@@ -159,10 +159,11 @@ export default function AdminGalleryPage() {
               className="hidden"
               id="file-upload"
             />
-            <label htmlFor="file-upload">
-              <Button variant="secondary" as="span" className="cursor-pointer">
-                Seleccionar Archivos
-              </Button>
+            <label 
+              htmlFor="file-upload"
+              className="inline-flex items-center justify-center px-6 py-3 bg-transparent text-dark font-semibold rounded-lg border-2 border-dark hover:bg-dark hover:text-cream transition-all duration-200 cursor-pointer"
+            >
+              Seleccionar Archivos
             </label>
           </div>
 

@@ -1,5 +1,14 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.1 (January 8, 2026)
+
+### Bug Fixes
+- **Fixed:** TypeScript error in admin gallery page (Button `as` prop)
+- **Fixed:** next-intl deprecation warning (moved i18n config to `src/i18n/request.ts`)
+- **Security:** Updated Next.js from 14.0.4 to 14.2.21 to patch security vulnerability
+
+---
+
 ## Version 1.0.0 (January 8, 2026)
 
 ### Initial Release
