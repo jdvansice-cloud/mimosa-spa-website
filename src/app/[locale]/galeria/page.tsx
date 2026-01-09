@@ -3,7 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import { Spinner } from '@/components/ui'
 import { GalleryGrid } from '@/components/gallery/GalleryGrid'
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'gallery' })
   return {
     title: t('title'),
@@ -11,7 +12,9 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   }
 }
 
-export default function GalleryPage({ params: { locale } }: { params: { locale: string } }) {
+export default async function GalleryPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  
   return (
     <div className="min-h-screen bg-cream">
       {/* Page Header */}

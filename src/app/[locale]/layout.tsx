@@ -26,12 +26,13 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({
-  params: { locale }
+  params
 }: {
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }) {
+  const { locale } = await params
   const messages = await getMessages({ locale })
-  const meta = (messages as any).metadata
+  const meta = (messages as Record<string, Record<string, string>>).metadata
 
   return {
     title: {
@@ -62,11 +63,13 @@ export async function generateMetadata({
 
 export default async function LocaleLayout({
   children,
-  params: { locale }
+  params
 }: {
   children: React.ReactNode
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }) {
+  const { locale } = await params
+  
   if (!locales.includes(locale)) {
     notFound()
   }

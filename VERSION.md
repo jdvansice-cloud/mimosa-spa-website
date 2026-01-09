@@ -1,5 +1,13 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.2 (January 8, 2026)
+
+### Bug Fixes
+- **Fixed:** Supabase TypeScript typing errors in API routes (gallery, promotions)
+- **Changed:** API routes now use direct Supabase client without strict typing
+
+---
+
 ## Version 1.0.1 (January 8, 2026)
 
 ### Bug Fixes

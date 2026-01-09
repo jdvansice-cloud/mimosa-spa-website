@@ -3,7 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import { useTranslations } from 'next-intl'
 import { Sparkles, Award, Heart } from 'lucide-react'
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'about' })
   return {
     title: t('title'),
@@ -11,7 +12,9 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   }
 }
 
-export default function AboutPage({ params: { locale } }: { params: { locale: string } }) {
+export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
+  await params // Ensure params are resolved
+  
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero Section */}
@@ -52,10 +55,10 @@ export default function AboutPage({ params: { locale } }: { params: { locale: st
             {/* Content */}
             <div>
               <h1 className="text-4xl md:text-5xl font-display font-semibold mb-6">
-                <AboutTitle locale={locale} />
+                <AboutTitle />
               </h1>
               <div className="w-16 h-1 bg-dark mb-8" />
-              <AboutContent locale={locale} />
+              <AboutContent />
             </div>
           </div>
         </div>
@@ -64,19 +67,19 @@ export default function AboutPage({ params: { locale } }: { params: { locale: st
       {/* Values Section */}
       <section className="section bg-beige">
         <div className="container-spa">
-          <ValuesSection locale={locale} />
+          <ValuesSection />
         </div>
       </section>
     </div>
   )
 }
 
-function AboutTitle({ locale }: { locale: string }) {
+function AboutTitle() {
   const t = useTranslations('about')
   return <>{t('title')}</>
 }
 
-function AboutContent({ locale }: { locale: string }) {
+function AboutContent() {
   const t = useTranslations('about')
   return (
     <div className="space-y-6 text-lg text-dark/80">
@@ -87,7 +90,7 @@ function AboutContent({ locale }: { locale: string }) {
   )
 }
 
-function ValuesSection({ locale }: { locale: string }) {
+function ValuesSection() {
   const t = useTranslations('about.values')
 
   const values = [
