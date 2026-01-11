@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function PromotionsPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params
+  await params // Consume param
   
   return (
     <div className="min-h-screen bg-cream">
@@ -29,7 +29,7 @@ export default async function PromotionsPage({ params }: { params: Promise<{ loc
       <section className="section">
         <div className="container-spa">
           <Suspense fallback={<Spinner size="lg" className="py-12" />}>
-            <PromotionsList locale={locale} />
+            <PromotionsList />
           </Suspense>
         </div>
       </section>

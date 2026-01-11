@@ -17,17 +17,17 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params
+  await params // Just to consume the param
   
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <HeroSection locale={locale} />
+      <HeroSection />
 
       {/* Featured Categories */}
       <section className="section bg-cream">
         <div className="container-spa">
-          <FeaturedCategories locale={locale} />
+          <FeaturedCategories />
         </div>
       </section>
 
@@ -35,7 +35,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <section className="section bg-beige">
         <div className="container-spa">
           <Suspense fallback={<Spinner size="lg" className="py-12" />}>
-            <PromotionsPreview locale={locale} />
+            <PromotionsPreview />
           </Suspense>
         </div>
       </section>
@@ -43,12 +43,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Locations */}
       <section className="section bg-cream">
         <div className="container-spa">
-          <LocationsSection locale={locale} />
+          <LocationsSection />
         </div>
       </section>
 
       {/* Booking CTA */}
-      <BookingCTA locale={locale} />
+      <BookingCTA />
     </div>
   )
 }

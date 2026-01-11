@@ -3,10 +3,6 @@
 import { useTranslations } from 'next-intl'
 import { PromotionCard } from './PromotionCard'
 
-interface PromotionsListProps {
-  locale: string
-}
-
 // Sample promotions - will be replaced with Supabase data
 const promotions = [
   {
@@ -65,7 +61,7 @@ const promotions = [
   },
 ]
 
-export function PromotionsList({ locale }: PromotionsListProps) {
+export function PromotionsList() {
   const t = useTranslations('promotions')
 
   if (promotions.length === 0) {
@@ -82,7 +78,6 @@ export function PromotionsList({ locale }: PromotionsListProps) {
         <PromotionCard
           key={promotion.id}
           promotion={promotion}
-          locale={locale}
         />
       ))}
     </div>

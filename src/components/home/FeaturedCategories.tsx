@@ -2,12 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { motion } from 'framer-motion'
-
-interface FeaturedCategoriesProps {
-  locale: string
-}
 
 const categories = [
   {
@@ -27,9 +23,10 @@ const categories = [
   },
 ]
 
-export function FeaturedCategories({ locale }: FeaturedCategoriesProps) {
+export function FeaturedCategories() {
   const t = useTranslations('home.featured')
   const tMenu = useTranslations('menu.categories')
+  const locale = useLocale()
 
   return (
     <div>

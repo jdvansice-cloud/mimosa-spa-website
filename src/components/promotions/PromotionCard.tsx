@@ -2,18 +2,18 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { Card, Button } from '@/components/ui'
 import { formatPrice, formatDate, getLocalizedContent } from '@/lib/utils'
 import type { Promotion } from '@/types'
 
 interface PromotionCardProps {
   promotion: Promotion
-  locale: string
 }
 
-export function PromotionCard({ promotion, locale }: PromotionCardProps) {
+export function PromotionCard({ promotion }: PromotionCardProps) {
   const t = useTranslations('promotions')
+  const locale = useLocale()
 
   const title = getLocalizedContent(promotion, 'title', locale)
 

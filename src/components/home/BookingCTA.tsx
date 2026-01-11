@@ -1,17 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { Calendar, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui'
 
-interface BookingCTAProps {
-  locale: string
-}
-
-export function BookingCTA({ locale }: BookingCTAProps) {
+export function BookingCTA() {
   const t = useTranslations('home.cta')
+  const locale = useLocale()
 
   return (
     <section className="relative py-24 overflow-hidden">

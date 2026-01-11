@@ -1,17 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { Calendar, ChevronDown } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui'
 
-interface HeroSectionProps {
-  locale: string
-}
-
-export function HeroSection({ locale }: HeroSectionProps) {
+export function HeroSection() {
   const t = useTranslations('home.hero')
+  const locale = useLocale()
 
   const scrollToContent = () => {
     window.scrollTo({

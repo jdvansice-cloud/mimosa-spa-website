@@ -1,15 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { PromotionCard } from '@/components/promotions/PromotionCard'
 import type { Promotion } from '@/types'
-
-interface PromotionsPreviewProps {
-  locale: string
-}
 
 // Sample promotions data - will be replaced with Supabase data
 const samplePromotions: Promotion[] = [
@@ -60,8 +56,9 @@ const samplePromotions: Promotion[] = [
   },
 ]
 
-export function PromotionsPreview({ locale }: PromotionsPreviewProps) {
+export function PromotionsPreview() {
   const t = useTranslations('home.promotions')
+  const locale = useLocale()
 
   return (
     <div>
@@ -84,7 +81,6 @@ export function PromotionsPreview({ locale }: PromotionsPreviewProps) {
           <PromotionCard
             key={promotion.id}
             promotion={promotion}
-            locale={locale}
           />
         ))}
       </div>
