@@ -57,15 +57,16 @@ export function formatDate(date: string | Date, locale: string = 'es'): string {
 /**
  * Get localized content from an object with _es and _en properties
  */
-export function getLocalizedContent<T extends Record<string, unknown>>(
-  obj: T,
+export function getLocalizedContent(
+  obj: object,
   field: string,
   locale: string
 ): string {
-  const localizedField = `${field}_${locale}` as keyof T
-  const fallbackField = `${field}_es` as keyof T
+  const localizedField = `${field}_${locale}`
+  const fallbackField = `${field}_es`
+  const record = obj as Record<string, unknown>
   
-  return (obj[localizedField] as string) || (obj[fallbackField] as string) || ''
+  return (record[localizedField] as string) || (record[fallbackField] as string) || ''
 }
 
 /**
