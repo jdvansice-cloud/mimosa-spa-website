@@ -91,22 +91,20 @@ export function HeroSection() {
           </div>
         </motion.div>
 
-        {/* Scroll Indicator */}
+        {/* Scroll Indicator - just the arrow */}
         <motion.button
           onClick={scrollToContent}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/80 hover:text-white transition-colors cursor-pointer"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-white/80 hover:text-white transition-colors cursor-pointer"
           aria-label="Scroll down"
-          style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.5)' }}
         >
-          <span className="text-xs tracking-wider uppercase">Explorar</span>
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
           >
-            <ChevronDown className="h-6 w-6" />
+            <ChevronDown className="h-8 w-8" />
           </motion.div>
         </motion.button>
       </div>

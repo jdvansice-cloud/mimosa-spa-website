@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { Menu, X, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button, LanguageSwitcher } from '@/components/ui'
-import { Logo } from './Logo'
 
 export function Header() {
   const t = useTranslations('navigation')
@@ -50,9 +50,17 @@ export function Header() {
     >
       <div className="container-spa">
         <nav className="flex items-center justify-between h-20">
-          {/* Logo */}
+          {/* Logo - Full logo image */}
           <Link href={`/${locale}`} className="flex-shrink-0">
-            <Logo size="md" theme="dark" />
+            <div className="relative h-12 w-40">
+              <Image
+                src="/logo.png"
+                alt="Mimosa Spa Retreat"
+                fill
+                className="object-contain object-left"
+                priority
+              />
+            </div>
           </Link>
 
           {/* Desktop Navigation */}

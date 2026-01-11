@@ -1,5 +1,15 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.10 (January 11, 2026)
+
+### Changes
+- **Updated:** Logo files with transparent backgrounds
+- **Changed:** Header now displays full Mimosa logo image
+- **Removed:** "Explorar" text from hero section, kept just the scroll arrow
+- **Improved:** Scroll indicator arrow is now larger and cleaner
+
+---
+
 ## Version 1.0.9 (January 11, 2026)
 
 ### UI Improvements
@@ -8,11 +18,6 @@
 - **Changed:** Language switcher supports dark variant for header
 - **Improved:** Hero section text visibility with stronger overlay and text shadows
 - **Improved:** Logo component now properly renders icon+text on dark backgrounds
-
-### Visual Changes
-- Dark header provides better branding consistency
-- Hero text is now much more readable against the background image
-- Buttons on hero have subtle shadows for better visibility
 
 ---
 
