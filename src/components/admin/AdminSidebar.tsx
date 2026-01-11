@@ -43,7 +43,7 @@ export function AdminSidebar() {
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-dark text-cream flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-cream/10">
-        <Logo className="[&_span]:text-cream [&_.text-dark]:text-cream [&_.text-warm-gray]:text-cream/70" />
+        <Logo theme="dark" size="md" />
         <p className="text-xs text-cream/50 mt-2">Panel de Administración</p>
       </div>
 

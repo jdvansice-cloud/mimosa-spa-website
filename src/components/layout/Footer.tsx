@@ -31,7 +31,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-1">
-            <Logo className="mb-4 [&_span]:text-cream [&_.text-dark]:text-cream [&_.text-warm-gray]:text-cream/70" />
+            <Logo theme="dark" size="md" />
             <p className="text-cream/70 text-sm mt-4">{t('tagline')}</p>
             
             {/* Social Links */}

@@ -36,8 +36,8 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-spa flex items-center justify-center p-4">
       <Card variant="elevated" padding="none" className="w-full max-w-md">
         {/* Header */}
-        <div className="p-8 bg-dark text-center">
-          <Logo className="justify-center [&_span]:text-cream [&_.text-dark]:text-cream [&_.text-warm-gray]:text-cream/70" />
+        <div className="p-8 bg-dark text-center flex flex-col items-center">
+          <Logo theme="dark" size="lg" />
           <p className="text-cream/70 mt-4 text-sm">Panel de Administración</p>
         </div>
 

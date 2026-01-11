@@ -1,5 +1,41 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.6 (January 11, 2026)
+
+### Improvements
+- **Fixed:** Modal scrolling - modals now scroll when content exceeds screen height
+- **Fixed:** Modal max-height limited to 90vh for better UX
+- **Improved:** Logo component with theme support (light/dark) and size variants (sm/md/lg)
+- **Improved:** Promotion form layout with better organization
+- **Added:** LogoWithImage component for custom logo images
+
+### Logo Usage
+```tsx
+// Default (light theme, medium size)
+<Logo />
+
+// Dark theme (for dark backgrounds)
+<Logo theme="dark" />
+
+// Different sizes
+<Logo size="sm" />  // Small
+<Logo size="md" />  // Medium (default)
+<Logo size="lg" />  // Large
+
+// Variants
+<Logo variant="icon" />  // Icon only
+<Logo variant="text" />  // Text only
+<Logo variant="full" />  // Icon + text (default)
+
+// Custom image logo
+<LogoWithImage src="/your-logo.png" size="lg" />
+```
+
+### To Replace Logo
+Add your logo image to `/public/logo.png` and update the Logo component to use it.
+
+---
+
 ## Version 1.0.5 (January 11, 2026)
 
 ### New Features

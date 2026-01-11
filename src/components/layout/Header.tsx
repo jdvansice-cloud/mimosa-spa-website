@@ -52,7 +52,7 @@ export function Header() {
         <nav className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href={`/${locale}`} className="flex-shrink-0">
-            <Logo className="h-12 w-auto" />
+            <Logo size="md" />
           </Link>
 
           {/* Desktop Navigation */}
