@@ -23,6 +23,9 @@ const samplePromotions: Promotion[] = [
     valid_until: '2026-01-31',
     is_active: true,
     sort_order: 1,
+    mindbody_service_id: null,
+    created_at: '2026-01-01',
+    updated_at: '2026-01-01',
   },
   {
     id: '2',
@@ -38,6 +41,9 @@ const samplePromotions: Promotion[] = [
     valid_until: '2026-01-31',
     is_active: true,
     sort_order: 2,
+    mindbody_service_id: null,
+    created_at: '2026-01-01',
+    updated_at: '2026-01-01',
   },
   {
     id: '3',
@@ -53,6 +59,9 @@ const samplePromotions: Promotion[] = [
     valid_until: '2026-01-31',
     is_active: true,
     sort_order: 3,
+    mindbody_service_id: null,
+    created_at: '2026-01-01',
+    updated_at: '2026-01-01',
   },
 ]
 
