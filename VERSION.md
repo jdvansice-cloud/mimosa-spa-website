@@ -1,16 +1,36 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.9 (January 11, 2026)
+
+### UI Improvements
+- **Changed:** Header now has dark background for better contrast
+- **Changed:** Navigation links are now light colored on dark header
+- **Changed:** Language switcher supports dark variant for header
+- **Improved:** Hero section text visibility with stronger overlay and text shadows
+- **Improved:** Logo component now properly renders icon+text on dark backgrounds
+
+### Visual Changes
+- Dark header provides better branding consistency
+- Hero text is now much more readable against the background image
+- Buttons on hero have subtle shadows for better visibility
+
+---
+
+## Version 1.0.8 (January 11, 2026)
+
+### New Features
+- **Added:** Mimosa flower favicon (browser tab icon)
+- **Added:** Apple touch icon for iOS home screen
+- **Added:** PWA icons (192x192, 512x512)
+- **Updated:** Manifest.json with proper icon references
+
+---
+
 ## Version 1.0.7 (January 11, 2026)
 
 ### New Features
 - **Added:** Official Mimosa Spa logo integrated throughout the site
 - **Added:** Logo icon (mimosa flower) for compact displays
-- **Added:** Favicon using the mimosa flower icon
-
-### Logo Files Added
-- `/public/logo.png` - Full logo with text
-- `/public/logo-icon.png` - Icon only (mimosa flower)
-- `/public/favicon.png` - Favicon
 
 ### Logo Usage
 ```tsx

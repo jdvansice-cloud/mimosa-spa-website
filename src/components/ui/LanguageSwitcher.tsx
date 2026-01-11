@@ -7,7 +7,7 @@ import { Globe } from 'lucide-react'
 
 interface LanguageSwitcherProps {
   className?: string
-  variant?: 'default' | 'compact'
+  variant?: 'default' | 'compact' | 'dark'
 }
 
 const languages = [
@@ -48,6 +48,54 @@ export function LanguageSwitcher({
             {lang.code.toUpperCase()}
           </button>
         ))}
+      </div>
+    )
+  }
+
+  if (variant === 'dark') {
+    return (
+      <div className={cn('relative group', className)}>
+        <button
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-cream/10 transition-colors"
+          aria-label="Select language"
+          aria-haspopup="listbox"
+        >
+          <Globe className="h-4 w-4 text-cream/70" />
+          <span className="text-sm font-medium text-cream/90">
+            {languages.find((l) => l.code === locale)?.flag}
+            <span className="ml-1">
+              {languages.find((l) => l.code === locale)?.code.toUpperCase()}
+            </span>
+          </span>
+        </button>
+
+        {/* Dropdown */}
+        <div
+          className={cn(
+            'absolute right-0 top-full mt-1 py-1 w-32',
+            'bg-dark rounded-lg shadow-elevated border border-cream/20',
+            'opacity-0 invisible group-hover:opacity-100 group-hover:visible',
+            'transition-all duration-200'
+          )}
+          role="listbox"
+        >
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => handleLanguageChange(lang.code)}
+              className={cn(
+                'w-full px-3 py-2 text-left text-sm flex items-center gap-2',
+                'transition-colors hover:bg-cream/10 text-cream/90',
+                locale === lang.code && 'bg-gold/20 text-gold font-medium'
+              )}
+              role="option"
+              aria-selected={locale === lang.code}
+            >
+              <span>{lang.flag}</span>
+              <span>{lang.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
     )
   }

@@ -26,6 +26,13 @@ export function Logo({ className, variant = 'full', theme = 'light', size = 'md'
     xl: 80,
   }
 
+  const textSizes = {
+    sm: 'text-lg',
+    md: 'text-xl',
+    lg: 'text-2xl',
+    xl: 'text-3xl',
+  }
+
   const textColor = theme === 'dark' ? 'text-cream' : 'text-dark'
   const subtextColor = theme === 'dark' ? 'text-cream/70' : 'text-warm-gray'
 
@@ -53,19 +60,51 @@ export function Logo({ className, variant = 'full', theme = 'light', size = 'md'
       <div className={cn('flex flex-col', className)}>
         <span className={cn(
           'font-display font-semibold tracking-wide',
-          size === 'sm' ? 'text-lg' : size === 'lg' ? 'text-3xl' : size === 'xl' ? 'text-4xl' : 'text-2xl',
+          textSizes[size],
           textColor
         )}>
           Mimosa
         </span>
-        <span className={cn('text-xs tracking-[0.2em] uppercase -mt-1', subtextColor)}>
+        <span className={cn('text-xs tracking-[0.15em] uppercase -mt-0.5', subtextColor)}>
           Spa Retreat
         </span>
       </div>
     )
   }
 
-  // Full variant - Complete logo image
+  // Full variant - for dark theme, use icon + text; for light, use full logo image
+  if (theme === 'dark') {
+    return (
+      <div className={cn('flex items-center gap-3', className)}>
+        <div 
+          className="relative flex-shrink-0" 
+          style={{ width: iconSizes[size], height: iconSizes[size] }}
+        >
+          <Image
+            src="/logo-icon.png"
+            alt="Mimosa Spa"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className={cn(
+            'font-display font-semibold tracking-wide',
+            textSizes[size],
+            textColor
+          )}>
+            Mimosa
+          </span>
+          <span className={cn('text-xs tracking-[0.15em] uppercase -mt-0.5', subtextColor)}>
+            Spa Retreat
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  // Light theme - use full logo image
   return (
     <div 
       className={cn('relative', className)} 
@@ -75,10 +114,7 @@ export function Logo({ className, variant = 'full', theme = 'light', size = 'md'
         src="/logo.png"
         alt="Mimosa Spa Retreat"
         fill
-        className={cn(
-          'object-contain object-left',
-          theme === 'dark' && 'brightness-0 invert'
-        )}
+        className="object-contain object-left"
         priority
       />
     </div>

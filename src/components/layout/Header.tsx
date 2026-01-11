@@ -44,15 +44,15 @@ export function Header() {
       className={cn(
         'fixed top-0 left-0 right-0 z-40 transition-all duration-300',
         isScrolled
-          ? 'bg-cream/95 backdrop-blur-md shadow-soft'
-          : 'bg-transparent'
+          ? 'bg-dark/95 backdrop-blur-md shadow-lg'
+          : 'bg-dark'
       )}
     >
       <div className="container-spa">
         <nav className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href={`/${locale}`} className="flex-shrink-0">
-            <Logo size="md" />
+            <Logo size="md" theme="dark" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -61,7 +61,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-dark hover:text-gold-600 font-medium transition-colors"
+                className="text-cream/90 hover:text-gold font-medium transition-colors"
               >
                 {item.label}
               </Link>
@@ -70,7 +70,7 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-4">
-            <LanguageSwitcher />
+            <LanguageSwitcher variant="dark" />
             <Link href={`/${locale}/reservar`}>
               <Button size="sm" leftIcon={<Calendar className="h-4 w-4" />}>
                 {t('book')}
@@ -80,15 +80,15 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 rounded-lg hover:bg-beige transition-colors"
+            className="lg:hidden p-2 rounded-lg hover:bg-cream/10 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? (
-              <X className="h-6 w-6 text-dark" />
+              <X className="h-6 w-6 text-cream" />
             ) : (
-              <Menu className="h-6 w-6 text-dark" />
+              <Menu className="h-6 w-6 text-cream" />
             )}
           </button>
         </nav>
@@ -97,8 +97,8 @@ export function Header() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          'lg:hidden fixed inset-x-0 top-20 bg-cream/98 backdrop-blur-md',
-          'border-b border-beige-300 shadow-lg',
+          'lg:hidden fixed inset-x-0 top-20 bg-dark/98 backdrop-blur-md',
+          'border-b border-cream/10 shadow-lg',
           'transition-all duration-300 ease-in-out',
           isMobileMenuOpen
             ? 'opacity-100 visible translate-y-0'
@@ -110,7 +110,7 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className="block py-3 text-lg font-medium text-dark hover:text-gold-600 transition-colors border-b border-beige-200"
+              className="block py-3 text-lg font-medium text-cream/90 hover:text-gold transition-colors border-b border-cream/10"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.label}
@@ -118,7 +118,7 @@ export function Header() {
           ))}
           
           <div className="pt-4 flex items-center justify-between">
-            <LanguageSwitcher variant="compact" />
+            <LanguageSwitcher variant="dark" />
             <Link href={`/${locale}/reservar`} onClick={() => setIsMobileMenuOpen(false)}>
               <Button size="md" leftIcon={<Calendar className="h-4 w-4" />}>
                 {t('book')}

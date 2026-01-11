@@ -19,6 +19,10 @@ const lato = Lato({
 export const metadata = {
   title: 'Admin | Mimosa Spa Retreat',
   description: 'Panel de administración',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export default function AdminLayout({
@@ -28,6 +32,11 @@ export default function AdminLayout({
 }) {
   return (
     <html lang="es" className={`${cormorant.variable} ${lato.variable}`}>
+      <head>
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="theme-color" content="#FCCF08" />
+      </head>
       <body className="min-h-screen bg-beige-100 font-body antialiased">
         <AdminLayoutClient>{children}</AdminLayoutClient>
       </body>

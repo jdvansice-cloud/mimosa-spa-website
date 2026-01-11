@@ -27,8 +27,8 @@ export function HeroSection() {
             backgroundImage: `url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070')`,
           }}
         />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-dark/40 via-dark/30 to-dark/60" />
+        {/* Stronger Overlay for better text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-dark/60 via-dark/50 to-dark/70" />
       </div>
 
       {/* Decorative Elements */}
@@ -46,19 +46,25 @@ export function HeroSection() {
           {/* Decorative Line */}
           <div className="flex items-center justify-center gap-4 mb-8">
             <span className="w-16 h-px bg-gold" />
-            <span className="text-gold text-sm tracking-[0.3em] uppercase">
+            <span className="text-gold text-sm tracking-[0.3em] uppercase font-medium drop-shadow-lg">
               Mimosa Spa Retreat
             </span>
             <span className="w-16 h-px bg-gold" />
           </div>
 
           {/* Main Title */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-semibold leading-tight mb-6">
+          <h1 
+            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-semibold leading-tight mb-6"
+            style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.5)' }}
+          >
             {t('title')}
           </h1>
 
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-white/80 mb-10 font-light">
+          <p 
+            className="text-xl md:text-2xl text-white/90 mb-10 font-light"
+            style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }}
+          >
             {t('subtitle')}
           </p>
 
@@ -68,7 +74,7 @@ export function HeroSection() {
               <Button
                 size="lg"
                 leftIcon={<Calendar className="h-5 w-5" />}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto shadow-lg"
               >
                 {t('cta')}
               </Button>
@@ -77,7 +83,7 @@ export function HeroSection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-dark"
+                className="w-full sm:w-auto border-2 border-white text-white hover:bg-white hover:text-dark shadow-lg"
               >
                 Ver Tratamientos
               </Button>
@@ -91,8 +97,9 @@ export function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/80 hover:text-white transition-colors cursor-pointer"
           aria-label="Scroll down"
+          style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.5)' }}
         >
           <span className="text-xs tracking-wider uppercase">Explorar</span>
           <motion.div

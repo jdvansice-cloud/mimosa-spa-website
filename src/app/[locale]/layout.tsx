@@ -41,6 +41,10 @@ export async function generateMetadata({
     },
     description: meta?.description || 'Tu refugio de paz y bienestar en Panamá',
     keywords: meta?.keywords || 'spa, masajes, bienestar, Panamá',
+    icons: {
+      icon: '/favicon.png',
+      apple: '/apple-touch-icon.png',
+    },
     openGraph: {
       title: meta?.title || 'Mimosa Spa Retreat',
       description: meta?.description || 'Tu refugio de paz y bienestar',
@@ -79,7 +83,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${cormorant.variable} ${lato.variable}`}>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#FCCF08" />

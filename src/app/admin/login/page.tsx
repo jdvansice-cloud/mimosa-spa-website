@@ -37,17 +37,7 @@ export default function AdminLoginPage() {
       <Card variant="elevated" padding="none" className="w-full max-w-md">
         {/* Header */}
         <div className="p-8 bg-dark text-center flex flex-col items-center">
-          <div className="flex items-center gap-3">
-            <Logo variant="icon" size="lg" />
-            <div className="flex flex-col text-left">
-              <span className="font-display text-2xl font-semibold text-cream tracking-wide">
-                Mimosa
-              </span>
-              <span className="text-xs text-cream/70 tracking-[0.15em] uppercase -mt-0.5">
-                Spa Retreat
-              </span>
-            </div>
-          </div>
+          <Logo theme="dark" size="lg" />
           <p className="text-cream/70 mt-4 text-sm">Panel de Administración</p>
         </div>
 
