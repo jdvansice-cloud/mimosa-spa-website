@@ -1,0 +1,19 @@
+{
+  "/[locale]/galeria/page": "app/[locale]/galeria/page.js",
+  "/[locale]/menu/page": "app/[locale]/menu/page.js",
+  "/[locale]/nosotros/page": "app/[locale]/nosotros/page.js",
+  "/[locale]/page": "app/[locale]/page.js",
+  "/[locale]/promociones/page": "app/[locale]/promociones/page.js",
+  "/[locale]/reservar/page": "app/[locale]/reservar/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/configuracion/page": "app/admin/configuracion/page.js",
+  "/admin/galeria/page": "app/admin/galeria/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/promociones/page": "app/admin/promociones/page.js",
+  "/api/gallery/route": "app/api/gallery/route.js",
+  "/api/mindbody/services/route": "app/api/mindbody/services/route.js",
+  "/api/promotions/route": "app/api/promotions/route.js",
+  "/page": "app/page.js"
+}

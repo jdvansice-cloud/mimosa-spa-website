@@ -1,0 +1,13 @@
+var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/_not-found/page.js")
+R.c("server/chunks/ssr/[root-of-the-server]__73422bab._.js")
+R.c("server/chunks/ssr/d2f63_next_dist_ae592007._.js")
+R.c("server/chunks/ssr/d2f63_next_dist_esm_build_templates_app-page_eae47edd.js")
+R.c("server/chunks/ssr/[root-of-the-server]__e17bde85._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__22da0a78._.js")
+R.c("server/chunks/ssr/d2f63_next_dist_a0f556a5._.js")
+R.c("server/chunks/ssr/Documents_GitHub_mimosaweb_src_app_layout_tsx_032ab40b._.js")
+R.c("server/chunks/ssr/Documents_GitHub_mimosaweb_338638ca._.js")
+R.c("server/chunks/ssr/d2f63_next_dist_client_components_162b137c._.js")
+R.c("server/chunks/ssr/80b94_GitHub_mimosaweb__next-internal_server_app__not-found_page_actions_a5f24945.js")
+R.m(30072)
+module.exports=R.m(30072).exports

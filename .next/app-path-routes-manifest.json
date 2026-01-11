@@ -1,0 +1,19 @@
+{
+  "/[locale]/galeria/page": "/[locale]/galeria",
+  "/[locale]/menu/page": "/[locale]/menu",
+  "/[locale]/nosotros/page": "/[locale]/nosotros",
+  "/[locale]/page": "/[locale]",
+  "/[locale]/promociones/page": "/[locale]/promociones",
+  "/[locale]/reservar/page": "/[locale]/reservar",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/admin/configuracion/page": "/admin/configuracion",
+  "/admin/galeria/page": "/admin/galeria",
+  "/admin/login/page": "/admin/login",
+  "/admin/page": "/admin",
+  "/admin/promociones/page": "/admin/promociones",
+  "/api/gallery/route": "/api/gallery",
+  "/api/mindbody/services/route": "/api/mindbody/services",
+  "/api/promotions/route": "/api/promotions",
+  "/page": "/"
+}

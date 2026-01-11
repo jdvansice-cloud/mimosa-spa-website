@@ -13,8 +13,25 @@
 - **Upgraded:** @supabase/supabase-js 2.39.0 → 2.48.0
 - **Security:** All CVE patches included (CVE-2025-66478, CVE-2025-55183, CVE-2025-55184, CVE-2025-67779)
 
+### Bug Fixes
+- **Fixed:** Components updated to use `useLocale()` hook instead of locale props
+- **Fixed:** Removed duplicate `src/lib/i18n/config.ts` (was conflicting with `src/i18n/request.ts`)
+- **Fixed:** `getLocalizedContent` type signature for React 19 compatibility
+- **Fixed:** Sample promotions missing required fields
+
 ### Breaking Changes
 - Updated next-intl configuration to v4 API (routing.ts, request.ts, middleware.ts)
+
+### Validation Commands
+```bash
+# Quick check (lint + type-check) - May miss some build-time errors
+npm run check-all
+
+# Full build validation (catches ALL errors, same as Vercel)
+npm run verify
+```
+
+**Important:** Always run `npm run verify` before pushing to ensure deployment success.
 
 ---
 
