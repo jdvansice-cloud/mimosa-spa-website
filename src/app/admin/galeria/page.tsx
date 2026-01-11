@@ -177,8 +177,8 @@ export default function AdminGalleryPage() {
             </select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="ghost" onClick={() => setIsUploadModalOpen(false)}>
+          <div className="flex justify-end gap-3 pt-4 border-t border-beige-200 mt-4">
+            <Button type="button" variant="ghost" onClick={() => setIsUploadModalOpen(false)}>
               Cancelar
             </Button>
             <Button type="submit">

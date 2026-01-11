@@ -157,25 +157,27 @@ export default function AdminPromotionsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingPromotion ? 'Editar Promoción' : 'Nueva Promoción'}
-        size="lg"
+        size="xl"
       >
         <form className="space-y-4">
-          <div>
-            <label className="label">Nombre (Español)</label>
-            <input
-              type="text"
-              className="input"
-              defaultValue={editingPromotion?.title_es}
-              placeholder="Ej: Esencia de Paz"
-            />
-          </div>
-          <div>
-            <label className="label">Nombre (Inglés)</label>
-            <input
-              type="text"
-              className="input"
-              placeholder="Ej: Essence of Peace"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="label">Nombre (Español)</label>
+              <input
+                type="text"
+                className="input"
+                defaultValue={editingPromotion?.title_es}
+                placeholder="Ej: Esencia de Paz"
+              />
+            </div>
+            <div>
+              <label className="label">Nombre (Inglés)</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Ej: Essence of Peace"
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -229,8 +231,8 @@ export default function AdminPromotionsPage() {
               Promoción activa
             </label>
           </div>
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+          <div className="flex justify-end gap-3 pt-4 border-t border-beige-200 mt-6">
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancelar
             </Button>
             <Button type="submit">

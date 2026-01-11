@@ -54,19 +54,19 @@ export function Modal({
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
-    full: 'max-w-[95vw] max-h-[95vh]',
+    full: 'max-w-4xl',
   }
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
         onClick={closeOnOverlayClick ? onClose : undefined}
       />
 
@@ -74,14 +74,15 @@ export function Modal({
       <div
         className={cn(
           'relative w-full bg-white rounded-2xl shadow-elevated',
-          'animate-scale-in overflow-hidden',
+          'animate-scale-in flex flex-col',
+          'max-h-[90vh] my-auto',
           sizes[size],
           className
         )}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b border-beige-200">
+          <div className="flex items-center justify-between p-6 border-b border-beige-200 flex-shrink-0">
             {title && (
               <h2
                 id="modal-title"
@@ -93,7 +94,7 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-beige-200 transition-colors"
+                className="p-2 rounded-full hover:bg-beige-200 transition-colors ml-auto"
                 aria-label="Cerrar"
               >
                 <X className="h-5 w-5 text-warm-gray" />
@@ -102,8 +103,11 @@ export function Modal({
           </div>
         )}
 
-        {/* Body */}
-        <div className={cn('p-6', !title && !showCloseButton && 'pt-6')}>
+        {/* Body - Scrollable */}
+        <div className={cn(
+          'p-6 overflow-y-auto flex-1',
+          !title && !showCloseButton && 'pt-6'
+        )}>
           {children}
         </div>
       </div>
