@@ -1,35 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { Logo } from '@/components/layout/Logo'
+import { useAuthStore } from '@/lib/auth/store'
 
 export default function AdminLoginPage() {
   const router = useRouter()
+  const { user, isLoading, error, signIn, clearError } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.replace('/admin')
+    }
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      // TODO: Implement Supabase auth
-      // For now, simulate login
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      
-      // Redirect to admin dashboard
+    clearError()
+    
+    const result = await signIn(email, password)
+    
+    if (result.success) {
       router.push('/admin')
-    } catch {
-      setError('Credenciales inválidas. Por favor, intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
     }
   }
 

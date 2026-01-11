@@ -1,17 +1,19 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { 
   LayoutDashboard, 
   Tag, 
   Image, 
   Settings, 
   LogOut,
-  ExternalLink 
+  ExternalLink,
+  User
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
+import { useAuthStore } from '@/lib/auth/store'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,12 +24,19 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, signOut, isLoading } = useAuthStore()
 
   const isActive = (href: string) => {
     if (href === '/admin') {
       return pathname === '/admin'
     }
     return pathname.startsWith(href)
+  }
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.replace('/admin/login')
   }
 
   return (
@@ -64,6 +73,14 @@ export function AdminSidebar() {
 
       {/* Footer */}
       <div className="p-4 border-t border-cream/10 space-y-2">
+        {/* User info */}
+        {user && (
+          <div className="flex items-center gap-3 px-4 py-2 text-cream/70">
+            <User className="h-4 w-4" />
+            <span className="text-sm truncate">{user.email}</span>
+          </div>
+        )}
+        
         <Link
           href="/es"
           target="_blank"
@@ -73,13 +90,12 @@ export function AdminSidebar() {
           <span className="text-sm">Ver Sitio</span>
         </Link>
         <button
-          onClick={() => {
-            window.location.href = '/admin/login'
-          }}
-          className="flex items-center gap-3 px-4 py-2 text-cream/70 hover:text-red-400 transition-colors w-full"
+          onClick={handleSignOut}
+          disabled={isLoading}
+          className="flex items-center gap-3 px-4 py-2 text-cream/70 hover:text-red-400 transition-colors w-full disabled:opacity-50"
         >
           <LogOut className="h-4 w-4" />
-          <span className="text-sm">Cerrar Sesión</span>
+          <span className="text-sm">{isLoading ? 'Cerrando...' : 'Cerrar Sesión'}</span>
         </button>
       </div>
     </aside>

@@ -1,6 +1,6 @@
 import { Cormorant_Garamond, Lato } from 'next/font/google'
 import '@/app/globals.css'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { AdminLayoutClient } from './AdminLayoutClient'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -29,12 +29,7 @@ export default function AdminLayout({
   return (
     <html lang="es" className={`${cormorant.variable} ${lato.variable}`}>
       <body className="min-h-screen bg-beige-100 font-body antialiased">
-        <div className="flex min-h-screen">
-          <AdminSidebar />
-          <main className="flex-1 p-8 ml-64">
-            {children}
-          </main>
-        </div>
+        <AdminLayoutClient>{children}</AdminLayoutClient>
       </body>
     </html>
   )

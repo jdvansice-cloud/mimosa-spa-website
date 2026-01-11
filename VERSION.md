@@ -1,5 +1,29 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.5 (January 11, 2026)
+
+### New Features
+- **Added:** Supabase authentication for admin panel
+- **Added:** Protected routes - admin pages require login
+- **Added:** Auth store with Zustand for session management
+- **Added:** Sign out functionality with proper session clearing
+- **Added:** User email display in admin sidebar
+
+### Files Added
+- `src/lib/auth/store.ts` - Authentication state management
+- `src/components/auth/AuthProvider.tsx` - Auth initialization
+- `src/components/auth/ProtectedRoute.tsx` - Route protection
+- `src/app/admin/AdminLayoutClient.tsx` - Client-side admin layout
+
+### How to Create Admin User
+1. Go to your Supabase project dashboard
+2. Navigate to Authentication → Users
+3. Click "Add user" → "Create new user"
+4. Enter email and password for your admin account
+5. User can now log in at `/admin/login`
+
+---
+
 ## Version 1.0.4 (January 11, 2026)
 
 ### Major Updates
@@ -18,6 +42,7 @@
 - **Fixed:** Removed duplicate `src/lib/i18n/config.ts` (was conflicting with `src/i18n/request.ts`)
 - **Fixed:** `getLocalizedContent` type signature for React 19 compatibility
 - **Fixed:** Sample promotions missing required fields
+- **Fixed:** `cookies()` async handling for Next.js 16
 
 ### Breaking Changes
 - Updated next-intl configuration to v4 API (routing.ts, request.ts, middleware.ts)
