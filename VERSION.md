@@ -1,5 +1,31 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.7 (January 11, 2026)
+
+### New Features
+- **Added:** Official Mimosa Spa logo integrated throughout the site
+- **Added:** Logo icon (mimosa flower) for compact displays
+- **Added:** Favicon using the mimosa flower icon
+
+### Logo Files Added
+- `/public/logo.png` - Full logo with text
+- `/public/logo-icon.png` - Icon only (mimosa flower)
+- `/public/favicon.png` - Favicon
+
+### Logo Usage
+```tsx
+// Full logo (light backgrounds - header)
+<Logo size="md" />
+
+// Icon only (any background)
+<Logo variant="icon" size="md" />
+
+// Size options: sm, md, lg, xl
+<Logo size="lg" />
+```
+
+---
+
 ## Version 1.0.6 (January 11, 2026)
 
 ### Improvements
@@ -7,32 +33,6 @@
 - **Fixed:** Modal max-height limited to 90vh for better UX
 - **Improved:** Logo component with theme support (light/dark) and size variants (sm/md/lg)
 - **Improved:** Promotion form layout with better organization
-- **Added:** LogoWithImage component for custom logo images
-
-### Logo Usage
-```tsx
-// Default (light theme, medium size)
-<Logo />
-
-// Dark theme (for dark backgrounds)
-<Logo theme="dark" />
-
-// Different sizes
-<Logo size="sm" />  // Small
-<Logo size="md" />  // Medium (default)
-<Logo size="lg" />  // Large
-
-// Variants
-<Logo variant="icon" />  // Icon only
-<Logo variant="text" />  // Text only
-<Logo variant="full" />  // Icon + text (default)
-
-// Custom image logo
-<LogoWithImage src="/your-logo.png" size="lg" />
-```
-
-### To Replace Logo
-Add your logo image to `/public/logo.png` and update the Logo component to use it.
 
 ---
 
