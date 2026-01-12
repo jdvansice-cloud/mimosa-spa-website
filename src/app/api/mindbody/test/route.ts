@@ -5,6 +5,8 @@ export async function GET() {
   const MINDBODY_API_KEY = process.env.MINDBODY_API_KEY
   const MINDBODY_SITE_ID = process.env.MINDBODY_SITE_ID
   const MINDBODY_API_URL = process.env.MINDBODY_API_URL || 'https://api.mindbodyonline.com/public/v6'
+  const MINDBODY_USERNAME = process.env.MINDBODY_USERNAME || '_mindbody_api'
+  const MINDBODY_PASSWORD = process.env.MINDBODY_PASSWORD || '_mindbody_api'
   
   const results: Record<string, unknown> = {
     config: {
@@ -26,8 +28,8 @@ export async function GET() {
         'SiteId': MINDBODY_SITE_ID!,
       },
       body: JSON.stringify({
-        Username: '_mindbody_api',
-        Password: '_mindbody_api',
+        Username: MINDBODY_USERNAME,
+        Password: MINDBODY_PASSWORD,
       }),
     })
     
@@ -45,7 +47,7 @@ export async function GET() {
         status: tokenResponse.status,
         statusText: tokenResponse.statusText,
         ok: tokenResponse.ok,
-        data: tokenData,
+        hasToken: !!tokenData.AccessToken,
       }
     }
     
@@ -60,20 +62,46 @@ export async function GET() {
         },
       })
       
-      const locationsText = await locationsResponse.text()
-      let locationsData
-      try {
-        locationsData = JSON.parse(locationsText)
-      } catch {
-        locationsData = locationsText
-      }
+      const locationsData = await locationsResponse.json()
       
       results.tests = {
         ...results.tests as object,
         locations: {
           status: locationsResponse.status,
           ok: locationsResponse.ok,
-          data: locationsData,
+          count: locationsData.Locations?.length || 0,
+          data: locationsData.Locations?.map((l: { Id: number; Name: string }) => ({ Id: l.Id, Name: l.Name }))
+        }
+      }
+      
+      // Test 3: Get session types (services)
+      const servicesResponse = await fetch(`${MINDBODY_API_URL}/site/sessiontypes?limit=200`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': MINDBODY_API_KEY!,
+          'SiteId': MINDBODY_SITE_ID!,
+          'Authorization': `Bearer ${tokenData.AccessToken}`,
+        },
+      })
+      
+      const servicesData = await servicesResponse.json()
+      const sessionTypes = servicesData.SessionTypes || []
+      
+      results.tests = {
+        ...results.tests as object,
+        sessionTypes: {
+          status: servicesResponse.status,
+          ok: servicesResponse.ok,
+          totalCount: sessionTypes.length,
+          bookableCount: sessionTypes.filter((s: { Bookable: boolean; Active: boolean }) => s.Bookable && s.Active).length,
+          categories: [...new Set(sessionTypes.map((s: { Category: string }) => s.Category))],
+          sample: sessionTypes.slice(0, 3).map((s: { Id: number; Name: string; Category: string; Bookable: boolean; Active: boolean }) => ({
+            Id: s.Id,
+            Name: s.Name,
+            Category: s.Category,
+            Bookable: s.Bookable,
+            Active: s.Active
+          }))
         }
       }
     }

@@ -11,10 +11,18 @@ export async function GET(request: NextRequest) {
     const locationId = searchParams.get('locationId')
     const type = searchParams.get('type') || 'main' // main, addons, or all
     
+    console.log('Fetching services for locationId:', locationId, 'type:', type)
+    
     // Get services from Mindbody
     const allServices = await getServices(
       locationId ? parseInt(locationId) : undefined
     )
+    
+    console.log('Total services from Mindbody:', allServices.length)
+    if (allServices.length > 0) {
+      console.log('Sample service:', JSON.stringify(allServices[0]))
+      console.log('Categories found:', [...new Set(allServices.map(s => s.Category))])
+    }
     
     // Filter based on type
     let filteredServices = allServices
@@ -31,6 +39,8 @@ export async function GET(request: NextRequest) {
       )
     }
     
+    console.log('Filtered services count:', filteredServices.length)
+    
     // Group services by category
     const grouped = filteredServices.reduce((acc, service) => {
       const category = service.Category || 'General'
@@ -45,13 +55,20 @@ export async function GET(request: NextRequest) {
       services: filteredServices,
       grouped,
       categories: Object.keys(grouped),
-      total: filteredServices.length
+      total: filteredServices.length,
+      debug: {
+        locationId,
+        type,
+        totalFromMindbody: allServices.length,
+        filteredCount: filteredServices.length
+      }
     })
     
   } catch (error) {
     console.error('Get services error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to get services' },
+      { error: 'Failed to get services', details: errorMessage },
       { status: 500 }
     )
   }

@@ -226,12 +226,19 @@ export async function getServices(locationId?: number) {
     }>
   }
   
+  // Note: Mindbody's sessiontypes endpoint may not filter by locationId
+  // Fetch all and let the app handle filtering if needed
   const response = await mindbodyRequest<ServicesResponse>('/site/sessiontypes', {
-    params: locationId ? { locationIds: locationId } : undefined
+    params: {
+      limit: 200, // Get more results
+      ...(locationId ? { locationIds: locationId } : {})
+    }
   })
   
+  console.log('Raw SessionTypes from Mindbody:', response.SessionTypes?.length || 0)
+  
   // Transform and filter for online booking
-  return (response.SessionTypes || [])
+  const services = (response.SessionTypes || [])
     .filter(s => s.Bookable && s.Active)
     .map(s => ({
       Id: s.Id,
@@ -245,6 +252,10 @@ export async function getServices(locationId?: number) {
       CategoryId: s.CategoryId,
       ProgramId: s.ProgramId,
     }))
+  
+  console.log('Filtered bookable services:', services.length)
+  
+  return services
 }
 
 // Get staff
