@@ -1,72 +1,126 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
-import { Spinner } from '@/components/ui'
+import { useEffect } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useBookingStore, selectCurrentStepNumber } from '@/lib/booking/store'
+import { StepProgress } from './shared/StepProgress'
+import { CartSummary } from './shared/CartSummary'
+import { ClientSelector } from './shared/ClientSelector'
+import { AuthStep } from './steps/AuthStep'
+import { LocationStep } from './steps/LocationStep'
+import { ServiceStep } from './steps/ServiceStep'
+import { AddonsStep } from './steps/AddonsStep'
+import { StaffStep } from './steps/StaffStep'
+import { DateTimeStep } from './steps/DateTimeStep'
+import { ConfirmStep } from './steps/ConfirmStep'
+import { SuccessStep } from './steps/SuccessStep'
 
-const BOOKING_WIDGET_URL = process.env.NEXT_PUBLIC_BOOKING_WIDGET_URL || 'https://mimosa-spa-booking-widget.netlify.app'
+const stepVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0
+  }),
+  center: {
+    x: 0,
+    opacity: 1
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 300 : -300,
+    opacity: 0
+  })
+}
 
 export function BookingWidget() {
-  const t = useTranslations('booking.widget')
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Set a timeout to show error if iframe doesn't load
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        setError('El sistema de reservas está tardando en cargar. Por favor, intenta recargar la página.')
-      }
-    }, 15000) // 15 second timeout
-
-    return () => clearTimeout(timeout)
-  }, [isLoading])
-
-  const handleIframeLoad = () => {
-    setIsLoading(false)
-    setError(null)
+  const { 
+    currentStep, 
+    showClientSelector, 
+    availableClients,
+    selectClient,
+    showClientSelectorModal,
+    selectedServices,
+    selectedAddons,
+    activePromotion
+  } = useBookingStore()
+  
+  const stepNumber = useBookingStore(selectCurrentStepNumber)
+  
+  // Show cart when services are selected
+  const showCart = selectedServices.length > 0 || selectedAddons.length > 0 || activePromotion !== null
+  
+  const renderStep = () => {
+    switch (currentStep) {
+      case 'auth':
+        return <AuthStep key="auth" />
+      case 'location':
+        return <LocationStep key="location" />
+      case 'services':
+        return <ServiceStep key="services" />
+      case 'addons':
+        return <AddonsStep key="addons" />
+      case 'staff':
+        return <StaffStep key="staff" />
+      case 'datetime':
+        return <DateTimeStep key="datetime" />
+      case 'confirm':
+        return <ConfirmStep key="confirm" />
+      case 'success':
+        return <SuccessStep key="success" />
+      default:
+        return <AuthStep key="auth" />
+    }
   }
-
-  const handleIframeError = () => {
-    setIsLoading(false)
-    setError('No se pudo cargar el sistema de reservas. Por favor, intenta de nuevo más tarde.')
-  }
-
+  
   return (
-    <div className="booking-widget-container relative bg-white rounded-2xl shadow-elevated overflow-hidden">
-      {/* Loading State */}
-      {isLoading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream z-10">
-          <Spinner size="lg" />
-          <p className="mt-4 text-warm-gray">{t('loading')}</p>
+    <div className="booking-widget bg-white rounded-2xl shadow-elevated overflow-hidden">
+      {/* Header with Progress */}
+      {currentStep !== 'success' && (
+        <div className="bg-gradient-to-r from-gold/10 to-gold/5 px-6 py-4 border-b border-beige-200">
+          <StepProgress currentStep={stepNumber} totalSteps={7} />
         </div>
       )}
-
-      {/* Error State */}
-      {error && !isLoading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream z-10 p-8 text-center">
-          <div className="text-6xl mb-4">😔</div>
-          <p className="text-dark mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="btn-primary"
-          >
-            Recargar Página
-          </button>
+      
+      {/* Main Content Area */}
+      <div className="flex flex-col lg:flex-row">
+        {/* Step Content */}
+        <div className={`flex-1 p-6 ${showCart && currentStep !== 'success' ? 'lg:pr-4' : ''}`}>
+          <AnimatePresence mode="wait" custom={stepNumber}>
+            <motion.div
+              key={currentStep}
+              custom={stepNumber}
+              variants={stepVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              {renderStep()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        
+        {/* Cart Sidebar - Desktop */}
+        {showCart && currentStep !== 'success' && (
+          <div className="hidden lg:block w-80 border-l border-beige-200 bg-beige-50/50 p-4">
+            <CartSummary />
+          </div>
+        )}
+      </div>
+      
+      {/* Cart Summary - Mobile (sticky bottom) */}
+      {showCart && currentStep !== 'success' && currentStep !== 'confirm' && (
+        <div className="lg:hidden border-t border-beige-200 bg-beige-50 p-4">
+          <CartSummary compact />
         </div>
       )}
-
-      {/* Iframe */}
-      <iframe
-        src={BOOKING_WIDGET_URL}
-        title="Mimosa Spa Booking System"
-        className="w-full border-0"
-        style={{ minHeight: '850px', height: '100%' }}
-        onLoad={handleIframeLoad}
-        onError={handleIframeError}
-        allow="payment"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
-      />
+      
+      {/* Client Selector Modal */}
+      {showClientSelector && (
+        <ClientSelector
+          clients={availableClients}
+          onSelect={selectClient}
+          onCancel={() => showClientSelectorModal(false)}
+        />
+      )}
     </div>
   )
 }

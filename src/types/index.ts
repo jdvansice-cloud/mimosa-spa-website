@@ -2,6 +2,9 @@
 // DATABASE TYPES
 // ===========================================
 
+// Re-export booking types
+export * from './booking'
+
 export interface Promotion {
   id: string
   title_es: string

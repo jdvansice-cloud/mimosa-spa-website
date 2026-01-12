@@ -1,79 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServices } from '@/lib/booking/mindbody'
 
-const RAILWAY_API_URL = process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://backend-proxy-server-production.up.railway.app'
+// Category to exclude from main services (shown in addons step)
+const ADICIONALES_CATEGORY = 'ADICIONALES'
 
-interface MindbodyService {
-  Id: string
-  Name: string
-  Description: string
-  Duration: number
-  Price: number
-  ProgramName?: string
-  OnlineBooking: boolean
-}
-
-interface TransformedService {
-  id: string
-  name: string
-  description: string
-  duration: number
-  price: number
-  category: string
-  onlineBooking: boolean
-}
-
+// GET /api/mindbody/services?locationId=1&type=main|addons|all
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const locationId = searchParams.get('locationId') || '1'
-
-    // Fetch services from Railway backend proxy
-    const response = await fetch(`${RAILWAY_API_URL}/api/services?locationId=${locationId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      next: {
-        revalidate: 300, // Cache for 5 minutes
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Railway API error: ${response.status}`)
+    const locationId = searchParams.get('locationId')
+    const type = searchParams.get('type') || 'main' // main, addons, or all
+    
+    // Get services from Mindbody
+    const allServices = await getServices(
+      locationId ? parseInt(locationId) : undefined
+    )
+    
+    // Filter based on type
+    let filteredServices = allServices
+    
+    if (type === 'main') {
+      // Exclude ADICIONALES category
+      filteredServices = allServices.filter(
+        s => s.Category?.toUpperCase() !== ADICIONALES_CATEGORY
+      )
+    } else if (type === 'addons') {
+      // Only ADICIONALES category
+      filteredServices = allServices.filter(
+        s => s.Category?.toUpperCase() === ADICIONALES_CATEGORY
+      )
     }
-
-    const data = await response.json()
-
-    // Filter and transform services for display
-    const services: TransformedService[] = data.Services?.filter((service: MindbodyService) => 
-      service.OnlineBooking === true
-    ).map((service: MindbodyService) => ({
-      id: service.Id,
-      name: service.Name,
-      description: service.Description,
-      duration: service.Duration,
-      price: service.Price,
-      category: service.ProgramName || 'General',
-      onlineBooking: service.OnlineBooking,
-    })) || []
-
-    // Group by category
-    const groupedServices = services.reduce<Record<string, TransformedService[]>>((acc, service) => {
-      const category = service.category
+    
+    // Group services by category
+    const grouped = filteredServices.reduce((acc, service) => {
+      const category = service.Category || 'General'
       if (!acc[category]) {
         acc[category] = []
       }
       acc[category].push(service)
       return acc
-    }, {})
-
-    return NextResponse.json({ 
-      data: services,
-      grouped: groupedServices,
+    }, {} as Record<string, typeof filteredServices>)
+    
+    return NextResponse.json({
+      services: filteredServices,
+      grouped,
+      categories: Object.keys(grouped),
+      total: filteredServices.length
     })
+    
   } catch (error) {
-    console.error('Mindbody API error:', error)
+    console.error('Get services error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch services' },
+      { error: 'Failed to get services' },
       { status: 500 }
     )
   }

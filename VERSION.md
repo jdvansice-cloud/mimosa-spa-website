@@ -1,12 +1,217 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.16 (January 12, 2026)
+
+### 🚀 MAJOR: Native Booking System Implementation
+
+**Complete native booking widget replacing iframe implementation!**
+
+#### New Files Created
+
+**API Routes:**
+- `/api/mindbody/auth/route.ts` - Client lookup & registration
+- `/api/mindbody/locations/route.ts` - Get spa locations
+- `/api/mindbody/services/route.ts` - Get services with ADICIONALES filtering
+- `/api/mindbody/staff/route.ts` - Get therapists
+- `/api/mindbody/availability/route.ts` - Check availability
+- `/api/mindbody/book/route.ts` - Create appointments
+
+**Booking Store:**
+- `/lib/booking/store.ts` - Zustand state management
+- `/lib/booking/mindbody.ts` - Mindbody API utility with token management
+
+**Types:**
+- `/types/booking.ts` - Comprehensive booking system types
+
+**UI Components:**
+- `BookingWidget.tsx` - Main container with step routing
+- `shared/StepProgress.tsx` - Visual progress indicator
+- `shared/CartSummary.tsx` - Cart with ITBM calculation
+- `shared/ClientSelector.tsx` - Multiple clients modal
+- `steps/AuthStep.tsx` - Email/phone login & registration
+- `steps/LocationStep.tsx` - Spa location selection
+- `steps/ServiceStep.tsx` - Treatment selection with categories
+- `steps/AddonsStep.tsx` - ADICIONALES selection
+- `steps/StaffStep.tsx` - Therapist selection
+- `steps/DateTimeStep.tsx` - Calendar & time slots
+- `steps/ConfirmStep.tsx` - Booking summary & submit
+- `steps/SuccessStep.tsx` - Confirmation with details
+
+#### Features Implemented
+
+1. **Authentication**
+   - Email or phone number lookup
+   - Multiple clients popup for shared contacts
+   - New client registration
+
+2. **Service Selection**
+   - Collapsible category groups
+   - ADICIONALES category separated
+   - Multi-service selection
+
+3. **Staff Selection**
+   - "Any Therapist" option
+   - Individual therapist cards with avatars
+
+4. **Date/Time Selection**
+   - Interactive calendar
+   - Availability indicators
+   - Time slot grid
+
+5. **Cart & Pricing**
+   - Promotion pricing with discount display
+   - ITBM (7%) tax calculation
+   - Total duration tracking
+
+6. **Booking Confirmation**
+   - Full booking summary
+   - Submit to Mindbody
+   - Success screen with confirmation number
+
+---
+
+## Version 1.0.15 (January 12, 2026)
+
+### Environment Variables Update
+- **Updated:** `.env.example` with comprehensive Vercel configuration
+- **Added:** Detailed Vercel Dashboard setup instructions in brief
+- **Added:** Security notes for NEXT_PUBLIC_ vs server-only variables
+- **Added:** Environment-specific configuration table
+
+### Vercel Environment Variables
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `MINDBODY_API_KEY` | 🔒 Secret | Mindbody API key |
+| `MINDBODY_SITE_ID` | Plain | Site ID (-41931) |
+| `MINDBODY_API_URL` | Plain | API base URL |
+| `NEXT_PUBLIC_SUPABASE_URL` | Plain | Supabase URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Plain | Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | 🔒 Secret | Supabase service key |
+| `NEXT_PUBLIC_SITE_URL` | Plain | Production URL |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Plain | WhatsApp number |
+| `NEXT_PUBLIC_ITBM_RATE` | Plain | Tax rate (0.07) |
+
+### Future Variables (Placeholders)
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Online payments
+- `STRIPE_SECRET_KEY` - Stripe server key
+- `WATI_API_KEY` - WhatsApp notifications
+
+---
+
+## Version 1.0.14 (January 11, 2026)
+
+### Documentation Updates
+- **Added:** Authentication System section with email/phone lookup
+- **Added:** Multiple clients selection popup for shared contact info
+- **Added:** ClientSelector component specification
+- **Added:** Client lookup API endpoint specification
+- **Updated:** Booking state with multiple clients handling fields
+- **Added:** useClientLookup hook to component structure
+
+### Client Lookup Features
+- Search by email OR phone number
+- Single client → proceed directly
+- Multiple clients → show selection popup
+- No client found → offer registration
+
+### Multiple Clients Popup
+```
+┌─────────────────────────────────────────┐
+│     Selecciona tu perfil                │
+├─────────────────────────────────────────┤
+│  👤 María García López                  │
+│  👤 Carlos García López                 │
+│  👤 Sofia García (Menor)                │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Version 1.0.13 (January 11, 2026)
+
+### Documentation Updates
+- **Added:** ITBM (7%) tax calculation in cart
+- **Updated:** Cart display shows Subtotal, ITBM, and Total lines
+- **Updated:** Pricing calculation logic includes tax
+
+### Cart Pricing Display
+```
+Subtotal:        $94.00
+ITBM (7%):        $6.58
+─────────────────────────
+TOTAL:          $100.58
+```
+
+---
+
+## Version 1.0.12 (January 11, 2026)
+
+### Documentation Updates
+- **Updated:** Implementation brief with detailed cart pricing display
+- **Added:** Visual distinction between promotion and regular bookings
+- **Added:** Cart summary component specifications
+- **Added:** Pricing calculation logic
+- **Added:** Confirmation step with booking submission flow
+
+### Cart Features Planned
+- Shows regular prices for each service
+- Displays promotion price with discount amount
+- Strikethrough on original prices when promotion active
+- Gold styling for promotion bookings
+- Running total with duration
+
+### Visual Distinction
+| Element | Promotion | Regular |
+|---------|-----------|---------|
+| Border | Gold 2px | Gray 1px |
+| Background | Gold tint | White |
+| Header | ⭐ PROMOCIÓN badge | None |
+| Items | Checkmarks ✓ | Bullets • |
+| Pricing | Shows discount | Regular price |
+
+---
+
+## Version 1.0.11 (January 11, 2026)
+
+### Documentation
+- **Added:** Comprehensive Booking System Implementation Brief
+- **Location:** `/docs/BOOKING_SYSTEM_IMPLEMENTATION_BRIEF.md`
+
+### Key Planning Decisions
+
+#### Promotion-Linked Bookings
+- Promotions will link to Mindbody promotions/packages
+- Each website promotion stores array of Mindbody service IDs
+- Clicking "Book" on promotion pre-loads all included services
+
+#### Multi-Treatment Booking
+- Booking cart supports multiple services
+- Total duration calculated from all services + add-ons
+- Availability checks for continuous time blocks
+
+#### Add-on Services (ADICIONALES)
+- "ADICIONALES" category hidden from main service list
+- Shown as separate step after selecting main treatments
+- Added to total duration for availability calculation
+
+#### Booking Flow (8 Steps)
+1. Authentication (email/phone)
+2. Location Selection
+3. Service Selection (excludes ADICIONALES)
+4. Add-on Selection (ADICIONALES only)
+5. Staff Selection
+6. Date & Time Selection
+7. Confirmation
+
+---
+
 ## Version 1.0.10 (January 11, 2026)
 
 ### Changes
 - **Updated:** Logo files with transparent backgrounds
 - **Changed:** Header now displays full Mimosa logo image
 - **Removed:** "Explorar" text from hero section, kept just the scroll arrow
-- **Improved:** Scroll indicator arrow is now larger and cleaner
 
 ---
 
