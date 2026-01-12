@@ -2,7 +2,7 @@ var R=require("../../../chunks/ssr/[turbopack]_runtime.js")("server/app/[locale]
 R.c("server/chunks/ssr/[root-of-the-server]__e33d1805._.js")
 R.c("server/chunks/ssr/d2f63_next_dist_ae592007._.js")
 R.c("server/chunks/ssr/Documents_GitHub_mimosaweb_da9945f3._.js")
-R.c("server/chunks/ssr/[root-of-the-server]__2d05b766._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__f5ff6d13._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__22da0a78._.js")
 R.c("server/chunks/ssr/d2f63_next_dist_a0f556a5._.js")
 R.c("server/chunks/ssr/d2f63_next_dist_client_components_builtin_global-error_e969d88f.js")

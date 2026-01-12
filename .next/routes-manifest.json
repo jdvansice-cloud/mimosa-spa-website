@@ -120,10 +120,46 @@
       "namedRegex": "^/admin/promociones(?:/)?$"
     },
     {
+      "page": "/api/cita/cancelar",
+      "regex": "^/api/cita/cancelar(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cita/cancelar(?:/)?$"
+    },
+    {
+      "page": "/api/cita/confirmar",
+      "regex": "^/api/cita/confirmar(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cita/confirmar(?:/)?$"
+    },
+    {
       "page": "/api/gallery",
       "regex": "^/api/gallery(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/gallery(?:/)?$"
+    },
+    {
+      "page": "/api/mindbody/auth",
+      "regex": "^/api/mindbody/auth(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/mindbody/auth(?:/)?$"
+    },
+    {
+      "page": "/api/mindbody/availability",
+      "regex": "^/api/mindbody/availability(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/mindbody/availability(?:/)?$"
+    },
+    {
+      "page": "/api/mindbody/book",
+      "regex": "^/api/mindbody/book(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/mindbody/book(?:/)?$"
+    },
+    {
+      "page": "/api/mindbody/locations",
+      "regex": "^/api/mindbody/locations(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/mindbody/locations(?:/)?$"
     },
     {
       "page": "/api/mindbody/services",
@@ -132,10 +168,22 @@
       "namedRegex": "^/api/mindbody/services(?:/)?$"
     },
     {
+      "page": "/api/mindbody/staff",
+      "regex": "^/api/mindbody/staff(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/mindbody/staff(?:/)?$"
+    },
+    {
       "page": "/api/promotions",
       "regex": "^/api/promotions(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/promotions(?:/)?$"
+    },
+    {
+      "page": "/cita/resultado",
+      "regex": "^/cita/resultado(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/cita/resultado(?:/)?$"
     }
   ],
   "dataRoutes": [],

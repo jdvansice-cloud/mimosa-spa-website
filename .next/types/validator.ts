@@ -146,10 +146,37 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/cita/resultado/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/cita/resultado">> = Specific
+  const handler = {} as typeof import("../../src/app/cita/resultado/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/">> = Specific
   const handler = {} as typeof import("../../src/app/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/cita/cancelar/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/cita/cancelar">> = Specific
+  const handler = {} as typeof import("../../src/app/api/cita/cancelar/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/cita/confirmar/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/cita/confirmar">> = Specific
+  const handler = {} as typeof import("../../src/app/api/cita/confirmar/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
@@ -164,10 +191,55 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/api/mindbody/auth/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/mindbody/auth">> = Specific
+  const handler = {} as typeof import("../../src/app/api/mindbody/auth/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/mindbody/availability/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/mindbody/availability">> = Specific
+  const handler = {} as typeof import("../../src/app/api/mindbody/availability/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/mindbody/book/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/mindbody/book">> = Specific
+  const handler = {} as typeof import("../../src/app/api/mindbody/book/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/mindbody/locations/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/mindbody/locations">> = Specific
+  const handler = {} as typeof import("../../src/app/api/mindbody/locations/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/api/mindbody/services/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/mindbody/services">> = Specific
   const handler = {} as typeof import("../../src/app/api/mindbody/services/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/mindbody/staff/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/mindbody/staff">> = Specific
+  const handler = {} as typeof import("../../src/app/api/mindbody/staff/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

@@ -12,8 +12,16 @@
   "/admin/login/page": "/admin/login",
   "/admin/page": "/admin",
   "/admin/promociones/page": "/admin/promociones",
+  "/api/cita/cancelar/route": "/api/cita/cancelar",
+  "/api/cita/confirmar/route": "/api/cita/confirmar",
   "/api/gallery/route": "/api/gallery",
+  "/api/mindbody/auth/route": "/api/mindbody/auth",
+  "/api/mindbody/availability/route": "/api/mindbody/availability",
+  "/api/mindbody/book/route": "/api/mindbody/book",
+  "/api/mindbody/locations/route": "/api/mindbody/locations",
   "/api/mindbody/services/route": "/api/mindbody/services",
+  "/api/mindbody/staff/route": "/api/mindbody/staff",
   "/api/promotions/route": "/api/promotions",
+  "/cita/resultado/page": "/cita/resultado",
   "/page": "/"
 }

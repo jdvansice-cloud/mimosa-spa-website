@@ -319,6 +319,12 @@ export async function addAppointment(appointmentData: {
       StartDateTime: string
       EndDateTime: string
       Status: string
+      Staff?: {
+        Id: number
+        FirstName: string
+        LastName: string
+        DisplayName?: string
+      }
     }
   }
   
