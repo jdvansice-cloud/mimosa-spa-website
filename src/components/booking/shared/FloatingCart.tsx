@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { ShoppingBag, X, Trash2, Clock, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
+
+// Tax rate constant
+const ITBM_RATE = 0.07
 
 export function FloatingCart() {
   const [isOpen, setIsOpen] = useState(false)
@@ -14,11 +17,38 @@ export function FloatingCart() {
     selectedAddons,
     removeService,
     removeAddon,
-    calculatePricing,
+    activePromotion,
   } = useBookingStore()
   
   const itemCount = selectedServices.length + selectedAddons.length
-  const pricing = calculatePricing()
+  
+  // Calculate pricing with useMemo - no state updates during render
+  const pricing = useMemo(() => {
+    const servicesSubtotal = selectedServices.reduce((sum, s) => sum + s.Price, 0)
+    const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
+    
+    const hasPromotion = activePromotion !== null
+    let finalServicesPrice = servicesSubtotal
+    
+    if (hasPromotion && activePromotion) {
+      finalServicesPrice = activePromotion.price
+    }
+    
+    const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
+    const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
+    const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
+    
+    const totalDuration = selectedServices.reduce((sum, s) => sum + (s.Duration || 0), 0) +
+                          selectedAddons.reduce((sum, a) => sum + (a.Duration || 0), 0)
+    
+    return {
+      subtotalBeforeTax,
+      itbmRate: ITBM_RATE,
+      itbmAmount,
+      totalWithTax,
+      totalDuration,
+    }
+  }, [selectedServices, selectedAddons, activePromotion])
   
   // Close on click outside
   useEffect(() => {

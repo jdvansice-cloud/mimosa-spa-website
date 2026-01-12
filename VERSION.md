@@ -1,5 +1,53 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.21 (January 12, 2026)
+
+### 🐛 Critical Bug Fix: Infinite Loop in Pricing Calculation
+
+**Fixed page unresponsive error caused by calculatePricing infinite loop**
+
+#### Root Cause
+
+The `calculatePricing` function in the Zustand store was calling `set()` to update state during component render. This triggered re-renders which called `calculatePricing` again, creating an infinite loop that caused the page to become unresponsive (5000+ errors in console).
+
+#### Solution
+
+Replaced `calculatePricing()` calls with `useMemo` hooks in all affected components:
+
+1. **FloatingCart.tsx** - Uses local useMemo for pricing calculation
+2. **CartSummary.tsx** - Uses local useMemo for pricing calculation  
+3. **ConfirmStep.tsx** - Uses local useMemo for pricing calculation
+4. **store.ts** - calculatePricing now returns pricing without calling set()
+
+#### Technical Details
+
+**Before (broken):**
+```tsx
+// Called during render - triggers infinite loop
+const pricing = calculatePricing()
+```
+
+**After (fixed):**
+```tsx
+// Pure computation with useMemo - no state updates
+const pricing = useMemo(() => {
+  const servicesSubtotal = selectedServices.reduce((sum, s) => sum + s.Price, 0)
+  // ... calculation
+  return { subtotalBeforeTax, itbmAmount, totalWithTax }
+}, [selectedServices, selectedAddons, activePromotion])
+```
+
+#### Updated Components
+
+| Component | Change |
+|-----------|--------|
+| `FloatingCart.tsx` | Replaced calculatePricing() with useMemo |
+| `CartSummary.tsx` | Replaced calculatePricing() with useMemo |
+| `ConfirmStep.tsx` | Replaced calculatePricing() with useMemo |
+| `store.ts` | Removed set() call from calculatePricing |
+
+---
+
 ## Version 1.0.20 (January 12, 2026)
 
 ### 🎨 Service Tile UI Improvements & Bug Fixes

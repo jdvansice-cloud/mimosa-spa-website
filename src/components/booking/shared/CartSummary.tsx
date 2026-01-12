@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useMemo } from 'react'
 import { Star, Clock, X, ShoppingBag } from 'lucide-react'
 import { useBookingStore } from '@/lib/booking/store'
+
+// Tax rate constant
+const ITBM_RATE = 0.07
 
 interface CartSummaryProps {
   compact?: boolean
@@ -14,18 +17,45 @@ export function CartSummary({ compact = false, showRemoveButtons = true }: CartS
     selectedServices,
     selectedAddons,
     activePromotion,
-    pricing,
-    calculatePricing,
     removeService,
     removeAddon,
   } = useBookingStore()
   
-  // Calculate pricing when services/addons change
-  useEffect(() => {
-    if (selectedServices.length > 0 || selectedAddons.length > 0) {
-      calculatePricing()
+  // Calculate pricing with useMemo - no state updates during render
+  const pricing = useMemo(() => {
+    const servicesSubtotal = selectedServices.reduce((sum, s) => sum + s.Price, 0)
+    const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
+    
+    const hasPromotion = activePromotion !== null
+    let promotionDiscount = 0
+    let finalServicesPrice = servicesSubtotal
+    
+    if (hasPromotion && activePromotion) {
+      finalServicesPrice = activePromotion.price
+      promotionDiscount = servicesSubtotal - finalServicesPrice
     }
-  }, [selectedServices, selectedAddons, activePromotion, calculatePricing])
+    
+    const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
+    const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
+    const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
+    
+    const totalDuration = selectedServices.reduce((sum, s) => sum + (s.Duration || 0), 0) +
+                          selectedAddons.reduce((sum, a) => sum + (a.Duration || 0), 0)
+    
+    return {
+      servicesSubtotal,
+      addonsSubtotal,
+      hasPromotion,
+      promotionName: activePromotion?.title_es || null,
+      promotionPrice: hasPromotion ? activePromotion!.price : null,
+      promotionDiscount,
+      subtotalBeforeTax,
+      itbmRate: ITBM_RATE,
+      itbmAmount,
+      totalWithTax,
+      totalDuration,
+    }
+  }, [selectedServices, selectedAddons, activePromotion])
   
   const hasItems = selectedServices.length > 0 || selectedAddons.length > 0
   
@@ -38,7 +68,7 @@ export function CartSummary({ compact = false, showRemoveButtons = true }: CartS
     )
   }
   
-  const hasPromotion = activePromotion !== null
+  const hasPromotion = pricing.hasPromotion
   
   // Compact view for mobile
   if (compact) {

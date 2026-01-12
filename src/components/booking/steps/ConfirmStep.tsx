@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { CheckCircle, ArrowLeft, MapPin, User, Calendar, Clock, Loader2, AlertTriangle } from 'lucide-react'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
 import { CartSummary } from '../shared/CartSummary'
+
+// Tax rate constant
+const ITBM_RATE = 0.07
 
 export function ConfirmStep() {
   const {
@@ -15,8 +18,6 @@ export function ConfirmStep() {
     selectedDate,
     selectedTime,
     activePromotion,
-    pricing,
-    calculatePricing,
     setBookingConfirmation,
     prevStep,
     setLoading,
@@ -28,12 +29,29 @@ export function ConfirmStep() {
   const totalDuration = useBookingStore(selectTotalDuration)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  // Ensure pricing is calculated
-  useEffect(() => {
-    if (!pricing) {
-      calculatePricing()
+  // Calculate pricing with useMemo
+  const pricing = useMemo(() => {
+    const servicesSubtotal = selectedServices.reduce((sum, s) => sum + s.Price, 0)
+    const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
+    
+    const hasPromotion = activePromotion !== null
+    let finalServicesPrice = servicesSubtotal
+    
+    if (hasPromotion && activePromotion) {
+      finalServicesPrice = activePromotion.price
     }
-  }, [pricing, calculatePricing])
+    
+    const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
+    const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
+    const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
+    
+    return {
+      subtotalBeforeTax,
+      itbmRate: ITBM_RATE,
+      itbmAmount,
+      totalWithTax,
+    }
+  }, [selectedServices, selectedAddons, activePromotion])
   
   // Format date for display
   const formatDate = (dateStr: string) => {

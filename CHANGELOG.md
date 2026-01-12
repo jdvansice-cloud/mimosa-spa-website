@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.21] - 2026-01-12
+
+### Fixed
+- **CRITICAL: Infinite loop causing page unresponsive**: `calculatePricing()` was calling `set()` during render, triggering infinite re-renders (5000+ errors)
+- **FloatingCart.tsx**: Replaced `calculatePricing()` call with local `useMemo` computation
+- **CartSummary.tsx**: Replaced `useEffect` + `calculatePricing()` with local `useMemo` computation
+- **ConfirmStep.tsx**: Replaced `useEffect` + `calculatePricing()` with local `useMemo` computation
+- **store.ts**: Removed `set()` call from `calculatePricing` to prevent state updates during render
+
+### Technical Details
+- All pricing calculations now use `useMemo` with proper dependencies
+- Store's `calculatePricing` is now a pure function that returns pricing without side effects
+- ITBM_RATE constant (0.07) defined locally in components that need it
+
+---
+
 ## [1.0.20] - 2026-01-12
 
 ### Fixed

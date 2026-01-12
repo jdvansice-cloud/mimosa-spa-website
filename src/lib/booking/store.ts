@@ -480,7 +480,7 @@ export const useBookingStore = create<BookingState & BookingActions>()(
           ),
         }
         
-        set({ pricing }, false, 'calculatePricing')
+        // Return computed pricing (don't set state to avoid re-render loops)
         return pricing
       },
       
