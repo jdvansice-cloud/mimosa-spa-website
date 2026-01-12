@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useBookingStore, selectCurrentStepNumber } from '@/lib/booking/store'
 import { StepProgress } from './shared/StepProgress'
 import { CartSummary } from './shared/CartSummary'
+import { FloatingCart } from './shared/FloatingCart'
 import { ClientSelector } from './shared/ClientSelector'
 import { AuthStep } from './steps/AuthStep'
 import { LocationStep } from './steps/LocationStep'
@@ -47,6 +48,13 @@ export function BookingWidget() {
   // Show cart when services are selected
   const showCart = selectedServices.length > 0 || selectedAddons.length > 0 || activePromotion !== null
   
+  // Show floating cart on steps where user is selecting items
+  const showFloatingCart = showCart && 
+    currentStep !== 'success' && 
+    currentStep !== 'confirm' && 
+    currentStep !== 'auth' && 
+    currentStep !== 'location'
+  
   const renderStep = () => {
     switch (currentStep) {
       case 'auth':
@@ -71,11 +79,20 @@ export function BookingWidget() {
   }
   
   return (
-    <div className="booking-widget bg-white rounded-2xl shadow-elevated overflow-hidden">
+    <div className="booking-widget bg-white rounded-2xl shadow-elevated overflow-hidden relative">
       {/* Header with Progress */}
       {currentStep !== 'success' && (
         <div className="bg-gradient-to-r from-gold/10 to-gold/5 px-6 py-4 border-b border-beige-200">
-          <StepProgress currentStep={stepNumber} totalSteps={7} />
+          <div className="flex items-center justify-between">
+            <StepProgress currentStep={stepNumber} totalSteps={7} />
+            
+            {/* Floating Cart - positioned in header on mobile */}
+            {showFloatingCart && (
+              <div className="lg:hidden">
+                <FloatingCart />
+              </div>
+            )}
+          </div>
         </div>
       )}
       
@@ -105,13 +122,6 @@ export function BookingWidget() {
           </div>
         )}
       </div>
-      
-      {/* Cart Summary - Mobile (sticky bottom) */}
-      {showCart && currentStep !== 'success' && currentStep !== 'confirm' && (
-        <div className="lg:hidden border-t border-beige-200 bg-beige-50 p-4">
-          <CartSummary compact />
-        </div>
-      )}
       
       {/* Client Selector Modal */}
       {showClientSelector && (

@@ -1,10 +1,149 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sparkles, ArrowLeft, ArrowRight, Loader2, ChevronDown, ChevronUp, Clock, Check, Plus } from 'lucide-react'
+import { Sparkles, ArrowLeft, ArrowRight, Loader2, ChevronDown, ChevronUp, Clock, Check, Plus, Info, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
+
+// Category configuration with icons and colors
+const CATEGORY_CONFIG: Record<string, { icon: string; color: string; gradient: string }> = {
+  'Tratamientos Corporales': { icon: '💆', color: 'bg-amber-100', gradient: 'from-amber-500/20 to-amber-600/5' },
+  'Tratamientos Faciales': { icon: '✨', color: 'bg-pink-100', gradient: 'from-pink-500/20 to-pink-600/5' },
+  'Paquetes Deluxe': { icon: '👑', color: 'bg-purple-100', gradient: 'from-purple-500/20 to-purple-600/5' },
+  'Paquetes de Masajes': { icon: '🌿', color: 'bg-green-100', gradient: 'from-green-500/20 to-green-600/5' },
+  'Tratamientos Parejas': { icon: '💕', color: 'bg-red-100', gradient: 'from-red-500/20 to-red-600/5' },
+  'TAI': { icon: '🧘', color: 'bg-blue-100', gradient: 'from-blue-500/20 to-blue-600/5' },
+  'Eventos': { icon: '🎉', color: 'bg-yellow-100', gradient: 'from-yellow-500/20 to-yellow-600/5' },
+}
+
+const DEFAULT_CONFIG = { icon: '🌸', color: 'bg-beige-100', gradient: 'from-gold/20 to-gold/5' }
+
+// Service Tile Component
+function ServiceTile({ 
+  service, 
+  isSelected, 
+  onToggle 
+}: { 
+  service: MindbodyService
+  isSelected: boolean
+  onToggle: () => void 
+}) {
+  const [showDetails, setShowDetails] = useState(false)
+  
+  return (
+    <div className="relative">
+      <div
+        className={`
+          relative rounded-xl border-2 transition-all duration-200 overflow-hidden
+          ${isSelected 
+            ? 'border-gold bg-gold/5 shadow-md ring-2 ring-gold/20' 
+            : 'border-beige-200 bg-white hover:border-gold/50 hover:shadow-sm'
+          }
+        `}
+      >
+        {/* Selected Badge */}
+        {isSelected && (
+          <div className="absolute top-2 right-2 z-10">
+            <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
+              <Check className="w-4 h-4 text-dark" />
+            </div>
+          </div>
+        )}
+        
+        {/* Tile Content */}
+        <div className="p-4">
+          {/* Name & Price */}
+          <div className="flex items-start justify-between gap-2 mb-2 pr-8">
+            <h4 className="font-medium text-dark text-sm leading-tight">
+              {service.Name}
+            </h4>
+          </div>
+          
+          {/* Price Badge */}
+          <div className="mb-3">
+            <span className={`
+              inline-block text-lg font-bold
+              ${isSelected ? 'text-gold-600' : 'text-dark'}
+            `}>
+              {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
+            </span>
+            {service.Duration > 0 && (
+              <span className="ml-2 text-xs text-warm-gray">
+                • {service.Duration} min
+              </span>
+            )}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onToggle}
+              className={`
+                flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg
+                font-medium text-sm transition-all duration-200
+                ${isSelected
+                  ? 'bg-gold text-dark hover:bg-gold/90'
+                  : 'bg-beige-100 text-dark hover:bg-beige-200'
+                }
+              `}
+            >
+              {isSelected ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Agregado
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  Agregar
+                </>
+              )}
+            </button>
+            
+            {service.Description && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowDetails(!showDetails)
+                }}
+                className={`
+                  p-2.5 rounded-lg transition-all duration-200
+                  ${showDetails 
+                    ? 'bg-gold/20 text-gold-600' 
+                    : 'bg-beige-100 text-warm-gray hover:bg-beige-200'
+                  }
+                `}
+                aria-label="Ver detalles"
+              >
+                {showDetails ? <X className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {/* Expandable Description */}
+        <AnimatePresence>
+          {showDetails && service.Description && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4 pt-2 border-t border-beige-100 bg-beige-50/50">
+                <p className="text-sm text-warm-gray leading-relaxed">
+                  {service.Description}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
 
 export function ServiceStep() {
   const {
@@ -45,10 +184,8 @@ export function ServiceStep() {
         setServices(data.services)
         setGroupedServices(data.grouped)
         
-        // Expand first category by default
-        if (Object.keys(data.grouped).length > 0) {
-          setExpandedCategories(new Set([Object.keys(data.grouped)[0]]))
-        }
+        // Expand all categories by default
+        setExpandedCategories(new Set(Object.keys(data.grouped)))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error de conexión')
       } finally {
@@ -83,19 +220,23 @@ export function ServiceStep() {
     }
   }
   
+  const getCategoryConfig = (category: string) => {
+    return CATEGORY_CONFIG[category] || DEFAULT_CONFIG
+  }
+  
   return (
     <div className="service-step">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold/60 rounded-full 
-                      flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <Sparkles className="w-8 h-8 text-white" />
+      <div className="text-center mb-6">
+        <div className="w-14 h-14 bg-gradient-to-br from-gold to-gold/60 rounded-full 
+                      flex items-center justify-center mx-auto mb-3 shadow-lg">
+          <Sparkles className="w-7 h-7 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-dark mb-2">
+        <h2 className="text-xl font-bold text-dark mb-1">
           Selecciona tus Tratamientos
         </h2>
-        <p className="text-warm-gray">
-          Elige uno o más servicios para tu visita
+        <p className="text-sm text-warm-gray">
+          Explora las categorías y agrega servicios a tu carrito
         </p>
       </div>
       
@@ -114,129 +255,102 @@ export function ServiceStep() {
         </div>
       )}
       
-      {/* Service Categories */}
+      {/* Category Tiles */}
       {!isLoading && (
         <div className="space-y-4">
-          {Object.entries(groupedServices).map(([category, categoryServices]) => (
-            <div 
-              key={category}
-              className="border border-beige-200 rounded-xl overflow-hidden"
-            >
-              {/* Category Header */}
-              <button
-                onClick={() => toggleCategory(category)}
-                className="w-full px-5 py-4 bg-beige-50 flex items-center justify-between
-                         hover:bg-beige-100 transition-colors"
+          {Object.entries(groupedServices).map(([category, categoryServices]) => {
+            const config = getCategoryConfig(category)
+            const isExpanded = expandedCategories.has(category)
+            const selectedInCategory = categoryServices.filter(s => isServiceSelected(s.Id)).length
+            
+            return (
+              <div 
+                key={category}
+                className="rounded-2xl border border-beige-200 overflow-hidden bg-white shadow-sm"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-semibold text-dark">{category}</span>
-                  <span className="text-sm text-warm-gray bg-white px-2 py-0.5 rounded-full">
-                    {categoryServices.length} servicios
-                  </span>
-                </div>
-                {expandedCategories.has(category) ? (
-                  <ChevronUp className="w-5 h-5 text-warm-gray" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-warm-gray" />
-                )}
-              </button>
-              
-              {/* Category Services */}
-              <AnimatePresence>
-                {expandedCategories.has(category) && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="divide-y divide-beige-100">
-                      {categoryServices.map((service) => {
-                        const selected = isServiceSelected(service.Id)
-                        
-                        return (
-                          <button
-                            key={service.Id}
-                            onClick={() => handleToggleService(service)}
-                            className={`
-                              w-full p-4 flex items-center gap-4 text-left
-                              transition-all duration-200
-                              ${selected 
-                                ? 'bg-gold/10' 
-                                : 'hover:bg-beige-50'
-                              }
-                            `}
-                          >
-                            {/* Selection Indicator */}
-                            <div className={`
-                              w-8 h-8 rounded-full flex items-center justify-center
-                              flex-shrink-0 transition-all
-                              ${selected 
-                                ? 'bg-gold text-dark' 
-                                : 'border-2 border-beige-300 text-transparent'
-                              }
-                            `}>
-                              {selected ? (
-                                <Check className="w-5 h-5" />
-                              ) : (
-                                <Plus className="w-5 h-5 text-beige-300" />
-                              )}
-                            </div>
-                            
-                            {/* Service Info */}
-                            <div className="flex-1 min-w-0">
-                              <h4 className={`font-medium ${selected ? 'text-dark' : 'text-dark'}`}>
-                                {service.Name}
-                              </h4>
-                              {service.Description && (
-                                <p className="text-sm text-warm-gray line-clamp-2 mt-1">
-                                  {service.Description}
-                                </p>
-                              )}
-                              {service.Duration > 0 && (
-                                <div className="flex items-center gap-3 mt-2">
-                                  <span className="text-xs text-warm-gray flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {service.Duration} min
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            
-                            {/* Price */}
-                            <div className="text-right flex-shrink-0">
-                              {service.Price > 0 ? (
-                                <span className={`
-                                  text-lg font-bold
-                                  ${selected ? 'text-gold-600' : 'text-dark'}
-                                `}>
-                                  ${service.Price.toFixed(0)}
-                                </span>
-                              ) : (
-                                <span className="text-sm text-warm-gray">
-                                  Consultar
-                                </span>
-                              )}
-                            </div>
-                          </button>
-                        )
-                      })}
+                {/* Category Header Tile */}
+                <button
+                  onClick={() => toggleCategory(category)}
+                  className={`
+                    w-full px-4 py-4 flex items-center justify-between
+                    bg-gradient-to-r ${config.gradient}
+                    hover:brightness-[0.98] transition-all duration-200
+                  `}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl" role="img" aria-hidden="true">
+                      {config.icon}
+                    </span>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-dark">{category}</h3>
+                      <p className="text-xs text-warm-gray">
+                        {categoryServices.length} tratamiento{categoryServices.length !== 1 ? 's' : ''}
+                        {selectedInCategory > 0 && (
+                          <span className="ml-2 text-gold-600 font-medium">
+                            • {selectedInCategory} en carrito
+                          </span>
+                        )}
+                      </p>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {selectedInCategory > 0 && (
+                      <span className="w-6 h-6 bg-gold text-dark text-xs font-bold 
+                                     rounded-full flex items-center justify-center">
+                        {selectedInCategory}
+                      </span>
+                    )}
+                    <div className={`
+                      w-8 h-8 rounded-full flex items-center justify-center
+                      ${isExpanded ? 'bg-gold/20' : 'bg-white/50'}
+                      transition-colors
+                    `}>
+                      {isExpanded ? (
+                        <ChevronUp className="w-5 h-5 text-dark" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-warm-gray" />
+                      )}
+                    </div>
+                  </div>
+                </button>
+                
+                {/* Services Grid */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-4 bg-beige-50/30">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {categoryServices.map((service) => (
+                            <ServiceTile
+                              key={service.Id}
+                              service={service}
+                              isSelected={isServiceSelected(service.Id)}
+                              onToggle={() => handleToggleService(service)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          })}
         </div>
       )}
       
-      {/* Selected Count */}
-      {selectedServices.length > 0 && (
-        <div className="mt-6 p-4 bg-gold/10 border border-gold/30 rounded-xl">
-          <p className="text-dark font-medium">
-            {selectedServices.length} servicio{selectedServices.length !== 1 ? 's' : ''} seleccionado{selectedServices.length !== 1 ? 's' : ''}
-          </p>
+      {/* Empty State */}
+      {!isLoading && Object.keys(groupedServices).length === 0 && (
+        <div className="text-center py-12 bg-beige-50 rounded-xl">
+          <Sparkles className="w-12 h-12 text-beige-300 mx-auto mb-3" />
+          <p className="text-warm-gray">No hay servicios disponibles</p>
         </div>
       )}
       

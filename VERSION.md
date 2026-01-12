@@ -1,5 +1,60 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.19 (January 12, 2026)
+
+### 🛒 Retail-Style Cart & Tile UI Redesign
+
+**Major UI overhaul for service selection experience!**
+
+#### New Components
+
+**FloatingCart** (`/components/booking/shared/FloatingCart.tsx`)
+- Retail-style shopping bag icon with item count badge
+- Dropdown cart panel with full item management
+- Remove items directly from cart
+- Pricing breakdown: Subtotal, ITBM (7%), Total
+- Click outside to close
+- Framer Motion animations for smooth interactions
+
+**ServiceTile** (`/components/booking/shared/ServiceTile.tsx`)
+- Card-based treatment display
+- Expandable description panels
+- Selected state visual indicators
+- Price badge with duration
+- Add/Remove toggle button
+
+#### Updated Components
+
+**ServiceStep** - Complete Redesign
+- Category-grouped tile layout
+- Category icons with colored gradients
+- Expandable category sections
+- Grid layout (2 columns)
+- Category headers show count + selected count
+
+**AddonsStep** - Tile Layout
+- Consistent design with ServiceStep
+- Expandable addon descriptions
+- Grid-based layout
+
+**BookingWidget** - Mobile Cart Integration
+- FloatingCart in header on mobile
+- Removed sticky bottom cart
+- Desktop sidebar unchanged
+
+#### Category Icons & Colors
+| Category | Icon | Gradient |
+|----------|------|----------|
+| Tratamientos Corporales | 💆 | amber-orange |
+| Tratamientos Faciales | ✨ | pink-rose |
+| Paquetes Deluxe | 👑 | yellow-amber |
+| Paquetes de Masajes | 🌿 | emerald-teal |
+| Tratamientos Parejas | 💕 | rose-pink |
+| TAI | 🧘 | blue-indigo |
+| Eventos | 🎉 | violet-purple |
+
+---
+
 ## Version 1.0.16 (January 12, 2026)
 
 ### 🚀 MAJOR: Native Booking System Implementation

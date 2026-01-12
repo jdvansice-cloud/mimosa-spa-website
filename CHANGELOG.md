@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.19] - 2026-01-12
+
+### Added
+- **FloatingCart component**: Retail-style floating cart icon with dropdown
+  - Shopping bag icon with item count badge
+  - Dropdown panel showing services and add-ons
+  - Remove items directly from cart
+  - Pricing breakdown (subtotal, ITBM 7%, total)
+  - Click outside to close functionality
+  - Framer Motion animations
+- **ServiceTile component**: Tile-based treatment display with expandable descriptions
+  - Cards with add/remove button and info toggle
+  - Expandable description panels
+  - Selected state visual indicators
+  - Duration and price display
+
+### Changed
+- **ServiceStep**: Complete redesign with tile-based category layout
+  - Category headers with icons and colored gradients
+  - Grid layout for services within categories
+  - All categories expanded by default
+  - Service count and selected count per category
+  - Info button to expand/collapse descriptions
+- **AddonsStep**: Updated to tile-based layout
+  - Consistent tile design with ServiceStep
+  - Expandable descriptions
+  - Cleaner visual hierarchy
+- **BookingWidget**: Integrated FloatingCart for mobile view
+  - Floating cart icon in header on mobile
+  - Replaced sticky bottom cart with floating dropdown
+  - Desktop sidebar cart unchanged
+
+### UI/UX
+- Category icons: 💆 Corporales, ✨ Faciales, 👑 Deluxe, 🌿 Masajes, 💕 Parejas, 🧘 TAI, 🎉 Eventos
+- Color-coded category gradients
+- Improved mobile cart experience with floating dropdown
+
+
 ## [1.0.18] - 2026-01-12
 
 ### Changed

@@ -1,10 +1,133 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, ArrowLeft, ArrowRight, Loader2, Clock, Check, X } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Plus, ArrowLeft, ArrowRight, Loader2, Clock, Check, X, Info, Sparkles } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
+
+// Addon Tile Component with expandable description
+function AddonTile({ 
+  addon, 
+  isSelected, 
+  onToggle 
+}: { 
+  addon: MindbodyService
+  isSelected: boolean
+  onToggle: () => void 
+}) {
+  const [showDetails, setShowDetails] = useState(false)
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`
+        relative rounded-xl border-2 transition-all duration-200 overflow-hidden
+        ${isSelected 
+          ? 'border-gold bg-gold/5 shadow-md ring-2 ring-gold/20' 
+          : 'border-beige-200 bg-white hover:border-gold/50 hover:shadow-sm'
+        }
+      `}
+    >
+      {/* Selected Badge */}
+      {isSelected && (
+        <div className="absolute top-2 right-2 z-10">
+          <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
+            <Check className="w-4 h-4 text-dark" />
+          </div>
+        </div>
+      )}
+      
+      <div className="p-4">
+        {/* Name */}
+        <h4 className="font-medium text-dark text-sm leading-tight mb-2 pr-8">
+          {addon.Name}
+        </h4>
+        
+        {/* Price Badge */}
+        <div className="mb-3">
+          <span className={`
+            inline-block text-lg font-bold
+            ${isSelected ? 'text-gold-600' : 'text-dark'}
+          `}>
+            {addon.Price > 0 ? `+$${addon.Price.toFixed(0)}` : 'Consultar'}
+          </span>
+          {addon.Duration > 0 && (
+            <span className="ml-2 text-xs text-warm-gray">
+              • +{addon.Duration} min
+            </span>
+          )}
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onToggle}
+            className={`
+              flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg
+              font-medium text-sm transition-all duration-200
+              ${isSelected
+                ? 'bg-gold text-dark hover:bg-gold/90'
+                : 'bg-beige-100 text-dark hover:bg-beige-200'
+              }
+            `}
+          >
+            {isSelected ? (
+              <>
+                <Check className="w-4 h-4" />
+                Agregado
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                Agregar
+              </>
+            )}
+          </button>
+          
+          {addon.Description && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowDetails(!showDetails)
+              }}
+              className={`
+                p-2.5 rounded-lg transition-all duration-200
+                ${showDetails 
+                  ? 'bg-gold/20 text-gold-600' 
+                  : 'bg-beige-100 text-warm-gray hover:bg-beige-200'
+                }
+              `}
+              aria-label="Ver detalles"
+            >
+              {showDetails ? <X className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {/* Expandable Description */}
+      <AnimatePresence>
+        {showDetails && addon.Description && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 pt-2 border-t border-beige-100 bg-beige-50/50">
+              <p className="text-sm text-warm-gray leading-relaxed">
+                {addon.Description}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
 
 export function AddonsStep() {
   const {
@@ -72,15 +195,15 @@ export function AddonsStep() {
   return (
     <div className="addons-step">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold/60 rounded-full 
-                      flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <Plus className="w-8 h-8 text-white" />
+      <div className="text-center mb-6">
+        <div className="w-14 h-14 bg-gradient-to-br from-gold to-gold/60 rounded-full 
+                      flex items-center justify-center mx-auto mb-3 shadow-lg">
+          <Sparkles className="w-7 h-7 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-dark mb-2">
+        <h2 className="text-xl font-bold text-dark mb-1">
           ¿Deseas agregar algo más?
         </h2>
-        <p className="text-warm-gray">
+        <p className="text-sm text-warm-gray">
           Mejora tu experiencia con servicios adicionales
         </p>
       </div>
@@ -103,6 +226,7 @@ export function AddonsStep() {
       {/* No Addons Available */}
       {!isLoading && localAddons.length === 0 && (
         <div className="text-center py-12 bg-beige-50 rounded-xl">
+          <Plus className="w-12 h-12 text-beige-300 mx-auto mb-3" />
           <p className="text-warm-gray mb-4">No hay adicionales disponibles</p>
           <button
             onClick={nextStep}
@@ -113,107 +237,17 @@ export function AddonsStep() {
         </div>
       )}
       
-      {/* Addon Cards */}
+      {/* Addon Tiles Grid */}
       {!isLoading && localAddons.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {localAddons.map((addon, index) => {
-            const selected = isAddonSelected(addon.Id)
-            
-            return (
-              <motion.button
-                key={addon.Id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => handleToggleAddon(addon)}
-                className={`
-                  p-5 border-2 rounded-xl text-left transition-all duration-200
-                  ${selected 
-                    ? 'border-gold bg-gold/10 shadow-md' 
-                    : 'border-beige-200 bg-white hover:border-gold/50 hover:bg-beige-50'
-                  }
-                `}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-dark mb-1">
-                      {addon.Name}
-                    </h4>
-                    {addon.Description && (
-                      <p className="text-sm text-warm-gray line-clamp-2 mb-3">
-                        {addon.Description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-4">
-                      {addon.Duration > 0 && (
-                        <span className="text-xs text-warm-gray flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          +{addon.Duration} min
-                        </span>
-                      )}
-                      {addon.Price > 0 ? (
-                        <span className="text-lg font-bold text-gold-600">
-                          +${addon.Price.toFixed(0)}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-warm-gray">
-                          Consultar
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Selection Icon */}
-                  <div className={`
-                    w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                    transition-all
-                    ${selected 
-                      ? 'bg-gold text-dark' 
-                      : 'border-2 border-beige-300'
-                    }
-                  `}>
-                    {selected ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      <Plus className="w-5 h-5 text-beige-400" />
-                    )}
-                  </div>
-                </div>
-              </motion.button>
-            )
-          })}
-        </div>
-      )}
-      
-      {/* Selected Addons Summary */}
-      {selectedAddons.length > 0 && (
-        <div className="mt-6 p-4 bg-gold/10 border border-gold/30 rounded-xl">
-          <div className="flex items-center justify-between mb-3">
-            <span className="font-medium text-dark">Adicionales seleccionados:</span>
-            <span className="text-gold-600 font-bold">
-              +${selectedAddons.reduce((sum, a) => sum + a.Price, 0).toFixed(2)}
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {selectedAddons.map((addon) => (
-              <span 
-                key={addon.Id}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-white 
-                         rounded-full text-sm text-dark border border-gold/30"
-              >
-                {addon.Name}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    removeAddon(addon.Id)
-                  }}
-                  className="text-warm-gray hover:text-red-500 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </span>
-            ))}
-          </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {localAddons.map((addon) => (
+            <AddonTile
+              key={addon.Id}
+              addon={addon}
+              isSelected={isAddonSelected(addon.Id)}
+              onToggle={() => handleToggleAddon(addon)}
+            />
+          ))}
         </div>
       )}
       
