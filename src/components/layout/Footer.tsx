@@ -31,7 +31,17 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-1">
-            <Logo theme="dark" size="md" />
+            <div className="flex items-center gap-3">
+              <Logo variant="icon" size="lg" />
+              <div className="flex flex-col">
+                <span className="font-display text-2xl font-semibold text-cream">
+                  Mimosa
+                </span>
+                <span className="text-xs tracking-[0.2em] uppercase text-cream/70">
+                  Spa Retreat
+                </span>
+              </div>
+            </div>
             <p className="text-cream/70 text-sm mt-4">{t('tagline')}</p>
             
             {/* Social Links */}

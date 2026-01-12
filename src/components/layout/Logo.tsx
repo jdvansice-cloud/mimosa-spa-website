@@ -40,14 +40,14 @@ export function Logo({ className, variant = 'full', theme = 'light', size = 'md'
   if (variant === 'icon') {
     return (
       <div 
-        className={cn('relative', className)} 
+        className={cn('relative rounded-full overflow-hidden bg-cream', className)} 
         style={{ width: iconSizes[size], height: iconSizes[size] }}
       >
         <Image
           src="/logo-icon.png"
           alt="Mimosa Spa"
           fill
-          className="object-contain"
+          className="object-contain p-1"
           priority
         />
       </div>
