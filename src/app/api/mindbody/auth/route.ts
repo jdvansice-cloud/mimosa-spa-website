@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     // Return more specific error message
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to search clients', details: errorMessage },
+      { error: 'Failed to search clients', details: errorMessage, stack: error instanceof Error ? error.stack : undefined },
       { status: 500 }
     )
   }
