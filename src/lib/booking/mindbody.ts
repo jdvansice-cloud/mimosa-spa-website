@@ -6,9 +6,21 @@
 import type { MindbodyTokenResponse } from '@/types/booking'
 
 // Environment variables (server-side only)
-const MINDBODY_API_KEY = process.env.MINDBODY_API_KEY!
-const MINDBODY_SITE_ID = process.env.MINDBODY_SITE_ID!
+const MINDBODY_API_KEY = process.env.MINDBODY_API_KEY
+const MINDBODY_SITE_ID = process.env.MINDBODY_SITE_ID
 const MINDBODY_API_URL = process.env.MINDBODY_API_URL || 'https://api.mindbodyonline.com/public/v6'
+const MINDBODY_USERNAME = process.env.MINDBODY_USERNAME || '_mindbody_api'
+const MINDBODY_PASSWORD = process.env.MINDBODY_PASSWORD || '_mindbody_api'
+
+// Validate environment variables
+function validateConfig() {
+  if (!MINDBODY_API_KEY) {
+    throw new Error('MINDBODY_API_KEY is not configured. Please add it to Vercel Environment Variables.')
+  }
+  if (!MINDBODY_SITE_ID) {
+    throw new Error('MINDBODY_SITE_ID is not configured. Please add it to Vercel Environment Variables.')
+  }
+}
 
 // Token cache
 let cachedToken: string | null = null
@@ -19,6 +31,9 @@ let tokenExpiry: number | null = null
 // ===========================================
 
 async function getAccessToken(): Promise<string> {
+  // Validate config first
+  validateConfig()
+  
   // Check if we have a valid cached token
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken
@@ -29,17 +44,25 @@ async function getAccessToken(): Promise<string> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Api-Key': MINDBODY_API_KEY,
-      'SiteId': MINDBODY_SITE_ID,
+      'Api-Key': MINDBODY_API_KEY!,
+      'SiteId': MINDBODY_SITE_ID!,
     },
     body: JSON.stringify({
-      Username: '_mindbody_api',
-      Password: '_mindbody_api',
+      Username: MINDBODY_USERNAME,
+      Password: MINDBODY_PASSWORD,
     }),
   })
   
   if (!response.ok) {
-    throw new Error(`Failed to get Mindbody token: ${response.status}`)
+    const errorText = await response.text()
+    console.error('Mindbody token error:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText,
+      apiKeyPrefix: MINDBODY_API_KEY?.substring(0, 8),
+      siteId: MINDBODY_SITE_ID,
+    })
+    throw new Error(`Failed to get Mindbody token: ${response.status} - ${errorText}`)
   }
   
   const data: MindbodyTokenResponse = await response.json()
@@ -90,8 +113,8 @@ export async function mindbodyRequest<T>(
     method,
     headers: {
       'Content-Type': 'application/json',
-      'Api-Key': MINDBODY_API_KEY,
-      'SiteId': MINDBODY_SITE_ID,
+      'Api-Key': MINDBODY_API_KEY!,
+      'SiteId': MINDBODY_SITE_ID!,
       'Authorization': `Bearer ${token}`,
     },
     body: body ? JSON.stringify(body) : undefined,
@@ -319,6 +342,12 @@ export async function addAppointment(appointmentData: {
       StartDateTime: string
       EndDateTime: string
       Status: string
+      Staff?: {
+        Id: number
+        FirstName: string
+        LastName: string
+        DisplayName?: string
+      }
     }
   }
   
