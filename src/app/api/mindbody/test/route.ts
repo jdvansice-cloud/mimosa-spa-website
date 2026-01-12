@@ -99,6 +99,30 @@ export async function GET() {
           sampleWithAllFields: sessionTypes.slice(0, 3),
         }
       }
+      
+      // Test 4: Get services (different endpoint - may have more data)
+      const siteServicesResponse = await fetch(`${MINDBODY_API_URL}/site/services?limit=200`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': MINDBODY_API_KEY!,
+          'SiteId': MINDBODY_SITE_ID!,
+          'Authorization': `Bearer ${tokenData.AccessToken}`,
+        },
+      })
+      
+      const siteServicesData = await siteServicesResponse.json()
+      const siteServices = siteServicesData.Services || []
+      
+      results.tests = {
+        ...results.tests as object,
+        services: {
+          status: siteServicesResponse.status,
+          ok: siteServicesResponse.ok,
+          totalCount: siteServices.length,
+          // Show complete first 3 services with ALL fields (may have OnlineBooking, Price)
+          sampleWithAllFields: siteServices.slice(0, 3),
+        }
+      }
     }
     
   } catch (error) {
