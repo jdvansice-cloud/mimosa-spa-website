@@ -100,27 +100,40 @@ export async function GET() {
         }
       }
       
-      // Test 4: Get services (different endpoint - may have more data)
-      const siteServicesResponse = await fetch(`${MINDBODY_API_URL}/site/services?limit=200`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Api-Key': MINDBODY_API_KEY!,
-          'SiteId': MINDBODY_SITE_ID!,
-          'Authorization': `Bearer ${tokenData.AccessToken}`,
-        },
-      })
+      // Test 4: Try bookableitems endpoint (has online booking services with prices)
+      const today = new Date()
+      const nextWeek = new Date(today)
+      nextWeek.setDate(today.getDate() + 7)
+      const startDate = today.toISOString().split('T')[0]
+      const endDate = nextWeek.toISOString().split('T')[0]
       
-      const siteServicesData = await siteServicesResponse.json()
-      const siteServices = siteServicesData.Services || []
+      const bookableResponse = await fetch(
+        `${MINDBODY_API_URL}/appointment/bookableitems?locationIds=1&startDate=${startDate}&endDate=${endDate}`, 
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Api-Key': MINDBODY_API_KEY!,
+            'SiteId': MINDBODY_SITE_ID!,
+            'Authorization': `Bearer ${tokenData.AccessToken}`,
+          },
+        }
+      )
+      
+      const bookableData = await bookableResponse.json()
+      
+      // Get unique session types from bookable items
+      const bookableSessionTypes = bookableData.SessionTypes || []
       
       results.tests = {
         ...results.tests as object,
-        services: {
-          status: siteServicesResponse.status,
-          ok: siteServicesResponse.ok,
-          totalCount: siteServices.length,
-          // Show complete first 3 services with ALL fields (may have OnlineBooking, Price)
-          sampleWithAllFields: siteServices.slice(0, 3),
+        bookableItems: {
+          status: bookableResponse.status,
+          ok: bookableResponse.ok,
+          sessionTypesCount: bookableSessionTypes.length,
+          // Show sample session types with ALL fields
+          sampleSessionTypes: bookableSessionTypes.slice(0, 3),
+          // Show what categories are available
+          categories: [...new Set(bookableSessionTypes.map((s: { Category?: string }) => s.Category))],
         }
       }
     }
