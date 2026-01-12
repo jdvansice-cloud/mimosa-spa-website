@@ -87,21 +87,16 @@ export async function GET() {
       const servicesData = await servicesResponse.json()
       const sessionTypes = servicesData.SessionTypes || []
       
+      // Show ALL fields of first 3 services to identify correct field names
       results.tests = {
         ...results.tests as object,
         sessionTypes: {
           status: servicesResponse.status,
           ok: servicesResponse.ok,
           totalCount: sessionTypes.length,
-          bookableCount: sessionTypes.filter((s: { Bookable: boolean; Active: boolean }) => s.Bookable && s.Active).length,
           categories: [...new Set(sessionTypes.map((s: { Category: string }) => s.Category))],
-          sample: sessionTypes.slice(0, 3).map((s: { Id: number; Name: string; Category: string; Bookable: boolean; Active: boolean }) => ({
-            Id: s.Id,
-            Name: s.Name,
-            Category: s.Category,
-            Bookable: s.Bookable,
-            Active: s.Active
-          }))
+          // Show complete first 3 services with ALL fields
+          sampleWithAllFields: sessionTypes.slice(0, 3),
         }
       }
     }
