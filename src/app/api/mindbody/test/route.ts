@@ -100,40 +100,82 @@ export async function GET() {
         }
       }
       
-      // Test 4: Try bookableitems endpoint (has online booking services with prices)
-      const today = new Date()
-      const nextWeek = new Date(today)
-      nextWeek.setDate(today.getDate() + 7)
-      const startDate = today.toISOString().split('T')[0]
-      const endDate = nextWeek.toISOString().split('T')[0]
+      // Test 4: Get session types with onlineOnly=true parameter (lowercase!)
+      const onlineServicesResponse = await fetch(`${MINDBODY_API_URL}/site/sessiontypes?limit=200&onlineOnly=true`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': MINDBODY_API_KEY!,
+          'SiteId': MINDBODY_SITE_ID!,
+          'Authorization': `Bearer ${tokenData.AccessToken}`,
+        },
+      })
       
-      const bookableResponse = await fetch(
-        `${MINDBODY_API_URL}/appointment/bookableitems?locationIds=1&startDate=${startDate}&endDate=${endDate}`, 
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Api-Key': MINDBODY_API_KEY!,
-            'SiteId': MINDBODY_SITE_ID!,
-            'Authorization': `Bearer ${tokenData.AccessToken}`,
-          },
-        }
-      )
-      
-      const bookableData = await bookableResponse.json()
-      
-      // Get unique session types from bookable items
-      const bookableSessionTypes = bookableData.SessionTypes || []
+      const onlineServicesData = await onlineServicesResponse.json()
+      const onlineSessionTypes = onlineServicesData.SessionTypes || []
       
       results.tests = {
         ...results.tests as object,
-        bookableItems: {
-          status: bookableResponse.status,
-          ok: bookableResponse.ok,
-          sessionTypesCount: bookableSessionTypes.length,
-          // Show sample session types with ALL fields
-          sampleSessionTypes: bookableSessionTypes.slice(0, 3),
-          // Show what categories are available
-          categories: [...new Set(bookableSessionTypes.map((s: { Category?: string }) => s.Category))],
+        onlineSessionTypes: {
+          status: onlineServicesResponse.status,
+          ok: onlineServicesResponse.ok,
+          totalCount: onlineSessionTypes.length,
+          categories: [...new Set(onlineSessionTypes.map((s: { Category: string }) => s.Category))],
+          // Show sample online services
+          sampleWithAllFields: onlineSessionTypes.slice(0, 5),
+        }
+      }
+      
+      // Test 5: Get PRICING from /sale/services endpoint
+      const pricingResponse = await fetch(`${MINDBODY_API_URL}/sale/services?limit=200&sellOnline=true`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': MINDBODY_API_KEY!,
+          'SiteId': MINDBODY_SITE_ID!,
+          'Authorization': `Bearer ${tokenData.AccessToken}`,
+        },
+      })
+      
+      const pricingText = await pricingResponse.text()
+      let pricingData
+      try {
+        pricingData = JSON.parse(pricingText)
+      } catch {
+        pricingData = { rawText: pricingText.substring(0, 1000) }
+      }
+      
+      const pricingServices = pricingData.Services || []
+      
+      results.tests = {
+        ...results.tests as object,
+        saleServices: {
+          status: pricingResponse.status,
+          ok: pricingResponse.ok,
+          totalCount: pricingServices.length,
+          // Show sample pricing services with ALL fields
+          sampleWithAllFields: pricingServices.slice(0, 5),
+        }
+      }
+      
+      // Test 6: Get programs
+      const programsResponse = await fetch(`${MINDBODY_API_URL}/site/programs`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': MINDBODY_API_KEY!,
+          'SiteId': MINDBODY_SITE_ID!,
+          'Authorization': `Bearer ${tokenData.AccessToken}`,
+        },
+      })
+      
+      const programsData = await programsResponse.json()
+      const programs = programsData.Programs || []
+      
+      results.tests = {
+        ...results.tests as object,
+        programs: {
+          status: programsResponse.status,
+          ok: programsResponse.ok,
+          count: programs.length,
+          allPrograms: programs,
         }
       }
     }
