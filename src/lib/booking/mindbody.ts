@@ -74,6 +74,30 @@ async function getAccessToken(): Promise<string> {
   return cachedToken
 }
 
+// Export token getter for test/debug endpoints
+export async function getMindbodyToken(): Promise<MindbodyTokenResponse | null> {
+  validateConfig()
+  
+  const response = await fetch(`${MINDBODY_API_URL}/usertoken/issue`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Api-Key': MINDBODY_API_KEY!,
+      'SiteId': MINDBODY_SITE_ID!,
+    },
+    body: JSON.stringify({
+      Username: MINDBODY_USERNAME,
+      Password: MINDBODY_PASSWORD,
+    }),
+  })
+  
+  if (!response.ok) {
+    return null
+  }
+  
+  return response.json()
+}
+
 // ===========================================
 // API REQUEST HELPER
 // ===========================================
@@ -201,64 +225,124 @@ export async function getLocations() {
   return response.Locations || []
 }
 
-// Get services (session types)
-export async function getServices(locationId?: number) {
-  interface ServicesResponse {
-    SessionTypes: Array<{
-      Id: number
-      Name: string
-      Description: string | null
-      DefaultTimeLength: number
-      NumDeducted: number
-      ProgramId: number
-      Category: string
-      CategoryId?: number
-      Price?: {
-        Amount: number
-        CurrencyCode: string
-      }
-      OnlinePrice?: {
-        Amount: number
-        CurrencyCode: string
-      }
-      // These fields might not exist or have different names
-      Bookable?: boolean
-      Active?: boolean
-      AllowOnlineBooking?: boolean
-      OnlineBooking?: boolean
-    }>
+// ===========================================
+// SERVICE HELPERS
+// ===========================================
+
+// Spanish program names from Mindbody
+const PROGRAM_NAMES: Record<number, string> = {
+  4: 'Tratamientos Corporales',
+  5: 'Paquetes Deluxe',
+  6: 'Tratamientos Faciales',
+  8: 'Adicionales',
+  11: 'Tratamientos Parejas',
+  12: 'Adicionales en Cabina',
+  13: 'Eventos',
+  19: 'Paquetes de Masajes',
+  20: 'TAI',
+  21: 'Parejas',
+}
+
+// Get Spanish category name from ProgramId
+function getSpanishCategory(programId: number | undefined): string {
+  if (programId && PROGRAM_NAMES[programId]) {
+    return PROGRAM_NAMES[programId]
   }
-  
-  // Note: Mindbody's sessiontypes endpoint may not filter by locationId
-  // Fetch all and let the app handle filtering if needed
-  const response = await mindbodyRequest<ServicesResponse>('/site/sessiontypes', {
+  return 'General'
+}
+
+// Sale/services response type
+interface SaleServicesResponse {
+  Services: Array<{
+    Id: string
+    Name: string
+    Price: number
+    OnlinePrice: number
+    TaxIncluded: number
+    TaxRate: number
+    ProductId: number
+    ProgramId: number
+    Program: string
+    RevenueCategory: string
+    SellOnline: boolean
+    Count: number // Number of visits - 1 = single session
+    ExpirationLength: number
+    ExpirationUnit: string
+  }>
+}
+
+// Get services from sale/services - SINGLE SESSION ONLY (Count = 1)
+export async function getServices(locationId?: number) {
+  const response = await mindbodyRequest<SaleServicesResponse>('/sale/services', {
     params: {
-      limit: 200, // Get more results
-      ...(locationId ? { locationIds: locationId } : {})
+      limit: 200,
+      sellOnline: true,
+      ...(locationId ? { locationId: locationId } : {})
     }
   })
   
-  console.log('Raw SessionTypes from Mindbody:', response.SessionTypes?.length || 0)
+  const allServices = response.Services || []
+  console.log('Total sale/services from Mindbody:', allServices.length)
   
-  // Transform services - don't filter by Bookable since the field may not exist
-  // All session types returned by Mindbody are generally available for booking
-  const services = (response.SessionTypes || [])
-    .map(s => ({
-      Id: s.Id,
-      Name: s.Name,
-      Description: s.Description,
-      Duration: s.DefaultTimeLength || 60,
-      Price: s.Price?.Amount || 0,
-      OnlinePrice: s.OnlinePrice?.Amount,
-      OnlineBooking: true, // Assume all returned services are bookable
-      Category: s.Category || 'General',
-      CategoryId: s.CategoryId,
-      ProgramId: s.ProgramId,
-    }))
+  // Filter for SINGLE SESSION ONLY (Count = 1) and exclude Adicionales (ProgramId 8)
+  const singleSessionServices = allServices.filter(s => s.Count === 1 && s.ProgramId !== 8)
+  console.log('Single session services (excluding add-ons):', singleSessionServices.length)
   
-  console.log('Total services:', services.length)
+  // Transform to service format
+  const services = singleSessionServices.map(s => ({
+    Id: parseInt(s.Id) || s.ProductId,
+    ProductId: s.ProductId,
+    Name: s.Name,
+    Description: '',
+    Duration: 0, // Duration not available in sale/services
+    Price: s.Price || s.OnlinePrice || 0,
+    OnlinePrice: s.OnlinePrice,
+    TaxIncluded: s.TaxIncluded,
+    OnlineBooking: s.SellOnline,
+    Category: getSpanishCategory(s.ProgramId),
+    ProgramId: s.ProgramId,
+    IsAddOn: false,
+  }))
+  
+  console.log('Services with prices:', services.filter(s => s.Price > 0).length)
   
   return services
+}
+
+// Get add-ons from sale/services - SINGLE SESSION ONLY (Count = 1), Adicionales only
+export async function getAddons(locationId?: number) {
+  const response = await mindbodyRequest<SaleServicesResponse>('/sale/services', {
+    params: {
+      limit: 200,
+      sellOnline: true,
+      ...(locationId ? { locationId: locationId } : {})
+    }
+  })
+  
+  const allServices = response.Services || []
+  console.log('Total sale/services for add-ons:', allServices.length)
+  
+  // Filter for Adicionales (ProgramId 8) AND single session (Count = 1)
+  const addons = allServices
+    .filter(s => s.ProgramId === 8 && s.Count === 1)
+    .map(s => ({
+      Id: parseInt(s.Id) || s.ProductId,
+      ProductId: s.ProductId,
+      Name: s.Name,
+      Description: '',
+      Duration: 0,
+      Price: s.Price || s.OnlinePrice || 0,
+      OnlinePrice: s.OnlinePrice,
+      TaxIncluded: s.TaxIncluded,
+      OnlineBooking: s.SellOnline,
+      Category: 'Adicionales',
+      ProgramId: s.ProgramId,
+      IsAddOn: true,
+    }))
+  
+  console.log('Single session add-ons:', addons.length)
+  
+  return addons
 }
 
 // Get staff

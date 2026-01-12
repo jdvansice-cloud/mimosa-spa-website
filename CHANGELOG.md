@@ -1,0 +1,86 @@
+# Changelog - Mimosa Spa Website
+
+All notable changes to this project will be documented in this file.
+
+## [1.0.18] - 2026-01-12
+
+### Changed
+- **Services data source**: Now uses ONLY `/sale/services` endpoint for service pricing
+- Services are filtered for single session pricing only (`Count === 1`)
+- Removed session types combination - all data from sale/services
+- Add-ons also use single session filtering
+
+### Removed
+- `extractPriceFromHtml()` function (no longer needed)
+- `cleanHtmlToText()` function (no longer needed)
+- Session types API call for services
+
+### UI
+- Duration display hidden when Duration is 0 (sale/services doesn't provide duration)
+
+
+## [1.0.17] - 2026-01-12
+
+### Fixed
+- **Services API**: Now correctly uses `onlineOnly=true` parameter to fetch only online-bookable services
+- **Price extraction**: Prices are now extracted from HTML OnlineDescription field (e.g., `<em>30 minutos $59</em>`)
+- **Spanish categories**: Services now display Spanish category names based on ProgramId mapping
+- **Add-ons endpoint**: Separate `/sale/services` API for add-ons with actual prices (ProgramId 8)
+
+### Changed
+- Updated `getServices()` in mindbody.ts to:
+  - Use `onlineOnly=true` parameter
+  - Extract prices from HTML descriptions
+  - Map English categories to Spanish
+  - Clean HTML entities from descriptions
+- Added `getAddons()` function using `/sale/services` endpoint for proper add-on pricing
+- Services route now filters by ProgramId (8 = Adicionales) instead of category string
+
+### Technical
+- Added PROGRAM_NAMES mapping for Spanish program names
+- Added CATEGORY_TRANSLATIONS for English to Spanish fallback
+- Added `extractPriceFromHtml()` and `cleanHtmlToText()` helper functions
+
+
+## [1.0.16] - 2026-01-12
+
+### Added
+- WATI WhatsApp integration for booking confirmations
+- Spanish templates: `confirmacion_reserva` and `recordatorio_cita`
+- Appointment confirmation/cancellation endpoints (`/api/cita/confirmar`, `/api/cita/cancelar`)
+- Health check endpoint (`/api/health`)
+
+### Fixed
+- TypeScript error in AppointmentResponse interface
+- PWA manifest warnings (apple-mobile-web-app-capable, icon sizes)
+- Mindbody API configuration validation
+- Locale detection forcing Spanish as default
+- Logo placement in header and footer
+- Location name overrides (Costa del Este, San Francisco)
+
+### Changed
+- Updated all icons to use Mimosa flower logo
+- Footer logo now shows icon with cream background
+
+
+## [1.0.15] - 2026-01-12
+
+### Added
+- Client authentication with multiple clients popup
+- CartSummary component with ITBM tax display
+- 8-step booking flow implementation
+- Zustand store for booking state management
+
+
+## [1.0.0 - 1.0.14] - Previous versions
+
+Initial development including:
+- Next.js 15 with App Router
+- React 19 with TypeScript
+- Supabase authentication for admin
+- Tailwind CSS styling
+- PWA configuration
+- Mindbody API integration foundation
+- Multilingual support (ES/EN)
+- Dark header with prominent logo
+- Responsive design

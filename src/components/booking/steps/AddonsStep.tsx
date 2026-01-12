@@ -145,13 +145,21 @@ export function AddonsStep() {
                       </p>
                     )}
                     <div className="flex items-center gap-4">
-                      <span className="text-xs text-warm-gray flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        +{addon.Duration} min
-                      </span>
-                      <span className="text-lg font-bold text-gold-600">
-                        +${addon.Price.toFixed(2)}
-                      </span>
+                      {addon.Duration > 0 && (
+                        <span className="text-xs text-warm-gray flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          +{addon.Duration} min
+                        </span>
+                      )}
+                      {addon.Price > 0 ? (
+                        <span className="text-lg font-bold text-gold-600">
+                          +${addon.Price.toFixed(0)}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-warm-gray">
+                          Consultar
+                        </span>
+                      )}
                     </div>
                   </div>
                   

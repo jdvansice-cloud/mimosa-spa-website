@@ -194,22 +194,30 @@ export function ServiceStep() {
                                   {service.Description}
                                 </p>
                               )}
-                              <div className="flex items-center gap-3 mt-2">
-                                <span className="text-xs text-warm-gray flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {service.Duration} min
-                                </span>
-                              </div>
+                              {service.Duration > 0 && (
+                                <div className="flex items-center gap-3 mt-2">
+                                  <span className="text-xs text-warm-gray flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {service.Duration} min
+                                  </span>
+                                </div>
+                              )}
                             </div>
                             
                             {/* Price */}
                             <div className="text-right flex-shrink-0">
-                              <span className={`
-                                text-lg font-bold
-                                ${selected ? 'text-gold-600' : 'text-dark'}
-                              `}>
-                                ${service.Price.toFixed(2)}
-                              </span>
+                              {service.Price > 0 ? (
+                                <span className={`
+                                  text-lg font-bold
+                                  ${selected ? 'text-gold-600' : 'text-dark'}
+                                `}>
+                                  ${service.Price.toFixed(0)}
+                                </span>
+                              ) : (
+                                <span className="text-sm text-warm-gray">
+                                  Consultar
+                                </span>
+                              )}
                             </div>
                           </button>
                         )

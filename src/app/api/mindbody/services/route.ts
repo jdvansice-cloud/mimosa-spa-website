@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServices } from '@/lib/booking/mindbody'
+import { getServices, getAddons } from '@/lib/booking/mindbody'
 
-// Category to exclude from main services (shown in addons step)
-const ADICIONALES_CATEGORY = 'ADICIONALES'
+// Program ID for Adicionales (add-ons)
+const ADICIONALES_PROGRAM_ID = 8
 
 // GET /api/mindbody/services?locationId=1&type=main|addons|all
 export async function GET(request: NextRequest) {
@@ -13,30 +13,49 @@ export async function GET(request: NextRequest) {
     
     console.log('Fetching services for locationId:', locationId, 'type:', type)
     
-    // Get services from Mindbody
-    const allServices = await getServices(
-      locationId ? parseInt(locationId) : undefined
-    )
+    let filteredServices: Array<{
+      Id: number
+      Name: string
+      Description: string
+      Duration: number
+      Price: number
+      OnlineBooking: boolean
+      Category: string
+      CategoryId?: number
+      ProgramId: number
+      IsAddOn: boolean
+      ProductId?: number
+      OnlinePrice?: number
+      TaxIncluded?: number
+    }> = []
     
-    console.log('Total services from Mindbody:', allServices.length)
-    if (allServices.length > 0) {
-      console.log('Sample service:', JSON.stringify(allServices[0]))
-      console.log('Categories found:', [...new Set(allServices.map(s => s.Category))])
-    }
-    
-    // Filter based on type
-    let filteredServices = allServices
-    
-    if (type === 'main') {
-      // Exclude ADICIONALES category
-      filteredServices = allServices.filter(
-        s => s.Category?.toUpperCase() !== ADICIONALES_CATEGORY
+    if (type === 'addons') {
+      // For add-ons, use the sale/services endpoint which has actual prices
+      filteredServices = await getAddons(
+        locationId ? parseInt(locationId) : undefined
       )
-    } else if (type === 'addons') {
-      // Only ADICIONALES category
-      filteredServices = allServices.filter(
-        s => s.Category?.toUpperCase() === ADICIONALES_CATEGORY
+    } else {
+      // For main services, use sessiontypes with onlineOnly=true
+      const allServices = await getServices(
+        locationId ? parseInt(locationId) : undefined
       )
+      
+      console.log('Total services from Mindbody:', allServices.length)
+      if (allServices.length > 0) {
+        console.log('Sample service:', JSON.stringify(allServices[0]))
+        console.log('Categories found:', [...new Set(allServices.map(s => s.Category))])
+        console.log('ProgramIds found:', [...new Set(allServices.map(s => s.ProgramId))])
+      }
+      
+      if (type === 'main') {
+        // Exclude Adicionales category (ProgramId 8)
+        filteredServices = allServices.filter(
+          s => s.ProgramId !== ADICIONALES_PROGRAM_ID
+        )
+      } else {
+        // type === 'all'
+        filteredServices = allServices
+      }
     }
     
     console.log('Filtered services count:', filteredServices.length)
@@ -59,8 +78,8 @@ export async function GET(request: NextRequest) {
       debug: {
         locationId,
         type,
-        totalFromMindbody: allServices.length,
-        filteredCount: filteredServices.length
+        filteredCount: filteredServices.length,
+        categoriesCount: Object.keys(grouped).length
       }
     })
     
