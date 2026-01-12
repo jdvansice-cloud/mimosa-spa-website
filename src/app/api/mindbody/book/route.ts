@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { addMultipleAppointments } from '@/lib/booking/mindbody'
+import { sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
 
 // POST /api/mindbody/book
 export async function POST(request: NextRequest) {
@@ -8,11 +9,17 @@ export async function POST(request: NextRequest) {
     const { 
       clientId, 
       locationId, 
-      services, // Array of { sessionTypeId, duration }
+      services, // Array of { sessionTypeId, duration, name }
       staffId,
       startDateTime, // ISO string
       notes,
-      promotionName
+      promotionName,
+      // Client info for WhatsApp notification
+      clientName,
+      clientPhone,
+      locationName,
+      therapistName,
+      totalDuration,
     } = body
     
     if (!clientId || !locationId || !services || !startDateTime) {
@@ -69,11 +76,64 @@ export async function POST(request: NextRequest) {
       .filter(r => r.success)
       .map(r => r.appointment)
     
+    // Get therapist name - either from request or from Mindbody response
+    let finalTherapistName = therapistName
+    if (!finalTherapistName && successfulAppointments.length > 0) {
+      const firstAppointment = successfulAppointments[0]
+      if (firstAppointment?.Staff) {
+        finalTherapistName = firstAppointment.Staff.DisplayName || 
+          `${firstAppointment.Staff.FirstName} ${firstAppointment.Staff.LastName}`
+      }
+    }
+    
+    // Send WhatsApp confirmation if WATI is configured and client phone is provided
+    let whatsappSent = false
+    if (isWatiConfigured() && clientPhone && clientName && finalTherapistName) {
+      try {
+        // Format date for display
+        const bookingDate = new Date(startDateTime)
+        const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+        const dateStr = `${days[bookingDate.getDay()]}, ${bookingDate.getDate()} de ${months[bookingDate.getMonth()]} ${bookingDate.getFullYear()}`
+        
+        // Format time
+        const hours = bookingDate.getHours()
+        const minutes = bookingDate.getMinutes()
+        const period = hours >= 12 ? 'PM' : 'AM'
+        const displayHours = hours % 12 || 12
+        const timeStr = `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
+        
+        // Get service names
+        const serviceNames = services.map((s: { name?: string }) => s.name || 'Servicio').filter(Boolean)
+        
+        const watiResult = await sendBookingConfirmation({
+          clientName,
+          clientPhone,
+          locationName: locationName || 'Mimosa Spa Retreat',
+          date: dateStr,
+          time: timeStr,
+          services: serviceNames,
+          totalDuration: totalDuration || 60,
+          therapistName: finalTherapistName,
+        })
+        
+        whatsappSent = watiResult.result
+        if (!watiResult.result) {
+          console.warn('WhatsApp notification failed:', watiResult.error)
+        }
+      } catch (watiError) {
+        console.error('Error sending WhatsApp notification:', watiError)
+        // Don't fail the booking if WhatsApp fails
+      }
+    }
+    
     return NextResponse.json({
       success: true,
       confirmationNumber,
       appointments: successfulAppointments,
       totalBooked: successfulAppointments.length,
+      whatsappSent,
       message: failures.length > 0 
         ? `${successfulAppointments.length} of ${services.length} services booked`
         : 'All services booked successfully'

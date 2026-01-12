@@ -15,10 +15,16 @@
 - `/api/mindbody/staff/route.ts` - Get therapists
 - `/api/mindbody/availability/route.ts` - Check availability
 - `/api/mindbody/book/route.ts` - Create appointments
+- `/api/cita/confirmar/route.ts` - Confirm appointment via WhatsApp button
+- `/api/cita/cancelar/route.ts` - Cancel appointment via WhatsApp button
+
+**Result Page:**
+- `/app/cita/resultado/page.tsx` - Appointment confirmation/cancellation result page
 
 **Booking Store:**
 - `/lib/booking/store.ts` - Zustand state management
 - `/lib/booking/mindbody.ts` - Mindbody API utility with token management
+- `/lib/booking/wati.ts` - WATI WhatsApp API for notifications
 
 **Types:**
 - `/types/booking.ts` - Comprehensive booking system types
@@ -67,6 +73,18 @@
    - Full booking summary
    - Submit to Mindbody
    - Success screen with confirmation number
+
+7. **WATI WhatsApp Integration**
+   - Automatic booking confirmation via WhatsApp
+   - Template message support
+   - `/lib/booking/wati.ts` - WATI API utility
+
+#### Environment Variables Added
+
+```
+WATI_API_URL=https://live-mt-server.wati.io
+WATI_ACCESS_TOKEN=eyJhbGciOiJIUzI1NiIs... (JWT token)
+```
 
 ---
 

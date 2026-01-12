@@ -32,6 +32,15 @@ Go to **Vercel Dashboard → Your Project → Settings → Environment Variables
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | `50760001234` | ❌ No |
 | `NEXT_PUBLIC_ITBM_RATE` | `0.07` | ❌ No |
 
+### 4. WATI WhatsApp API (🔒 Server-side only)
+
+| Name | Value | Sensitive |
+|------|-------|-----------|
+| `WATI_API_URL` | `https://live-mt-server.wati.io` | ❌ No |
+| `WATI_ACCESS_TOKEN` | `eyJhbGciOiJIUzI1NiIs...` (full JWT token) | ✅ Yes |
+
+> **Note:** Copy the full WATI access token - it's a long JWT string starting with `eyJhbGci...`
+
 ---
 
 ## Step-by-Step Instructions
@@ -71,6 +80,8 @@ After adding all variables, your list should look like:
 │ NEXT_PUBLIC_SITE_URL               │ https://mimosa...  │ All         │
 │ NEXT_PUBLIC_WHATSAPP_NUMBER        │ 50760001234        │ All         │
 │ NEXT_PUBLIC_ITBM_RATE              │ 0.07               │ All         │
+│ WATI_API_URL                       │ https://live-mt... │ All         │
+│ WATI_ACCESS_TOKEN                  │ ●●●●●●●●           │ All         │
 └────────────────────────────────────┴─────────────────────┴─────────────┘
 ```
 
@@ -95,6 +106,7 @@ After adding environment variables:
 **These are server-only:**
 - `MINDBODY_API_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `WATI_ACCESS_TOKEN`
 
 ### Variables WITH `NEXT_PUBLIC_` prefix:
 - ⚠️ Exposed to browser
@@ -162,13 +174,20 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_xxxxx
 STRIPE_SECRET_KEY=sk_live_xxxxx
 ```
 
-### WhatsApp Notifications (WATI)
-```
-WATI_API_URL=https://live-server.wati.io
-WATI_API_KEY=your-wati-api-key
-```
-
 ### Analytics (Google)
 ```
 NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 ```
+
+---
+
+## Getting WATI Credentials
+
+1. Go to [app.wati.io](https://app.wati.io)
+2. Log in to your account
+3. Navigate to **Settings → API Settings** or **Developers**
+4. Copy:
+   - **API Endpoint** → `WATI_API_URL`
+   - **Access Token** → `WATI_ACCESS_TOKEN`
+
+> **Important:** The Access Token is a long JWT string. Copy the entire token including the `eyJhbGci...` prefix.

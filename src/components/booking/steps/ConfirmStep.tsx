@@ -63,15 +63,17 @@ export function ConfirmStep() {
     setError(null)
     
     try {
-      // Build services array with durations
+      // Build services array with durations and names
       const services = [
         ...selectedServices.map(s => ({
           sessionTypeId: s.Id,
-          duration: s.Duration
+          duration: s.Duration,
+          name: s.Name
         })),
         ...selectedAddons.map(a => ({
           sessionTypeId: a.Id,
-          duration: a.Duration
+          duration: a.Duration,
+          name: a.Name
         }))
       ]
       
@@ -88,6 +90,14 @@ export function ConfirmStep() {
           staffId: selectedStaff?.Id,
           startDateTime,
           promotionName: activePromotion?.title_es,
+          // Additional data for WhatsApp notification
+          clientName: `${clientInfo.FirstName} ${clientInfo.LastName}`,
+          clientPhone: clientInfo.MobilePhone,
+          locationName: selectedLocation.Name,
+          therapistName: selectedStaff 
+            ? selectedStaff.DisplayName || `${selectedStaff.FirstName} ${selectedStaff.LastName}`
+            : undefined,
+          totalDuration,
         })
       })
       
