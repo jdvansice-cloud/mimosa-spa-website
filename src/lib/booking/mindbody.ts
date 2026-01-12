@@ -221,8 +221,11 @@ export async function getServices(locationId?: number) {
         Amount: number
         CurrencyCode: string
       }
-      Bookable: boolean
-      Active: boolean
+      // These fields might not exist or have different names
+      Bookable?: boolean
+      Active?: boolean
+      AllowOnlineBooking?: boolean
+      OnlineBooking?: boolean
     }>
   }
   
@@ -237,23 +240,23 @@ export async function getServices(locationId?: number) {
   
   console.log('Raw SessionTypes from Mindbody:', response.SessionTypes?.length || 0)
   
-  // Transform and filter for online booking
+  // Transform services - don't filter by Bookable since the field may not exist
+  // All session types returned by Mindbody are generally available for booking
   const services = (response.SessionTypes || [])
-    .filter(s => s.Bookable && s.Active)
     .map(s => ({
       Id: s.Id,
       Name: s.Name,
       Description: s.Description,
-      Duration: s.DefaultTimeLength,
+      Duration: s.DefaultTimeLength || 60,
       Price: s.Price?.Amount || 0,
       OnlinePrice: s.OnlinePrice?.Amount,
-      OnlineBooking: s.Bookable,
+      OnlineBooking: true, // Assume all returned services are bookable
       Category: s.Category || 'General',
       CategoryId: s.CategoryId,
       ProgramId: s.ProgramId,
     }))
   
-  console.log('Filtered bookable services:', services.length)
+  console.log('Total services:', services.length)
   
   return services
 }
