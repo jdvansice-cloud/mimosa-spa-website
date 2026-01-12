@@ -4,18 +4,6 @@ import { searchClients, addClient } from '@/lib/booking/mindbody'
 // POST /api/mindbody/auth - Client lookup
 export async function POST(request: NextRequest) {
   try {
-    // Check if Mindbody is configured
-    if (!process.env.MINDBODY_API_KEY || !process.env.MINDBODY_SITE_ID) {
-      console.error('Mindbody configuration missing:', {
-        hasApiKey: !!process.env.MINDBODY_API_KEY,
-        hasSiteId: !!process.env.MINDBODY_SITE_ID,
-      })
-      return NextResponse.json(
-        { error: 'Mindbody API not configured. Please check environment variables.' },
-        { status: 503 }
-      )
-    }
-    
     const body = await request.json()
     const { searchText, searchType, action } = body
     
@@ -92,10 +80,8 @@ export async function POST(request: NextRequest) {
     
   } catch (error) {
     console.error('Client lookup error:', error)
-    // Return more specific error message
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to search clients', details: errorMessage },
+      { error: 'Failed to search clients' },
       { status: 500 }
     )
   }
