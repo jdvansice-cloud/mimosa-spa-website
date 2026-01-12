@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sparkles, ArrowLeft, ArrowRight, Loader2, ChevronDown, ChevronUp, Clock, Check, Plus, Info, X } from 'lucide-react'
+import { Sparkles, ArrowLeft, ArrowRight, Loader2, ChevronDown, ChevronUp, Clock, Check, Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
@@ -31,6 +31,18 @@ function ServiceTile({
 }) {
   const [showDetails, setShowDetails] = useState(false)
   
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onToggle()
+  }
+  
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowDetails(!showDetails)
+  }
+  
   return (
     <div className="relative">
       <div
@@ -53,32 +65,41 @@ function ServiceTile({
         
         {/* Tile Content */}
         <div className="p-4">
-          {/* Name & Price */}
-          <div className="flex items-start justify-between gap-2 mb-2 pr-8">
-            <h4 className="font-medium text-dark text-sm leading-tight">
+          {/* Service Name - LARGER FONT */}
+          <div className="pr-8 mb-3">
+            <h4 className="font-semibold text-dark text-base sm:text-lg leading-snug">
               {service.Name}
             </h4>
           </div>
           
-          {/* Price Badge */}
-          <div className="mb-3">
+          {/* Price & Duration Row */}
+          <div className="flex items-center gap-3 mb-4">
             <span className={`
-              inline-block text-lg font-bold
+              text-xl font-bold
               ${isSelected ? 'text-gold-600' : 'text-dark'}
             `}>
               {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
             </span>
             {service.Duration > 0 && (
-              <span className="ml-2 text-xs text-warm-gray">
-                • {service.Duration} min
+              <span className="flex items-center gap-1 text-sm text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full">
+                <Clock className="w-3.5 h-3.5" />
+                {service.Duration} min
               </span>
             )}
           </div>
           
+          {/* Brief Description Preview (if available) */}
+          {service.Description && !showDetails && (
+            <p className="text-sm text-warm-gray mb-3 line-clamp-2">
+              {service.Description}
+            </p>
+          )}
+          
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
-              onClick={onToggle}
+              type="button"
+              onClick={handleToggle}
               className={`
                 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg
                 font-medium text-sm transition-all duration-200
@@ -103,10 +124,8 @@ function ServiceTile({
             
             {service.Description && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowDetails(!showDetails)
-                }}
+                type="button"
+                onClick={handleInfoClick}
                 className={`
                   p-2.5 rounded-lg transition-all duration-200
                   ${showDetails 
@@ -116,13 +135,13 @@ function ServiceTile({
                 `}
                 aria-label="Ver detalles"
               >
-                {showDetails ? <X className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+                {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
             )}
           </div>
         </div>
         
-        {/* Expandable Description */}
+        {/* Expandable Full Description */}
         <AnimatePresence>
           {showDetails && service.Description && (
             <motion.div
@@ -184,8 +203,9 @@ export function ServiceStep() {
         setServices(data.services)
         setGroupedServices(data.grouped)
         
-        // Expand all categories by default
-        setExpandedCategories(new Set(Object.keys(data.grouped)))
+        // Start with all categories collapsed (empty set)
+        // User will expand what they're interested in
+        setExpandedCategories(new Set())
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error de conexión')
       } finally {
@@ -213,11 +233,14 @@ export function ServiceStep() {
   }
   
   const handleToggleService = (service: MindbodyService) => {
-    if (isServiceSelected(service.Id)) {
-      removeService(service.Id)
-    } else {
-      addService(service)
-    }
+    // Prevent any race conditions by using setTimeout
+    setTimeout(() => {
+      if (isServiceSelected(service.Id)) {
+        removeService(service.Id)
+      } else {
+        addService(service)
+      }
+    }, 0)
   }
   
   const getCategoryConfig = (category: string) => {

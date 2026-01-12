@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, ArrowLeft, ArrowRight, Loader2, Clock, Check, X, Info, Sparkles } from 'lucide-react'
+import { Plus, ArrowLeft, ArrowRight, Loader2, Clock, Check, ChevronDown, ChevronUp, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
@@ -17,6 +17,18 @@ function AddonTile({
   onToggle: () => void 
 }) {
   const [showDetails, setShowDetails] = useState(false)
+  
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onToggle()
+  }
+  
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowDetails(!showDetails)
+  }
   
   return (
     <motion.div
@@ -40,30 +52,39 @@ function AddonTile({
       )}
       
       <div className="p-4">
-        {/* Name */}
-        <h4 className="font-medium text-dark text-sm leading-tight mb-2 pr-8">
+        {/* Name - LARGER FONT */}
+        <h4 className="font-semibold text-dark text-base sm:text-lg leading-snug mb-3 pr-8">
           {addon.Name}
         </h4>
         
-        {/* Price Badge */}
-        <div className="mb-3">
+        {/* Price & Duration Row */}
+        <div className="flex items-center gap-3 mb-4">
           <span className={`
-            inline-block text-lg font-bold
+            text-xl font-bold
             ${isSelected ? 'text-gold-600' : 'text-dark'}
           `}>
             {addon.Price > 0 ? `+$${addon.Price.toFixed(0)}` : 'Consultar'}
           </span>
           {addon.Duration > 0 && (
-            <span className="ml-2 text-xs text-warm-gray">
-              • +{addon.Duration} min
+            <span className="flex items-center gap-1 text-sm text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full">
+              <Clock className="w-3.5 h-3.5" />
+              +{addon.Duration} min
             </span>
           )}
         </div>
         
+        {/* Brief Description Preview */}
+        {addon.Description && !showDetails && (
+          <p className="text-sm text-warm-gray mb-3 line-clamp-2">
+            {addon.Description}
+          </p>
+        )}
+        
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
           <button
-            onClick={onToggle}
+            type="button"
+            onClick={handleToggle}
             className={`
               flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg
               font-medium text-sm transition-all duration-200
@@ -88,10 +109,8 @@ function AddonTile({
           
           {addon.Description && (
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowDetails(!showDetails)
-              }}
+              type="button"
+              onClick={handleInfoClick}
               className={`
                 p-2.5 rounded-lg transition-all duration-200
                 ${showDetails 
@@ -101,13 +120,13 @@ function AddonTile({
               `}
               aria-label="Ver detalles"
             >
-              {showDetails ? <X className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+              {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           )}
         </div>
       </div>
       
-      {/* Expandable Description */}
+      {/* Expandable Full Description */}
       <AnimatePresence>
         {showDetails && addon.Description && (
           <motion.div
@@ -185,11 +204,14 @@ export function AddonsStep() {
   }
   
   const handleToggleAddon = (addon: MindbodyService) => {
-    if (isAddonSelected(addon.Id)) {
-      removeAddon(addon.Id)
-    } else {
-      addAddon(addon)
-    }
+    // Prevent stalling with setTimeout
+    setTimeout(() => {
+      if (isAddonSelected(addon.Id)) {
+        removeAddon(addon.Id)
+      } else {
+        addAddon(addon)
+      }
+    }, 0)
   }
   
   return (

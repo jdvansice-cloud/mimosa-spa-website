@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.20] - 2026-01-12
+
+### Fixed
+- **Page stalling when adding treatments**: Added `setTimeout()` wrapper to toggle handlers to prevent React state race conditions
+- **Event propagation issues**: All buttons now use `e.preventDefault()` and `e.stopPropagation()` with explicit `type="button"` attribute
+
+### Changed
+- **Service tile titles**: Larger font size (`text-base sm:text-lg` from `text-sm`) for better readability
+- **Duration display**: New pill-style badge with clock icon and rounded background
+- **Categories start collapsed**: Categories now start collapsed by default for better UX
+- **Description preview**: 2-line description preview shown by default with `line-clamp-2`
+- **Info button icon**: Changed from Info/X icons to ChevronDown/ChevronUp for expand/collapse
+
+### Updated Components
+- `ServiceStep.tsx` - Larger titles, description preview, collapsed categories, fixed toggle
+- `AddonsStep.tsx` - Larger titles, description preview, fixed toggle
+- `ServiceTile.tsx` (shared) - Larger fonts, better event handling, description preview
+
+---
+
 ## [1.0.19] - 2026-01-12
 
 ### Added

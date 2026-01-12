@@ -1,5 +1,56 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.0.20 (January 12, 2026)
+
+### 🎨 Service Tile UI Improvements & Bug Fixes
+
+**Improved readability and fixed interaction issues**
+
+#### UI Improvements
+
+**Larger Service Titles**
+- Service names now use `text-base sm:text-lg` (was `text-sm`)
+- Bold font weight for better visibility
+- Better line spacing for long service names
+
+**Description Preview**
+- 2-line preview of service description shown by default
+- Uses `line-clamp-2` for truncation
+- Expand button reveals full description
+- Changed icon from Info to ChevronDown/ChevronUp for clarity
+
+**Duration Badge**
+- New pill-style duration badge with background
+- Clock icon with time in rounded pill
+- Better visual hierarchy
+
+#### Bug Fixes
+
+**Fixed: Page stalling when adding treatments**
+- Added `setTimeout(() => ..., 0)` wrapper to all toggle handlers
+- Prevents React state update race conditions
+- Smooth interaction on add/remove
+
+**Fixed: Event propagation issues**
+- All button clicks now use `e.preventDefault()` and `e.stopPropagation()`
+- Added `type="button"` to all buttons
+- Prevents unintended form submissions
+
+**Categories start collapsed**
+- Categories now start collapsed by default
+- Users expand what they're interested in
+- Better UX for many categories
+
+#### Updated Components
+
+| Component | Changes |
+|-----------|---------|
+| `ServiceStep.tsx` | Larger titles, description preview, collapsed by default, fixed toggle |
+| `AddonsStep.tsx` | Larger titles, description preview, fixed toggle |
+| `ServiceTile.tsx` (shared) | Larger fonts, better event handling, description preview |
+
+---
+
 ## Version 1.0.19 (January 12, 2026)
 
 ### 🛒 Retail-Style Cart & Tile UI Redesign
