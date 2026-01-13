@@ -29,27 +29,43 @@ export function ConfirmStep() {
   const totalDuration = useBookingStore(selectTotalDuration)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  // Calculate pricing with useMemo
+  // Calculate pricing with useMemo - returns full CartPricing object
   const pricing = useMemo(() => {
     const servicesSubtotal = selectedServices.reduce((sum, s) => sum + s.Price, 0)
     const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
     
     const hasPromotion = activePromotion !== null
     let finalServicesPrice = servicesSubtotal
+    let promotionDiscount = 0
     
     if (hasPromotion && activePromotion) {
       finalServicesPrice = activePromotion.price
+      promotionDiscount = servicesSubtotal - activePromotion.price
     }
     
     const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
     const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
     const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
     
+    // Calculate total duration
+    const servicesDuration = selectedServices.reduce((sum, s) => sum + s.Duration, 0)
+    const addonsDuration = selectedAddons.reduce((sum, a) => sum + a.Duration, 0)
+    const totalDuration = servicesDuration + addonsDuration
+    
     return {
+      services: selectedServices,
+      addons: selectedAddons,
+      servicesSubtotal,
+      addonsSubtotal,
+      hasPromotion,
+      promotionName: activePromotion?.name || null,
+      promotionPrice: activePromotion?.price || null,
+      promotionDiscount,
       subtotalBeforeTax,
       itbmRate: ITBM_RATE,
       itbmAmount,
       totalWithTax,
+      totalDuration,
     }
   }, [selectedServices, selectedAddons, activePromotion])
   

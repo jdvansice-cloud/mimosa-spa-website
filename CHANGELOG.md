@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.22] - 2026-01-12
+
+### Fixed
+- **TypeScript compilation error in ConfirmStep.tsx**: `useMemo` now returns complete `CartPricing` object
+- Added missing fields: `services`, `addons`, `servicesSubtotal`, `addonsSubtotal`, `hasPromotion`, `promotionName`, `promotionPrice`, `promotionDiscount`, `totalDuration`
+- Fixes error: "Type is missing properties from CartPricing: services, addons, servicesSubtotal..."
+
+---
+
 ## [1.0.21] - 2026-01-12
 
 ### Fixed
