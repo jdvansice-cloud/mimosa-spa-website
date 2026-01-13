@@ -72,14 +72,15 @@ export function FloatingCart() {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isCartOpen, closeSidebar])
   
-  // Prevent body scroll when sidebar is open
+  // Prevent body scroll when sidebar is open - only on mobile (lg breakpoint is 1024px)
   useEffect(() => {
-    if (isCartOpen) {
+    const isMobile = window.innerWidth < 1024
+    if (isCartOpen && isMobile) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
     }
-    
+
     return () => {
       document.body.style.overflow = ''
     }
