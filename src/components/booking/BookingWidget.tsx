@@ -40,16 +40,20 @@ export function BookingWidget() {
     showClientSelectorModal,
     selectedServices,
     selectedAddons,
-    activePromotion
+    activePromotion,
+    isCartOpen
   } = useBookingStore()
   
   const stepNumber = useBookingStore(selectCurrentStepNumber)
   
-  // Show cart when services are selected
-  const showCart = selectedServices.length > 0 || selectedAddons.length > 0 || activePromotion !== null
+  // Has items in cart
+  const hasCartItems = selectedServices.length > 0 || selectedAddons.length > 0 || activePromotion !== null
+  
+  // Show desktop cart sidebar when items exist AND cart is open
+  const showDesktopCart = hasCartItems && isCartOpen && currentStep !== 'success'
   
   // Show floating cart on steps where user is selecting items
-  const showFloatingCart = showCart && 
+  const showFloatingCart = hasCartItems && 
     currentStep !== 'success' && 
     currentStep !== 'confirm' && 
     currentStep !== 'auth' && 
@@ -99,7 +103,7 @@ export function BookingWidget() {
       {/* Main Content Area */}
       <div className="flex flex-col lg:flex-row">
         {/* Step Content */}
-        <div className={`flex-1 p-6 ${showCart && currentStep !== 'success' ? 'lg:pr-4' : ''}`}>
+        <div className={`flex-1 p-6 ${showDesktopCart ? 'lg:pr-4' : ''}`}>
           <AnimatePresence mode="wait" custom={stepNumber}>
             <motion.div
               key={currentStep}
@@ -116,11 +120,19 @@ export function BookingWidget() {
         </div>
         
         {/* Cart Sidebar - Desktop */}
-        {showCart && currentStep !== 'success' && (
-          <div className="hidden lg:block w-80 border-l border-beige-200 bg-beige-50/50 p-4">
-            <CartSummary />
-          </div>
-        )}
+        <AnimatePresence>
+          {showDesktopCart && (
+            <motion.div 
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 320, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="hidden lg:block border-l border-beige-200 bg-beige-50/50 p-4 overflow-hidden"
+            >
+              <CartSummary showCloseButton={true} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       
       {/* Client Selector Modal */}

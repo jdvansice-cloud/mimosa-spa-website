@@ -1,5 +1,49 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.1.2 (January 13, 2026)
+
+### 🔧 Bug Fixes: Duration Parsing & Cart Close Button
+
+Fixed two issues reported in cart functionality:
+
+#### 1. Duration Now Parsed from Service Names
+**Services show correct duration instead of "0 minutos"**
+
+- Added `parseDurationFromName()` helper function
+- Extracts duration from service names like "Baño de Luna - 120 min"
+- Supports various formats: "60 min", "90 minutos", "45 mins", "2 horas"
+- Applied to both services and addons
+
+**Examples:**
+```
+"Baño de Luna - 120 min" → Duration: 120
+"Masaje Relajante - 60min" → Duration: 60
+"Tratamiento Facial - 90 minutos" → Duration: 90
+```
+
+#### 2. Cart Panel Close Button Added
+**Desktop cart panel can now be collapsed**
+
+- Added close button (chevron icon) to CartSummary header
+- Clicking collapses the cart panel back to just the cart icon
+- Desktop cart uses `isCartOpen` state for visibility
+- Smooth slide animation when opening/closing
+- Cart icon in step bar toggles open/close
+
+#### Technical Changes:
+- CartSummary accepts `showCloseButton` prop
+- BookingWidget now uses `isCartOpen` to control desktop cart visibility
+- Added AnimatePresence for smooth cart panel transitions
+
+### Files Changed:
+| File | Changes |
+|------|---------|
+| `src/lib/booking/mindbody.ts` | Added `parseDurationFromName()` helper |
+| `src/components/booking/shared/CartSummary.tsx` | Added close button with `showCloseButton` prop |
+| `src/components/booking/BookingWidget.tsx` | Desktop cart uses `isCartOpen` state |
+
+---
+
 ## Version 1.1.1 (January 13, 2026)
 
 ### 🛒 Cart in Step Progress Bar

@@ -264,6 +264,32 @@ function removeTaxFromPrice(priceWithTax: number): number {
   return Math.round(priceWithTax / (1 + ITBM_TAX_RATE))
 }
 
+// ===========================================
+// DURATION PARSING HELPER
+// Extract duration from service name (e.g., "Baño de Luna - 120 min")
+// ===========================================
+function parseDurationFromName(name: string): number {
+  // Match patterns like "120 min", "60min", "90 mins", "45 minutos"
+  const patterns = [
+    /(\d+)\s*min(?:utos?|s)?/i,  // "120 min", "60 minutos", "45 mins"
+    /(\d+)\s*(?:hr|hora)s?/i,    // "1 hr", "2 horas" (convert to minutes)
+  ]
+  
+  for (const pattern of patterns) {
+    const match = name.match(pattern)
+    if (match) {
+      const value = parseInt(match[1], 10)
+      // If it's hours, convert to minutes
+      if (pattern.source.includes('hr|hora')) {
+        return value * 60
+      }
+      return value
+    }
+  }
+  
+  return 0 // Default if no duration found
+}
+
 // Sale/services response type
 interface SaleServicesResponse {
   Services: Array<{
@@ -317,7 +343,7 @@ export async function getServices(locationId?: number) {
     ProductId: s.ProductId,
     Name: s.Name,
     Description: '',
-    Duration: 0, // Duration not available in sale/services
+    Duration: parseDurationFromName(s.Name), // Parse duration from name
     Price: removeTaxFromPrice(s.Price || s.OnlinePrice || 0), // Price WITHOUT tax
     OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
     TaxIncluded: s.TaxIncluded,
@@ -363,7 +389,7 @@ export async function getAddons(locationId?: number) {
       ProductId: s.ProductId,
       Name: s.Name,
       Description: '',
-      Duration: 0,
+      Duration: parseDurationFromName(s.Name), // Parse duration from name
       Price: removeTaxFromPrice(s.Price || s.OnlinePrice || 0), // Price WITHOUT tax
       OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
       TaxIncluded: s.TaxIncluded,

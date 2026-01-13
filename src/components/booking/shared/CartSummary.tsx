@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Star, Clock, X, ShoppingBag } from 'lucide-react'
+import { Star, Clock, X, ShoppingBag, ChevronRight } from 'lucide-react'
 import { useBookingStore } from '@/lib/booking/store'
 
 // Tax rate constant
@@ -10,15 +10,17 @@ const ITBM_RATE = 0.07
 interface CartSummaryProps {
   compact?: boolean
   showRemoveButtons?: boolean
+  showCloseButton?: boolean
 }
 
-export function CartSummary({ compact = false, showRemoveButtons = true }: CartSummaryProps) {
+export function CartSummary({ compact = false, showRemoveButtons = true, showCloseButton = false }: CartSummaryProps) {
   const {
     selectedServices,
     selectedAddons,
     activePromotion,
     removeService,
     removeAddon,
+    closeCart,
   } = useBookingStore()
   
   // Calculate pricing with useMemo - no state updates during render
@@ -121,8 +123,17 @@ export function CartSummary({ compact = false, showRemoveButtons = true }: CartS
       )}
       
       {/* Cart Title */}
-      <div className="px-4 py-3 border-b border-beige-200">
+      <div className="px-4 py-3 border-b border-beige-200 flex items-center justify-between">
         <h3 className="font-semibold text-dark">Tu Reserva</h3>
+        {showCloseButton && (
+          <button
+            onClick={closeCart}
+            className="p-1.5 rounded-lg hover:bg-beige-100 text-warm-gray hover:text-dark transition-colors"
+            aria-label="Cerrar carrito"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
       </div>
       
       {/* Services List */}
