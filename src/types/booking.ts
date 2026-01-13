@@ -1,110 +1,88 @@
-// Mindbody Service Types
-export interface MindbodyService {
-  Id: string
-  ProductId: number
-  Name: string
-  Price: number  // This is the price WITHOUT ITBM (after we remove it)
-  OnlinePrice: number
-  Duration?: number
-  Description?: string
-  ProgramId: number
-  SellOnline: boolean
-  Count?: number
-}
+// ===========================================
+// BOOKING SYSTEM TYPES
+// ===========================================
 
-export interface MindbodyProgram {
+// ===========================================
+// MINDBODY API TYPES
+// ===========================================
+
+export interface MindbodyLocation {
   Id: number
   Name: string
-  ScheduleType: string
-  CancelOffset?: number
+  Address: string
+  Address2?: string
+  City: string
+  StateProvCode: string
+  PostalCode: string
+  Phone: string
+  Latitude?: number
+  Longitude?: number
+}
+
+export interface MindbodyService {
+  Id: number
+  Name: string
+  Description: string | null
+  Duration: number // in minutes
+  Price: number
+  OnlinePrice?: number
+  OnlineBooking: boolean
+  Category: string
+  CategoryId?: number
+  ProgramId: number
+  Count?: number
 }
 
 export interface MindbodyStaff {
   Id: number
   FirstName: string
   LastName: string
-  DisplayName?: string
-  ImageUrl?: string
-  Bio?: string
-  AppointmentInstructor?: boolean
-}
-
-export interface MindbodyLocation {
-  Id: number
-  Name: string
-  Address?: string
-  Address2?: string
-  City?: string
-  Phone?: string
-}
-
-export interface MindbodyClient {
-  Id: string
-  UniqueId?: number
-  FirstName: string
-  LastName: string
+  DisplayName: string
+  Bio: string | null
+  ImageUrl: string | null
+  AppointmentTrn: boolean
   Email?: string
   MobilePhone?: string
 }
 
+export interface MindbodyClient {
+  Id: number
+  FirstName: string
+  LastName: string
+  Email: string
+  MobilePhone: string
+  HomePhone?: string
+  BirthDate?: string
+  Gender?: string
+  CreationDate?: string
+}
+
 export interface MindbodyAvailability {
   Id: number
-  Staff?: MindbodyStaff
   StartDateTime: string
   EndDateTime: string
-  Location?: MindbodyLocation
-  SessionType?: {
-    Id: number
-    Name: string
-  }
+  StaffId: number
+  LocationId: number
+  SessionTypeId: number
 }
 
-// Cart and Booking Types
-export interface CartService extends MindbodyService {
-  isAddon?: boolean
+export interface MindbodyAppointment {
+  Id: number
+  ClientId: number
+  LocationId: number
+  StaffId: number
+  StartDateTime: string
+  EndDateTime: string
+  Status: string
+  Notes?: string
 }
 
-export interface CartPricing {
-  services: CartService[]
-  addons: CartService[]
-  servicesSubtotal: number
-  addonsSubtotal: number
-  hasPromotion: boolean
-  promotionName: string | null
-  promotionPrice: number | null
-  promotionDiscount: number
-  subtotalBeforeTax: number
-  itbmRate: number
-  itbmAmount: number
-  totalWithTax: number
-  totalDuration: number
-}
+// ===========================================
+// BOOKING FLOW TYPES
+// ===========================================
 
-// Promotion Types
-export interface Promotion {
-  id: string
-  title_es: string
-  title_en: string
-  description_es?: string
-  description_en?: string
-  price: number
-  original_price?: number
-  duration_minutes: number
-  image_url?: string
-  valid_until: string
-  is_active: boolean
-  service_ids: string[]
-  created_at: string
-  updated_at: string
-}
-
-export interface PromotionWithServices extends Promotion {
-  services?: CartService[]
-}
-
-// Booking Flow Types
 export type BookingStep = 
-  | 'login'
+  | 'auth'
   | 'location'
   | 'services'
   | 'addons'
@@ -113,52 +91,199 @@ export type BookingStep =
   | 'confirm'
   | 'success'
 
-export interface BookingConfirmation {
-  clientId: string
-  clientName: string
-  location: MindbodyLocation
-  services: CartService[]
-  addons: CartService[]
-  staff?: MindbodyStaff
-  dateTime: string
-  pricing: CartPricing
-  bookingId?: string
+export const BOOKING_STEPS: BookingStep[] = [
+  'auth',
+  'location', 
+  'services',
+  'addons',
+  'staff',
+  'datetime',
+  'confirm',
+  'success'
+]
+
+export const STEP_NUMBERS: Record<BookingStep, number> = {
+  auth: 1,
+  location: 2,
+  services: 3,
+  addons: 4,
+  staff: 5,
+  datetime: 6,
+  confirm: 7,
+  success: 8
 }
 
-// API Response Types
-export interface SaleServicesResponse {
-  Services: MindbodyService[]
-  PaginationResponse?: {
-    RequestedLimit: number
-    RequestedOffset: number
-    PageSize: number
-    TotalResults: number
-  }
+// ===========================================
+// CLIENT LOOKUP TYPES
+// ===========================================
+
+export interface ClientLookupResult {
+  found: boolean
+  clients: MindbodyClient[]
+  count: number
 }
 
-export interface ProgramsResponse {
-  Programs: MindbodyProgram[]
+export type IdentifierType = 'email' | 'phone' | null
+
+// ===========================================
+// CART & PRICING TYPES
+// ===========================================
+
+export interface CartItem {
+  service: MindbodyService
+  isAddon: boolean
+  isPromotion: boolean
 }
 
-export interface StaffResponse {
-  StaffMembers: MindbodyStaff[]
-}
-
-export interface LocationsResponse {
-  Locations: MindbodyLocation[]
-}
-
-export interface ClientsResponse {
-  Clients: MindbodyClient[]
-}
-
-export interface BookableItemsResponse {
-  Availabilities: MindbodyAvailability[]
-}
-
-// Category for grouping services
-export interface ServiceCategory {
-  id: number
-  name: string
+export interface CartPricing {
+  // Individual items
   services: MindbodyService[]
+  addons: MindbodyService[]
+  
+  // Subtotals
+  servicesSubtotal: number
+  addonsSubtotal: number
+  
+  // Promotion
+  hasPromotion: boolean
+  promotionName: string | null
+  promotionPrice: number | null
+  promotionDiscount: number
+  
+  // Tax calculation
+  subtotalBeforeTax: number
+  itbmRate: number
+  itbmAmount: number
+  
+  // Final
+  totalWithTax: number
+  
+  // Duration
+  totalDuration: number
 }
+
+// ===========================================
+// TIME SLOT TYPES
+// ===========================================
+
+export interface TimeSlot {
+  time: string // "09:00"
+  displayTime: string // "9:00 AM"
+  available: boolean
+  staffId?: number
+}
+
+export interface AvailableDate {
+  date: string // "2026-01-15"
+  displayDate: string // "Miércoles, 15 de Enero"
+  hasAvailability: boolean
+  slotsCount: number
+}
+
+// ===========================================
+// BOOKING REQUEST/RESPONSE TYPES
+// ===========================================
+
+export interface BookingRequest {
+  clientId: number
+  locationId: number
+  services: {
+    sessionTypeId: number
+    staffId: number | null
+    startDateTime: string
+  }[]
+  notes?: string
+  promotionId?: string
+}
+
+export interface BookingResponse {
+  success: boolean
+  appointments: MindbodyAppointment[]
+  confirmationNumber?: string
+  error?: string
+}
+
+export interface BookingConfirmation {
+  success: boolean
+  confirmationNumber: string
+  appointments: {
+    service: MindbodyService
+    staff: MindbodyStaff | null
+    dateTime: string
+  }[]
+  location: MindbodyLocation
+  client: MindbodyClient
+  pricing: CartPricing
+}
+
+// ===========================================
+// PROMOTION TYPES (Extended)
+// ===========================================
+
+export interface PromotionWithServices {
+  id: string
+  title_es: string
+  title_en: string | null
+  description_es: string | null
+  description_en: string | null
+  price: number
+  originalPrice?: number
+  duration_minutes: number | null
+  image_url: string | null
+  valid_from: string
+  valid_until: string
+  is_active: boolean
+  
+  // Mindbody integration
+  mindbody_promotion_id: string | null
+  mindbody_service_ids: string[]
+  services?: MindbodyService[] // Populated services
+}
+
+// ===========================================
+// API RESPONSE TYPES
+// ===========================================
+
+export interface MindbodyApiResponse<T> {
+  data: T | null
+  error: string | null
+  status: number
+}
+
+export interface MindbodyTokenResponse {
+  AccessToken: string
+  TokenType: string
+}
+
+// ===========================================
+// FORM TYPES
+// ===========================================
+
+export interface ClientRegistrationForm {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  birthDate?: string
+  gender?: 'Male' | 'Female' | 'Other'
+}
+
+// ===========================================
+// ERROR TYPES
+// ===========================================
+
+export interface BookingError {
+  code: string
+  message: string
+  field?: string
+}
+
+export const BOOKING_ERROR_CODES = {
+  CLIENT_NOT_FOUND: 'CLIENT_NOT_FOUND',
+  MULTIPLE_CLIENTS: 'MULTIPLE_CLIENTS',
+  NO_AVAILABILITY: 'NO_AVAILABILITY',
+  SLOT_TAKEN: 'SLOT_TAKEN',
+  BOOKING_FAILED: 'BOOKING_FAILED',
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  INVALID_INPUT: 'INVALID_INPUT',
+} as const

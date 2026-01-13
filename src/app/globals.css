@@ -1,165 +1,291 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Variables */
+:root {
+  --color-gold: #FCCF08;
+  --color-gold-dark: #D4AD00;
+  --color-gold-light: #FFF3B0;
+  --color-cream: #FDFAF5;
+  --color-beige: #F5EFE7;
+  --color-warm-gray: #8B8680;
+  --color-dark: #333333;
+  --color-black: #1A1A1A;
+  
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Lato', sans-serif;
+  
+  --header-height: 80px;
+  --mobile-nav-height: 70px;
+}
+
+/* Base Styles */
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   body {
-    @apply bg-beige-50 text-dark antialiased;
-    font-family: 'Montserrat', system-ui, sans-serif;
+    @apply bg-cream text-dark font-body;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
-
+  
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
+    @apply font-display font-semibold tracking-wide;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+  
+  p {
+    @apply leading-relaxed;
+  }
+  
+  a {
+    @apply transition-colors duration-200;
+  }
+  
+  img {
+    @apply max-w-full h-auto;
+  }
+  
+  /* Remove default button styles */
+  button {
+    @apply font-body;
   }
 }
 
+/* Component Styles */
 @layer components {
+  /* Primary Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3
+           bg-gold text-dark font-semibold rounded-lg
+           hover:bg-gold-600 active:bg-gold-700
+           transition-all duration-200
+           shadow-sm hover:shadow-md
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* Secondary Button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3
+           bg-transparent text-dark font-semibold rounded-lg
+           border-2 border-dark
+           hover:bg-dark hover:text-cream
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2
+           bg-transparent text-dark font-medium
+           hover:bg-beige rounded-lg
+           transition-all duration-200;
+  }
+  
+  /* Card */
+  .card {
+    @apply bg-white rounded-2xl shadow-card overflow-hidden
+           transition-all duration-300
+           hover:shadow-elevated;
+  }
+  
+  /* Section Title with Line */
+  .section-title {
+    @apply relative inline-block;
+  }
+  
+  .section-title::after {
+    @apply content-[''] absolute -bottom-3 left-0 w-16 h-1 bg-gold;
+  }
+  
+  /* Decorative Title (like —MENU—) */
+  .title-decorated {
+    @apply text-3xl md:text-4xl font-display font-semibold tracking-wider;
+  }
+  
+  .title-decorated::before,
+  .title-decorated::after {
+    content: '—';
+    @apply mx-2 text-warm-gray;
+  }
+  
+  /* Container */
   .container-spa {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-3 
-           bg-gold text-dark font-semibold rounded-lg
-           hover:bg-gold-500 active:bg-gold-600
-           transition-all duration-200
-           shadow-soft hover:shadow-gold
-           focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2;
+  
+  /* Page Section */
+  .section {
+    @apply py-16 md:py-24;
   }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-3
-           bg-white text-dark font-medium rounded-lg
-           border-2 border-beige-300
-           hover:border-gold hover:bg-beige-50
-           transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2;
+  
+  /* Overlay Card (for menu categories) */
+  .overlay-card {
+    @apply relative overflow-hidden rounded-lg cursor-pointer;
   }
-
-  .btn-ghost {
-    @apply inline-flex items-center justify-center px-4 py-2
-           text-dark font-medium rounded-lg
-           hover:bg-beige-100
+  
+  .overlay-card::before {
+    @apply content-[''] absolute inset-0 bg-black/40 z-10
+           transition-all duration-300;
+  }
+  
+  .overlay-card:hover::before {
+    @apply bg-black/50;
+  }
+  
+  .overlay-card-content {
+    @apply absolute inset-0 z-20 flex flex-col items-center justify-center
+           text-white text-center p-4;
+  }
+  
+  /* Form Input */
+  .input {
+    @apply w-full px-4 py-3 rounded-lg border border-beige-400
+           bg-white text-dark placeholder:text-warm-gray
+           focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent
            transition-all duration-200;
   }
-
-  .card {
-    @apply bg-white rounded-2xl shadow-soft overflow-hidden;
-  }
-
-  .card-hover {
-    @apply card transition-all duration-300
-           hover:shadow-medium hover:-translate-y-1;
-  }
-
-  .input {
-    @apply w-full px-4 py-3 rounded-lg
-           bg-white border-2 border-beige-200
-           text-dark placeholder-warm-gray-400
-           transition-all duration-200
-           focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20;
-  }
-
-  .section-title {
-    @apply text-3xl md:text-4xl font-serif font-semibold text-dark
-           tracking-wide;
-  }
-
-  .section-divider {
-    @apply w-16 h-1 bg-gold rounded-full my-4;
-  }
-
-  /* Service card styles */
-  .service-card {
-    @apply relative overflow-hidden rounded-xl bg-white
-           border border-beige-200 
-           transition-all duration-300
-           hover:border-gold hover:shadow-soft;
-  }
-
-  .service-card-selected {
-    @apply border-gold-400 bg-gold-50 shadow-gold;
-  }
-
-  /* Category accordion styles */
-  .category-header {
-    @apply flex items-center justify-between w-full p-4
-           bg-beige-100 rounded-xl
-           transition-all duration-200
-           hover:bg-beige-200;
-  }
-
-  .category-header-open {
-    @apply bg-gold-100 hover:bg-gold-200;
+  
+  /* Form Label */
+  .label {
+    @apply block text-sm font-medium text-dark mb-2;
   }
 }
 
+/* Utility Classes */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  /* Text Gradient */
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-600 to-gold-400 bg-clip-text text-transparent;
   }
   
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
   
-  .animate-slide-up {
-    animation: slideUp 0.5s ease-out forwards;
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
-
-  .animate-slide-in-right {
-    animation: slideInRight 0.3s ease-out forwards;
+  
+  /* Line clamp */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Safe area padding for mobile */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
   }
 }
 
-/* Custom scrollbar for cart sidebar */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: theme('colors.beige.300') transparent;
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+/* WhatsApp Button Pulse */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: theme('colors.beige.300');
-  border-radius: 3px;
+.whatsapp-pulse::before {
+  content: '';
+  @apply absolute inset-0 rounded-full bg-green-500;
+  animation: pulse-ring 1.5s ease-out infinite;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: theme('colors.beige.400');
+/* Booking Widget iframe */
+.booking-widget-container {
+  @apply w-full min-h-[800px] rounded-2xl overflow-hidden shadow-elevated;
 }
 
-/* Cart sidebar overlay */
-.cart-overlay {
-  @apply fixed inset-0 bg-black/30 z-40;
-  backdrop-filter: blur(2px);
+.booking-widget-container iframe {
+  @apply w-full h-full min-h-[800px] border-0;
 }
 
-.cart-sidebar {
-  @apply fixed right-0 top-0 h-full w-full max-w-md 
-         bg-white shadow-2xl z-50 
-         flex flex-col;
+/* Mobile bottom navigation safe area */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-nav {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
 }
 
-/* WhatsApp button */
-.whatsapp-button {
-  @apply fixed bottom-6 right-6 z-50
-         w-14 h-14 rounded-full
-         bg-[#25D366] text-white
-         flex items-center justify-center
-         shadow-lg hover:shadow-xl
-         transition-all duration-300
-         hover:scale-110;
+/* Custom scrollbar for desktop */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-beige;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-warm-gray rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-warm-gray-500;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }

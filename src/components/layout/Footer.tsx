@@ -2,132 +2,162 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { MapPin, Phone, Mail, Instagram, Facebook, Clock } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react'
+import { Logo } from './Logo'
 
 export function Footer() {
   const t = useTranslations('footer')
-  const tLocations = useTranslations('locations')
+  const tNav = useTranslations('navigation')
+  const tContact = useTranslations('contact')
+  const tHome = useTranslations('home.locations')
+  const params = useParams()
+  const locale = params.locale as string
 
   const currentYear = new Date().getFullYear()
 
+  const navLinks = [
+    { href: `/${locale}`, label: tNav('home') },
+    { href: `/${locale}/menu`, label: tNav('menu') },
+    { href: `/${locale}/promociones`, label: tNav('promotions') },
+    { href: `/${locale}/nosotros`, label: tNav('about') },
+    { href: `/${locale}/galeria`, label: tNav('gallery') },
+    { href: `/${locale}/reservar`, label: tNav('book') },
+  ]
+
   return (
-    <footer className="bg-dark text-white">
+    <footer className="bg-dark text-cream">
       <div className="container-spa py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand */}
-          <div className="space-y-4">
-            <div>
-              <span className="font-display text-3xl font-semibold text-gold">
-                Mimosa
-              </span>
-              <span className="block text-sm tracking-widest text-beige-300 uppercase">
-                Spa Retreat
-              </span>
+          {/* Brand Column */}
+          <div className="lg:col-span-1">
+            <div className="flex items-center gap-3">
+              <Logo variant="icon" size="lg" />
+              <div className="flex flex-col">
+                <span className="font-display text-2xl font-semibold text-cream">
+                  Mimosa
+                </span>
+                <span className="text-xs tracking-[0.2em] uppercase text-cream/70">
+                  Spa Retreat
+                </span>
+              </div>
             </div>
-            <p className="text-beige-300 text-sm leading-relaxed">
-              Tu santuario de paz y renovación en Panamá.
-            </p>
-            <div className="flex gap-4 pt-2">
+            <p className="text-cream/70 text-sm mt-4">{t('tagline')}</p>
+            
+            {/* Social Links */}
+            <div className="flex gap-4 mt-6">
               <a
                 href="https://instagram.com/mimosasparetreat"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-gold hover:text-dark transition-all duration-200"
+                className="p-2 rounded-full bg-cream/10 hover:bg-gold hover:text-dark transition-colors"
+                aria-label="Instagram"
               >
-                <Instagram className="w-5 h-5" />
+                <Instagram className="h-5 w-5" />
               </a>
               <a
                 href="https://facebook.com/mimosasparetreat"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-gold hover:text-dark transition-all duration-200"
+                className="p-2 rounded-full bg-cream/10 hover:bg-gold hover:text-dark transition-colors"
+                aria-label="Facebook"
               >
-                <Facebook className="w-5 h-5" />
+                <Facebook className="h-5 w-5" />
               </a>
             </div>
           </div>
 
-          {/* Costa del Este Location */}
-          <div className="space-y-4">
-            <h4 className="font-serif text-lg font-semibold text-gold">
-              {tLocations('costaDelEste.name')}
-            </h4>
-            <div className="space-y-3 text-sm text-beige-300">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
-                <span>{tLocations('costaDelEste.address')}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-gold flex-shrink-0" />
-                <span>+507 6000-0000</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-gold flex-shrink-0" />
-                <span>Lun-Vie: 9am-8pm | Sáb-Dom: 9am-6pm</span>
-              </div>
-            </div>
+          {/* Links Column */}
+          <div>
+            <h4 className="text-lg font-display font-semibold mb-4">{t('links')}</h4>
+            <ul className="space-y-3">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-cream/70 hover:text-gold transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* San Francisco Location */}
-          <div className="space-y-4">
-            <h4 className="font-serif text-lg font-semibold text-gold">
-              {tLocations('sanFrancisco.name')}
+          {/* Locations Column */}
+          <div>
+            <h4 className="text-lg font-display font-semibold mb-4">
+              {tHome('title')}
             </h4>
-            <div className="space-y-3 text-sm text-beige-300">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
-                <span>{tLocations('sanFrancisco.address')}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-gold flex-shrink-0" />
-                <span>+507 6000-0001</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-gold flex-shrink-0" />
-                <span>Lun-Vie: 9am-8pm | Sáb-Dom: 9am-6pm</span>
-              </div>
-            </div>
+            <ul className="space-y-4">
+              <li className="flex gap-3">
+                <MapPin className="h-5 w-5 text-gold flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">{tHome('costaDelEste.name')}</p>
+                  <p className="text-cream/70 text-sm">{tHome('costaDelEste.address')}</p>
+                </div>
+              </li>
+              <li className="flex gap-3">
+                <MapPin className="h-5 w-5 text-gold flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">{tHome('sanFrancisco.name')}</p>
+                  <p className="text-cream/70 text-sm">{tHome('sanFrancisco.address')}</p>
+                </div>
+              </li>
+            </ul>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="font-serif text-lg font-semibold text-gold">
-              Enlaces
-            </h4>
-            <nav className="flex flex-col gap-2 text-sm">
-              <Link href="/menu" className="text-beige-300 hover:text-gold transition-colors">
-                Tratamientos
-              </Link>
-              <Link href="/promociones" className="text-beige-300 hover:text-gold transition-colors">
-                Promociones
-              </Link>
-              <Link href="/nosotros" className="text-beige-300 hover:text-gold transition-colors">
-                Nosotros
-              </Link>
-              <Link href="/galeria" className="text-beige-300 hover:text-gold transition-colors">
-                Galería
-              </Link>
-              <Link href="/reservar" className="text-beige-300 hover:text-gold transition-colors">
-                Reservar
-              </Link>
-            </nav>
+          {/* Contact Column */}
+          <div>
+            <h4 className="text-lg font-display font-semibold mb-4">{t('contact')}</h4>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-gold" />
+                <a
+                  href="tel:+5076000000"
+                  className="text-cream/70 hover:text-gold transition-colors"
+                >
+                  +507 6000-0000
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <Mail className="h-5 w-5 text-gold" />
+                <a
+                  href="mailto:info@mimosaretreat.com"
+                  className="text-cream/70 hover:text-gold transition-colors"
+                >
+                  info@mimosaretreat.com
+                </a>
+              </li>
+              <li className="flex gap-3">
+                <Clock className="h-5 w-5 text-gold flex-shrink-0 mt-0.5" />
+                <div className="text-cream/70 text-sm">
+                  <p>{tContact('weekdays')}</p>
+                  <p>{tContact('weekends')}</p>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
-      </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-white/10">
-        <div className="container-spa py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-beige-400">
-            <p>© {currentYear} Mimosa Spa Retreat. {t('rights')}.</p>
-            <div className="flex gap-6">
-              <Link href="/privacidad" className="hover:text-gold transition-colors">
-                Privacidad
-              </Link>
-              <Link href="/terminos" className="hover:text-gold transition-colors">
-                Términos
-              </Link>
-            </div>
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-8 border-t border-cream/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-cream/50 text-sm">
+            © {currentYear} Mimosa Spa Retreat. {t('rights')}.
+          </p>
+          <div className="flex gap-6 text-sm">
+            <Link
+              href={`/${locale}/privacidad`}
+              className="text-cream/50 hover:text-gold transition-colors"
+            >
+              {t('privacy')}
+            </Link>
+            <Link
+              href={`/${locale}/terminos`}
+              className="text-cream/50 hover:text-gold transition-colors"
+            >
+              {t('terms')}
+            </Link>
           </div>
         </div>
       </div>
