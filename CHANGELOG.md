@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.23] - 2026-01-12
+
+### Fixed
+- **TypeScript error in ConfirmStep.tsx**: Changed `activePromotion?.name` to `activePromotion?.title_es`
+- `PromotionWithServices` type uses `title_es` not `name` for the promotion title
+
+---
+
 ## [1.0.22] - 2026-01-12
 
 ### Fixed

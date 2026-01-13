@@ -1,0 +1,13 @@
+var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/_not-found/page.js")
+R.c("server/chunks/ssr/[root-of-the-server]__9511a86e._.js")
+R.c("server/chunks/ssr/6b3ad_next_dist_4f940363._.js")
+R.c("server/chunks/ssr/6b3ad_next_dist_esm_build_templates_app-page_348e890e.js")
+R.c("server/chunks/ssr/[root-of-the-server]__3f0c73c1._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__4d02e51c._.js")
+R.c("server/chunks/ssr/6b3ad_next_dist_036e6650._.js")
+R.c("server/chunks/ssr/Documents_GitHub_mimosa-spa-website_src_app_layout_tsx_17606276._.js")
+R.c("server/chunks/ssr/Documents_GitHub_mimosa-spa-website_2a2a3225._.js")
+R.c("server/chunks/ssr/6b3ad_next_dist_client_components_da1342a9._.js")
+R.c("server/chunks/ssr/7889e_mimosa-spa-website__next-internal_server_app__not-found_page_actions_c7687be7.js")
+R.m(84811)
+module.exports=R.m(84811).exports

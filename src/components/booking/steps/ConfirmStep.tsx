@@ -58,7 +58,7 @@ export function ConfirmStep() {
       servicesSubtotal,
       addonsSubtotal,
       hasPromotion,
-      promotionName: activePromotion?.name || null,
+      promotionName: activePromotion?.title_es || null,
       promotionPrice: activePromotion?.price || null,
       promotionDiscount,
       subtotalBeforeTax,
