@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Cormorant_Garamond, Lato } from 'next/font/google'
-import { Header, Footer, WhatsAppWidget, MobileBottomNav } from '@/components/layout'
+import { Header, Footer, MobileBottomNav } from '@/components/layout'
 import '@/app/globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -102,7 +102,6 @@ export default async function LocaleLayout({
             </main>
             <Footer />
             <MobileBottomNav />
-            <WhatsAppWidget />
           </div>
         </NextIntlClientProvider>
       </body>
