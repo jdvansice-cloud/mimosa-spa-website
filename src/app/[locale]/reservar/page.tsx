@@ -15,18 +15,18 @@ export default async function BookingPage({ params }: { params: Promise<{ locale
   
   return (
     <div className="min-h-screen bg-cream">
-      {/* Page Header */}
-      <section className="py-12 bg-beige text-center">
+      {/* Page Header - Compact */}
+      <section className="py-4 md:py-6 bg-beige text-center">
         <div className="container-spa">
-          <h1 className="text-3xl md:text-4xl font-display font-semibold mb-2">
+          <h1 className="text-2xl md:text-3xl font-display font-semibold mb-1">
             Reservar Cita
           </h1>
-          <p className="text-warm-gray">Agenda tu próxima visita</p>
+          <p className="text-sm text-warm-gray">Agenda tu próxima visita</p>
         </div>
       </section>
 
       {/* Booking Widget */}
-      <section className="section">
+      <section className="py-4 md:py-6">
         <div className="container-spa max-w-4xl">
           <BookingWidget />
         </div>
