@@ -69,6 +69,9 @@ interface BookingState {
   
   // Computed pricing (cached)
   pricing: CartPricing | null
+  
+  // Cart UI State
+  isCartOpen: boolean
 }
 
 // ===========================================
@@ -134,6 +137,11 @@ interface BookingActions {
   // Reset
   reset: () => void
   resetToStep: (step: BookingStep) => void
+  
+  // Cart UI
+  openCart: () => void
+  closeCart: () => void
+  toggleCart: () => void
 }
 
 // ===========================================
@@ -186,6 +194,9 @@ const initialState: BookingState = {
   
   // Pricing
   pricing: null,
+  
+  // Cart UI
+  isCartOpen: false,
 }
 
 // ===========================================
@@ -327,7 +338,8 @@ export const useBookingStore = create<BookingState & BookingActions>()(
         const newServices = [...state.selectedServices, service]
         return { 
           selectedServices: newServices,
-          pricing: null // Invalidate cache
+          pricing: null, // Invalidate cache
+          isCartOpen: true // Auto-open cart when adding
         }
       }, false, 'addService'),
       
@@ -353,7 +365,8 @@ export const useBookingStore = create<BookingState & BookingActions>()(
         }
         return { 
           selectedAddons: [...state.selectedAddons, addon],
-          pricing: null
+          pricing: null,
+          isCartOpen: true // Auto-open cart when adding
         }
       }, false, 'addAddon'),
       
@@ -485,14 +498,27 @@ export const useBookingStore = create<BookingState & BookingActions>()(
       },
       
       // ===========================================
+      // CART UI ACTIONS
+      // ===========================================
+      
+      openCart: () => set({ isCartOpen: true }, false, 'openCart'),
+      
+      closeCart: () => set({ isCartOpen: false }, false, 'closeCart'),
+      
+      toggleCart: () => set((state) => ({ 
+        isCartOpen: !state.isCartOpen 
+      }), false, 'toggleCart'),
+      
+      // ===========================================
       // RESET ACTIONS
       // ===========================================
       
-      reset: () => set(initialState, false, 'reset'),
+      reset: () => set({ ...initialState, isCartOpen: false }, false, 'reset'),
       
       resetToStep: (step) => set({
         ...initialState,
-        currentStep: step
+        currentStep: step,
+        isCartOpen: false
       }, false, 'resetToStep'),
     }),
     { name: 'booking-store' }

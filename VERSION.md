@@ -1,5 +1,35 @@
 # Mimosa Spa Website - Version History
 
+## Version 1.1.1 (January 13, 2026)
+
+### 🛒 Cart in Step Progress Bar
+
+Added cart icon integrated into the step progress bar:
+
+#### Features:
+- **Cart icon with badge** positioned after step 7 "Confirmar" in desktop view
+- **Item count badge** shows number of items in cart (services + addons)
+- **Click to toggle** opens/closes the cart sidebar
+- **Auto-open** cart automatically opens when item is added
+- **Mobile support** cart button in mobile progress bar header
+- **Visual feedback** gold highlight when items in cart
+
+#### Technical Changes:
+- Added `isCartOpen`, `openCart`, `closeCart`, `toggleCart` to booking store
+- `addService` and `addAddon` now auto-open cart when items added
+- StepProgress component now includes cart button with item count
+- FloatingCart uses store state instead of local state for open/close
+- Removed fixed floating cart button (now in step bar)
+
+### Files Changed:
+| File | Changes |
+|------|---------|
+| `src/lib/booking/store.ts` | Added cart UI state and actions |
+| `src/components/booking/shared/StepProgress.tsx` | Added cart icon with count |
+| `src/components/booking/shared/FloatingCart.tsx` | Uses store for open/close |
+
+---
+
 ## Version 1.1.0 (January 13, 2026)
 
 ### 🎯 Major Update: Pricing & Cart UI Improvements

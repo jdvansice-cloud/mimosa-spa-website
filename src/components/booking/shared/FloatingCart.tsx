@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useEffect, useMemo, useCallback } from 'react'
 import { ShoppingBag, X, Trash2, Clock, Tag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
@@ -9,14 +9,14 @@ import { useBookingStore } from '@/lib/booking/store'
 const ITBM_RATE = 0.07
 
 export function FloatingCart() {
-  const [isOpen, setIsOpen] = useState(false)
-  
   const {
     selectedServices,
     selectedAddons,
     removeService,
     removeAddon,
     activePromotion,
+    isCartOpen,
+    closeCart,
   } = useBookingStore()
   
   const itemCount = selectedServices.length + selectedAddons.length
@@ -55,26 +55,26 @@ export function FloatingCart() {
     }
   }, [selectedServices, selectedAddons, activePromotion])
   
-  // Close sidebar handler
+  // Close sidebar handler - use store action
   const closeSidebar = useCallback(() => {
-    setIsOpen(false)
-  }, [])
+    closeCart()
+  }, [closeCart])
   
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isCartOpen) {
         closeSidebar()
       }
     }
     
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [isOpen, closeSidebar])
+  }, [isCartOpen, closeSidebar])
   
   // Prevent body scroll when sidebar is open
   useEffect(() => {
-    if (isOpen) {
+    if (isCartOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
@@ -83,37 +83,13 @@ export function FloatingCart() {
     return () => {
       document.body.style.overflow = ''
     }
-  }, [isOpen])
+  }, [isCartOpen])
   
   return (
     <>
-      {/* Fixed Cart Toggle Button - Right Edge */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed right-4 top-1/2 -translate-y-1/2 z-40
-                 flex items-center justify-center w-14 h-14 
-                 bg-white border-2 border-gold rounded-full shadow-xl
-                 hover:bg-gold/10 hover:scale-105 transition-all duration-200"
-        aria-label={`Carrito: ${itemCount} items`}
-      >
-        <ShoppingBag className="w-6 h-6 text-gold" />
-        
-        {/* Item Count Badge */}
-        {itemCount > 0 && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 w-6 h-6 bg-gold text-dark text-xs 
-                     font-bold rounded-full flex items-center justify-center shadow-md"
-          >
-            {itemCount}
-          </motion.span>
-        )}
-      </button>
-      
-      {/* Sidebar Overlay */}
+      {/* Sidebar Overlay - Controlled by store */}
       <AnimatePresence>
-        {isOpen && (
+        {isCartOpen && (
           <>
             {/* Backdrop with blur */}
             <motion.div
