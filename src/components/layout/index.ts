@@ -1,0 +1,5 @@
+export { Header } from './Header'
+export { Footer } from './Footer'
+export { Logo } from './Logo'
+export { WhatsAppWidget } from './WhatsAppWidget'
+export { MobileBottomNav } from './MobileBottomNav'
