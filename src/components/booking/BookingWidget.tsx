@@ -101,9 +101,9 @@ export function BookingWidget() {
       )}
       
       {/* Main Content Area */}
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-180px)]">
         {/* Step Content */}
-        <div className={`flex-1 p-6 ${showDesktopCart ? 'lg:pr-4' : ''}`}>
+        <div className={`flex-1 p-6 overflow-y-auto ${showDesktopCart ? 'lg:pr-4' : ''}`}>
           <AnimatePresence mode="wait" custom={stepNumber}>
             <motion.div
               key={currentStep}
@@ -113,6 +113,7 @@ export function BookingWidget() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="h-full"
             >
               {renderStep()}
             </motion.div>

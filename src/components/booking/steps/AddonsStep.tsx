@@ -215,7 +215,9 @@ export function AddonsStep() {
   }
   
   return (
-    <div className="addons-step">
+    <div className="addons-step flex flex-col h-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto pb-4">
       {/* Header */}
       <div className="text-center mb-6">
         <div className="w-14 h-14 bg-gradient-to-br from-gold to-gold/60 rounded-full 
@@ -272,25 +274,28 @@ export function AddonsStep() {
           ))}
         </div>
       )}
-      
-      {/* Navigation */}
-      <div className="mt-8 flex items-center justify-between">
-        <button
-          onClick={prevStep}
-          className="flex items-center gap-2 text-warm-gray hover:text-dark transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Volver
-        </button>
-        
-        <button
-          onClick={nextStep}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/90 
-                   text-dark font-semibold rounded-xl hover:shadow-lg transition-all"
-        >
-          {selectedAddons.length > 0 ? 'Continuar' : 'Saltar'}
-          <ArrowRight className="w-5 h-5" />
-        </button>
+      </div>
+
+      {/* Navigation - Sticky at bottom */}
+      <div className="sticky bottom-0 bg-white border-t border-beige-200 pt-4 pb-2 -mx-6 px-6 mt-auto">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={prevStep}
+            className="flex items-center gap-2 text-warm-gray hover:text-dark transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Volver
+          </button>
+
+          <button
+            onClick={nextStep}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/90
+                     text-dark font-semibold rounded-xl hover:shadow-lg transition-all"
+          >
+            {selectedAddons.length > 0 ? 'Continuar' : 'Saltar'}
+            <ArrowRight className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
   )
