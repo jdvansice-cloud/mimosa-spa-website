@@ -169,12 +169,12 @@ export function LocationStep() {
       )}
       
       {/* Back Button */}
-      <div className="mt-8">
+      <div className="mt-6 pt-2 border-t border-beige-200">
         <button
           onClick={prevStep}
-          className="flex items-center gap-2 text-warm-gray hover:text-dark transition-colors"
+          className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
           Volver
         </button>
       </div>

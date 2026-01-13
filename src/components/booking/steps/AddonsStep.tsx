@@ -1,43 +1,31 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, ArrowLeft, ArrowRight, Loader2, Clock, Check, ChevronDown, ChevronUp, Sparkles } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, ArrowLeft, ArrowRight, Loader2, Clock, Check, Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
 
-// Addon Tile Component with expandable description
-function AddonTile({ 
-  addon, 
-  isSelected, 
-  onToggle 
-}: { 
+// Addon Tile Component - Clickable anywhere
+function AddonTile({
+  addon,
+  isSelected,
+  onToggle
+}: {
   addon: MindbodyService
   isSelected: boolean
-  onToggle: () => void 
+  onToggle: () => void
 }) {
-  const [showDetails, setShowDetails] = useState(false)
-  
-  const handleToggle = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    onToggle()
-  }
-  
-  const handleInfoClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setShowDetails(!showDetails)
-  }
-  
   return (
-    <motion.div
+    <motion.button
+      type="button"
+      onClick={onToggle}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={`
-        relative rounded-xl border-2 transition-all duration-200 overflow-hidden
-        ${isSelected 
-          ? 'border-gold bg-gold/5 shadow-md ring-2 ring-gold/20' 
+        relative rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full
+        ${isSelected
+          ? 'border-gold bg-gold/5 shadow-md ring-2 ring-gold/20'
           : 'border-beige-200 bg-white hover:border-gold/50 hover:shadow-sm'
         }
       `}
@@ -50,101 +38,30 @@ function AddonTile({
           </div>
         </div>
       )}
-      
-      <div className="p-4">
-        {/* Name - LARGER FONT */}
-        <h4 className="font-semibold text-dark text-base sm:text-lg leading-snug mb-3 pr-8">
+
+      <div className="p-3">
+        {/* Name */}
+        <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug mb-2 pr-8">
           {addon.Name}
         </h4>
-        
+
         {/* Price & Duration Row */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2">
           <span className={`
-            text-xl font-bold
+            text-lg font-bold
             ${isSelected ? 'text-gold-600' : 'text-dark'}
           `}>
             {addon.Price > 0 ? `+$${addon.Price.toFixed(0)}` : 'Consultar'}
           </span>
           {addon.Duration > 0 && (
-            <span className="flex items-center gap-1 text-sm text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full">
-              <Clock className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1 text-xs text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full">
+              <Clock className="w-3 h-3" />
               +{addon.Duration} min
             </span>
           )}
         </div>
-        
-        {/* Brief Description Preview */}
-        {addon.Description && !showDetails && (
-          <p className="text-sm text-warm-gray mb-3 line-clamp-2">
-            {addon.Description}
-          </p>
-        )}
-        
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleToggle}
-            className={`
-              flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg
-              font-medium text-sm transition-all duration-200
-              ${isSelected
-                ? 'bg-gold text-dark hover:bg-gold/90'
-                : 'bg-beige-100 text-dark hover:bg-beige-200'
-              }
-            `}
-          >
-            {isSelected ? (
-              <>
-                <Check className="w-4 h-4" />
-                Agregado
-              </>
-            ) : (
-              <>
-                <Plus className="w-4 h-4" />
-                Agregar
-              </>
-            )}
-          </button>
-          
-          {addon.Description && (
-            <button
-              type="button"
-              onClick={handleInfoClick}
-              className={`
-                p-2.5 rounded-lg transition-all duration-200
-                ${showDetails 
-                  ? 'bg-gold/20 text-gold-600' 
-                  : 'bg-beige-100 text-warm-gray hover:bg-beige-200'
-                }
-              `}
-              aria-label="Ver detalles"
-            >
-              {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-          )}
-        </div>
       </div>
-      
-      {/* Expandable Full Description */}
-      <AnimatePresence>
-        {showDetails && addon.Description && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 pt-2 border-t border-beige-100 bg-beige-50/50">
-              <p className="text-sm text-warm-gray leading-relaxed">
-                {addon.Description}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    </motion.button>
   )
 }
 
@@ -219,15 +136,15 @@ export function AddonsStep() {
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto pb-4">
       {/* Header */}
-      <div className="text-center mb-6">
-        <div className="w-14 h-14 bg-gradient-to-br from-gold to-gold/60 rounded-full 
-                      flex items-center justify-center mx-auto mb-3 shadow-lg">
-          <Sparkles className="w-7 h-7 text-white" />
+      <div className="text-center mb-4">
+        <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                      flex items-center justify-center mx-auto mb-2 shadow-md">
+          <Sparkles className="w-5 h-5 text-white" />
         </div>
-        <h2 className="text-xl font-bold text-dark mb-1">
+        <h2 className="text-lg font-bold text-dark mb-0.5">
           ¿Deseas agregar algo más?
         </h2>
-        <p className="text-sm text-warm-gray">
+        <p className="text-xs text-warm-gray">
           Mejora tu experiencia con servicios adicionales
         </p>
       </div>
@@ -277,23 +194,23 @@ export function AddonsStep() {
       </div>
 
       {/* Navigation - Sticky at bottom */}
-      <div className="sticky bottom-0 bg-white border-t border-beige-200 pt-4 pb-2 -mx-6 px-6 mt-auto">
+      <div className="sticky bottom-0 bg-white border-t border-beige-200 py-2 -mx-6 px-6 mt-auto">
         <div className="flex items-center justify-between">
           <button
             onClick={prevStep}
-            className="flex items-center gap-2 text-warm-gray hover:text-dark transition-colors"
+            className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
             Volver
           </button>
 
           <button
             onClick={nextStep}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/90
-                     text-dark font-semibold rounded-xl hover:shadow-lg transition-all"
+            className="flex items-center gap-1 px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
+                     hover:bg-gold/90 transition-all"
           >
             {selectedAddons.length > 0 ? 'Continuar' : 'Saltar'}
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>

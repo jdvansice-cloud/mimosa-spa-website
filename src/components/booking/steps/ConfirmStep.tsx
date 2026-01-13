@@ -265,33 +265,32 @@ export function ConfirmStep() {
       </div>
       
       {/* Navigation */}
-      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="mt-6 pt-2 border-t border-beige-200 flex items-center justify-between gap-4">
         <button
           onClick={prevStep}
           disabled={isSubmitting}
-          className="flex items-center gap-2 text-warm-gray hover:text-dark transition-colors
+          className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors
                    disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
           Volver
         </button>
-        
+
         <button
           onClick={handleConfirmBooking}
           disabled={isSubmitting || isLoading}
-          className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-gold to-gold/90 
-                   text-dark font-bold text-lg rounded-xl hover:shadow-lg transition-all
-                   disabled:opacity-50 disabled:cursor-not-allowed
-                   flex items-center justify-center gap-2"
+          className="px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
+                   hover:bg-gold/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                   flex items-center justify-center gap-1"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
               Procesando...
             </>
           ) : (
             <>
-              <CheckCircle className="w-5 h-5" />
+              <CheckCircle className="w-4 h-4" />
               Confirmar Reserva
             </>
           )}
