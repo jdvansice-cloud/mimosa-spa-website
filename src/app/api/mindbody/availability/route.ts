@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     console.log('Required duration:', duration, 'minutes')
 
     // Get available items from Mindbody
-    // Try fetching for each session type individually if the combined call fails
+    // Note: /appointment/bookableitems REQUIRES sessionTypeIds parameter
     let availableItems: Array<{
       Id: number
       StartDateTime: string
@@ -68,50 +68,22 @@ export async function GET(request: NextRequest) {
       SessionType: { Id: number; Name: string }
     }> = []
 
-    try {
-      // First try with all session types
-      availableItems = await getBookableItems({
-        locationIds: parsedLocationId,
-        sessionTypeIds: serviceIdArray,
-        startDate,
-        endDate,
-      })
-      console.log('Bookable items returned with session types:', availableItems.length)
-
-      // If no items found with session type filter, try without it
-      if (availableItems.length === 0) {
-        console.log('No items with session type filter, trying without filter...')
-        const allItems = await getBookableItems({
-          locationIds: parsedLocationId,
-          startDate,
-          endDate,
-        })
-        console.log('All bookable items for location:', allItems.length)
-
-        // Log what session types are actually available
-        if (allItems.length > 0) {
-          const sessionTypes = new Set(allItems.map(item => `${item.SessionType?.Id}: ${item.SessionType?.Name}`))
-          console.log('Available session types at location:', Array.from(sessionTypes))
-        }
-
-        // Use all items if we couldn't find filtered ones
-        // The duration filter will still apply later
-        availableItems = allItems
-      }
-    } catch (error) {
-      console.error('Error fetching bookable items:', error)
-      // If that fails, try fetching without session type filter
+    // Only try bookableitems if we have session type IDs
+    if (serviceIdArray.length > 0) {
       try {
-        console.log('Trying to fetch all bookable items without session type filter...')
+        console.log('Fetching bookable items with session types:', serviceIdArray)
         availableItems = await getBookableItems({
           locationIds: parsedLocationId,
+          sessionTypeIds: serviceIdArray,
           startDate,
           endDate,
         })
-        console.log('All bookable items:', availableItems.length)
-      } catch (err) {
-        console.error('Error fetching all bookable items:', err)
+        console.log('Bookable items returned:', availableItems.length)
+      } catch (error) {
+        console.error('Error fetching bookable items:', error)
       }
+    } else {
+      console.log('No session type IDs provided - skipping bookableitems endpoint')
     }
 
     // If bookable items returns empty, try alternative endpoints

@@ -41,14 +41,22 @@ export async function GET(request: NextRequest) {
       Name: s.DisplayName
     }))
 
-    // Test 3: Get bookable items using the helper function (which now uses array format)
-    console.log('\n=== TEST 3: Bookable Items (no session filter) ===')
-    const allBookable = await getBookableItems({
-      locationIds: parsedLocationId,
-      startDate: startDateStr,
-      endDate: endDateStr,
-    })
-    console.log('All bookable items:', allBookable.length)
+    // Test 3: Get bookable items - REQUIRES sessionTypeIds
+    console.log('\n=== TEST 3: Bookable Items (with session types) ===')
+    let allBookable: Awaited<ReturnType<typeof getBookableItems>> = []
+    if (sessionTypes.length > 0) {
+      // Use all session type IDs we have
+      const allSessionTypeIds = sessionTypes.map(st => st.Id)
+      allBookable = await getBookableItems({
+        locationIds: parsedLocationId,
+        sessionTypeIds: allSessionTypeIds,
+        startDate: startDateStr,
+        endDate: endDateStr,
+      })
+      console.log('Bookable items with all session types:', allBookable.length)
+    } else {
+      console.log('No session types available - cannot call bookableitems')
+    }
 
     // Extract unique session types from bookable items
     const bookableSessionTypes = new Set<string>()
