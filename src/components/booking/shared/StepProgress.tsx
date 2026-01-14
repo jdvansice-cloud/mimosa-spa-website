@@ -14,8 +14,8 @@ const stepLabels: Record<number, string> = {
   2: 'Ubicación',
   3: 'Servicios',
   4: 'Adicionales',
-  5: 'Terapeuta',
-  6: 'Fecha y Hora',
+  5: 'Fecha y Hora',
+  6: 'Terapeuta',
   7: 'Confirmar'
 }
 

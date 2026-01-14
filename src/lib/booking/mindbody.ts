@@ -103,10 +103,12 @@ export async function getMindbodyToken(): Promise<MindbodyTokenResponse | null> 
 // API REQUEST HELPER
 // ===========================================
 
+type ParamValue = string | number | boolean | undefined | number[] | string[]
+
 interface MindbodyRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body?: Record<string, unknown>
-  params?: Record<string, string | number | boolean | undefined>
+  params?: Record<string, ParamValue>
 }
 
 export async function mindbodyRequest<T>(
@@ -114,17 +116,24 @@ export async function mindbodyRequest<T>(
   options: MindbodyRequestOptions = {}
 ): Promise<T> {
   const { method = 'GET', body, params } = options
-  
+
   // Get access token
   const token = await getAccessToken()
-  
+
   // Build URL with query params
   let url = `${MINDBODY_API_URL}${endpoint}`
   if (params) {
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        searchParams.append(key, String(value))
+        // Handle arrays - Mindbody API expects repeated params for arrays
+        if (Array.isArray(value)) {
+          value.forEach(v => {
+            searchParams.append(key, String(v))
+          })
+        } else {
+          searchParams.append(key, String(value))
+        }
       }
     })
     const queryString = searchParams.toString()
@@ -132,7 +141,9 @@ export async function mindbodyRequest<T>(
       url += `?${queryString}`
     }
   }
-  
+
+  console.log('Mindbody API request:', method, url)
+
   // Make request
   const response = await fetch(url, {
     method,
@@ -144,13 +155,13 @@ export async function mindbodyRequest<T>(
     },
     body: body ? JSON.stringify(body) : undefined,
   })
-  
+
   if (!response.ok) {
     const errorText = await response.text()
     console.error(`Mindbody API error: ${response.status}`, errorText)
-    throw new Error(`Mindbody API error: ${response.status}`)
+    throw new Error(`Mindbody API error: ${response.status} - ${errorText}`)
   }
-  
+
   return response.json()
 }
 
@@ -745,13 +756,15 @@ export async function getBookableItems(params: {
 
   console.log('getBookableItems called with:', params)
 
+  // Mindbody GET /appointment/bookableitems uses query params
+  // SessionTypeIds should be passed as array in the URL
   const response = await mindbodyRequest<BookableItemsResponse>('/appointment/bookableitems', {
     params: {
+      sessionTypeIds: params.sessionTypeIds, // Pass as array, mindbodyRequest will handle
       locationIds: params.locationIds,
-      sessionTypeIds: params.sessionTypeIds.join(','),
-      staffIds: params.staffIds,
       startDate: params.startDate,
       endDate: params.endDate,
+      ...(params.staffIds ? { staffIds: params.staffIds } : {}),
     }
   })
 
