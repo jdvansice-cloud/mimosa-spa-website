@@ -9,6 +9,8 @@ import type { MindbodyStaff } from '@/types/booking'
 export function StaffStep() {
   const {
     selectedLocation,
+    selectedServices,
+    selectedAddons,
     staff,
     setStaffList,
     selectedStaff,
@@ -21,7 +23,7 @@ export function StaffStep() {
   const [isLoadingStaff, setIsLoadingStaff] = useState(false)
   const [staffError, setStaffError] = useState<string | null>(null)
 
-  // Fetch staff on mount or when location changes
+  // Fetch staff on mount or when location/services change
   useEffect(() => {
     async function fetchStaff() {
       if (!selectedLocation) return
@@ -35,9 +37,16 @@ export function StaffStep() {
       setIsLoadingStaff(true)
       setStaffError(null)
       try {
-        const response = await fetch(
-          `/api/mindbody/staff?locationId=${selectedLocation.Id}`
-        )
+        // Build URL with location and session type IDs for the selected services
+        const allServices = [...selectedServices, ...selectedAddons]
+        const sessionTypeIds = allServices.map(s => s.Id).join(',')
+
+        let url = `/api/mindbody/staff?locationId=${selectedLocation.Id}`
+        if (sessionTypeIds) {
+          url += `&sessionTypeIds=${sessionTypeIds}`
+        }
+
+        const response = await fetch(url)
         const data = await response.json()
 
         if (!response.ok) {
@@ -54,7 +63,7 @@ export function StaffStep() {
     }
 
     fetchStaff()
-  }, [selectedLocation, staff, setStaffList])
+  }, [selectedLocation, selectedServices, selectedAddons, staff, setStaffList])
   
   const handleSelectStaff = (staffMember: MindbodyStaff | null) => {
     setStaff(staffMember)

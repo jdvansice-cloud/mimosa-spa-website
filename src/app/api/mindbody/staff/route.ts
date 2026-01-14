@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getStaff } from '@/lib/booking/mindbody'
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 
-// GET /api/mindbody/staff?locationId=1
+// GET /api/mindbody/staff?locationId=1&sessionTypeIds=1,2,3
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const locationId = searchParams.get('locationId')
+    const sessionTypeIdsParam = searchParams.get('sessionTypeIds')
 
     // Validate locationId if provided
     let parsedLocationId: number | undefined
@@ -20,8 +21,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Parse sessionTypeIds if provided
+    let sessionTypeIds: number[] | undefined
+    if (sessionTypeIdsParam) {
+      sessionTypeIds = sessionTypeIdsParam
+        .split(',')
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id))
+    }
+
     // Get staff from Mindbody
-    const staffMembers = await getStaff(parsedLocationId)
+    const staffMembers = await getStaff(parsedLocationId, sessionTypeIds)
 
     // Validate API response
     if (!Array.isArray(staffMembers)) {

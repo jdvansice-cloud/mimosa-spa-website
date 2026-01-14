@@ -392,7 +392,7 @@ export async function getAddons(locationId?: number) {
 }
 
 // Get staff
-export async function getStaff(locationId?: number) {
+export async function getStaff(locationId?: number, sessionTypeIds?: number[]) {
   interface StaffResponse {
     StaffMembers: Array<{
       Id: number
@@ -406,11 +406,20 @@ export async function getStaff(locationId?: number) {
       MobilePhone?: string
     }>
   }
-  
+
+  // Build params - include sessionTypeIds if provided to get staff who can perform those services
+  const params: Record<string, string | number | boolean | undefined> = {}
+  if (locationId) {
+    params.locationIds = locationId
+  }
+  if (sessionTypeIds && sessionTypeIds.length > 0) {
+    params.sessionTypeIds = sessionTypeIds.join(',')
+  }
+
   const response = await mindbodyRequest<StaffResponse>('/staff/staff', {
-    params: locationId ? { locationIds: locationId } : undefined
+    params: Object.keys(params).length > 0 ? params : undefined
   })
-  
+
   // Filter for appointment providers only
   return (response.StaffMembers || [])
     .filter(s => s.AppointmentTrn)
