@@ -163,6 +163,50 @@ export async function GET(request: NextRequest) {
       console.log('Schedule items error:', e)
     }
 
+    // Test 8: Try schedule items with specific known staff IDs
+    // These are staff members from San Francisco location who should have schedules
+    console.log('\n=== TEST 8: Schedule Items with Specific Staff ===')
+    const knownStaffIds = [
+      100000076, // Noreidis Iglesias
+      100000063, // Judith Padilla
+      100000017, // Marianelis Salcedo
+      100000069, // Yeni Solis
+      100000068, // Meilin Villarreal
+    ]
+    let staffSchedules: typeof scheduleItems = []
+    try {
+      staffSchedules = await getScheduleItems({
+        locationIds: [parsedLocationId],
+        staffIds: knownStaffIds,
+        startDate: startDateStr,
+        endDate: endDateStr,
+      })
+      console.log('Staff schedules for known staff:', staffSchedules.length)
+      for (const s of staffSchedules) {
+        console.log(`Staff ${s.FirstName} ${s.LastName}: ${s.Availabilities?.length || 0} availabilities, ${s.Appointments?.length || 0} appointments`)
+      }
+    } catch (e) {
+      console.log('Staff schedules error:', e)
+    }
+
+    // Test 9: Try staff availability with specific staff IDs
+    console.log('\n=== TEST 9: Staff Appointment Availability with Specific Staff ===')
+    let knownStaffAvailability: typeof staffAvailability = []
+    try {
+      knownStaffAvailability = await getStaffAppointmentAvailability({
+        locationId: parsedLocationId,
+        staffIds: knownStaffIds,
+        startDateTime: `${startDateStr}T00:00:00`,
+        endDateTime: `${endDateStr}T23:59:59`,
+      })
+      console.log('Known staff availability:', knownStaffAvailability.length)
+      for (const s of knownStaffAvailability) {
+        console.log(`Staff ${s.FirstName} ${s.LastName}: ${s.Availabilities?.length || 0} availabilities`)
+      }
+    } catch (e) {
+      console.log('Known staff availability error:', e)
+    }
+
     return NextResponse.json({
       locationId: parsedLocationId,
       dateRange: { start: startDateStr, end: endDateStr },
@@ -201,6 +245,27 @@ export async function GET(request: NextRequest) {
           Name: `${s.FirstName} ${s.LastName}`,
           availabilityCount: s.Availabilities?.length || 0,
           appointmentCount: s.Appointments?.length || 0,
+          sampleAvailability: s.Availabilities?.[0] || null,
+        })),
+      },
+      knownStaffSchedules: {
+        testedStaffIds: knownStaffIds,
+        total: staffSchedules.length,
+        staff: staffSchedules.map(s => ({
+          Id: s.Id,
+          Name: `${s.FirstName} ${s.LastName}`,
+          availabilityCount: s.Availabilities?.length || 0,
+          appointmentCount: s.Appointments?.length || 0,
+          sampleAvailability: s.Availabilities?.[0] || null,
+        })),
+      },
+      knownStaffAvailability: {
+        testedStaffIds: knownStaffIds,
+        total: knownStaffAvailability.length,
+        staff: knownStaffAvailability.map(s => ({
+          Id: s.Id,
+          Name: `${s.FirstName} ${s.LastName}`,
+          availabilityCount: s.Availabilities?.length || 0,
           sampleAvailability: s.Availabilities?.[0] || null,
         })),
       },
