@@ -122,7 +122,7 @@ export function DateTimeStep() {
 
   const handleDateSelect = (dateString: string) => {
     setDate(dateString)
-    setTime(null) // Reset time when date changes
+    // Note: setDate in store already resets selectedTime to null
   }
 
   const handleTimeSelect = (time: string) => {
