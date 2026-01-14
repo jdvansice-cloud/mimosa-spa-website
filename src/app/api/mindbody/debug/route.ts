@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionTypes, getStaff, getBookableItems, getAvailableDates, getStaffAppointmentAvailability } from '@/lib/booking/mindbody'
+import { getSessionTypes, getStaff, getBookableItems, getAvailableDates, getStaffAppointmentAvailability, getScheduleItems } from '@/lib/booking/mindbody'
 
 // GET /api/mindbody/debug?locationId=1
 // Debug endpoint to test Mindbody API responses directly
@@ -122,6 +122,39 @@ export async function GET(request: NextRequest) {
       console.log('Staff availability error:', e)
     }
 
+    // Test 7: Try schedule items endpoint - raw staff schedules
+    console.log('\n=== TEST 7: Schedule Items ===')
+    let scheduleItems: Array<{
+      Id: number
+      FirstName: string
+      LastName: string
+      Availabilities: Array<{
+        Id: number
+        StartDateTime: string
+        EndDateTime: string
+        BookableEndDateTime?: string
+      }>
+      Appointments: Array<{
+        Id: number
+        StartDateTime: string
+        EndDateTime: string
+        Status: string
+      }>
+    }> = []
+    try {
+      scheduleItems = await getScheduleItems({
+        locationIds: [parsedLocationId],
+        startDate: startDateStr,
+        endDate: endDateStr,
+      })
+      console.log('Schedule items staff:', scheduleItems.length)
+      if (scheduleItems.length > 0) {
+        console.log('Sample schedule item:', JSON.stringify(scheduleItems[0], null, 2))
+      }
+    } catch (e) {
+      console.log('Schedule items error:', e)
+    }
+
     return NextResponse.json({
       locationId: parsedLocationId,
       dateRange: { start: startDateStr, end: endDateStr },
@@ -150,6 +183,16 @@ export async function GET(request: NextRequest) {
           Id: s.Id,
           Name: `${s.FirstName} ${s.LastName}`,
           availabilityCount: s.Availabilities?.length || 0,
+          sampleAvailability: s.Availabilities?.[0] || null,
+        })),
+      },
+      scheduleItems: {
+        total: scheduleItems.length,
+        staff: scheduleItems.map(s => ({
+          Id: s.Id,
+          Name: `${s.FirstName} ${s.LastName}`,
+          availabilityCount: s.Availabilities?.length || 0,
+          appointmentCount: s.Appointments?.length || 0,
           sampleAvailability: s.Availabilities?.[0] || null,
         })),
       },

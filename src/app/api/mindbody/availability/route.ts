@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBookableItems, getStaffAppointmentAvailability } from '@/lib/booking/mindbody'
+import { getBookableItems, getStaffAppointmentAvailability, getScheduleItems } from '@/lib/booking/mindbody'
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 
 // GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&startDate=2026-01-15&endDate=2026-01-29&duration=90
@@ -114,10 +114,56 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // If bookable items returns empty, try the staff appointment availability endpoint
-    // This is a fallback that gets raw staff schedule data
+    // If bookable items returns empty, try alternative endpoints
     if (availableItems.length === 0) {
-      console.log('=== BOOKABLE ITEMS EMPTY - TRYING STAFF AVAILABILITY ===')
+      console.log('=== BOOKABLE ITEMS EMPTY - TRYING SCHEDULE ITEMS ===')
+
+      // Try /appointment/scheduleitems first - this returns raw staff schedules
+      try {
+        const scheduleItems = await getScheduleItems({
+          locationIds: [parsedLocationId],
+          startDate,
+          endDate,
+        })
+
+        console.log('Schedule items returned:', scheduleItems.length, 'staff members')
+
+        // Convert schedule availabilities to the same format as bookable items
+        for (const staff of scheduleItems) {
+          if (staff.Availabilities && staff.Availabilities.length > 0) {
+            console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Availabilities.length} availability blocks`)
+            for (const avail of staff.Availabilities) {
+              availableItems.push({
+                Id: avail.Id || 0,
+                StartDateTime: avail.StartDateTime,
+                EndDateTime: avail.BookableEndDateTime || avail.EndDateTime,
+                Staff: {
+                  Id: staff.Id,
+                  FirstName: staff.FirstName,
+                  LastName: staff.LastName,
+                },
+                Location: {
+                  Id: parsedLocationId,
+                  Name: 'Location',
+                },
+                SessionType: {
+                  Id: serviceIdArray[0] || 0,
+                  Name: 'Service',
+                },
+              })
+            }
+          }
+        }
+
+        console.log('Converted schedule items to', availableItems.length, 'availability items')
+      } catch (err) {
+        console.error('Error fetching schedule items:', err)
+      }
+    }
+
+    // If still empty, try staff appointment availability as second fallback
+    if (availableItems.length === 0) {
+      console.log('=== SCHEDULE ITEMS EMPTY - TRYING STAFF APPOINTMENT AVAILABILITY ===')
 
       try {
         const staffAvailability = await getStaffAppointmentAvailability({

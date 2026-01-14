@@ -903,6 +903,96 @@ export async function getStaffAppointments(params: {
   return response.Appointments || []
 }
 
+// Get active session types that have availability
+// This endpoint returns session types with staff assignments
+export async function getActiveSessionTypes(params: {
+  locationId: number
+  startDate: string
+  endDate: string
+}) {
+  interface ActiveSessionTypesResponse {
+    SessionTypes: Array<{
+      Id: number
+      Name: string
+      ProgramId: number
+      DefaultTimeLength: number
+      OnlineDescription: string | null
+    }>
+  }
+
+  console.log('getActiveSessionTypes called with:', params)
+
+  const response = await mindbodyRequest<ActiveSessionTypesResponse>('/appointment/activesessiontypes', {
+    params: {
+      scheduleType: 'Appointment',
+      locationId: params.locationId,
+      startDate: params.startDate,
+      endDate: params.endDate,
+    }
+  })
+
+  console.log('Active session types response:', response.SessionTypes?.length || 0, 'session types')
+
+  return response.SessionTypes || []
+}
+
+// Get schedule items - returns raw schedule blocks for staff
+export async function getScheduleItems(params: {
+  locationIds: number[]
+  staffIds?: number[]
+  startDate: string
+  endDate: string
+}) {
+  interface ScheduleItemsResponse {
+    StaffMembers: Array<{
+      Id: number
+      FirstName: string
+      LastName: string
+      Appointments: Array<{
+        Id: number
+        StartDateTime: string
+        EndDateTime: string
+        Status: string
+        SessionType?: {
+          Id: number
+          Name: string
+        }
+      }>
+      Availabilities: Array<{
+        Id: number
+        StartDateTime: string
+        EndDateTime: string
+        BookableEndDateTime?: string
+      }>
+      UnavailableItems: Array<{
+        Id: number
+        StartDateTime: string
+        EndDateTime: string
+      }>
+    }>
+  }
+
+  console.log('getScheduleItems called with:', params)
+
+  const queryParams: Record<string, ParamValue> = {
+    locationIds: params.locationIds,
+    startDate: params.startDate,
+    endDate: params.endDate,
+  }
+
+  if (params.staffIds && params.staffIds.length > 0) {
+    queryParams.staffIds = params.staffIds
+  }
+
+  const response = await mindbodyRequest<ScheduleItemsResponse>('/appointment/scheduleitems', {
+    params: queryParams
+  })
+
+  console.log('Schedule items response:', response.StaffMembers?.length || 0, 'staff members')
+
+  return response.StaffMembers || []
+}
+
 // Add appointment
 export async function addAppointment(appointmentData: {
   ClientId: number
