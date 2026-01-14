@@ -328,6 +328,38 @@ export async function getSessionTypes(onlineOnly: boolean = true) {
   return sessionTypes
 }
 
+// Normalize name for flexible matching between sale/services and sessiontypes
+function normalizeServiceName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    // Remove common variations
+    .replace(/\s+/g, ' ')  // Multiple spaces to single
+    .replace(/[–—]/g, '-') // Different dash types
+}
+
+// Find matching session type with flexible matching
+function findSessionTypeMatch(
+  name: string,
+  sessionTypeMap: Map<string, { Id: number; Duration: number; ProgramId: number }>
+): { Id: number; Duration: number; ProgramId: number } | undefined {
+  const normalizedName = normalizeServiceName(name)
+
+  // Try exact match first
+  if (sessionTypeMap.has(normalizedName)) {
+    return sessionTypeMap.get(normalizedName)
+  }
+
+  // Try partial match - service name contains session type name or vice versa
+  for (const [stName, stData] of sessionTypeMap.entries()) {
+    if (normalizedName.includes(stName) || stName.includes(normalizedName)) {
+      return stData
+    }
+  }
+
+  return undefined
+}
+
 // Get services by combining session types (for appointments) with sale services (for pricing)
 // This ensures we have the correct SessionTypeId for booking appointments
 // Filter: Online bookable, single session, has price, NOT Adicionales
@@ -349,15 +381,13 @@ export async function getServices(locationId?: number) {
   console.log('Total online session types:', sessionTypes.length)
 
   // Create a map of session types by normalized name for matching
-  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number; Category: string }>()
+  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
   for (const st of sessionTypes) {
-    // Normalize name for matching (lowercase, trim)
-    const normalizedName = st.Name.toLowerCase().trim()
+    const normalizedName = normalizeServiceName(st.Name)
     sessionTypeMap.set(normalizedName, {
       Id: st.Id,
       Duration: st.DefaultTimeLength || 0,
       ProgramId: st.ProgramId,
-      Category: st.Category || 'General',
     })
   }
 
@@ -372,8 +402,7 @@ export async function getServices(locationId?: number) {
 
   // Transform and match with session types for correct Id
   const services = filteredServices.map(s => {
-    const normalizedName = s.Name.toLowerCase().trim()
-    const sessionType = sessionTypeMap.get(normalizedName)
+    const sessionType = findSessionTypeMatch(s.Name, sessionTypeMap)
 
     // Use SessionTypeId from session types if found, otherwise use ProductId
     const serviceId = sessionType?.Id || s.ProductId
@@ -393,7 +422,8 @@ export async function getServices(locationId?: number) {
       OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
       TaxIncluded: s.TaxIncluded,
       OnlineBooking: s.SellOnline,
-      Category: sessionType?.Category || getSpanishCategory(s.ProgramId),
+      // Always use Spanish category from PROGRAM_NAMES based on ProgramId
+      Category: getSpanishCategory(s.ProgramId),
       ProgramId: s.ProgramId,
       IsAddOn: false,
     }
@@ -401,8 +431,7 @@ export async function getServices(locationId?: number) {
 
   // Only include services that have a matching session type (truly online bookable)
   const onlineBookableServices = services.filter(s => {
-    const normalizedName = s.Name.toLowerCase().trim()
-    return sessionTypeMap.has(normalizedName)
+    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
   })
 
   console.log('Online bookable services with session type match:', onlineBookableServices.length)
@@ -430,27 +459,28 @@ export async function getAddons(locationId?: number) {
   console.log('Total sale/services for add-ons:', allSaleServices.length)
 
   // Create a map of session types by normalized name
-  const sessionTypeMap = new Map<string, { Id: number; Duration: number }>()
+  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
   for (const st of sessionTypes) {
-    const normalizedName = st.Name.toLowerCase().trim()
+    const normalizedName = normalizeServiceName(st.Name)
     sessionTypeMap.set(normalizedName, {
       Id: st.Id,
       Duration: st.DefaultTimeLength || 0,
+      ProgramId: st.ProgramId,
     })
   }
 
-  // Filter for Adicionales only
+  // Filter for Adicionales only (ProgramId 8)
   const filteredAddons = allSaleServices.filter(s =>
     s.ProgramId === 8 && // Adicionales category
     s.SellOnline === true &&
     s.Count === 1 &&
     s.Price > 0
   )
+  console.log('Filtered addons from sale/services (ProgramId=8, SellOnline):', filteredAddons.length)
 
-  // Transform and match with session types
+  // Transform and match with session types using flexible matching
   const addons = filteredAddons.map(s => {
-    const normalizedName = s.Name.toLowerCase().trim()
-    const sessionType = sessionTypeMap.get(normalizedName)
+    const sessionType = findSessionTypeMatch(s.Name, sessionTypeMap)
 
     const serviceId = sessionType?.Id || s.ProductId
     const duration = sessionType?.Duration || parseDurationFromName(s.Name)
@@ -477,11 +507,17 @@ export async function getAddons(locationId?: number) {
 
   // Only include addons that have a matching session type (truly online bookable)
   const onlineBookableAddons = addons.filter(s => {
-    const normalizedName = s.Name.toLowerCase().trim()
-    return sessionTypeMap.has(normalizedName)
+    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
   })
 
   console.log('Online bookable add-ons with session type match:', onlineBookableAddons.length)
+
+  // If no addons match session types, return all filtered addons
+  // This handles cases where addons might not have separate session types
+  if (onlineBookableAddons.length === 0 && filteredAddons.length > 0) {
+    console.log('No session type matches - returning all SellOnline addons:', filteredAddons.length)
+    return addons
+  }
 
   return onlineBookableAddons
 }
