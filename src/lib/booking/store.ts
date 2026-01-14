@@ -204,21 +204,21 @@ const initialState: BookingState = {
 // HELPER FUNCTIONS
 // ===========================================
 
+// Step order: auth -> location -> services -> addons -> datetime -> staff -> confirm -> success
+const STEP_ORDER: BookingStep[] = ['auth', 'location', 'services', 'addons', 'datetime', 'staff', 'confirm', 'success']
+
 function getNextStep(currentStep: BookingStep): BookingStep {
-  const steps: BookingStep[] = ['auth', 'location', 'services', 'addons', 'staff', 'datetime', 'confirm', 'success']
-  const currentIndex = steps.indexOf(currentStep)
-  return currentIndex < steps.length - 1 ? steps[currentIndex + 1] : currentStep
+  const currentIndex = STEP_ORDER.indexOf(currentStep)
+  return currentIndex < STEP_ORDER.length - 1 ? STEP_ORDER[currentIndex + 1] : currentStep
 }
 
 function getPrevStep(currentStep: BookingStep): BookingStep {
-  const steps: BookingStep[] = ['auth', 'location', 'services', 'addons', 'staff', 'datetime', 'confirm', 'success']
-  const currentIndex = steps.indexOf(currentStep)
-  return currentIndex > 0 ? steps[currentIndex - 1] : currentStep
+  const currentIndex = STEP_ORDER.indexOf(currentStep)
+  return currentIndex > 0 ? STEP_ORDER[currentIndex - 1] : currentStep
 }
 
 function getStepByNumber(stepNumber: number): BookingStep {
-  const steps: BookingStep[] = ['auth', 'location', 'services', 'addons', 'staff', 'datetime', 'confirm', 'success']
-  return steps[stepNumber - 1] || 'auth'
+  return STEP_ORDER[stepNumber - 1] || 'auth'
 }
 
 function calculateTotalDuration(services: MindbodyService[], addons: MindbodyService[]): number {
@@ -404,13 +404,21 @@ export const useBookingStore = create<BookingState & BookingActions>()(
       // SCHEDULE ACTIONS
       // ===========================================
       
-      setDate: (date) => set({ 
+      setDate: (date) => set({
         selectedDate: date,
         selectedTime: null, // Reset time when date changes
-        availableSlots: []
+        availableSlots: [],
+        // Clear staff selection when date changes (staff availability depends on date/time)
+        selectedStaff: null,
+        staff: []
       }, false, 'setDate'),
-      
-      setTime: (time) => set({ selectedTime: time }, false, 'setTime'),
+
+      setTime: (time) => set({
+        selectedTime: time,
+        // Clear staff selection when time changes (staff availability depends on date/time)
+        selectedStaff: null,
+        staff: []
+      }, false, 'setTime'),
       
       setAvailableDates: (dates) => set({ availableDates: dates }, false, 'setAvailableDates'),
       
@@ -564,7 +572,7 @@ export const useBookingStore = create<BookingState & BookingActions>()(
 // ===========================================
 
 export const selectCurrentStepNumber = (state: BookingState) => {
-  const steps: BookingStep[] = ['auth', 'location', 'services', 'addons', 'staff', 'datetime', 'confirm', 'success']
+  const steps: BookingStep[] = ['auth', 'location', 'services', 'addons', 'datetime', 'staff', 'confirm', 'success']
   return steps.indexOf(state.currentStep) + 1
 }
 
@@ -586,10 +594,10 @@ export const selectCanProceed = (state: BookingState) => {
       return state.selectedServices.length > 0
     case 'addons':
       return true // Addons are optional
-    case 'staff':
-      return true // "Any therapist" is valid
     case 'datetime':
       return state.selectedDate !== null && state.selectedTime !== null
+    case 'staff':
+      return true // "Any therapist" is valid
     case 'confirm':
       return true
     default:

@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getBookableItems } from '@/lib/booking/mindbody'
-import {
-  sanitizeError,
-  ERROR_MESSAGES,
-  PANAMA_TIMEZONE
-} from '@/lib/booking/constants'
+import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 
-// GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&staffId=1&startDate=2026-01-15&endDate=2026-01-29&duration=90
+// GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&startDate=2026-01-15&endDate=2026-01-29&duration=90
+// Returns available time slots in 30-min increments where at least one therapist
+// has continuous availability for the total treatment duration
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const locationId = searchParams.get('locationId')
     const serviceIds = searchParams.get('serviceIds')
-    const staffId = searchParams.get('staffId')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const totalDuration = searchParams.get('duration') // Total duration needed in minutes
@@ -54,11 +51,18 @@ export async function GET(request: NextRequest) {
 
     const duration = totalDuration ? parseInt(totalDuration) : 60
 
+    console.log('Fetching availability for:', {
+      locationId: parsedLocationId,
+      serviceIds: serviceIdArray,
+      startDate,
+      endDate,
+      duration
+    })
+
     // Get available items from Mindbody
     const availableItems = await getBookableItems({
       locationIds: parsedLocationId,
       sessionTypeIds: serviceIdArray,
-      staffIds: staffId ? parseInt(staffId) : undefined,
       startDate,
       endDate,
     })
@@ -72,75 +76,153 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Process available items into dates and time slots
-    const dateMap = new Map<string, {
-      date: string
-      slots: Array<{
-        time: string
-        displayTime: string
-        staffId: number
-        staffName: string
-        available: boolean
-      }>
-    }>()
+    console.log('Total bookable items from Mindbody:', availableItems.length)
+
+    // Group availability by date -> staff -> time blocks
+    // We need to find continuous time blocks for each staff member
+    const staffAvailabilityByDate = new Map<string, Map<number, {
+      staffId: number
+      staffName: string
+      blocks: { start: Date; end: Date }[]
+    }>>()
 
     for (const item of availableItems) {
-      // Validate item has required fields
       if (!item.StartDateTime || !item.EndDateTime || !item.Staff) {
         continue
       }
 
-      const dateTime = new Date(item.StartDateTime)
-      if (isNaN(dateTime.getTime())) {
+      const startDT = new Date(item.StartDateTime)
+      const endDT = new Date(item.EndDateTime)
+
+      if (isNaN(startDT.getTime()) || isNaN(endDT.getTime())) {
         continue
       }
 
-      const dateKey = dateTime.toISOString().split('T')[0]
-      const timeKey = dateTime.toTimeString().slice(0, 5) // "09:00"
+      const dateKey = startDT.toISOString().split('T')[0]
 
-      // Calculate end time to ensure slot fits duration
-      const endTime = new Date(item.EndDateTime)
-      if (isNaN(endTime.getTime())) {
-        continue
+      if (!staffAvailabilityByDate.has(dateKey)) {
+        staffAvailabilityByDate.set(dateKey, new Map())
       }
 
-      const slotDuration = (endTime.getTime() - dateTime.getTime()) / (1000 * 60)
+      const staffMap = staffAvailabilityByDate.get(dateKey)!
 
-      // Only include slots that can fit the total duration
-      if (slotDuration < duration) continue
-
-      if (!dateMap.has(dateKey)) {
-        dateMap.set(dateKey, {
-          date: dateKey,
-          slots: []
+      if (!staffMap.has(item.Staff.Id)) {
+        staffMap.set(item.Staff.Id, {
+          staffId: item.Staff.Id,
+          staffName: `${item.Staff.FirstName} ${item.Staff.LastName}`,
+          blocks: []
         })
       }
 
-      const dateEntry = dateMap.get(dateKey)!
+      staffMap.get(item.Staff.Id)!.blocks.push({
+        start: startDT,
+        end: endDT
+      })
+    }
 
-      // Check if time slot already exists
-      const existingSlot = dateEntry.slots.find(s => s.time === timeKey)
-      if (!existingSlot) {
-        dateEntry.slots.push({
-          time: timeKey,
-          displayTime: formatTime(timeKey),
-          staffId: item.Staff.Id,
-          staffName: `${item.Staff.FirstName} ${item.Staff.LastName}`,
-          available: true
+    // Process each date to generate 30-minute time slots
+    const availableDates: Array<{
+      date: string
+      displayDate: string
+      hasAvailability: boolean
+      slotsCount: number
+      slots: Array<{
+        time: string
+        displayTime: string
+        available: boolean
+        availableStaffIds: number[]
+      }>
+    }> = []
+
+    for (const [dateKey, staffMap] of staffAvailabilityByDate.entries()) {
+      // Merge overlapping/adjacent blocks for each staff
+      const staffWithMergedBlocks = new Map<number, {
+        staffId: number
+        staffName: string
+        blocks: { start: Date; end: Date }[]
+      }>()
+
+      for (const [staffId, staffData] of staffMap.entries()) {
+        const mergedBlocks = mergeTimeBlocks(staffData.blocks)
+        staffWithMergedBlocks.set(staffId, {
+          ...staffData,
+          blocks: mergedBlocks
+        })
+      }
+
+      // Find the earliest and latest times across all staff
+      let dayStart: Date | null = null
+      let dayEnd: Date | null = null
+
+      for (const staffData of staffWithMergedBlocks.values()) {
+        for (const block of staffData.blocks) {
+          if (!dayStart || block.start < dayStart) dayStart = block.start
+          if (!dayEnd || block.end > dayEnd) dayEnd = block.end
+        }
+      }
+
+      if (!dayStart || !dayEnd) continue
+
+      // Generate 30-minute slots
+      const slots: Array<{
+        time: string
+        displayTime: string
+        available: boolean
+        availableStaffIds: number[]
+      }> = []
+
+      // Round dayStart down to nearest 30 minutes
+      const slotStart = new Date(dayStart)
+      slotStart.setMinutes(Math.floor(slotStart.getMinutes() / 30) * 30, 0, 0)
+
+      const currentSlot = new Date(slotStart)
+
+      while (currentSlot < dayEnd) {
+        const slotTime = currentSlot.toTimeString().slice(0, 5) // "09:00"
+        const slotEnd = new Date(currentSlot.getTime() + duration * 60 * 1000)
+
+        // Check which staff can accommodate this slot with the full duration
+        const availableStaffIds: number[] = []
+
+        for (const [staffId, staffData] of staffWithMergedBlocks.entries()) {
+          // Check if any block can fit the entire duration starting at this time
+          for (const block of staffData.blocks) {
+            if (currentSlot >= block.start && slotEnd <= block.end) {
+              availableStaffIds.push(staffId)
+              break
+            }
+          }
+        }
+
+        // Only add slot if at least one staff member is available
+        if (availableStaffIds.length > 0) {
+          slots.push({
+            time: slotTime,
+            displayTime: formatTime(slotTime),
+            available: true,
+            availableStaffIds
+          })
+        }
+
+        // Move to next 30-minute slot
+        currentSlot.setMinutes(currentSlot.getMinutes() + 30)
+      }
+
+      if (slots.length > 0) {
+        availableDates.push({
+          date: dateKey,
+          displayDate: formatDate(dateKey),
+          hasAvailability: true,
+          slotsCount: slots.length,
+          slots: slots.sort((a, b) => a.time.localeCompare(b.time))
         })
       }
     }
 
-    // Convert to array and sort
-    const availableDates = Array.from(dateMap.values())
-      .map(d => ({
-        date: d.date,
-        displayDate: formatDate(d.date),
-        hasAvailability: d.slots.length > 0,
-        slotsCount: d.slots.length,
-        slots: d.slots.sort((a, b) => a.time.localeCompare(b.time))
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date))
+    // Sort dates
+    availableDates.sort((a, b) => a.date.localeCompare(b.date))
+
+    console.log('Available dates found:', availableDates.length)
 
     return NextResponse.json({
       availableDates,
@@ -155,6 +237,30 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+// Merge overlapping or adjacent time blocks
+function mergeTimeBlocks(blocks: { start: Date; end: Date }[]): { start: Date; end: Date }[] {
+  if (blocks.length === 0) return []
+
+  // Sort by start time
+  const sorted = [...blocks].sort((a, b) => a.start.getTime() - b.start.getTime())
+
+  const merged: { start: Date; end: Date }[] = [sorted[0]]
+
+  for (let i = 1; i < sorted.length; i++) {
+    const current = sorted[i]
+    const last = merged[merged.length - 1]
+
+    // If current block overlaps or is adjacent to last block, merge them
+    if (current.start.getTime() <= last.end.getTime()) {
+      last.end = new Date(Math.max(last.end.getTime(), current.end.getTime()))
+    } else {
+      merged.push(current)
+    }
+  }
+
+  return merged
 }
 
 // Helper: Format time to display format

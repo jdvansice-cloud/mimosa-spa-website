@@ -81,23 +81,23 @@ export interface MindbodyAppointment {
 // BOOKING FLOW TYPES
 // ===========================================
 
-export type BookingStep = 
+export type BookingStep =
   | 'auth'
   | 'location'
   | 'services'
   | 'addons'
-  | 'staff'
-  | 'datetime'
+  | 'datetime'  // Now step 5 - select date and time first
+  | 'staff'     // Now step 6 - select therapist based on date/time
   | 'confirm'
   | 'success'
 
 export const BOOKING_STEPS: BookingStep[] = [
   'auth',
-  'location', 
+  'location',
   'services',
   'addons',
-  'staff',
-  'datetime',
+  'datetime',  // Date/time before staff
+  'staff',     // Staff after date/time
   'confirm',
   'success'
 ]
@@ -107,8 +107,8 @@ export const STEP_NUMBERS: Record<BookingStep, number> = {
   location: 2,
   services: 3,
   addons: 4,
-  staff: 5,
-  datetime: 6,
+  datetime: 5,  // Now step 5
+  staff: 6,     // Now step 6
   confirm: 7,
   success: 8
 }
@@ -170,7 +170,8 @@ export interface TimeSlot {
   time: string // "09:00"
   displayTime: string // "9:00 AM"
   available: boolean
-  staffId?: number
+  // Staff IDs that have availability for this slot (can accommodate total duration)
+  availableStaffIds: number[]
 }
 
 export interface AvailableDate {
@@ -178,6 +179,7 @@ export interface AvailableDate {
   displayDate: string // "Miércoles, 15 de Enero"
   hasAvailability: boolean
   slotsCount: number
+  slots?: TimeSlot[] // Time slots for this date
 }
 
 // ===========================================
