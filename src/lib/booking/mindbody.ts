@@ -728,7 +728,7 @@ export async function getStaffWithAvailability(params: {
 // Get bookable items (availability) - returns specific time slots
 export async function getBookableItems(params: {
   locationIds: number
-  sessionTypeIds: number[]
+  sessionTypeIds?: number[]
   staffIds?: number
   startDate: string
   endDate: string
@@ -756,16 +756,27 @@ export async function getBookableItems(params: {
 
   console.log('getBookableItems called with:', params)
 
+  // Build params - sessionTypeIds is optional
+  const queryParams: Record<string, ParamValue> = {
+    locationIds: params.locationIds,
+    startDate: params.startDate,
+    endDate: params.endDate,
+  }
+
+  // Only add sessionTypeIds if provided and not empty
+  if (params.sessionTypeIds && params.sessionTypeIds.length > 0) {
+    queryParams.sessionTypeIds = params.sessionTypeIds
+  }
+
+  if (params.staffIds) {
+    queryParams.staffIds = params.staffIds
+  }
+
+  console.log('getBookableItems query params:', queryParams)
+
   // Mindbody GET /appointment/bookableitems uses query params
-  // SessionTypeIds should be passed as array in the URL
   const response = await mindbodyRequest<BookableItemsResponse>('/appointment/bookableitems', {
-    params: {
-      sessionTypeIds: params.sessionTypeIds, // Pass as array, mindbodyRequest will handle
-      locationIds: params.locationIds,
-      startDate: params.startDate,
-      endDate: params.endDate,
-      ...(params.staffIds ? { staffIds: params.staffIds } : {}),
-    }
+    params: queryParams
   })
 
   console.log('Bookable items response:', response.AvailableItems?.length || 0, 'items')

@@ -104,8 +104,18 @@ export function DateTimeStep() {
           duration: totalDuration.toString()
         })
 
+        console.log('Fetching availability with params:', {
+          locationId: selectedLocation.Id,
+          serviceIds: serviceIds,
+          services: selectedServices.map(s => ({ id: s.Id, name: s.Name })),
+          addons: selectedAddons.map(a => ({ id: a.Id, name: a.Name })),
+          duration: totalDuration
+        })
+
         const response = await fetch(`/api/mindbody/availability?${params}`)
         const data = await response.json()
+
+        console.log('Availability response:', data)
 
         if (!response.ok) {
           throw new Error(data.error || 'Error al cargar disponibilidad')

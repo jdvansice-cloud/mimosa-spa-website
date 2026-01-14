@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBookableItems } from '@/lib/booking/mindbody'
+import { getBookableItems, getStaff } from '@/lib/booking/mindbody'
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 
 // GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&startDate=2026-01-15&endDate=2026-01-29&duration=90
@@ -51,21 +51,85 @@ export async function GET(request: NextRequest) {
 
     const duration = totalDuration ? parseInt(totalDuration) : 60
 
-    console.log('Fetching availability for:', {
-      locationId: parsedLocationId,
-      serviceIds: serviceIdArray,
-      startDate,
-      endDate,
-      duration
-    })
+    console.log('=== AVAILABILITY REQUEST ===')
+    console.log('Location ID:', parsedLocationId)
+    console.log('Session Type IDs:', serviceIdArray)
+    console.log('Date range:', startDate, 'to', endDate)
+    console.log('Required duration:', duration, 'minutes')
 
     // Get available items from Mindbody
-    const availableItems = await getBookableItems({
-      locationIds: parsedLocationId,
-      sessionTypeIds: serviceIdArray,
-      startDate,
-      endDate,
-    })
+    // Try fetching for each session type individually if the combined call fails
+    let availableItems: Array<{
+      Id: number
+      StartDateTime: string
+      EndDateTime: string
+      Staff: { Id: number; FirstName: string; LastName: string }
+      Location: { Id: number; Name: string }
+      SessionType: { Id: number; Name: string }
+    }> = []
+
+    try {
+      // First try with all session types
+      availableItems = await getBookableItems({
+        locationIds: parsedLocationId,
+        sessionTypeIds: serviceIdArray,
+        startDate,
+        endDate,
+      })
+      console.log('Bookable items returned with session types:', availableItems.length)
+
+      // If no items found with session type filter, try without it
+      if (availableItems.length === 0) {
+        console.log('No items with session type filter, trying without filter...')
+        const allItems = await getBookableItems({
+          locationIds: parsedLocationId,
+          startDate,
+          endDate,
+        })
+        console.log('All bookable items for location:', allItems.length)
+
+        // Log what session types are actually available
+        if (allItems.length > 0) {
+          const sessionTypes = new Set(allItems.map(item => `${item.SessionType?.Id}: ${item.SessionType?.Name}`))
+          console.log('Available session types at location:', Array.from(sessionTypes))
+        }
+
+        // Use all items if we couldn't find filtered ones
+        // The duration filter will still apply later
+        availableItems = allItems
+      }
+    } catch (error) {
+      console.error('Error fetching bookable items:', error)
+      // If that fails, try fetching without session type filter
+      try {
+        console.log('Trying to fetch all bookable items without session type filter...')
+        availableItems = await getBookableItems({
+          locationIds: parsedLocationId,
+          startDate,
+          endDate,
+        })
+        console.log('All bookable items:', availableItems.length)
+      } catch (err) {
+        console.error('Error fetching all bookable items:', err)
+      }
+    }
+
+    // If no items found, log helpful debug info
+    if (availableItems.length === 0) {
+      console.log('=== NO AVAILABILITY FOUND ===')
+      console.log('This could mean:')
+      console.log('1. No staff scheduled for these session types')
+      console.log('2. Session type IDs do not exist or are not bookable online')
+      console.log('3. Location ID is incorrect')
+      console.log('Requested session type IDs:', serviceIdArray)
+    } else {
+      // Log sample of what was found
+      console.log('=== AVAILABILITY FOUND ===')
+      console.log('Total items:', availableItems.length)
+      if (availableItems[0]) {
+        console.log('Sample item:', JSON.stringify(availableItems[0], null, 2))
+      }
+    }
 
     // Validate API response
     if (!Array.isArray(availableItems)) {
@@ -227,7 +291,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       availableDates,
       totalDates: availableDates.length,
-      requestedDuration: duration
+      requestedDuration: duration,
+      // Debug info
+      debug: {
+        requestedSessionTypeIds: serviceIdArray,
+        locationId: parsedLocationId,
+        rawItemsCount: availableItems.length,
+      }
     })
 
   } catch (error) {
