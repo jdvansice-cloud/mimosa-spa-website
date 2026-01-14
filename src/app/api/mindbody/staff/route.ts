@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStaff, getAvailableStaffForServices } from '@/lib/booking/mindbody'
+import { getStaff, getStaffWithAvailability } from '@/lib/booking/mindbody'
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 
 // GET /api/mindbody/staff?locationId=1&sessionTypeIds=1,2,3
+// Returns staff with availability for the given session types
+// Uses GET /appointment/availabledates to check which staff have dates available
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Parse sessionTypeIds if provided
-    let sessionTypeIds: number[] | undefined
+    let sessionTypeIds: number[] = []
     if (sessionTypeIdsParam) {
       sessionTypeIds = sessionTypeIdsParam
         .split(',')
@@ -34,18 +36,31 @@ export async function GET(request: NextRequest) {
         .filter(id => !isNaN(id))
     }
 
-    // Get staff from Mindbody
-    // If sessionTypeIds provided, use bookable items to find available staff
-    // Otherwise, fall back to basic staff list
+    console.log('Fetching staff for locationId:', parsedLocationId, 'sessionTypeIds:', sessionTypeIds)
+
     let staffMembers
-    if (sessionTypeIds && sessionTypeIds.length > 0) {
-      staffMembers = await getAvailableStaffForServices({
+
+    if (sessionTypeIds.length > 0) {
+      // Get staff with availability for the next 30 days
+      const today = new Date()
+      const thirtyDaysLater = new Date(today)
+      thirtyDaysLater.setDate(today.getDate() + 30)
+
+      const startDate = today.toISOString().split('T')[0]
+      const endDate = thirtyDaysLater.toISOString().split('T')[0]
+
+      staffMembers = await getStaffWithAvailability({
         locationId: parsedLocationId,
         sessionTypeIds,
+        startDate,
+        endDate,
       })
     } else {
+      // Fall back to all staff if no session types provided
       staffMembers = await getStaff(parsedLocationId)
     }
+
+    console.log('Staff members found:', staffMembers.length)
 
     // Validate API response
     if (!Array.isArray(staffMembers)) {

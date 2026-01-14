@@ -23,7 +23,7 @@ export function StaffStep() {
   const [isLoadingStaff, setIsLoadingStaff] = useState(false)
   const [staffError, setStaffError] = useState<string | null>(null)
 
-  // Fetch staff on mount or when location/services change
+  // Fetch staff with availability on mount or when location/services change
   useEffect(() => {
     async function fetchStaff() {
       if (!selectedLocation) return
@@ -37,7 +37,7 @@ export function StaffStep() {
       setIsLoadingStaff(true)
       setStaffError(null)
       try {
-        // Build URL with location and session type IDs for the selected services
+        // Build URL with session type IDs from selected services
         const allServices = [...selectedServices, ...selectedAddons]
         const sessionTypeIds = allServices.map(s => s.Id).join(',')
 
