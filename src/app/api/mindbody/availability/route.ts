@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBookableItems, getStaff } from '@/lib/booking/mindbody'
+import { getBookableItems, getStaffAppointmentAvailability } from '@/lib/booking/mindbody'
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 
 // GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&startDate=2026-01-15&endDate=2026-01-29&duration=90
@@ -114,13 +114,60 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // If no items found, log helpful debug info
+    // If bookable items returns empty, try the staff appointment availability endpoint
+    // This is a fallback that gets raw staff schedule data
+    if (availableItems.length === 0) {
+      console.log('=== BOOKABLE ITEMS EMPTY - TRYING STAFF AVAILABILITY ===')
+
+      try {
+        const staffAvailability = await getStaffAppointmentAvailability({
+          locationId: parsedLocationId,
+          startDateTime: `${startDate}T00:00:00`,
+          endDateTime: `${endDate}T23:59:59`,
+        })
+
+        console.log('Staff availability returned:', staffAvailability.length, 'staff members')
+
+        // Convert staff availability to the same format as bookable items
+        for (const staff of staffAvailability) {
+          if (staff.Availabilities && staff.Availabilities.length > 0) {
+            for (const avail of staff.Availabilities) {
+              availableItems.push({
+                Id: 0, // No specific ID for raw availability
+                StartDateTime: avail.StartDateTime,
+                EndDateTime: avail.BookableEndDateTime || avail.EndDateTime,
+                Staff: {
+                  Id: staff.Id,
+                  FirstName: staff.FirstName,
+                  LastName: staff.LastName,
+                },
+                Location: {
+                  Id: parsedLocationId,
+                  Name: 'Location',
+                },
+                SessionType: {
+                  Id: serviceIdArray[0] || 0,
+                  Name: 'Service',
+                },
+              })
+            }
+          }
+        }
+
+        console.log('Converted staff availability to', availableItems.length, 'items')
+      } catch (err) {
+        console.error('Error fetching staff availability:', err)
+      }
+    }
+
+    // If still no items found, log helpful debug info
     if (availableItems.length === 0) {
       console.log('=== NO AVAILABILITY FOUND ===')
       console.log('This could mean:')
       console.log('1. No staff scheduled for these session types')
       console.log('2. Session type IDs do not exist or are not bookable online')
       console.log('3. Location ID is incorrect')
+      console.log('4. Staff schedules not configured in Mindbody')
       console.log('Requested session type IDs:', serviceIdArray)
     } else {
       // Log sample of what was found

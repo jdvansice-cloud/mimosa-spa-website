@@ -643,6 +643,7 @@ export async function getAvailableStaffForServices(params: {
 
 // Get available dates - returns dates when staff are scheduled to work
 // Use this first to narrow down which dates to check for bookable items
+// Note: Mindbody API v6 expects sessionTypeIds as an array (repeated params)
 export async function getAvailableDates(params: {
   locationId: number
   sessionTypeIds: number[]
@@ -656,14 +657,19 @@ export async function getAvailableDates(params: {
 
   console.log('getAvailableDates called with:', params)
 
+  const queryParams: Record<string, ParamValue> = {
+    locationId: params.locationId,
+    sessionTypeIds: params.sessionTypeIds, // Pass as array (repeated params)
+    startDate: params.startDate,
+    endDate: params.endDate,
+  }
+
+  if (params.staffId) {
+    queryParams.staffId = params.staffId
+  }
+
   const response = await mindbodyRequest<AvailableDatesResponse>('/appointment/availabledates', {
-    params: {
-      locationId: params.locationId,
-      sessionTypeIds: params.sessionTypeIds.join(','),
-      staffId: params.staffId,
-      startDate: params.startDate,
-      endDate: params.endDate,
-    }
+    params: queryParams
   })
 
   console.log('Available dates response:', response.AvailableDates?.length || 0, 'dates')
@@ -726,6 +732,12 @@ export async function getStaffWithAvailability(params: {
 }
 
 // Get bookable items (availability) - returns specific time slots
+// Note: Mindbody API v6 /appointment/bookableitems requires:
+// - locationIds (array) - required
+// - sessionTypeIds (array) - optional, filters by session type
+// - staffIds (array) - optional, filters by staff
+// - startDate, endDate - date range
+// - limit - max results (default 100)
 export async function getBookableItems(params: {
   locationIds: number
   sessionTypeIds?: number[]
@@ -752,15 +764,22 @@ export async function getBookableItems(params: {
         Name: string
       }
     }>
+    PaginationResponse?: {
+      TotalResults: number
+      RequestedLimit: number
+      RequestedOffset: number
+    }
   }
 
   console.log('getBookableItems called with:', params)
 
-  // Build params - sessionTypeIds is optional
+  // Build params - Mindbody API expects arrays for locationIds and sessionTypeIds
   const queryParams: Record<string, ParamValue> = {
-    locationIds: params.locationIds,
+    // Pass locationIds as array (repeated params)
+    locationIds: [params.locationIds],
     startDate: params.startDate,
     endDate: params.endDate,
+    limit: 200, // Increase limit to get more results
   }
 
   // Only add sessionTypeIds if provided and not empty
@@ -769,7 +788,7 @@ export async function getBookableItems(params: {
   }
 
   if (params.staffIds) {
-    queryParams.staffIds = params.staffIds
+    queryParams.staffIds = [params.staffIds]
   }
 
   console.log('getBookableItems query params:', queryParams)
@@ -780,8 +799,108 @@ export async function getBookableItems(params: {
   })
 
   console.log('Bookable items response:', response.AvailableItems?.length || 0, 'items')
+  if (response.PaginationResponse) {
+    console.log('Pagination:', response.PaginationResponse)
+  }
 
   return response.AvailableItems || []
+}
+
+// Get staff appointment availability - returns available time blocks for staff
+// This endpoint shows when staff are available for appointments
+export async function getStaffAppointmentAvailability(params: {
+  locationId: number
+  staffIds?: number[]
+  startDateTime: string  // ISO datetime
+  endDateTime: string    // ISO datetime
+}) {
+  interface StaffAvailabilityResponse {
+    StaffMembers: Array<{
+      Id: number
+      FirstName: string
+      LastName: string
+      Availabilities: Array<{
+        StartDateTime: string
+        EndDateTime: string
+        BookableEndDateTime: string
+      }>
+    }>
+  }
+
+  console.log('getStaffAppointmentAvailability called with:', params)
+
+  const queryParams: Record<string, ParamValue> = {
+    locationId: params.locationId,
+    startDateTime: params.startDateTime,
+    endDateTime: params.endDateTime,
+  }
+
+  if (params.staffIds && params.staffIds.length > 0) {
+    queryParams.staffIds = params.staffIds
+  }
+
+  const response = await mindbodyRequest<StaffAvailabilityResponse>('/staff/staffappointmentavailability', {
+    params: queryParams
+  })
+
+  console.log('Staff availability response:', response.StaffMembers?.length || 0, 'staff members')
+
+  return response.StaffMembers || []
+}
+
+// Get appointments for staff - shows existing bookings to determine availability
+export async function getStaffAppointments(params: {
+  locationId: number
+  staffIds?: number[]
+  startDate: string
+  endDate: string
+}) {
+  interface StaffAppointmentsResponse {
+    Appointments: Array<{
+      Id: number
+      StartDateTime: string
+      EndDateTime: string
+      Status: string
+      Staff: {
+        Id: number
+        FirstName: string
+        LastName: string
+      }
+      Location: {
+        Id: number
+        Name: string
+      }
+      SessionType: {
+        Id: number
+        Name: string
+      }
+      Client?: {
+        Id: number
+        FirstName: string
+        LastName: string
+      }
+    }>
+  }
+
+  console.log('getStaffAppointments called with:', params)
+
+  const queryParams: Record<string, ParamValue> = {
+    locationIds: [params.locationId],
+    startDate: params.startDate,
+    endDate: params.endDate,
+  }
+
+  if (params.staffIds && params.staffIds.length > 0) {
+    queryParams.staffIds = params.staffIds
+  }
+
+  const response = await mindbodyRequest<StaffAppointmentsResponse>('/appointment/staffappointments', {
+    params: queryParams
+  })
+
+  console.log('Staff appointments response:', response.Appointments?.length || 0, 'appointments')
+
+  return response.Appointments || []
 }
 
 // Add appointment
