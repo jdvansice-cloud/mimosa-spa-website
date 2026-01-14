@@ -391,8 +391,8 @@ export async function getAddons(locationId?: number) {
   return addons
 }
 
-// Get staff
-export async function getStaff(locationId?: number, sessionTypeIds?: number[]) {
+// Get staff - basic endpoint without service filtering
+export async function getStaff(locationId?: number) {
   interface StaffResponse {
     StaffMembers: Array<{
       Id: number
@@ -407,17 +407,8 @@ export async function getStaff(locationId?: number, sessionTypeIds?: number[]) {
     }>
   }
 
-  // Build params - include sessionTypeIds if provided to get staff who can perform those services
-  const params: Record<string, string | number | boolean | undefined> = {}
-  if (locationId) {
-    params.locationIds = locationId
-  }
-  if (sessionTypeIds && sessionTypeIds.length > 0) {
-    params.sessionTypeIds = sessionTypeIds.join(',')
-  }
-
   const response = await mindbodyRequest<StaffResponse>('/staff/staff', {
-    params: Object.keys(params).length > 0 ? params : undefined
+    params: locationId ? { locationIds: locationId } : undefined
   })
 
   // Filter for appointment providers only
@@ -432,6 +423,69 @@ export async function getStaff(locationId?: number, sessionTypeIds?: number[]) {
       ImageUrl: s.ImageUrl,
       AppointmentTrn: s.AppointmentTrn,
     }))
+}
+
+// Get available staff for specific services by checking bookable items
+// This returns staff who have availability for the given services in the next 14 days
+export async function getAvailableStaffForServices(params: {
+  locationId: number
+  sessionTypeIds: number[]
+}): Promise<Array<{
+  Id: number
+  FirstName: string
+  LastName: string
+  DisplayName: string
+  Bio: string | null
+  ImageUrl: string | null
+  AppointmentTrn: boolean
+}>> {
+  // Get availability for the next 14 days to find staff who can perform these services
+  const today = new Date()
+  const twoWeeksLater = new Date(today)
+  twoWeeksLater.setDate(today.getDate() + 14)
+
+  const startDate = today.toISOString().split('T')[0]
+  const endDate = twoWeeksLater.toISOString().split('T')[0]
+
+  try {
+    const bookableItems = await getBookableItems({
+      locationIds: params.locationId,
+      sessionTypeIds: params.sessionTypeIds,
+      startDate,
+      endDate,
+    })
+
+    // Extract unique staff from bookable items
+    const staffMap = new Map<number, {
+      Id: number
+      FirstName: string
+      LastName: string
+      DisplayName: string
+      Bio: string | null
+      ImageUrl: string | null
+      AppointmentTrn: boolean
+    }>()
+
+    for (const item of bookableItems) {
+      if (item.Staff && !staffMap.has(item.Staff.Id)) {
+        staffMap.set(item.Staff.Id, {
+          Id: item.Staff.Id,
+          FirstName: item.Staff.FirstName,
+          LastName: item.Staff.LastName,
+          DisplayName: `${item.Staff.FirstName} ${item.Staff.LastName}`,
+          Bio: null,
+          ImageUrl: null,
+          AppointmentTrn: true,
+        })
+      }
+    }
+
+    return Array.from(staffMap.values())
+  } catch (error) {
+    console.error('Error getting available staff for services:', error)
+    // Fall back to regular staff list
+    return getStaff(params.locationId)
+  }
 }
 
 // Get bookable items (availability)
