@@ -17,6 +17,7 @@ export function ConfirmStep() {
     selectedDate,
     selectedTime,
     activePromotion,
+    availableSlots,
     setBookingConfirmation,
     prevStep,
     setLoading,
@@ -105,6 +106,16 @@ export function ConfirmStep() {
 
       const startDateTime = `${selectedDate}T${selectedTime}:00`
 
+      // Get staff ID - use selected staff, or pick from available staff for the time slot
+      let staffIdToUse = selectedStaff?.Id
+      if (!staffIdToUse && selectedTime) {
+        const selectedSlot = availableSlots.find(s => s.time === selectedTime)
+        if (selectedSlot?.availableStaffIds?.length) {
+          // Pick the first available staff for this slot
+          staffIdToUse = selectedSlot.availableStaffIds[0]
+        }
+      }
+
       const response = await fetch('/api/mindbody/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -112,7 +123,7 @@ export function ConfirmStep() {
           clientId: clientInfo.Id,
           locationId: selectedLocation.Id,
           services,
-          staffId: selectedStaff?.Id,
+          staffId: staffIdToUse,
           startDateTime,
           promotionName: activePromotion?.title_es,
           clientName: `${clientInfo.FirstName} ${clientInfo.LastName}`,
