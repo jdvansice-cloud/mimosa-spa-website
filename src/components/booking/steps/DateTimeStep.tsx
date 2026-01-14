@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Calendar, ArrowLeft, ArrowRight, Loader2, Clock, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
@@ -39,43 +39,12 @@ export function DateTimeStep() {
 
   // Local state for this step
   const [availableDatesData, setAvailableDatesData] = useState<AvailableDate[]>([])
-  const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDateSlots, setSelectedDateSlots] = useState<TimeSlot[]>([])
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false)
   const [availabilityError, setAvailabilityError] = useState<string | null>(null)
 
-  // Generate calendar days for current month view
-  const calendarDays = useMemo(() => {
-    const year = currentMonth.getFullYear()
-    const month = currentMonth.getMonth()
-
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
-    const startPadding = firstDay.getDay()
-
-    const days: { date: Date | null; dateString: string; isAvailable: boolean; slotsCount: number }[] = []
-
-    // Add padding for days before first of month
-    for (let i = 0; i < startPadding; i++) {
-      days.push({ date: null, dateString: '', isAvailable: false, slotsCount: 0 })
-    }
-
-    // Add days of the month
-    for (let d = 1; d <= lastDay.getDate(); d++) {
-      const date = new Date(year, month, d)
-      const dateString = date.toISOString().split('T')[0]
-      const availableDate = availableDatesData.find(ad => ad.date === dateString)
-
-      days.push({
-        date,
-        dateString,
-        isAvailable: availableDate?.hasAvailability || false,
-        slotsCount: availableDate?.slotsCount || 0
-      })
-    }
-
-    return days
-  }, [currentMonth, availableDatesData])
+  // Ref for horizontal scroll
+  const dateScrollRef = useRef<HTMLDivElement>(null)
 
   // Fetch availability when step loads or services change
   useEffect(() => {
@@ -123,6 +92,11 @@ export function DateTimeStep() {
 
         setAvailableDatesData(data.availableDates)
         setAvailableDates(data.availableDates)
+
+        // Auto-select first available date if none selected
+        if (!selectedDate && data.availableDates.length > 0) {
+          setDate(data.availableDates[0].date)
+        }
       } catch (err) {
         setAvailabilityError(err instanceof Error ? err.message : 'Error de conexión')
       } finally {
@@ -146,50 +120,37 @@ export function DateTimeStep() {
     }
   }, [selectedDate, availableDatesData, setAvailableSlots])
 
-  const handleDateSelect = (dateString: string, isAvailable: boolean) => {
-    if (!isAvailable) return
+  const handleDateSelect = (dateString: string) => {
     setDate(dateString)
+    setTime(null) // Reset time when date changes
   }
 
   const handleTimeSelect = (time: string) => {
     setTime(time)
   }
 
-  const isToday = (date: Date | null) => {
-    if (!date) return false
-    const today = new Date()
-    return date.toDateString() === today.toDateString()
+  // Scroll dates left/right
+  const scrollDates = (direction: 'left' | 'right') => {
+    if (dateScrollRef.current) {
+      const scrollAmount = 200
+      dateScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      })
+    }
   }
 
-  const isPast = (date: Date | null) => {
-    if (!date) return true
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return date < today
+  // Parse display date to get day name and date number
+  const parseDisplayDate = (displayDate: string, dateStr: string) => {
+    // displayDate format: "Miércoles, 14 de Enero"
+    const parts = displayDate.split(',')
+    const dayName = parts[0]?.trim() || ''
+    const date = new Date(dateStr + 'T12:00:00')
+    const dayNum = date.getDate()
+    const monthShort = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'][date.getMonth()]
+
+    return { dayName, dayNum, monthShort }
   }
-
-  const goToPrevMonth = () => {
-    setCurrentMonth(prev => {
-      const newMonth = new Date(prev)
-      newMonth.setMonth(newMonth.getMonth() - 1)
-      return newMonth
-    })
-  }
-
-  const goToNextMonth = () => {
-    setCurrentMonth(prev => {
-      const newMonth = new Date(prev)
-      newMonth.setMonth(newMonth.getMonth() + 1)
-      return newMonth
-    })
-  }
-
-  const monthNames = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ]
-
-  const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
   // Get selected slot info for display
   const selectedSlot = selectedDateSlots.find(s => s.time === selectedTime)
@@ -228,121 +189,113 @@ export function DateTimeStep() {
           </div>
         )}
 
-        {!isLoadingAvailability && (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {/* Calendar */}
+        {!isLoadingAvailability && !availabilityError && (
+          <div className="space-y-6">
+            {/* Date Selection - Horizontal Scrollable */}
             <div className="bg-white border border-beige-200 rounded-xl p-4">
-              {/* Month Navigation */}
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  onClick={goToPrevMonth}
-                  className="p-2 hover:bg-beige-100 rounded-lg transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5 text-warm-gray" />
-                </button>
-                <h3 className="font-semibold text-dark">
-                  {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-dark flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-gold" />
+                  Selecciona Fecha
                 </h3>
-                <button
-                  onClick={goToNextMonth}
-                  className="p-2 hover:bg-beige-100 rounded-lg transition-colors"
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => scrollDates('left')}
+                    className="p-1.5 hover:bg-beige-100 rounded-lg transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-warm-gray" />
+                  </button>
+                  <button
+                    onClick={() => scrollDates('right')}
+                    className="p-1.5 hover:bg-beige-100 rounded-lg transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4 text-warm-gray" />
+                  </button>
+                </div>
+              </div>
+
+              {availableDatesData.length === 0 ? (
+                <div className="text-center py-8 text-warm-gray">
+                  <Calendar className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">No hay fechas disponibles</p>
+                </div>
+              ) : (
+                <div
+                  ref={dateScrollRef}
+                  className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  <ChevronRight className="w-5 h-5 text-warm-gray" />
-                </button>
-              </div>
+                  {availableDatesData.map((dateItem) => {
+                    const { dayName, dayNum, monthShort } = parseDisplayDate(dateItem.displayDate, dateItem.date)
+                    const isSelected = selectedDate === dateItem.date
 
-              {/* Day Names */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {dayNames.map(day => (
-                  <div key={day} className="text-center text-xs font-medium text-warm-gray py-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {calendarDays.map((day, index) => {
-                  if (!day.date) {
-                    return <div key={`empty-${index}`} className="p-2" />
-                  }
-
-                  const isSelected = selectedDate === day.dateString
-                  const past = isPast(day.date)
-                  const today = isToday(day.date)
-
-                  return (
-                    <button
-                      key={day.dateString}
-                      onClick={() => handleDateSelect(day.dateString, day.isAvailable && !past)}
-                      disabled={!day.isAvailable || past}
-                      className={`
-                        p-2 rounded-lg text-sm font-medium transition-all
-                        ${isSelected
-                          ? 'bg-gold text-dark shadow-md'
-                          : day.isAvailable && !past
-                            ? 'bg-gold/10 text-dark hover:bg-gold/20'
-                            : 'text-beige-300 cursor-not-allowed'
-                        }
-                        ${today && !isSelected ? 'ring-2 ring-gold/50' : ''}
-                      `}
-                    >
-                      <span>{day.date.getDate()}</span>
-                      {day.isAvailable && !past && (
-                        <span className="block text-[10px] text-gold-600 mt-0.5">
-                          {day.slotsCount}
+                    return (
+                      <button
+                        key={dateItem.date}
+                        onClick={() => handleDateSelect(dateItem.date)}
+                        className={`
+                          flex-shrink-0 flex flex-col items-center justify-center
+                          w-16 h-20 rounded-xl transition-all
+                          ${isSelected
+                            ? 'bg-gold text-dark shadow-lg scale-105'
+                            : 'bg-beige-50 text-dark hover:bg-gold/20 hover:scale-102'
+                          }
+                        `}
+                      >
+                        <span className={`text-[10px] font-medium uppercase tracking-wide ${isSelected ? 'text-dark/70' : 'text-warm-gray'}`}>
+                          {dayName.slice(0, 3)}
                         </span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Legend */}
-              <div className="mt-4 flex items-center gap-4 text-xs text-warm-gray">
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 bg-gold/10 rounded"></span>
-                  Disponible
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 bg-gold rounded"></span>
-                  Seleccionado
-                </span>
-              </div>
+                        <span className="text-xl font-bold">{dayNum}</span>
+                        <span className={`text-[10px] ${isSelected ? 'text-dark/70' : 'text-warm-gray'}`}>
+                          {monthShort}
+                        </span>
+                        <span className={`text-[9px] mt-0.5 ${isSelected ? 'text-dark/60' : 'text-gold'}`}>
+                          {dateItem.slotsCount} slots
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Time Slots */}
+            {/* Time Slots - Grid Tiles */}
             <div className="bg-white border border-beige-200 rounded-xl p-4">
               <h3 className="font-semibold text-dark mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-gold" />
+                <Clock className="w-4 h-4 text-gold" />
                 Horarios Disponibles
+                {selectedDateInfo && (
+                  <span className="text-xs font-normal text-warm-gray ml-auto">
+                    {selectedDateInfo.displayDate}
+                  </span>
+                )}
               </h3>
 
               {!selectedDate ? (
-                <div className="text-center py-12 text-warm-gray">
-                  <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p>Selecciona una fecha para ver los horarios</p>
+                <div className="text-center py-8 text-warm-gray">
+                  <Clock className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">Selecciona una fecha para ver los horarios</p>
                 </div>
               ) : selectedDateSlots.length === 0 ? (
-                <div className="text-center py-12 text-warm-gray">
-                  <Clock className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p>No hay horarios disponibles para esta fecha</p>
+                <div className="text-center py-8 text-warm-gray">
+                  <Clock className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">No hay horarios disponibles</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-80 overflow-y-auto">
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
                   <AnimatePresence>
                     {selectedDateSlots.map((slot, index) => (
                       <motion.button
                         key={slot.time}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.02 }}
                         onClick={() => handleTimeSelect(slot.time)}
                         disabled={!slot.available}
                         className={`
-                          py-3 px-2 rounded-lg text-sm font-medium transition-all
+                          py-2.5 px-1 rounded-lg text-sm font-medium transition-all
                           ${selectedTime === slot.time
-                            ? 'bg-gold text-dark shadow-md'
+                            ? 'bg-gold text-dark shadow-md ring-2 ring-gold/50'
                             : slot.available
                               ? 'bg-beige-50 text-dark hover:bg-gold/20'
                               : 'bg-beige-100 text-beige-300 cursor-not-allowed'
@@ -356,24 +309,37 @@ export function DateTimeStep() {
                 </div>
               )}
             </div>
-          </div>
-        )}
 
-        {/* Selected Summary */}
-        {selectedDate && selectedTime && (
-          <div className="mt-4 p-3 bg-gold/10 border border-gold/30 rounded-xl">
-            <p className="text-dark font-medium flex items-center gap-2 text-sm">
-              <Calendar className="w-4 h-4 text-gold" />
-              {selectedDateInfo?.displayDate}
-              <span className="text-warm-gray mx-1">•</span>
-              <Clock className="w-4 h-4 text-gold" />
-              {selectedSlot?.displayTime}
-              {selectedSlot && (
-                <span className="text-warm-gray ml-2 text-xs">
-                  ({selectedSlot.availableStaffIds.length} terapeuta{selectedSlot.availableStaffIds.length !== 1 ? 's' : ''})
-                </span>
-              )}
-            </p>
+            {/* Selected Summary */}
+            {selectedDate && selectedTime && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-gold/10 border border-gold/30 rounded-xl"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gold/20 rounded-lg flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-gold" />
+                    </div>
+                    <div>
+                      <p className="text-dark font-semibold text-sm">
+                        {selectedDateInfo?.displayDate}
+                      </p>
+                      <p className="text-warm-gray text-xs">
+                        {selectedSlot?.displayTime}
+                        {selectedSlot && (
+                          <span className="ml-2">
+                            • {selectedSlot.availableStaffIds.length} terapeuta{selectedSlot.availableStaffIds.length !== 1 ? 's' : ''} disponible{selectedSlot.availableStaffIds.length !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <Clock className="w-5 h-5 text-gold" />
+                </div>
+              </motion.div>
+            )}
           </div>
         )}
       </div>
