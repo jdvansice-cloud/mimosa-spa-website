@@ -68,7 +68,8 @@ export function BookingWidget() {
   const hasCartItems = selectedServices.length > 0 || selectedAddons.length > 0 || activePromotion !== null
 
   // Show desktop cart sidebar when items exist AND cart is open
-  const showDesktopCart = hasCartItems && isCartOpen && currentStep !== 'success'
+  // Hide on confirm step since all info is already shown there
+  const showDesktopCart = hasCartItems && isCartOpen && currentStep !== 'success' && currentStep !== 'confirm'
 
   // Show floating cart on steps where user is selecting items
   const showFloatingCart = hasCartItems &&
