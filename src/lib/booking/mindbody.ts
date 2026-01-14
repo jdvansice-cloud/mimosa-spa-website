@@ -1030,6 +1030,8 @@ export async function addAppointment(appointmentData: {
 }
 
 // Add multiple appointments (for multi-service bookings)
+// Uses Mindbody's AddMultipleAppointments batch endpoint (added November 2024)
+// Each appointment is processed individually - if one fails, others still succeed
 export async function addMultipleAppointments(appointments: Array<{
   ClientId: number
   LocationId: number
@@ -1038,16 +1040,107 @@ export async function addMultipleAppointments(appointments: Array<{
   StartDateTime: string
   Notes?: string
 }>) {
+  // Build the request body with AddAppointmentRequests array
+  const requestBody = {
+    AddAppointmentRequests: appointments.map(apt => ({
+      ClientId: String(apt.ClientId), // Mindbody expects string ClientId
+      LocationId: apt.LocationId,
+      StaffId: apt.StaffId,
+      SessionTypeId: apt.SessionTypeId,
+      StartDateTime: apt.StartDateTime,
+      Notes: apt.Notes,
+    }))
+  }
+
+  console.log('AddMultipleAppointments request:', JSON.stringify(requestBody, null, 2))
+
+  interface MultipleAppointmentsResponse {
+    Appointments: Array<{
+      Id: number
+      ClientId: number
+      LocationId: number
+      StaffId: number
+      StartDateTime: string
+      EndDateTime: string
+      Status: string
+      Staff?: {
+        Id: number
+        FirstName: string
+        LastName: string
+        DisplayName?: string
+      }
+      SessionType?: {
+        Id: number
+        Name: string
+      }
+    }>
+    Errors?: Array<{
+      Message: string
+      Code?: string
+    }>
+  }
+
+  try {
+    const response = await mindbodyRequest<MultipleAppointmentsResponse>('/appointment/addmultipleappointments', {
+      method: 'POST',
+      body: requestBody
+    })
+
+    console.log('AddMultipleAppointments response:', JSON.stringify(response, null, 2))
+
+    // Transform response to match expected format
+    const results = []
+
+    if (response.Appointments && response.Appointments.length > 0) {
+      for (const apt of response.Appointments) {
+        results.push({ success: true, appointment: apt })
+      }
+    }
+
+    // Include any errors in results
+    if (response.Errors && response.Errors.length > 0) {
+      for (const error of response.Errors) {
+        results.push({ success: false, error: error.Message })
+      }
+    }
+
+    // If no appointments were created but we got a response, check for issues
+    if (results.length === 0) {
+      console.warn('AddMultipleAppointments returned empty response')
+      // Fall back to sequential booking
+      return addMultipleAppointmentsSequential(appointments)
+    }
+
+    return results
+  } catch (error) {
+    console.error('AddMultipleAppointments failed, falling back to sequential:', error)
+    // Fall back to sequential booking if batch endpoint fails
+    return addMultipleAppointmentsSequential(appointments)
+  }
+}
+
+// Fallback: Add appointments sequentially (one at a time)
+// Used when AddMultipleAppointments endpoint is unavailable or fails
+async function addMultipleAppointmentsSequential(appointments: Array<{
+  ClientId: number
+  LocationId: number
+  StaffId?: number
+  SessionTypeId: number
+  StartDateTime: string
+  Notes?: string
+}>) {
+  console.log('Using sequential appointment booking fallback')
   const results = []
-  
+
   for (const appointment of appointments) {
     try {
       const result = await addAppointment(appointment)
       results.push({ success: true, appointment: result })
     } catch (error) {
+      console.error('Sequential appointment failed:', error)
       results.push({ success: false, error: String(error) })
     }
   }
-  
+
   return results
 }
