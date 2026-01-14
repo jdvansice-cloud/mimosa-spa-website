@@ -282,29 +282,45 @@ export function DateTimeStep() {
                   <p className="text-sm">No hay horarios disponibles</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
                   <AnimatePresence>
-                    {selectedDateSlots.map((slot, index) => (
-                      <motion.button
-                        key={slot.time}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.02 }}
-                        onClick={() => handleTimeSelect(slot.time)}
-                        disabled={!slot.available}
-                        className={`
-                          py-2.5 px-1 rounded-lg text-sm font-medium transition-all
-                          ${selectedTime === slot.time
-                            ? 'bg-gold text-dark shadow-md ring-2 ring-gold/50'
-                            : slot.available
-                              ? 'bg-beige-50 text-dark hover:bg-gold/20'
-                              : 'bg-beige-100 text-beige-300 cursor-not-allowed'
-                          }
-                        `}
-                      >
-                        {slot.displayTime}
-                      </motion.button>
-                    ))}
+                    {selectedDateSlots.map((slot, index) => {
+                      const isSelected = selectedTime === slot.time
+                      return (
+                        <motion.button
+                          key={slot.time}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.015, duration: 0.2 }}
+                          onClick={() => handleTimeSelect(slot.time)}
+                          disabled={!slot.available}
+                          className={`
+                            relative py-3 px-2 rounded-xl text-center transition-all duration-200
+                            ${isSelected
+                              ? 'bg-gradient-to-br from-gold to-gold/80 text-dark shadow-lg scale-105 ring-2 ring-gold/50'
+                              : slot.available
+                                ? 'bg-white border-2 border-beige-200 text-dark hover:border-gold hover:bg-gold/5 hover:scale-102 shadow-sm'
+                                : 'bg-beige-100 border-2 border-beige-100 text-beige-300 cursor-not-allowed'
+                            }
+                          `}
+                        >
+                          <span className={`text-sm font-semibold ${isSelected ? 'text-dark' : ''}`}>
+                            {slot.displayTime}
+                          </span>
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute -top-1 -right-1 w-4 h-4 bg-dark rounded-full flex items-center justify-center"
+                            >
+                              <svg className="w-2.5 h-2.5 text-gold" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      )
+                    })}
                   </AnimatePresence>
                 </div>
               )}
