@@ -121,14 +121,13 @@ export function AddonsStep() {
   }
   
   const handleToggleAddon = (addon: MindbodyService) => {
-    // Prevent stalling with setTimeout
-    setTimeout(() => {
-      if (isAddonSelected(addon.Id)) {
-        removeAddon(addon.Id)
-      } else {
-        addAddon(addon)
-      }
-    }, 0)
+    // Use the current state from the check to avoid race conditions
+    const currentlySelected = isAddonSelected(addon.Id)
+    if (currentlySelected) {
+      removeAddon(addon.Id)
+    } else {
+      addAddon(addon)
+    }
   }
   
   return (

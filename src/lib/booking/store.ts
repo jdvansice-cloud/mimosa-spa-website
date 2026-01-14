@@ -15,9 +15,10 @@ import type {
   BOOKING_STEPS,
   STEP_NUMBERS,
 } from '@/types/booking'
+import { ITBM_TAX_RATE } from './constants'
 
-// Tax rate constant
-const ITBM_RATE = parseFloat(process.env.NEXT_PUBLIC_ITBM_RATE || '0.07')
+// Use the shared tax rate constant
+const ITBM_RATE = ITBM_TAX_RATE
 
 // ===========================================
 // STORE STATE INTERFACE
@@ -409,25 +410,49 @@ export const useBookingStore = create<BookingState & BookingActions>()(
       // ===========================================
       // PROMOTION ACTIONS
       // ===========================================
-      
+
       loadPromotion: (promotion) => {
-        // Pre-load services from promotion
+        const state = get()
         const promotionServices = promotion.services || []
-        
+
+        // Check if user has manually selected services that will be replaced
+        const hadPreviousServices = state.selectedServices.length > 0
+        const isReplacingServices = hadPreviousServices &&
+          !state.activePromotion && // Only warn if not already using a promotion
+          promotionServices.length > 0
+
+        // Log warning for debugging (in production, this could trigger a toast notification)
+        if (isReplacingServices) {
+          console.warn('Promotion is replacing manually selected services:', {
+            previousServices: state.selectedServices.map(s => s.Name),
+            promotionServices: promotionServices.map((s: { Name: string }) => s.Name)
+          })
+        }
+
         set({
           activePromotion: promotion,
           selectedServices: promotionServices,
+          selectedAddons: [], // Clear addons when loading a promotion
           pricing: null,
           // Skip to addons step if promotion is loaded
           currentStep: 'addons'
         }, false, 'loadPromotion')
       },
-      
-      clearPromotion: () => set({
-        activePromotion: null,
-        selectedServices: [],
-        pricing: null
-      }, false, 'clearPromotion'),
+
+      clearPromotion: () => {
+        const state = get()
+        // Log when clearing promotion
+        if (state.activePromotion) {
+          console.log('Clearing promotion:', state.activePromotion.title_es)
+        }
+
+        set({
+          activePromotion: null,
+          selectedServices: [],
+          selectedAddons: [],
+          pricing: null
+        }, false, 'clearPromotion')
+      },
       
       // ===========================================
       // BOOKING ACTIONS

@@ -4,6 +4,7 @@
 // ===========================================
 
 import type { MindbodyTokenResponse } from '@/types/booking'
+import { ITBM_TAX_RATE, PROGRAM_NAMES as SHARED_PROGRAM_NAMES } from './constants'
 
 // Environment variables (server-side only)
 const MINDBODY_API_KEY = process.env.MINDBODY_API_KEY
@@ -229,24 +230,10 @@ export async function getLocations() {
 // SERVICE HELPERS
 // ===========================================
 
-// Spanish program names from Mindbody
-const PROGRAM_NAMES: Record<number, string> = {
-  4: 'Tratamientos Corporales',
-  5: 'Paquetes Deluxe',
-  6: 'Tratamientos Faciales',
-  8: 'Adicionales',
-  11: 'Tratamientos Parejas',
-  12: 'Adicionales en Cabina',
-  13: 'Eventos',
-  19: 'Paquetes de Masajes',
-  20: 'TAI',
-  21: 'Parejas',
-}
-
 // Get Spanish category name from ProgramId
 function getSpanishCategory(programId: number | undefined): string {
-  if (programId && PROGRAM_NAMES[programId]) {
-    return PROGRAM_NAMES[programId]
+  if (programId && SHARED_PROGRAM_NAMES[programId]) {
+    return SHARED_PROGRAM_NAMES[programId]
   }
   return 'General'
 }
@@ -255,8 +242,8 @@ function getSpanishCategory(programId: number | undefined): string {
 // ITBM TAX REMOVAL HELPER
 // Mindbody prices include 7% ITBM tax
 // We remove it for display, calculate in cart
+// Uses ITBM_TAX_RATE from constants.ts
 // ===========================================
-const ITBM_TAX_RATE = 0.07
 
 function removeTaxFromPrice(priceWithTax: number): number {
   // Formula: priceWithoutTax = priceWithTax / (1 + taxRate)

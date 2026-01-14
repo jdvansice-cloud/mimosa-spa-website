@@ -105,9 +105,9 @@ export function BookingWidget() {
       {/* Sentinel for detecting scroll */}
       <div ref={sentinelRef} className="h-0" />
 
-      {/* Sticky Steps Bar - Fixed at top when scrolling */}
+      {/* Sticky Steps Bar - Fixed below header when scrolling */}
       {currentStep !== 'success' && isSticky && (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm shadow-md border-b border-beige-200">
+        <div className="fixed top-20 left-0 right-0 z-30 bg-white/95 backdrop-blur-sm shadow-md border-b border-beige-200">
           <div className="container-spa max-w-4xl px-4 py-2">
             <div className="flex items-center justify-between">
               <StepProgress currentStep={stepNumber} totalSteps={7} />

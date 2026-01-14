@@ -148,14 +148,13 @@ export function ServiceStep() {
   }
   
   const handleToggleService = (service: MindbodyService) => {
-    // Prevent any race conditions by using setTimeout
-    setTimeout(() => {
-      if (isServiceSelected(service.Id)) {
-        removeService(service.Id)
-      } else {
-        addService(service)
-      }
-    }, 0)
+    // Use the current state from the check to avoid race conditions
+    const currentlySelected = isServiceSelected(service.Id)
+    if (currentlySelected) {
+      removeService(service.Id)
+    } else {
+      addService(service)
+    }
   }
   
   const getCategoryConfig = (category: string) => {

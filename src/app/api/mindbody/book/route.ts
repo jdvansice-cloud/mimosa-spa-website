@@ -1,14 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { addMultipleAppointments } from '@/lib/booking/mindbody'
 import { sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
+import {
+  validateRequired,
+  sanitizeError,
+  ERROR_MESSAGES,
+  formatDateForPanama,
+  formatTimeForPanama
+} from '@/lib/booking/constants'
+import {
+  checkRateLimit,
+  getClientIdentifier,
+  createRateLimitHeaders,
+  RATE_LIMIT_BOOKING
+} from '@/lib/booking/rate-limit'
+
+// Service type from request body
+interface BookingService {
+  sessionTypeId: number
+  duration: number
+  name?: string
+}
 
 // POST /api/mindbody/book
 export async function POST(request: NextRequest) {
+  // Apply rate limiting first
+  const clientId_rl = getClientIdentifier(request)
+  const rateLimitResult = checkRateLimit(`book:${clientId_rl}`, RATE_LIMIT_BOOKING)
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Demasiadas solicitudes. Por favor espera unos minutos.' },
+      {
+        status: 429,
+        headers: createRateLimitHeaders(rateLimitResult)
+      }
+    )
+  }
+
   try {
     const body = await request.json()
-    const { 
-      clientId, 
-      locationId, 
+    const {
+      clientId,
+      locationId,
       services, // Array of { sessionTypeId, duration, name }
       staffId,
       startDateTime, // ISO string
@@ -21,92 +55,147 @@ export async function POST(request: NextRequest) {
       therapistName,
       totalDuration,
     } = body
-    
-    if (!clientId || !locationId || !services || !startDateTime) {
+
+    // Validate required fields
+    const validation = validateRequired(
+      { clientId, locationId, services, startDateTime },
+      ['clientId', 'locationId', 'services', 'startDateTime']
+    )
+
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'clientId, locationId, services, and startDateTime are required' },
+        {
+          error: 'Faltan campos requeridos',
+          details: `Campos faltantes: ${validation.missing.join(', ')}`
+        },
         { status: 400 }
       )
     }
-    
+
+    // Validate services array
+    if (!Array.isArray(services) || services.length === 0) {
+      return NextResponse.json(
+        { error: 'Debes seleccionar al menos un servicio' },
+        { status: 400 }
+      )
+    }
+
+    // Validate each service has required fields
+    for (const service of services as BookingService[]) {
+      if (!service.sessionTypeId || typeof service.sessionTypeId !== 'number') {
+        return NextResponse.json(
+          { error: 'Servicio inválido: falta sessionTypeId' },
+          { status: 400 }
+        )
+      }
+      if (!service.duration || typeof service.duration !== 'number' || service.duration <= 0) {
+        return NextResponse.json(
+          { error: 'Servicio inválido: duración debe ser mayor a 0' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validate startDateTime is a valid date
+    const startDate = new Date(startDateTime)
+    if (isNaN(startDate.getTime())) {
+      return NextResponse.json(
+        { error: 'Fecha/hora de inicio inválida' },
+        { status: 400 }
+      )
+    }
+
+    // Don't allow bookings in the past
+    if (startDate < new Date()) {
+      return NextResponse.json(
+        { error: 'No se puede reservar en el pasado' },
+        { status: 400 }
+      )
+    }
+
     // Build appointments array with consecutive start times
     const appointments = []
     let currentStartTime = new Date(startDateTime)
-    
-    for (const service of services) {
+
+    for (const service of services as BookingService[]) {
       appointments.push({
         ClientId: clientId,
         LocationId: locationId,
         StaffId: staffId || undefined,
         SessionTypeId: service.sessionTypeId,
         StartDateTime: currentStartTime.toISOString(),
-        Notes: promotionName 
+        Notes: promotionName
           ? `Promoción: ${promotionName}${notes ? ` | ${notes}` : ''}`
           : notes,
       })
-      
+
       // Move start time for next service
       currentStartTime = new Date(
         currentStartTime.getTime() + (service.duration * 60 * 1000)
       )
     }
-    
+
     // Submit all appointments
     const results = await addMultipleAppointments(appointments)
-    
+
     // Check for any failures
     const failures = results.filter(r => !r.success)
-    if (failures.length > 0) {
-      console.error('Some appointments failed:', failures)
-      
-      // If all failed, return error
-      if (failures.length === results.length) {
-        return NextResponse.json(
-          { error: 'Failed to create appointments', details: failures },
-          { status: 500 }
-        )
-      }
+    const successes = results.filter(r => r.success)
+
+    // If all failed, return error
+    if (failures.length === results.length) {
+      console.error('All appointments failed:', failures)
+      return NextResponse.json(
+        { error: ERROR_MESSAGES.BOOKING_FAILED },
+        { status: 500 }
+      )
     }
-    
+
     // Generate confirmation number
     const confirmationNumber = `MIM-${Date.now().toString(36).toUpperCase()}`
-    
+
     // Get successful appointments
-    const successfulAppointments = results
-      .filter(r => r.success)
-      .map(r => r.appointment)
-    
+    const successfulAppointments = successes.map(r => r.appointment)
+
     // Get therapist name - either from request or from Mindbody response
     let finalTherapistName = therapistName
     if (!finalTherapistName && successfulAppointments.length > 0) {
       const firstAppointment = successfulAppointments[0]
       if (firstAppointment?.Staff) {
-        finalTherapistName = firstAppointment.Staff.DisplayName || 
+        finalTherapistName = firstAppointment.Staff.DisplayName ||
           `${firstAppointment.Staff.FirstName} ${firstAppointment.Staff.LastName}`
       }
     }
-    
+
+    // Handle partial booking failures
+    let partialBookingWarning: string | null = null
+    if (failures.length > 0 && successes.length > 0) {
+      console.warn('Partial booking failure:', {
+        totalRequested: services.length,
+        successful: successes.length,
+        failed: failures.length,
+        failedServices: failures.map((f, i) => ({
+          index: i,
+          error: f.error
+        }))
+      })
+      partialBookingWarning = ERROR_MESSAGES.PARTIAL_BOOKING
+    }
+
     // Send WhatsApp confirmation if WATI is configured and client phone is provided
     let whatsappSent = false
     if (isWatiConfigured() && clientPhone && clientName && finalTherapistName) {
       try {
-        // Format date for display
+        // Format date for display using Panama timezone
         const bookingDate = new Date(startDateTime)
-        const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-        const dateStr = `${days[bookingDate.getDay()]}, ${bookingDate.getDate()} de ${months[bookingDate.getMonth()]} ${bookingDate.getFullYear()}`
-        
-        // Format time
-        const hours = bookingDate.getHours()
-        const minutes = bookingDate.getMinutes()
-        const period = hours >= 12 ? 'PM' : 'AM'
-        const displayHours = hours % 12 || 12
-        const timeStr = `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
-        
+        const dateStr = formatDateForPanama(bookingDate)
+        const timeStr = formatTimeForPanama(bookingDate)
+
         // Get service names
-        const serviceNames = services.map((s: { name?: string }) => s.name || 'Servicio').filter(Boolean)
-        
+        const serviceNames = (services as BookingService[])
+          .map(s => s.name || 'Servicio')
+          .filter(Boolean)
+
         const watiResult = await sendBookingConfirmation({
           clientName,
           clientPhone,
@@ -117,7 +206,7 @@ export async function POST(request: NextRequest) {
           totalDuration: totalDuration || 60,
           therapistName: finalTherapistName,
         })
-        
+
         whatsappSent = watiResult.result
         if (!watiResult.result) {
           console.warn('WhatsApp notification failed:', watiResult.error)
@@ -127,22 +216,24 @@ export async function POST(request: NextRequest) {
         // Don't fail the booking if WhatsApp fails
       }
     }
-    
+
     return NextResponse.json({
       success: true,
       confirmationNumber,
       appointments: successfulAppointments,
       totalBooked: successfulAppointments.length,
+      totalRequested: services.length,
       whatsappSent,
-      message: failures.length > 0 
-        ? `${successfulAppointments.length} of ${services.length} services booked`
-        : 'All services booked successfully'
+      partialBookingWarning,
+      message: failures.length > 0
+        ? `${successfulAppointments.length} de ${services.length} servicios reservados`
+        : 'Todos los servicios reservados exitosamente'
     })
-    
+
   } catch (error) {
     console.error('Booking error:', error)
     return NextResponse.json(
-      { error: 'Failed to create booking' },
+      { error: sanitizeError(error) },
       { status: 500 }
     )
   }
