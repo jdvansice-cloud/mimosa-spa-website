@@ -111,9 +111,42 @@ export async function GET(request: NextRequest) {
           console.log('Schedule items returned:', scheduleItems.length, 'staff members')
 
           // Convert schedule availabilities to the same format as bookable items
+          // Also account for UnavailableItems - times when staff is marked unavailable
           for (const staff of scheduleItems) {
             if (staff.Availabilities && staff.Availabilities.length > 0) {
               console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Availabilities.length} availability blocks`)
+
+              // Get unavailable periods for this staff member
+              const unavailablePeriods: { start: Date; end: Date }[] = []
+              if (staff.UnavailableItems && staff.UnavailableItems.length > 0) {
+                console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.UnavailableItems.length} unavailable periods`)
+                for (const unavail of staff.UnavailableItems) {
+                  if (unavail.StartDateTime && unavail.EndDateTime) {
+                    unavailablePeriods.push({
+                      start: new Date(unavail.StartDateTime),
+                      end: new Date(unavail.EndDateTime)
+                    })
+                  }
+                }
+              }
+
+              // Get existing appointments that block availability
+              const appointmentPeriods: { start: Date; end: Date }[] = []
+              if (staff.Appointments && staff.Appointments.length > 0) {
+                console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Appointments.length} existing appointments`)
+                for (const appt of staff.Appointments) {
+                  if (appt.StartDateTime && appt.EndDateTime && appt.Status !== 'Cancelled') {
+                    appointmentPeriods.push({
+                      start: new Date(appt.StartDateTime),
+                      end: new Date(appt.EndDateTime)
+                    })
+                  }
+                }
+              }
+
+              // Combine all blocked periods
+              const blockedPeriods = [...unavailablePeriods, ...appointmentPeriods]
+
               for (const avail of staff.Availabilities) {
                 // Use EndDateTime from the availability block, not BookableEndDateTime
                 // BookableEndDateTime is often "0001-01-01T00:00:00" which is invalid
@@ -122,24 +155,36 @@ export async function GET(request: NextRequest) {
                 // Skip if we don't have valid start/end times
                 if (!avail.StartDateTime || !endDateTime) continue
 
-                availableItems.push({
-                  Id: avail.Id || 0,
-                  StartDateTime: avail.StartDateTime,
-                  EndDateTime: endDateTime,
-                  Staff: {
-                    Id: staff.Id,
-                    FirstName: staff.FirstName,
-                    LastName: staff.LastName,
-                  },
-                  Location: {
-                    Id: parsedLocationId,
-                    Name: 'Location',
-                  },
-                  SessionType: {
-                    Id: serviceIdArray[0] || 0,
-                    Name: 'Service',
-                  },
-                })
+                const availStart = new Date(avail.StartDateTime)
+                const availEnd = new Date(endDateTime)
+
+                // Subtract blocked periods from this availability block
+                const effectiveBlocks = subtractBlockedPeriods(
+                  { start: availStart, end: availEnd },
+                  blockedPeriods
+                )
+
+                // Add each effective block as an available item
+                for (const block of effectiveBlocks) {
+                  availableItems.push({
+                    Id: avail.Id || 0,
+                    StartDateTime: block.start.toISOString(),
+                    EndDateTime: block.end.toISOString(),
+                    Staff: {
+                      Id: staff.Id,
+                      FirstName: staff.FirstName,
+                      LastName: staff.LastName,
+                    },
+                    Location: {
+                      Id: parsedLocationId,
+                      Name: 'Location',
+                    },
+                    SessionType: {
+                      Id: serviceIdArray[0] || 0,
+                      Name: 'Service',
+                    },
+                  })
+                }
               }
             }
           }
@@ -421,6 +466,59 @@ function mergeTimeBlocks(blocks: { start: Date; end: Date }[]): { start: Date; e
   }
 
   return merged
+}
+
+// Subtract blocked periods (unavailability, appointments) from an availability block
+// Returns an array of remaining available time blocks
+function subtractBlockedPeriods(
+  availability: { start: Date; end: Date },
+  blockedPeriods: { start: Date; end: Date }[]
+): { start: Date; end: Date }[] {
+  if (blockedPeriods.length === 0) {
+    return [availability]
+  }
+
+  // Sort blocked periods by start time
+  const sortedBlocked = [...blockedPeriods].sort((a, b) => a.start.getTime() - b.start.getTime())
+
+  let remainingBlocks: { start: Date; end: Date }[] = [{ ...availability }]
+
+  for (const blocked of sortedBlocked) {
+    const newBlocks: { start: Date; end: Date }[] = []
+
+    for (const block of remainingBlocks) {
+      // Check if blocked period overlaps with this block
+      if (blocked.end <= block.start || blocked.start >= block.end) {
+        // No overlap - keep block as is
+        newBlocks.push(block)
+      } else {
+        // There is overlap - split the block
+
+        // Part before blocked period
+        if (blocked.start > block.start) {
+          newBlocks.push({
+            start: block.start,
+            end: new Date(Math.min(blocked.start.getTime(), block.end.getTime()))
+          })
+        }
+
+        // Part after blocked period
+        if (blocked.end < block.end) {
+          newBlocks.push({
+            start: new Date(Math.max(blocked.end.getTime(), block.start.getTime())),
+            end: block.end
+          })
+        }
+      }
+    }
+
+    remainingBlocks = newBlocks
+  }
+
+  // Filter out any blocks that are too small (less than 15 minutes)
+  return remainingBlocks.filter(block =>
+    (block.end.getTime() - block.start.getTime()) >= 15 * 60 * 1000
+  )
 }
 
 // Helper: Format time to display format
