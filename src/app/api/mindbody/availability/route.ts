@@ -431,6 +431,16 @@ export async function GET(request: NextRequest) {
         availableStaffIds: number[]
       }> = []
 
+      // Get current time in Panama timezone (UTC-5)
+      // Add 30-minute buffer so users don't book slots that are about to start
+      const now = new Date()
+      const panamaOffset = -5 * 60 // Panama is UTC-5
+      const localOffset = now.getTimezoneOffset()
+      const panamaTime = new Date(now.getTime() + (localOffset + panamaOffset) * 60 * 1000)
+      const minimumBookingTime = new Date(panamaTime.getTime() + 30 * 60 * 1000) // 30 min buffer
+
+      console.log(`Current Panama time: ${panamaTime.toISOString()}, minimum booking time: ${minimumBookingTime.toISOString()}`)
+
       // Round dayStart down to nearest 30 minutes
       const slotStart = new Date(dayStart)
       slotStart.setMinutes(Math.floor(slotStart.getMinutes() / 30) * 30, 0, 0)
@@ -440,6 +450,17 @@ export async function GET(request: NextRequest) {
       while (currentSlot < dayEnd) {
         const slotTime = currentSlot.toTimeString().slice(0, 5) // "09:00"
         const slotEnd = new Date(currentSlot.getTime() + duration * 60 * 1000)
+
+        // Skip slots that are in the past or too soon to book
+        // Compare just the datetime portion for same-day bookings
+        const slotDateStr = currentSlot.toISOString().split('T')[0]
+        const todayStr = panamaTime.toISOString().split('T')[0]
+
+        if (slotDateStr === todayStr && currentSlot < minimumBookingTime) {
+          // This slot is today and has already passed (or too soon)
+          currentSlot.setMinutes(currentSlot.getMinutes() + 30)
+          continue
+        }
 
         // Check which staff can accommodate this slot with the full duration
         const availableStaffIds: number[] = []
