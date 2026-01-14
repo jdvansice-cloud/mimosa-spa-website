@@ -68,17 +68,110 @@ export async function GET(request: NextRequest) {
       SessionType: { Id: number; Name: string }
     }> = []
 
+    // First, get all staff for this location - we need this to fetch unavailability data
+    const allStaff = await getStaff(parsedLocationId)
+    const validStaffIds = allStaff
+      .filter(s => s.Id > 0 && s.AppointmentTrn !== false)
+      .map(s => s.Id)
+
+    console.log('Found', validStaffIds.length, 'valid staff members at location')
+
+    // Fetch schedule items to get unavailability and appointment data
+    // We need this regardless of which availability source we use
+    let staffBlockedPeriods = new Map<number, { start: Date; end: Date }[]>()
+
+    if (validStaffIds.length > 0) {
+      try {
+        const scheduleItems = await getScheduleItems({
+          locationIds: [parsedLocationId],
+          staffIds: validStaffIds,
+          startDate,
+          endDate,
+        })
+
+        console.log('Schedule items returned:', scheduleItems.length, 'staff members')
+
+        // Build blocked periods map for each staff member
+        for (const staff of scheduleItems) {
+          const blockedPeriods: { start: Date; end: Date }[] = []
+
+          // Get unavailable periods (like "Reparaciones")
+          if (staff.UnavailableItems && staff.UnavailableItems.length > 0) {
+            console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.UnavailableItems.length} unavailable periods`)
+            for (const unavail of staff.UnavailableItems) {
+              if (unavail.StartDateTime && unavail.EndDateTime) {
+                blockedPeriods.push({
+                  start: new Date(unavail.StartDateTime),
+                  end: new Date(unavail.EndDateTime)
+                })
+              }
+            }
+          }
+
+          // Get existing appointments
+          if (staff.Appointments && staff.Appointments.length > 0) {
+            console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Appointments.length} existing appointments`)
+            for (const appt of staff.Appointments) {
+              if (appt.StartDateTime && appt.EndDateTime && appt.Status !== 'Cancelled') {
+                blockedPeriods.push({
+                  start: new Date(appt.StartDateTime),
+                  end: new Date(appt.EndDateTime)
+                })
+              }
+            }
+          }
+
+          if (blockedPeriods.length > 0) {
+            staffBlockedPeriods.set(staff.Id, blockedPeriods)
+          }
+        }
+
+        console.log('Built blocked periods for', staffBlockedPeriods.size, 'staff members')
+      } catch (err) {
+        console.error('Error fetching schedule items for blocked periods:', err)
+      }
+    }
+
     // Only try bookableitems if we have session type IDs
     if (serviceIdArray.length > 0) {
       try {
         console.log('Fetching bookable items with session types:', serviceIdArray)
-        availableItems = await getBookableItems({
+        const rawBookableItems = await getBookableItems({
           locationIds: parsedLocationId,
           sessionTypeIds: serviceIdArray,
           startDate,
           endDate,
         })
-        console.log('Bookable items returned:', availableItems.length)
+        console.log('Bookable items returned:', rawBookableItems.length)
+
+        // Filter bookable items against blocked periods
+        for (const item of rawBookableItems) {
+          if (!item.Staff?.Id || !item.StartDateTime || !item.EndDateTime) {
+            continue
+          }
+
+          const itemStart = new Date(item.StartDateTime)
+          const itemEnd = new Date(item.EndDateTime)
+          const staffId = item.Staff.Id
+          const blockedPeriods = staffBlockedPeriods.get(staffId) || []
+
+          // Check if this time slot overlaps with any blocked period
+          let isBlocked = false
+          for (const blocked of blockedPeriods) {
+            // Overlap check: NOT (itemEnd <= blocked.start OR itemStart >= blocked.end)
+            if (!(itemEnd <= blocked.start || itemStart >= blocked.end)) {
+              isBlocked = true
+              console.log(`Filtering out slot for staff ${staffId} at ${item.StartDateTime} - overlaps with blocked period`)
+              break
+            }
+          }
+
+          if (!isBlocked) {
+            availableItems.push(item)
+          }
+        }
+
+        console.log('After filtering blocked periods:', availableItems.length, 'items remain')
       } catch (error) {
         console.error('Error fetching bookable items:', error)
       }
@@ -86,111 +179,71 @@ export async function GET(request: NextRequest) {
       console.log('No session type IDs provided - skipping bookableitems endpoint')
     }
 
-    // If bookable items returns empty, try alternative endpoints
-    if (availableItems.length === 0) {
-      console.log('=== BOOKABLE ITEMS EMPTY - TRYING SCHEDULE ITEMS WITH STAFF IDS ===')
+    // If bookable items returns empty, try building availability from schedule items
+    // We already have the schedule data from above, so we can reuse it
+    if (availableItems.length === 0 && validStaffIds.length > 0) {
+      console.log('=== BOOKABLE ITEMS EMPTY - BUILDING FROM SCHEDULE ITEMS ===')
 
-      // First get all staff for this location (filter out system users with negative IDs)
       try {
-        const allStaff = await getStaff(parsedLocationId)
-        const validStaffIds = allStaff
-          .filter(s => s.Id > 0 && s.AppointmentTrn !== false)
-          .map(s => s.Id)
+        // Fetch schedule items again to get the availability blocks
+        // (we only stored blocked periods above, not the full availability)
+        const scheduleItems = await getScheduleItems({
+          locationIds: [parsedLocationId],
+          staffIds: validStaffIds,
+          startDate,
+          endDate,
+        })
 
-        console.log('Found', validStaffIds.length, 'valid staff members at location')
+        console.log('Schedule items returned:', scheduleItems.length, 'staff members')
 
-        if (validStaffIds.length > 0) {
-          // Now call scheduleitems WITH the staff IDs - this is required to get availability
-          const scheduleItems = await getScheduleItems({
-            locationIds: [parsedLocationId],
-            staffIds: validStaffIds,
-            startDate,
-            endDate,
-          })
+        // Convert schedule availabilities to the same format as bookable items
+        for (const staff of scheduleItems) {
+          if (staff.Availabilities && staff.Availabilities.length > 0) {
+            console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Availabilities.length} availability blocks`)
 
-          console.log('Schedule items returned:', scheduleItems.length, 'staff members')
+            // Get blocked periods from our pre-built map
+            const blockedPeriods = staffBlockedPeriods.get(staff.Id) || []
 
-          // Convert schedule availabilities to the same format as bookable items
-          // Also account for UnavailableItems - times when staff is marked unavailable
-          for (const staff of scheduleItems) {
-            if (staff.Availabilities && staff.Availabilities.length > 0) {
-              console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Availabilities.length} availability blocks`)
+            for (const avail of staff.Availabilities) {
+              const endDateTime = avail.EndDateTime
 
-              // Get unavailable periods for this staff member
-              const unavailablePeriods: { start: Date; end: Date }[] = []
-              if (staff.UnavailableItems && staff.UnavailableItems.length > 0) {
-                console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.UnavailableItems.length} unavailable periods`)
-                for (const unavail of staff.UnavailableItems) {
-                  if (unavail.StartDateTime && unavail.EndDateTime) {
-                    unavailablePeriods.push({
-                      start: new Date(unavail.StartDateTime),
-                      end: new Date(unavail.EndDateTime)
-                    })
-                  }
-                }
-              }
+              if (!avail.StartDateTime || !endDateTime) continue
 
-              // Get existing appointments that block availability
-              const appointmentPeriods: { start: Date; end: Date }[] = []
-              if (staff.Appointments && staff.Appointments.length > 0) {
-                console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Appointments.length} existing appointments`)
-                for (const appt of staff.Appointments) {
-                  if (appt.StartDateTime && appt.EndDateTime && appt.Status !== 'Cancelled') {
-                    appointmentPeriods.push({
-                      start: new Date(appt.StartDateTime),
-                      end: new Date(appt.EndDateTime)
-                    })
-                  }
-                }
-              }
+              const availStart = new Date(avail.StartDateTime)
+              const availEnd = new Date(endDateTime)
 
-              // Combine all blocked periods
-              const blockedPeriods = [...unavailablePeriods, ...appointmentPeriods]
+              // Subtract blocked periods from this availability block
+              const effectiveBlocks = subtractBlockedPeriods(
+                { start: availStart, end: availEnd },
+                blockedPeriods
+              )
 
-              for (const avail of staff.Availabilities) {
-                // Use EndDateTime from the availability block, not BookableEndDateTime
-                // BookableEndDateTime is often "0001-01-01T00:00:00" which is invalid
-                const endDateTime = avail.EndDateTime
-
-                // Skip if we don't have valid start/end times
-                if (!avail.StartDateTime || !endDateTime) continue
-
-                const availStart = new Date(avail.StartDateTime)
-                const availEnd = new Date(endDateTime)
-
-                // Subtract blocked periods from this availability block
-                const effectiveBlocks = subtractBlockedPeriods(
-                  { start: availStart, end: availEnd },
-                  blockedPeriods
-                )
-
-                // Add each effective block as an available item
-                for (const block of effectiveBlocks) {
-                  availableItems.push({
-                    Id: avail.Id || 0,
-                    StartDateTime: block.start.toISOString(),
-                    EndDateTime: block.end.toISOString(),
-                    Staff: {
-                      Id: staff.Id,
-                      FirstName: staff.FirstName,
-                      LastName: staff.LastName,
-                    },
-                    Location: {
-                      Id: parsedLocationId,
-                      Name: 'Location',
-                    },
-                    SessionType: {
-                      Id: serviceIdArray[0] || 0,
-                      Name: 'Service',
-                    },
-                  })
-                }
+              // Add each effective block as an available item
+              for (const block of effectiveBlocks) {
+                availableItems.push({
+                  Id: avail.Id || 0,
+                  StartDateTime: block.start.toISOString(),
+                  EndDateTime: block.end.toISOString(),
+                  Staff: {
+                    Id: staff.Id,
+                    FirstName: staff.FirstName,
+                    LastName: staff.LastName,
+                  },
+                  Location: {
+                    Id: parsedLocationId,
+                    Name: 'Location',
+                  },
+                  SessionType: {
+                    Id: serviceIdArray[0] || 0,
+                    Name: 'Service',
+                  },
+                })
               }
             }
           }
-
-          console.log('Converted schedule items to', availableItems.length, 'availability items')
         }
+
+        console.log('Converted schedule items to', availableItems.length, 'availability items')
       } catch (err) {
         console.error('Error fetching schedule items:', err)
       }
@@ -201,12 +254,6 @@ export async function GET(request: NextRequest) {
       console.log('=== SCHEDULE ITEMS EMPTY - TRYING STAFF APPOINTMENT AVAILABILITY ===')
 
       try {
-        // First get staff IDs if we don't have them yet
-        const allStaff = await getStaff(parsedLocationId)
-        const validStaffIds = allStaff
-          .filter(s => s.Id > 0 && s.AppointmentTrn !== false)
-          .map(s => s.Id)
-
         const staffAvailability = await getStaffAppointmentAvailability({
           locationId: parsedLocationId,
           staffIds: validStaffIds.length > 0 ? validStaffIds : undefined,
@@ -217,27 +264,41 @@ export async function GET(request: NextRequest) {
         console.log('Staff availability returned:', staffAvailability.length, 'staff members')
 
         // Convert staff availability to the same format as bookable items
+        // Also filter against blocked periods
         for (const staff of staffAvailability) {
           if (staff.Availabilities && staff.Availabilities.length > 0) {
+            const blockedPeriods = staffBlockedPeriods.get(staff.Id) || []
+
             for (const avail of staff.Availabilities) {
-              availableItems.push({
-                Id: 0, // No specific ID for raw availability
-                StartDateTime: avail.StartDateTime,
-                EndDateTime: avail.BookableEndDateTime || avail.EndDateTime,
-                Staff: {
-                  Id: staff.Id,
-                  FirstName: staff.FirstName,
-                  LastName: staff.LastName,
-                },
-                Location: {
-                  Id: parsedLocationId,
-                  Name: 'Location',
-                },
-                SessionType: {
-                  Id: serviceIdArray[0] || 0,
-                  Name: 'Service',
-                },
-              })
+              const availStart = new Date(avail.StartDateTime)
+              const availEnd = new Date(avail.BookableEndDateTime || avail.EndDateTime)
+
+              // Subtract blocked periods
+              const effectiveBlocks = subtractBlockedPeriods(
+                { start: availStart, end: availEnd },
+                blockedPeriods
+              )
+
+              for (const block of effectiveBlocks) {
+                availableItems.push({
+                  Id: 0,
+                  StartDateTime: block.start.toISOString(),
+                  EndDateTime: block.end.toISOString(),
+                  Staff: {
+                    Id: staff.Id,
+                    FirstName: staff.FirstName,
+                    LastName: staff.LastName,
+                  },
+                  Location: {
+                    Id: parsedLocationId,
+                    Name: 'Location',
+                  },
+                  SessionType: {
+                    Id: serviceIdArray[0] || 0,
+                    Name: 'Service',
+                  },
+                })
+              }
             }
           }
         }
