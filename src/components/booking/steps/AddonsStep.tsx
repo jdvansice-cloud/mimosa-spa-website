@@ -75,46 +75,45 @@ export function AddonsStep() {
     removeAddon,
     nextStep,
     prevStep,
-    setLoading,
-    setError,
-    isLoading,
-    error
   } = useBookingStore()
-  
+
   const [localAddons, setLocalAddons] = useState<MindbodyService[]>([])
-  
+  const [isLoadingAddons, setIsLoadingAddons] = useState(false)
+  const [addonsError, setAddonsError] = useState<string | null>(null)
+
   // Fetch addons on mount
   useEffect(() => {
     async function fetchAddons() {
       if (!selectedLocation) return
-      
+
       if (addons.length > 0) {
         setLocalAddons(addons)
         return
       }
-      
-      setLoading(true)
+
+      setIsLoadingAddons(true)
+      setAddonsError(null)
       try {
         const response = await fetch(
           `/api/mindbody/services?locationId=${selectedLocation.Id}&type=addons`
         )
         const data = await response.json()
-        
+
         if (!response.ok) {
           throw new Error(data.error || 'Error al cargar adicionales')
         }
-        
+
         setAddons(data.services)
         setLocalAddons(data.services)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error de conexión')
+        setAddonsError(err instanceof Error ? err.message : 'Error de conexión')
       } finally {
-        setLoading(false)
+        setIsLoadingAddons(false)
       }
     }
-    
+
     fetchAddons()
-  }, [selectedLocation, addons, setAddons, setLoading, setError])
+  }, [selectedLocation, addons, setAddons])
   
   const isAddonSelected = (addonId: number) => {
     return selectedAddons.some(a => a.Id === addonId)
@@ -149,22 +148,22 @@ export function AddonsStep() {
       </div>
       
       {/* Loading State */}
-      {isLoading && (
+      {isLoadingAddons && (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="w-10 h-10 text-gold animate-spin mb-4" />
           <p className="text-warm-gray">Cargando adicionales...</p>
         </div>
       )}
-      
+
       {/* Error State */}
-      {error && (
+      {addonsError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-6">
-          {error}
+          {addonsError}
         </div>
       )}
-      
+
       {/* No Addons Available */}
-      {!isLoading && localAddons.length === 0 && (
+      {!isLoadingAddons && localAddons.length === 0 && (
         <div className="text-center py-12 bg-beige-50 rounded-xl">
           <Plus className="w-12 h-12 text-beige-300 mx-auto mb-3" />
           <p className="text-warm-gray mb-4">No hay adicionales disponibles</p>
@@ -178,7 +177,7 @@ export function AddonsStep() {
       )}
       
       {/* Addon Tiles Grid */}
-      {!isLoading && localAddons.length > 0 && (
+      {!isLoadingAddons && localAddons.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-2">
           {localAddons.map((addon) => (
             <AddonTile

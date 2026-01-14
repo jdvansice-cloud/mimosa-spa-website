@@ -322,7 +322,16 @@ export const useBookingStore = create<BookingState & BookingActions>()(
       // ===========================================
       
       setLocation: (location) => {
-        set({ selectedLocation: location }, false, 'setLocation')
+        // Clear staff, dates, and slots when location changes (they're location-specific)
+        set({
+          selectedLocation: location,
+          staff: [],
+          selectedStaff: null,
+          availableDates: [],
+          availableSlots: [],
+          selectedDate: null,
+          selectedTime: null
+        }, false, 'setLocation')
       },
       
       setLocations: (locations) => set({ locations }, false, 'setLocations'),

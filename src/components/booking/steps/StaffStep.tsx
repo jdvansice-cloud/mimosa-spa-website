@@ -15,46 +15,46 @@ export function StaffStep() {
     setStaff,
     nextStep,
     prevStep,
-    setLoading,
-    setError,
-    isLoading,
-    error
   } = useBookingStore()
-  
+
   const [localStaff, setLocalStaff] = useState<MindbodyStaff[]>([])
-  
-  // Fetch staff on mount
+  const [isLoadingStaff, setIsLoadingStaff] = useState(false)
+  const [staffError, setStaffError] = useState<string | null>(null)
+
+  // Fetch staff on mount or when location changes
   useEffect(() => {
     async function fetchStaff() {
       if (!selectedLocation) return
-      
+
+      // Use cached staff if available for this location
       if (staff.length > 0) {
         setLocalStaff(staff)
         return
       }
-      
-      setLoading(true)
+
+      setIsLoadingStaff(true)
+      setStaffError(null)
       try {
         const response = await fetch(
           `/api/mindbody/staff?locationId=${selectedLocation.Id}`
         )
         const data = await response.json()
-        
+
         if (!response.ok) {
           throw new Error(data.error || 'Error al cargar terapeutas')
         }
-        
+
         setStaffList(data.staff)
         setLocalStaff(data.staff)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error de conexión')
+        setStaffError(err instanceof Error ? err.message : 'Error de conexión')
       } finally {
-        setLoading(false)
+        setIsLoadingStaff(false)
       }
     }
-    
+
     fetchStaff()
-  }, [selectedLocation, staff, setStaffList, setLoading, setError])
+  }, [selectedLocation, staff, setStaffList])
   
   const handleSelectStaff = (staffMember: MindbodyStaff | null) => {
     setStaff(staffMember)
@@ -78,22 +78,22 @@ export function StaffStep() {
       </div>
       
       {/* Loading State */}
-      {isLoading && (
+      {isLoadingStaff && (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="w-10 h-10 text-gold animate-spin mb-4" />
           <p className="text-warm-gray">Cargando terapeutas...</p>
         </div>
       )}
-      
+
       {/* Error State */}
-      {error && (
+      {staffError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-6">
-          {error}
+          {staffError}
         </div>
       )}
-      
+
       {/* Staff Selection */}
-      {!isLoading && (
+      {!isLoadingStaff && (
         <div className="space-y-4">
           {/* Any Therapist Option */}
           <motion.button

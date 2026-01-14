@@ -89,47 +89,46 @@ export function ServiceStep() {
     removeService,
     nextStep,
     prevStep,
-    setLoading,
-    setError,
-    isLoading,
-    error
   } = useBookingStore()
-  
+
   const hasServices = useBookingStore(selectHasServices)
   const [groupedServices, setGroupedServices] = useState<Record<string, MindbodyService[]>>({})
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
-  
+  const [isLoadingServices, setIsLoadingServices] = useState(false)
+  const [servicesError, setServicesError] = useState<string | null>(null)
+
   // Fetch services on mount
   useEffect(() => {
     async function fetchServices() {
       if (!selectedLocation) return
-      
-      setLoading(true)
+
+      setIsLoadingServices(true)
+      setServicesError(null)
       try {
         const response = await fetch(
           `/api/mindbody/services?locationId=${selectedLocation.Id}&type=main`
         )
         const data = await response.json()
-        
+
         if (!response.ok) {
           throw new Error(data.error || 'Error al cargar servicios')
         }
-        
+
         setServices(data.services)
         setGroupedServices(data.grouped)
-        
+
         // Start with all categories collapsed (empty set)
         // User will expand what they're interested in
         setExpandedCategories(new Set())
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error de conexión')
+        setServicesError(err instanceof Error ? err.message : 'Error de conexión')
       } finally {
-        setLoading(false)
+        setIsLoadingServices(false)
       }
     }
-    
+
     fetchServices()
-  }, [selectedLocation, setServices, setLoading, setError])
+  }, [selectedLocation, setServices])
   
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
@@ -180,22 +179,22 @@ export function ServiceStep() {
       </div>
       
       {/* Loading State */}
-      {isLoading && (
+      {isLoadingServices && (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="w-10 h-10 text-gold animate-spin mb-4" />
           <p className="text-warm-gray">Cargando servicios...</p>
         </div>
       )}
-      
+
       {/* Error State */}
-      {error && (
+      {servicesError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-6">
-          {error}
+          {servicesError}
         </div>
       )}
-      
+
       {/* Category Tiles */}
-      {!isLoading && (
+      {!isLoadingServices && (
         <div className="space-y-4">
           {Object.entries(groupedServices).map(([category, categoryServices]) => {
             const config = getCategoryConfig(category)
@@ -286,7 +285,7 @@ export function ServiceStep() {
       )}
       
       {/* Empty State */}
-      {!isLoading && Object.keys(groupedServices).length === 0 && (
+      {!isLoadingServices && Object.keys(groupedServices).length === 0 && (
         <div className="text-center py-12 bg-beige-50 rounded-xl">
           <Sparkles className="w-12 h-12 text-beige-300 mx-auto mb-3" />
           <p className="text-warm-gray">No hay servicios disponibles</p>

@@ -1,11 +1,12 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Star, Clock, X, ShoppingBag, ChevronRight } from 'lucide-react'
+import { Star, Clock, X, ShoppingBag, ChevronRight, MapPin } from 'lucide-react'
 import { useBookingStore } from '@/lib/booking/store'
+import { ITBM_TAX_RATE } from '@/lib/booking/constants'
 
-// Tax rate constant
-const ITBM_RATE = 0.07
+// Use shared tax rate constant
+const ITBM_RATE = ITBM_TAX_RATE
 
 interface CartSummaryProps {
   compact?: boolean
@@ -18,6 +19,7 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
     selectedServices,
     selectedAddons,
     activePromotion,
+    selectedLocation,
     removeService,
     removeAddon,
     closeCart,
@@ -124,7 +126,15 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
       
       {/* Cart Title */}
       <div className="px-4 py-3 border-b border-beige-200 flex items-center justify-between">
-        <h3 className="font-semibold text-dark">Tu Reserva</h3>
+        <div>
+          <h3 className="font-semibold text-dark">Tu Reserva</h3>
+          {selectedLocation && (
+            <p className="text-xs text-warm-gray flex items-center gap-1 mt-0.5">
+              <MapPin className="w-3 h-3" />
+              {selectedLocation.Name}
+            </p>
+          )}
+        </div>
         {showCloseButton && (
           <button
             onClick={closeCart}
