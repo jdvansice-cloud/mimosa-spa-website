@@ -232,19 +232,6 @@ export async function GET(request: NextRequest) {
 
     console.log('Total bookable items from Mindbody:', availableItems.length)
 
-    // Log sample items for debugging
-    if (availableItems.length > 0) {
-      console.log('=== SAMPLE AVAILABLE ITEMS ===')
-      availableItems.slice(0, 3).forEach((item, i) => {
-        console.log(`Item ${i + 1}:`, {
-          staffId: item.Staff?.Id,
-          staffName: item.Staff ? `${item.Staff.FirstName} ${item.Staff.LastName}` : 'none',
-          start: item.StartDateTime,
-          end: item.EndDateTime,
-        })
-      })
-    }
-
     // Group availability by date -> staff -> time blocks
     // We need to find continuous time blocks for each staff member
     const staffAvailabilityByDate = new Map<string, Map<number, {
@@ -285,18 +272,6 @@ export async function GET(request: NextRequest) {
         start: startDT,
         end: endDT
       })
-    }
-
-    // Log grouped data for debugging
-    console.log('=== GROUPED AVAILABILITY BY DATE ===')
-    for (const [dateKey, staffMap] of staffAvailabilityByDate.entries()) {
-      console.log(`Date ${dateKey}: ${staffMap.size} staff members`)
-      for (const [staffId, staffData] of staffMap.entries()) {
-        console.log(`  Staff ${staffId} (${staffData.staffName}): ${staffData.blocks.length} blocks`)
-        staffData.blocks.forEach((block, i) => {
-          console.log(`    Block ${i + 1}: ${block.start.toISOString()} to ${block.end.toISOString()}`)
-        })
-      }
     }
 
     // Process each date to generate 30-minute time slots
