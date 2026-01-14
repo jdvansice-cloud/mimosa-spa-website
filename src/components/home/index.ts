@@ -1,0 +1,5 @@
+export { HeroSection } from './HeroSection'
+export { FeaturedCategories } from './FeaturedCategories'
+export { PromotionsPreview } from './PromotionsPreview'
+export { LocationsSection } from './LocationsSection'
+export { BookingCTA } from './BookingCTA'

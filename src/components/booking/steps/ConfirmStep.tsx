@@ -1,0 +1,327 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+import { CheckCircle, ArrowLeft, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star } from 'lucide-react'
+import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
+
+// Tax rate constant
+const ITBM_RATE = 0.07
+
+export function ConfirmStep() {
+  const {
+    clientInfo,
+    selectedLocation,
+    selectedServices,
+    selectedAddons,
+    selectedStaff,
+    selectedDate,
+    selectedTime,
+    activePromotion,
+    setBookingConfirmation,
+    prevStep,
+    setLoading,
+    setError,
+    isLoading,
+    error
+  } = useBookingStore()
+
+  const totalDuration = useBookingStore(selectTotalDuration)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Calculate pricing with useMemo
+  const pricing = useMemo(() => {
+    const servicesSubtotal = selectedServices.reduce((sum, s) => sum + s.Price, 0)
+    const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
+
+    const hasPromotion = activePromotion !== null
+    let finalServicesPrice = servicesSubtotal
+    let promotionDiscount = 0
+
+    if (hasPromotion && activePromotion) {
+      finalServicesPrice = activePromotion.price
+      promotionDiscount = servicesSubtotal - activePromotion.price
+    }
+
+    const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
+    const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
+    const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
+
+    return {
+      services: selectedServices,
+      addons: selectedAddons,
+      servicesSubtotal,
+      addonsSubtotal,
+      hasPromotion,
+      promotionName: activePromotion?.title_es || null,
+      promotionPrice: activePromotion?.price || null,
+      promotionDiscount,
+      subtotalBeforeTax,
+      itbmRate: ITBM_RATE,
+      itbmAmount,
+      totalWithTax,
+      totalDuration,
+    }
+  }, [selectedServices, selectedAddons, activePromotion, totalDuration])
+
+  // Format date for display (shorter format)
+  const formatDateShort = (dateStr: string) => {
+    const date = new Date(dateStr + 'T12:00:00')
+    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+    return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`
+  }
+
+  // Format time for display
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':').map(Number)
+    const period = hours >= 12 ? 'PM' : 'AM'
+    const displayHours = hours % 12 || 12
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
+  }
+
+  const handleConfirmBooking = async () => {
+    if (!clientInfo || !selectedLocation || !selectedDate || !selectedTime) {
+      setError('Información incompleta. Por favor vuelve a intentar.')
+      return
+    }
+
+    setIsSubmitting(true)
+    setLoading(true)
+    setError(null)
+
+    try {
+      const services = [
+        ...selectedServices.map(s => ({
+          sessionTypeId: s.Id,
+          duration: s.Duration,
+          name: s.Name
+        })),
+        ...selectedAddons.map(a => ({
+          sessionTypeId: a.Id,
+          duration: a.Duration,
+          name: a.Name
+        }))
+      ]
+
+      const startDateTime = `${selectedDate}T${selectedTime}:00`
+
+      const response = await fetch('/api/mindbody/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: clientInfo.Id,
+          locationId: selectedLocation.Id,
+          services,
+          staffId: selectedStaff?.Id,
+          startDateTime,
+          promotionName: activePromotion?.title_es,
+          clientName: `${clientInfo.FirstName} ${clientInfo.LastName}`,
+          clientPhone: clientInfo.MobilePhone,
+          locationName: selectedLocation.Name,
+          therapistName: selectedStaff
+            ? selectedStaff.DisplayName || `${selectedStaff.FirstName} ${selectedStaff.LastName}`
+            : undefined,
+          totalDuration,
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al crear la reserva')
+      }
+
+      setBookingConfirmation({
+        success: true,
+        confirmationNumber: data.confirmationNumber,
+        appointments: data.appointments,
+        location: selectedLocation,
+        client: clientInfo,
+        pricing: pricing!
+      })
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión')
+    } finally {
+      setIsSubmitting(false)
+      setLoading(false)
+    }
+  }
+
+  const therapistName = selectedStaff
+    ? selectedStaff.DisplayName || `${selectedStaff.FirstName} ${selectedStaff.LastName}`
+    : 'Cualquier disponible'
+
+  return (
+    <div className="confirm-step flex flex-col h-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto pb-4">
+        {/* Header - Compact */}
+        <div className="text-center mb-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                        flex items-center justify-center mx-auto mb-2 shadow-md">
+            <CheckCircle className="w-5 h-5 text-white" />
+          </div>
+          <h2 className="text-lg font-bold text-dark mb-0.5">
+            Confirmar Reserva
+          </h2>
+          <p className="text-xs text-warm-gray">
+            Revisa y confirma tu cita
+          </p>
+        </div>
+
+        {/* Error State */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 mb-4 flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Promotion Badge */}
+        {pricing.hasPromotion && (
+          <div className="mb-4 p-3 bg-gradient-to-r from-gold/20 to-gold/10 border border-gold/30 rounded-xl">
+            <span className="flex items-center gap-2 text-sm font-semibold text-dark">
+              <Star className="w-4 h-4 text-gold" />
+              {activePromotion?.title_es}
+            </span>
+          </div>
+        )}
+
+        {/* Appointment Card - Consolidated */}
+        <div className="bg-white border border-beige-200 rounded-xl overflow-hidden mb-4">
+          {/* Date/Time/Duration Row */}
+          <div className="p-3 bg-beige-50 border-b border-beige-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-gold" />
+                <span className="font-semibold text-dark text-sm">
+                  {selectedDate && formatDateShort(selectedDate)}
+                </span>
+                <span className="text-warm-gray">•</span>
+                <span className="text-dark text-sm">
+                  {selectedTime && formatTime(selectedTime)}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-warm-gray bg-white px-2 py-1 rounded-full">
+                <Clock className="w-3 h-3" />
+                {totalDuration} min
+              </div>
+            </div>
+          </div>
+
+          {/* Details Grid */}
+          <div className="p-3 grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-warm-gray mb-0.5">Ubicación</p>
+              <p className="font-medium text-dark flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-gold" />
+                {selectedLocation?.Name}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-warm-gray mb-0.5">Terapeuta</p>
+              <p className="font-medium text-dark flex items-center gap-1">
+                <User className="w-3 h-3 text-gold" />
+                {therapistName}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Services Summary - Compact */}
+        <div className="bg-white border border-beige-200 rounded-xl p-3 mb-4">
+          <h3 className="text-xs font-semibold text-warm-gray uppercase tracking-wider mb-2">
+            Servicios
+          </h3>
+          <div className="space-y-1.5">
+            {selectedServices.map((service) => (
+              <div key={service.Id} className="flex justify-between text-sm">
+                <span className="text-dark">{service.Name}</span>
+                <span className={pricing.hasPromotion ? 'text-warm-gray line-through' : 'text-dark'}>
+                  ${service.Price.toFixed(2)}
+                </span>
+              </div>
+            ))}
+            {selectedAddons.map((addon) => (
+              <div key={addon.Id} className="flex justify-between text-sm">
+                <span className="text-dark">+ {addon.Name}</span>
+                <span className="text-dark">${addon.Price.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Pricing Summary */}
+          <div className="mt-3 pt-3 border-t border-beige-200 space-y-1.5">
+            {pricing.hasPromotion && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Descuento</span>
+                <span>-${pricing.promotionDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm">
+              <span className="text-warm-gray">Subtotal</span>
+              <span className="text-dark">${pricing.subtotalBeforeTax.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-warm-gray">ITBM (7%)</span>
+              <span className="text-dark">${pricing.itbmAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-base pt-1 border-t border-beige-200">
+              <span className="text-dark">Total</span>
+              <span className={pricing.hasPromotion ? 'text-gold' : 'text-dark'}>
+                ${pricing.totalWithTax.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Client Info - Minimal */}
+        <div className="text-xs text-warm-gray text-center">
+          Reserva a nombre de <span className="font-medium text-dark">{clientInfo?.FirstName} {clientInfo?.LastName}</span>
+        </div>
+
+        {/* Payment Notice - Compact */}
+        <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-amber-800 text-xs text-center">
+            El pago se realiza en el spa al momento de tu visita
+          </p>
+        </div>
+      </div>
+
+      {/* Navigation - Sticky at bottom */}
+      <div className="sticky bottom-0 bg-white border-t border-beige-200 py-2 -mx-6 px-6 mt-auto">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={prevStep}
+            disabled={isSubmitting}
+            className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver
+          </button>
+
+          <button
+            onClick={handleConfirmBooking}
+            disabled={isSubmitting || isLoading}
+            className="flex items-center gap-1 px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
+                     hover:bg-gold/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Procesando...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="w-4 h-4" />
+                Confirmar
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
