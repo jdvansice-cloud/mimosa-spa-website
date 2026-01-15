@@ -80,7 +80,7 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-4">
             <LanguageSwitcher variant="dark" />
             <Link
-              href="/portal"
+              href={`/${locale}/portal`}
               className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
               title="Mi Portal"
             >
@@ -131,9 +131,9 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          
+
           <Link
-            href="/portal"
+            href={`/${locale}/portal`}
             className="block py-3 text-lg font-medium text-cream/90 hover:text-gold transition-colors border-b border-cream/10"
             onClick={() => setIsMobileMenuOpen(false)}
           >

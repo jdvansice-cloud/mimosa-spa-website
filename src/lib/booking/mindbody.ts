@@ -1030,8 +1030,6 @@ export async function addAppointment(appointmentData: {
 }
 
 // Add multiple appointments (for multi-service bookings)
-// Books each appointment sequentially, one at a time
-// Each appointment is processed individually - if one fails, others may still succeed
 export async function addMultipleAppointments(appointments: Array<{
   ClientId: number
   LocationId: number
@@ -1040,58 +1038,20 @@ export async function addMultipleAppointments(appointments: Array<{
   StartDateTime: string
   Notes?: string
 }>) {
-  console.log('Booking', appointments.length, 'appointments sequentially')
-  console.log('Appointments to book:', JSON.stringify(appointments, null, 2))
+  const results = []
 
-  const results: Array<{
-    success: boolean
-    appointment?: {
-      Id: number
-      ClientId: number
-      LocationId: number
-      StaffId: number
-      StartDateTime: string
-      EndDateTime: string
-      Status: string
-      Staff?: {
-        Id: number
-        FirstName: string
-        LastName: string
-        DisplayName?: string
-      }
-    }
-    error?: string
-  }> = []
-
-  for (let i = 0; i < appointments.length; i++) {
-    const appointment = appointments[i]
-    console.log(`Booking appointment ${i + 1}/${appointments.length}:`, {
-      SessionTypeId: appointment.SessionTypeId,
-      StartDateTime: appointment.StartDateTime,
-      StaffId: appointment.StaffId,
-    })
-
+  for (const appointment of appointments) {
     try {
       const result = await addAppointment(appointment)
-      console.log(`Appointment ${i + 1} booked successfully:`, result.Id)
       results.push({ success: true, appointment: result })
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      console.error(`Appointment ${i + 1} failed:`, errorMessage)
-      results.push({ success: false, error: errorMessage })
+      results.push({ success: false, error: String(error) })
     }
   }
-
-  console.log('Booking results:', results.map(r => ({
-    success: r.success,
-    appointmentId: r.appointment?.Id,
-    error: r.error
-  })))
 
   return results
 }
 
-// ============================================
 // CLIENT HISTORY & PORTAL FUNCTIONS
 // ============================================
 
