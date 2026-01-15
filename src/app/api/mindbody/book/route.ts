@@ -6,7 +6,8 @@ import {
   sanitizeError,
   ERROR_MESSAGES,
   formatDateForPanama,
-  formatTimeForPanama
+  formatTimeForPanama,
+  isDateTimeInPastForPanama
 } from '@/lib/booking/constants'
 import {
   checkRateLimit,
@@ -105,8 +106,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Don't allow bookings in the past
-    if (startDate < new Date()) {
+    // Don't allow bookings in the past (using Panama timezone)
+    if (isDateTimeInPastForPanama(startDateTime)) {
       return NextResponse.json(
         { error: 'No se puede reservar en el pasado' },
         { status: 400 }

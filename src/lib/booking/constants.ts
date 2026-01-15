@@ -147,6 +147,39 @@ export function panamaTimeToUTC(dateStr: string, timeStr: string): Date {
   return new Date(panamaDate.getTime() - offsetDiff * 60 * 1000)
 }
 
+// Get current time in Panama timezone for comparisons
+// This is critical for Vercel deployments where server runs in UTC
+export function getCurrentPanamaTime(): Date {
+  // Get current UTC time
+  const now = new Date()
+
+  // Format current time in Panama timezone and parse it back
+  // This gives us the "wall clock" time in Panama
+  const panamaTimeStr = now.toLocaleString('en-US', {
+    timeZone: PANAMA_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  })
+
+  // Parse back: "01/15/2025, 14:30:00" -> Date object
+  // The parsed date will be in local server time, but represents Panama wall clock time
+  return new Date(panamaTimeStr)
+}
+
+// Check if a datetime string (YYYY-MM-DDTHH:MM:SS) is in the past for Panama timezone
+export function isDateTimeInPastForPanama(dateTimeStr: string): boolean {
+  // The dateTimeStr is in format "2025-01-15T14:30:00" representing Panama local time
+  const bookingTime = new Date(dateTimeStr)
+  const panamaTime = getCurrentPanamaTime()
+
+  return bookingTime < panamaTime
+}
+
 // Validate required fields for API requests
 export function validateRequired<T extends Record<string, unknown>>(
   data: T,
