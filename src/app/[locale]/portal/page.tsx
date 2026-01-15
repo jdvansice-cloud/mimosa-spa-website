@@ -51,6 +51,7 @@ function PortalContent() {
   type SupabaseClient = ReturnType<typeof import('@/lib/supabase/client').getClient>
   const supabaseRef = useRef<SupabaseClient | null>(null)
   const [isInitializing, setIsInitializing] = useState(true)
+  const dataFetchedRef = useRef(false)
 
   // Lazy load Supabase client
   const getSupabase = (): SupabaseClient => {
@@ -153,9 +154,10 @@ function PortalContent() {
     }
   }, [router, searchParams, setAuth, setMindbodyClient, mindbodyClientId, client, logout, locale])
 
-  // Fetch data when client is available
+  // Fetch data when client is available (only once)
   useEffect(() => {
-    if (session && mindbodyClientId) {
+    if (session && mindbodyClientId && !dataFetchedRef.current) {
+      dataFetchedRef.current = true
       fetchAllData()
     }
   }, [session, mindbodyClientId])
