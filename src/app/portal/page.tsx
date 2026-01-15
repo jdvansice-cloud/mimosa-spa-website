@@ -14,7 +14,8 @@ import {
   ArrowRight,
   Loader2,
   MapPin,
-  RefreshCw
+  RefreshCw,
+  Settings
 } from 'lucide-react'
 import { usePortalStore, usePortalData } from '@/lib/portal/store'
 import { PANAMA_TIMEZONE } from '@/lib/booking/constants'
@@ -111,6 +112,13 @@ export default function PortalPage() {
               </p>
             </div>
             <button
+              onClick={() => router.push('/portal/profile')}
+              className="p-2 text-warm-gray hover:text-gold transition-colors"
+              title="Editar perfil"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+            <button
               onClick={handleLogout}
               className="p-2 text-warm-gray hover:text-red-500 transition-colors"
               title="Cerrar sesión"
@@ -189,10 +197,17 @@ export default function PortalPage() {
             { id: 'upcoming', label: 'Próximas Citas', icon: CalendarCheck },
             { id: 'history', label: 'Historial', icon: History },
             { id: 'purchases', label: 'Compras', icon: ShoppingBag },
+            { id: 'profile', label: 'Mi Perfil', icon: Settings },
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              onClick={() => setActiveTab(id as typeof activeTab)}
+              onClick={() => {
+                if (id === 'profile') {
+                  router.push('/portal/profile')
+                } else {
+                  setActiveTab(id as typeof activeTab)
+                }
+              }}
               className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap
                        transition-all ${
                          activeTab === id

@@ -1367,3 +1367,129 @@ export async function getClientCompleteInfo(clientId: string) {
   const clients = (response as unknown as { Clients: ClientInfoResponse['Client'][] }).Clients
   return clients?.[0] || null
 }
+
+// Custom client field interface
+export interface CustomClientField {
+  Id: number
+  DataType: string
+  Name: string
+  Value?: string
+}
+
+// Get custom client fields configured for the site
+export async function getCustomClientFields() {
+  interface CustomFieldsResponse {
+    CustomClientFields: Array<{
+      Id: number
+      DataType: string
+      Name: string
+    }>
+  }
+
+  const response = await mindbodyRequest<CustomFieldsResponse>(
+    '/client/customclientfields'
+  )
+
+  return response.CustomClientFields || []
+}
+
+// Update client profile interface
+export interface UpdateClientData {
+  Id: string
+  FirstName?: string
+  LastName?: string
+  Email?: string
+  MobilePhone?: string
+  HomePhone?: string
+  AddressLine1?: string
+  AddressLine2?: string
+  City?: string
+  State?: string
+  PostalCode?: string
+  Country?: string
+  BirthDate?: string
+  EmergencyContactInfoName?: string
+  EmergencyContactInfoPhone?: string
+  EmergencyContactInfoEmail?: string
+  CustomClientFields?: Array<{
+    Id: number
+    Value: string
+  }>
+}
+
+// Update client profile in Mindbody
+export async function updateClient(clientData: UpdateClientData) {
+  interface UpdateClientResponse {
+    Client: {
+      Id: string
+      UniqueId: number
+      FirstName: string
+      LastName: string
+      Email: string
+      MobilePhone: string
+      HomePhone: string
+      BirthDate: string | null
+      AddressLine1: string | null
+      AddressLine2: string | null
+      City: string | null
+      State: string | null
+      PostalCode: string | null
+      Country: string | null
+      CustomClientFields: Array<{
+        Id: number
+        DataType: string
+        Name: string
+        Value: string
+      }>
+    }
+  }
+
+  const response = await mindbodyRequest<UpdateClientResponse>('/client/updateclient', {
+    method: 'POST',
+    body: {
+      Client: clientData
+    }
+  })
+
+  return response.Client
+}
+
+// Get client with custom fields
+export async function getClientWithCustomFields(clientId: string) {
+  interface ClientWithFieldsResponse {
+    Clients: Array<{
+      Id: string
+      UniqueId: number
+      FirstName: string
+      LastName: string
+      Email: string
+      MobilePhone: string
+      HomePhone: string
+      BirthDate: string | null
+      AddressLine1: string | null
+      AddressLine2: string | null
+      City: string | null
+      State: string | null
+      PostalCode: string | null
+      Country: string | null
+      EmergencyContactInfoName: string | null
+      EmergencyContactInfoPhone: string | null
+      EmergencyContactInfoEmail: string | null
+      CustomClientFields: Array<{
+        Id: number
+        DataType: string
+        Name: string
+        Value: string
+      }>
+    }>
+  }
+
+  const queryParams = new URLSearchParams()
+  queryParams.set('request.clientId', clientId)
+
+  const response = await mindbodyRequest<ClientWithFieldsResponse>(
+    `/client/clients?${queryParams.toString()}`
+  )
+
+  return response.Clients?.[0] || null
+}

@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getClientCompleteInfo, searchClients } from '@/lib/booking/mindbody'
+import {
+  getClientWithCustomFields,
+  searchClients,
+  updateClient,
+  getCustomClientFields,
+  type UpdateClientData
+} from '@/lib/booking/mindbody'
 import { sanitizeError } from '@/lib/booking/constants'
 
-// GET /api/portal/profile - Get client profile information
+// GET /api/portal/profile - Get client profile information with custom fields
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const clientId = searchParams.get('clientId')
+    const includeCustomFields = searchParams.get('includeCustomFields') === 'true'
 
     if (!clientId) {
       return NextResponse.json(
@@ -15,7 +22,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const client = await getClientCompleteInfo(clientId)
+    // Get client with custom fields
+    const client = await getClientWithCustomFields(clientId)
 
     if (!client) {
       return NextResponse.json(
@@ -24,10 +32,62 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ client })
+    // Optionally get custom field definitions
+    let customFieldDefinitions = null
+    if (includeCustomFields) {
+      customFieldDefinitions = await getCustomClientFields()
+    }
+
+    return NextResponse.json({
+      client,
+      customFieldDefinitions
+    })
 
   } catch (error) {
     console.error('Portal profile error:', error)
+    return NextResponse.json(
+      { error: sanitizeError(error) },
+      { status: 500 }
+    )
+  }
+}
+
+// PUT /api/portal/profile - Update client profile
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { clientId, updates } = body
+
+    if (!clientId) {
+      return NextResponse.json(
+        { error: 'Se requiere el ID del cliente' },
+        { status: 400 }
+      )
+    }
+
+    if (!updates || Object.keys(updates).length === 0) {
+      return NextResponse.json(
+        { error: 'No se proporcionaron datos para actualizar' },
+        { status: 400 }
+      )
+    }
+
+    // Build update data
+    const updateData: UpdateClientData = {
+      Id: clientId,
+      ...updates
+    }
+
+    // Update client in Mindbody
+    const updatedClient = await updateClient(updateData)
+
+    return NextResponse.json({
+      success: true,
+      client: updatedClient
+    })
+
+  } catch (error) {
+    console.error('Portal profile update error:', error)
     return NextResponse.json(
       { error: sanitizeError(error) },
       { status: 500 }
