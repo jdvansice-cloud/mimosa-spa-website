@@ -32,16 +32,23 @@ export function AuthStep() {
       setError('Por favor ingresa tu correo electrónico o número de teléfono')
       return
     }
-    
+
     // Determine search type
     const isEmail = clientIdentifier.includes('@')
-    const isPhone = /^[\d\s\-\+\(\)]+$/.test(clientIdentifier.replace(/\s/g, ''))
-    
+    const cleanedPhone = clientIdentifier.replace(/[\s\-\(\)]/g, '')
+    const isPhone = /^\d+$/.test(cleanedPhone)
+
     if (!isEmail && !isPhone) {
       setError('Por favor ingresa un correo electrónico o número de teléfono válido')
       return
     }
-    
+
+    // Validate phone number format - must start with country code (e.g., 507)
+    if (isPhone && cleanedPhone.length < 10) {
+      setError('Recuerda incluir el código de país sin el signo + (ej: 50766124546)')
+      return
+    }
+
     setLoading(true)
     setError(null)
     
@@ -215,7 +222,7 @@ export function AuthStep() {
                 className="w-full pl-12 pr-4 py-3 border border-beige-200 rounded-xl 
                          focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
                          transition-all"
-                placeholder="+507 6000-0000"
+                placeholder="50766124546"
               />
             </div>
           </div>
@@ -295,7 +302,7 @@ export function AuthStep() {
           className="w-full pl-12 pr-4 py-4 border-2 border-beige-200 rounded-xl 
                    text-lg focus:outline-none focus:ring-2 focus:ring-gold/50 
                    focus:border-gold transition-all"
-          placeholder="correo@ejemplo.com o +507 6000-0000"
+          placeholder="correo@ejemplo.com o 50766124546"
           autoFocus
         />
       </div>
