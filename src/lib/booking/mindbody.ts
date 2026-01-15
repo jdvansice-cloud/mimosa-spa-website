@@ -1039,7 +1039,7 @@ export async function addMultipleAppointments(appointments: Array<{
   Notes?: string
 }>) {
   const results = []
-  
+
   for (const appointment of appointments) {
     try {
       const result = await addAppointment(appointment)
@@ -1048,6 +1048,408 @@ export async function addMultipleAppointments(appointments: Array<{
       results.push({ success: false, error: String(error) })
     }
   }
-  
+
   return results
+}
+
+// CLIENT HISTORY & PORTAL FUNCTIONS
+// ============================================
+
+// Types for client history responses
+export interface ClientVisit {
+  AppointmentId: number
+  AppointmentStatus: string
+  ClassId: number | null
+  ClientId: string
+  StartDateTime: string
+  EndDateTime: string
+  LastModifiedDateTime: string
+  LateCancelled: boolean
+  LocationId: number
+  MakeUp: boolean
+  Name: string
+  ServiceId: number
+  SignedIn: boolean
+  StaffId: number
+  StaffName?: string
+  WebSignup: boolean
+  Action?: string
+  Site?: {
+    Id: number
+    Name: string
+  }
+  Location?: {
+    Id: number
+    Name: string
+  }
+  Staff?: {
+    Id: number
+    FirstName: string
+    LastName: string
+    DisplayName?: string
+  }
+}
+
+export interface ClientPurchase {
+  Sale: {
+    Id: number
+    SaleDate: string
+    SaleTime: string
+    SaleDateTime: string
+    OriginalSaleDateTime: string
+    ClientId: string
+    PurchasedItems: Array<{
+      Id: number
+      IsService: boolean
+      BarcodeId: string | null
+    }>
+    LocationId: number
+    Payments: Array<{
+      Id: number
+      Amount: number
+      Method: number
+      Type: string
+      Notes: string | null
+    }>
+  }
+  Description: string
+  Quantity: number
+  Price: number
+  Discount: number
+  Tax: number
+  Returned: boolean
+  PaymentRefId: number
+  Id: number
+  Status: string
+  IsService: boolean
+}
+
+export interface ClientScheduledVisit {
+  AppointmentId: number
+  AppointmentStatus: string
+  ClassId: number | null
+  ClientId: string
+  StartDateTime: string
+  EndDateTime: string
+  Id: number
+  LastModifiedDateTime: string
+  LateCancelled: boolean
+  LocationId: number
+  MakeUp: boolean
+  Name: string
+  ServiceId: number
+  SignedIn: boolean
+  StaffId: number
+  WebSignup: boolean
+  Staff?: {
+    Id: number
+    FirstName: string
+    LastName: string
+    DisplayName?: string
+  }
+  Location?: {
+    Id: number
+    Name: string
+  }
+}
+
+// Get client visit history (past appointments)
+export async function getClientVisits(params: {
+  clientId: string
+  startDate?: string
+  endDate?: string
+  limit?: number
+  offset?: number
+}) {
+  interface ClientVisitsResponse {
+    PaginationResponse: {
+      RequestedLimit: number
+      RequestedOffset: number
+      PageSize: number
+      TotalResults: number
+    }
+    Visits: ClientVisit[]
+  }
+
+  const queryParams = new URLSearchParams()
+  queryParams.set('request.clientId', params.clientId)
+
+  if (params.startDate) {
+    queryParams.set('request.startDate', params.startDate)
+  }
+  if (params.endDate) {
+    queryParams.set('request.endDate', params.endDate)
+  }
+  if (params.limit) {
+    queryParams.set('request.limit', params.limit.toString())
+  }
+  if (params.offset) {
+    queryParams.set('request.offset', params.offset.toString())
+  }
+
+  const response = await mindbodyRequest<ClientVisitsResponse>(
+    `/client/clientvisits?${queryParams.toString()}`
+  )
+
+  return {
+    visits: response.Visits || [],
+    pagination: response.PaginationResponse
+  }
+}
+
+// Get client purchase history
+export async function getClientPurchases(params: {
+  clientId: string
+  startDate?: string
+  endDate?: string
+  limit?: number
+  offset?: number
+}) {
+  interface ClientPurchasesResponse {
+    PaginationResponse: {
+      RequestedLimit: number
+      RequestedOffset: number
+      PageSize: number
+      TotalResults: number
+    }
+    Purchases: ClientPurchase[]
+  }
+
+  const queryParams = new URLSearchParams()
+  queryParams.set('request.clientId', params.clientId)
+
+  if (params.startDate) {
+    queryParams.set('request.startDate', params.startDate)
+  }
+  if (params.endDate) {
+    queryParams.set('request.endDate', params.endDate)
+  }
+  if (params.limit) {
+    queryParams.set('request.limit', params.limit.toString())
+  }
+  if (params.offset) {
+    queryParams.set('request.offset', params.offset.toString())
+  }
+
+  const response = await mindbodyRequest<ClientPurchasesResponse>(
+    `/client/clientpurchases?${queryParams.toString()}`
+  )
+
+  return {
+    purchases: response.Purchases || [],
+    pagination: response.PaginationResponse
+  }
+}
+
+// Get client scheduled visits (upcoming appointments)
+export async function getClientSchedule(params: {
+  clientId: string
+  startDate?: string
+  endDate?: string
+  limit?: number
+  offset?: number
+}) {
+  interface ClientScheduleResponse {
+    PaginationResponse: {
+      RequestedLimit: number
+      RequestedOffset: number
+      PageSize: number
+      TotalResults: number
+    }
+    Visits: ClientScheduledVisit[]
+  }
+
+  const queryParams = new URLSearchParams()
+  queryParams.set('request.clientId', params.clientId)
+
+  if (params.startDate) {
+    queryParams.set('request.startDate', params.startDate)
+  }
+  if (params.endDate) {
+    queryParams.set('request.endDate', params.endDate)
+  }
+  if (params.limit) {
+    queryParams.set('request.limit', params.limit.toString())
+  }
+  if (params.offset) {
+    queryParams.set('request.offset', params.offset.toString())
+  }
+
+  const response = await mindbodyRequest<ClientScheduleResponse>(
+    `/client/clientschedule?${queryParams.toString()}`
+  )
+
+  return {
+    visits: response.Visits || [],
+    pagination: response.PaginationResponse
+  }
+}
+
+// Get full client info with all details
+export async function getClientCompleteInfo(clientId: string) {
+  interface ClientInfoResponse {
+    Client: {
+      Id: string
+      UniqueId: number
+      FirstName: string
+      LastName: string
+      Email: string
+      MobilePhone: string
+      HomePhone: string
+      BirthDate: string | null
+      CreationDate: string
+      Status: string
+      Action: string
+      PhotoUrl: string | null
+      AddressLine1: string | null
+      AddressLine2: string | null
+      City: string | null
+      State: string | null
+      PostalCode: string | null
+      Country: string | null
+      IsProspect: boolean
+      FirstAppointmentDate: string | null
+      ReferredBy: string | null
+      EmergencyContactInfoName: string | null
+      EmergencyContactInfoPhone: string | null
+      EmergencyContactInfoEmail: string | null
+    }
+  }
+
+  const queryParams = new URLSearchParams()
+  queryParams.set('request.clientId', clientId)
+
+  const response = await mindbodyRequest<ClientInfoResponse>(
+    `/client/clients?${queryParams.toString()}`
+  )
+
+  // The API returns a Clients array, get the first one
+  const clients = (response as unknown as { Clients: ClientInfoResponse['Client'][] }).Clients
+  return clients?.[0] || null
+}
+
+// Custom client field interface
+export interface CustomClientField {
+  Id: number
+  DataType: string
+  Name: string
+  Value?: string
+}
+
+// Get custom client fields configured for the site
+export async function getCustomClientFields() {
+  interface CustomFieldsResponse {
+    CustomClientFields: Array<{
+      Id: number
+      DataType: string
+      Name: string
+    }>
+  }
+
+  const response = await mindbodyRequest<CustomFieldsResponse>(
+    '/client/customclientfields'
+  )
+
+  return response.CustomClientFields || []
+}
+
+// Update client profile interface
+export interface UpdateClientData {
+  Id: string
+  FirstName?: string
+  LastName?: string
+  Email?: string
+  MobilePhone?: string
+  HomePhone?: string
+  AddressLine1?: string
+  AddressLine2?: string
+  City?: string
+  State?: string
+  PostalCode?: string
+  Country?: string
+  BirthDate?: string
+  EmergencyContactInfoName?: string
+  EmergencyContactInfoPhone?: string
+  EmergencyContactInfoEmail?: string
+  CustomClientFields?: Array<{
+    Id: number
+    Value: string
+  }>
+}
+
+// Update client profile in Mindbody
+export async function updateClient(clientData: UpdateClientData) {
+  interface UpdateClientResponse {
+    Client: {
+      Id: string
+      UniqueId: number
+      FirstName: string
+      LastName: string
+      Email: string
+      MobilePhone: string
+      HomePhone: string
+      BirthDate: string | null
+      AddressLine1: string | null
+      AddressLine2: string | null
+      City: string | null
+      State: string | null
+      PostalCode: string | null
+      Country: string | null
+      CustomClientFields: Array<{
+        Id: number
+        DataType: string
+        Name: string
+        Value: string
+      }>
+    }
+  }
+
+  const response = await mindbodyRequest<UpdateClientResponse>('/client/updateclient', {
+    method: 'POST',
+    body: {
+      Client: clientData
+    }
+  })
+
+  return response.Client
+}
+
+// Get client with custom fields
+export async function getClientWithCustomFields(clientId: string) {
+  interface ClientWithFieldsResponse {
+    Clients: Array<{
+      Id: string
+      UniqueId: number
+      FirstName: string
+      LastName: string
+      Email: string
+      MobilePhone: string
+      HomePhone: string
+      BirthDate: string | null
+      AddressLine1: string | null
+      AddressLine2: string | null
+      City: string | null
+      State: string | null
+      PostalCode: string | null
+      Country: string | null
+      EmergencyContactInfoName: string | null
+      EmergencyContactInfoPhone: string | null
+      EmergencyContactInfoEmail: string | null
+      CustomClientFields: Array<{
+        Id: number
+        DataType: string
+        Name: string
+        Value: string
+      }>
+    }>
+  }
+
+  const queryParams = new URLSearchParams()
+  queryParams.set('request.clientId', clientId)
+
+  const response = await mindbodyRequest<ClientWithFieldsResponse>(
+    `/client/clients?${queryParams.toString()}`
+  )
+
+  return response.Clients?.[0] || null
 }

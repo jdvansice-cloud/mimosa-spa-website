@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
-import { Menu, X, Calendar } from 'lucide-react'
+import { Menu, X, Calendar, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button, LanguageSwitcher } from '@/components/ui'
 
@@ -79,6 +79,13 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-4">
             <LanguageSwitcher variant="dark" />
+            <Link
+              href={`/${locale}/portal`}
+              className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
+              title="Mi Portal"
+            >
+              <User className="h-5 w-5" />
+            </Link>
             <Link href={`/${locale}/reservar`}>
               <Button size="sm" leftIcon={<Calendar className="h-4 w-4" />}>
                 {t('book')}
@@ -124,7 +131,15 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          
+
+          <Link
+            href={`/${locale}/portal`}
+            className="block py-3 text-lg font-medium text-cream/90 hover:text-gold transition-colors border-b border-cream/10"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Mi Portal
+          </Link>
+
           <div className="pt-4 flex items-center justify-between">
             <LanguageSwitcher variant="dark" />
             <Link href={`/${locale}/reservar`} onClick={() => setIsMobileMenuOpen(false)}>

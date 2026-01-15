@@ -1,11 +1,17 @@
 import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/types'
 
+// Check if Supabase env vars are configured
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
 export function createClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      'Missing Supabase environment variables. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
+    )
+  }
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
 }
 
 // Singleton instance for client-side usage
@@ -16,4 +22,9 @@ export function getClient() {
     clientInstance = createClient()
   }
   return clientInstance
+}
+
+// Check if Supabase is configured without throwing
+export function isSupabaseConfigured() {
+  return !!supabaseUrl && !!supabaseAnonKey
 }
