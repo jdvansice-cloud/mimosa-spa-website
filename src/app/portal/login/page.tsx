@@ -6,19 +6,22 @@ import Image from 'next/image'
 import { Mail, Phone, ArrowRight, Loader2, User } from 'lucide-react'
 import { usePortalStore, type PortalClient } from '@/lib/portal/store'
 
+// Type for client selection list
+interface ClientOption {
+  Id: number
+  FirstName: string
+  LastName: string
+  Email: string | null
+  MobilePhone: string | null
+}
+
 export default function PortalLoginPage() {
   const router = useRouter()
   const { login, setError, error } = usePortalStore()
 
   const [identifier, setIdentifier] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [multipleClients, setMultipleClients] = useState<Array<{
-    Id: number
-    FirstName: string
-    LastName: string
-    Email: string | null
-    MobilePhone: string | null
-  }> | null>(null)
+  const [multipleClients, setMultipleClients] = useState<ClientOption[] | null>(null)
 
   const handleLookup = async () => {
     if (!identifier.trim()) {
@@ -73,7 +76,7 @@ export default function PortalLoginPage() {
     }
   }
 
-  const handleSelectClient = (client: typeof multipleClients extends Array<infer T> ? T : never) => {
+  const handleSelectClient = (client: ClientOption) => {
     login(client as PortalClient)
     router.push('/portal')
   }
