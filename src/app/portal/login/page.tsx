@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense, useRef } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { Mail, Phone, ArrowRight, Loader2, User } from 'lucide-react'
-import { usePortalStore, type PortalClient } from '@/lib/portal/store'
+import { Mail, ArrowRight, Loader2, User, CheckCircle } from 'lucide-react'
 
-// Type for client selection list
+type LoginStep = 'email' | 'sending' | 'sent' | 'verifying'
+
 interface ClientOption {
   Id: number
   FirstName: string
@@ -15,82 +15,210 @@ interface ClientOption {
   MobilePhone: string | null
 }
 
-export default function PortalLoginPage() {
+function PortalLoginContent() {
   const router = useRouter()
-  const { login, setError, error } = usePortalStore()
+  const searchParams = useSearchParams()
+  type SupabaseClient = ReturnType<typeof import('@/lib/supabase/client').getClient>
+  const supabaseRef = useRef<SupabaseClient | null>(null)
 
-  const [identifier, setIdentifier] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  // Lazy load Supabase client
+  const getSupabase = (): SupabaseClient => {
+    if (!supabaseRef.current) {
+      const { getClient } = require('@/lib/supabase/client')
+      supabaseRef.current = getClient()
+    }
+    return supabaseRef.current as SupabaseClient
+  }
+
+  const [email, setEmail] = useState('')
+  const [step, setStep] = useState<LoginStep>('email')
+  const [error, setError] = useState<string | null>(null)
   const [multipleClients, setMultipleClients] = useState<ClientOption[] | null>(null)
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null)
 
-  const handleLookup = async () => {
-    if (!identifier.trim()) {
-      setError('Por favor ingresa tu correo electrónico o número de teléfono')
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const supabase = getSupabase()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        // User is already authenticated, redirect to portal
+        router.push('/portal')
+      }
+    }
+    checkSession()
+  }, [router])
+
+  // Handle error from callback
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam))
+    }
+  }, [searchParams])
+
+  const handleEmailSubmit = async () => {
+    if (!email.trim()) {
+      setError('Por favor ingresa tu correo electrónico')
       return
     }
 
-    // Validate phone format
-    const isEmail = identifier.includes('@')
-    const cleanedPhone = identifier.replace(/[\s\-\(\)]/g, '')
-    const isPhone = /^\d+$/.test(cleanedPhone)
-
-    if (!isEmail && !isPhone) {
-      setError('Por favor ingresa un correo electrónico o número de teléfono válido')
+    if (!email.includes('@')) {
+      setError('Por favor ingresa un correo electrónico válido')
       return
     }
 
-    if (isPhone && cleanedPhone.length < 10) {
-      setError('Recuerda incluir el código de país sin el signo + (ej: 50766124546)')
-      return
-    }
-
-    setIsLoading(true)
+    setStep('sending')
     setError(null)
 
     try {
-      const response = await fetch('/api/portal/profile', {
+      // First verify the email exists in Mindbody
+      const response = await fetch('/api/portal/auth/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier })
+        body: JSON.stringify({ email })
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al buscar cliente')
+        throw new Error(data.error || 'Error al verificar correo')
       }
 
       if (data.multiple) {
         // Multiple clients found - show selection
         setMultipleClients(data.clients)
-      } else {
-        // Single client - login and redirect
-        login(data.client as PortalClient)
-        router.push('/portal')
+        setStep('email')
+        return
       }
+
+      // Store client ID for linking after auth
+      const clientId = data.clientId
+      setSelectedClientId(clientId)
+
+      // Send magic link via Supabase
+      const supabase = getSupabase()
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/portal/auth/callback?clientId=${clientId}`,
+          data: {
+            mindbody_client_id: clientId,
+            first_name: data.firstName,
+            last_name: data.lastName
+          }
+        }
+      })
+
+      if (authError) {
+        throw new Error(authError.message)
+      }
+
+      setStep('sent')
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error de conexión')
-    } finally {
-      setIsLoading(false)
+      setStep('email')
     }
   }
 
-  const handleSelectClient = (client: ClientOption) => {
-    login(client as PortalClient)
-    router.push('/portal')
+  const handleSelectClient = async (client: ClientOption) => {
+    if (!client.Email) {
+      setError('Este cliente no tiene correo electrónico registrado')
+      return
+    }
+
+    setEmail(client.Email)
+    setSelectedClientId(client.Id)
+    setMultipleClients(null)
+    setStep('sending')
+
+    try {
+      // Send magic link via Supabase
+      const supabase = getSupabase()
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email: client.Email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/portal/auth/callback?clientId=${client.Id}`,
+          data: {
+            mindbody_client_id: client.Id,
+            first_name: client.FirstName,
+            last_name: client.LastName
+          }
+        }
+      })
+
+      if (authError) {
+        throw new Error(authError.message)
+      }
+
+      setStep('sent')
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión')
+      setStep('email')
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleLookup()
+      handleEmailSubmit()
     }
   }
 
-  // If showing client selection
+  // Success state - magic link sent
+  if (step === 'sent') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
+        <div className="w-full max-w-md text-center">
+          {/* Logo */}
+          <Image
+            src="/images/logo.png"
+            alt="Mimosa Spa Retreat"
+            width={180}
+            height={60}
+            className="mx-auto mb-8"
+          />
+
+          {/* Success Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-beige-200">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-green-600" />
+            </div>
+
+            <h1 className="text-2xl font-bold text-dark mb-3">
+              Revisa tu correo
+            </h1>
+
+            <p className="text-warm-gray mb-6">
+              Hemos enviado un enlace de acceso a<br />
+              <span className="font-semibold text-dark">{email}</span>
+            </p>
+
+            <div className="bg-gold/10 rounded-xl p-4 text-sm text-dark/80">
+              <p>Haz clic en el enlace del correo para acceder a tu portal.</p>
+              <p className="mt-2 text-warm-gray">El enlace expira en 1 hora.</p>
+            </div>
+
+            <button
+              onClick={() => {
+                setStep('email')
+                setEmail('')
+              }}
+              className="mt-6 text-gold hover:text-gold/80 font-medium transition-colors"
+            >
+              Usar otro correo
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Multiple clients selection
   if (multipleClients) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="text-center mb-8">
@@ -105,9 +233,16 @@ export default function PortalLoginPage() {
               Selecciona tu Perfil
             </h1>
             <p className="text-warm-gray">
-              Encontramos varias cuentas asociadas
+              Encontramos varias cuentas asociadas a este correo
             </p>
           </div>
+
+          {/* Error */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Client List */}
           <div className="space-y-3 mb-6">
@@ -115,9 +250,12 @@ export default function PortalLoginPage() {
               <button
                 key={client.Id}
                 onClick={() => handleSelectClient(client)}
-                className="w-full p-4 bg-white border border-beige-200 rounded-xl
-                         hover:border-gold hover:shadow-md transition-all
-                         flex items-center gap-4 text-left"
+                disabled={!client.Email}
+                className={`w-full p-4 bg-white border rounded-xl transition-all
+                         flex items-center gap-4 text-left
+                         ${client.Email
+                           ? 'border-beige-200 hover:border-gold hover:shadow-md cursor-pointer'
+                           : 'border-gray-200 opacity-50 cursor-not-allowed'}`}
               >
                 <div className="w-12 h-12 bg-gold/10 rounded-full flex items-center justify-center">
                   <User className="w-6 h-6 text-gold" />
@@ -127,7 +265,7 @@ export default function PortalLoginPage() {
                     {client.FirstName} {client.LastName}
                   </p>
                   <p className="text-sm text-warm-gray">
-                    {client.Email || client.MobilePhone}
+                    {client.Email || 'Sin correo registrado'}
                   </p>
                 </div>
               </button>
@@ -136,18 +274,22 @@ export default function PortalLoginPage() {
 
           {/* Back Button */}
           <button
-            onClick={() => setMultipleClients(null)}
+            onClick={() => {
+              setMultipleClients(null)
+              setError(null)
+            }}
             className="w-full py-3 text-warm-gray hover:text-dark transition-colors"
           >
-            ← Usar otro correo o teléfono
+            ← Usar otro correo
           </button>
         </div>
       </div>
     )
   }
 
+  // Main login form
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -171,34 +313,31 @@ export default function PortalLoginPage() {
           <div className="text-center mb-6">
             <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold/60 rounded-full
                           flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <User className="w-8 h-8 text-white" />
+              <Mail className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-xl font-semibold text-dark">
               Iniciar Sesión
             </h2>
             <p className="text-sm text-warm-gray mt-1">
-              Ingresa tu correo o teléfono registrado
+              Te enviaremos un enlace de acceso a tu correo
             </p>
           </div>
 
-          {/* Input */}
+          {/* Email Input */}
           <div className="relative mb-4">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-gray">
-              {identifier.includes('@') ? (
-                <Mail className="w-5 h-5" />
-              ) : (
-                <Phone className="w-5 h-5" />
-              )}
+              <Mail className="w-5 h-5" />
             </div>
             <input
-              type="text"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               onKeyPress={handleKeyPress}
+              disabled={step === 'sending'}
               className="w-full pl-12 pr-4 py-4 border-2 border-beige-200 rounded-xl
                        text-lg focus:outline-none focus:ring-2 focus:ring-gold/50
-                       focus:border-gold transition-all"
-              placeholder="correo@ejemplo.com o 50766124546"
+                       focus:border-gold transition-all disabled:opacity-50"
+              placeholder="correo@ejemplo.com"
               autoFocus
             />
           </div>
@@ -212,21 +351,21 @@ export default function PortalLoginPage() {
 
           {/* Submit Button */}
           <button
-            onClick={handleLookup}
-            disabled={isLoading || !identifier.trim()}
+            onClick={handleEmailSubmit}
+            disabled={step === 'sending' || !email.trim()}
             className="w-full py-4 bg-gradient-to-r from-gold to-gold/90 text-dark
                      font-semibold rounded-xl hover:shadow-lg transition-all
                      disabled:opacity-50 disabled:cursor-not-allowed
                      flex items-center justify-center gap-2"
           >
-            {isLoading ? (
+            {step === 'sending' ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Buscando...
+                Enviando...
               </>
             ) : (
               <>
-                Continuar
+                Enviar enlace de acceso
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
@@ -250,5 +389,26 @@ export default function PortalLoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Loading component for Suspense fallback
+function LoginLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
+        <p className="text-warm-gray">Cargando...</p>
+      </div>
+    </div>
+  )
+}
+
+// Export with Suspense wrapper for useSearchParams
+export default function PortalLoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <PortalLoginContent />
+    </Suspense>
   )
 }

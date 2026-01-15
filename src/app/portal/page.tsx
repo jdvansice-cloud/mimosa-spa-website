@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense, useRef } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import {
   Calendar,
@@ -42,11 +42,26 @@ function formatTime(dateStr: string) {
   })
 }
 
-export default function PortalPage() {
+function PortalContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  type SupabaseClient = ReturnType<typeof import('@/lib/supabase/client').getClient>
+  const supabaseRef = useRef<SupabaseClient | null>(null)
+  const [isInitializing, setIsInitializing] = useState(true)
+
+  // Lazy load Supabase client
+  const getSupabase = (): SupabaseClient => {
+    if (!supabaseRef.current) {
+      const { getClient } = require('@/lib/supabase/client')
+      supabaseRef.current = getClient()
+    }
+    return supabaseRef.current as SupabaseClient
+  }
+
   const {
-    isAuthenticated,
+    session,
     client,
+    mindbodyClientId,
     visits,
     purchases,
     upcomingAppointments,
@@ -54,39 +69,167 @@ export default function PortalPage() {
     error,
     activeTab,
     setActiveTab,
+    setAuth,
+    setMindbodyClient,
     logout
   } = usePortalStore()
   const { fetchAllData } = usePortalData()
 
-  // Redirect if not authenticated
+  // Initialize auth state and fetch client data
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/portal/login')
-    }
-  }, [isAuthenticated, router])
+    const supabase = getSupabase()
 
-  // Fetch data on mount
+    const initializeAuth = async () => {
+      try {
+        // Get session from Supabase
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+
+        if (!currentSession) {
+          // Not authenticated - redirect to login
+          router.push('/portal/login')
+          return
+        }
+
+        // Set auth state
+        setAuth(currentSession.user, currentSession)
+
+        // Check for clientId from URL (passed from magic link callback)
+        const urlClientId = searchParams.get('clientId')
+        if (urlClientId) {
+          const clientIdNum = parseInt(urlClientId, 10)
+          if (!isNaN(clientIdNum)) {
+            // Fetch client details from Mindbody
+            const response = await fetch(`/api/portal/profile?clientId=${clientIdNum}`)
+            if (response.ok) {
+              const data = await response.json()
+              setMindbodyClient(data.client, clientIdNum)
+            }
+          }
+        } else if (mindbodyClientId && !client) {
+          // Have clientId from storage but no client data - fetch it
+          const response = await fetch(`/api/portal/profile?clientId=${mindbodyClientId}`)
+          if (response.ok) {
+            const data = await response.json()
+            setMindbodyClient(data.client, mindbodyClientId)
+          }
+        }
+
+        // Also get client ID from user metadata if available
+        if (!mindbodyClientId && currentSession.user.user_metadata?.mindbody_client_id) {
+          const metaClientId = currentSession.user.user_metadata.mindbody_client_id
+          const response = await fetch(`/api/portal/profile?clientId=${metaClientId}`)
+          if (response.ok) {
+            const data = await response.json()
+            setMindbodyClient(data.client, metaClientId)
+          }
+        }
+
+      } catch (err) {
+        console.error('Error initializing auth:', err)
+      } finally {
+        setIsInitializing(false)
+      }
+    }
+
+    initializeAuth()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        if (event === 'SIGNED_OUT') {
+          logout()
+          router.push('/portal/login')
+        } else if (currentSession) {
+          setAuth(currentSession.user, currentSession)
+        }
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [router, searchParams, setAuth, setMindbodyClient, mindbodyClientId, client, logout])
+
+  // Fetch data when client is available
   useEffect(() => {
-    if (isAuthenticated && client) {
+    if (session && mindbodyClientId) {
       fetchAllData()
     }
-  }, [isAuthenticated, client])
+  }, [session, mindbodyClientId])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const supabase = getSupabase()
+    await supabase.auth.signOut()
     logout()
     router.push('/portal/login')
   }
 
-  if (!isAuthenticated || !client) {
+  // Loading state
+  if (isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gold" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-white">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
+          <p className="text-warm-gray">Cargando tu portal...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Not authenticated
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-white">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
+          <p className="text-warm-gray">Redirigiendo...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Authenticated but no Mindbody client linked
+  if (!client && !mindbodyClientId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
+        <div className="w-full max-w-md text-center">
+          <Image
+            src="/images/logo.png"
+            alt="Mimosa Spa Retreat"
+            width={180}
+            height={60}
+            className="mx-auto mb-8"
+          />
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-beige-200">
+            <User className="w-16 h-16 text-gold mx-auto mb-4" />
+            <h1 className="text-xl font-bold text-dark mb-2">
+              Bienvenido
+            </h1>
+            <p className="text-warm-gray mb-6">
+              Tu sesión está activa, pero no encontramos una cuenta de cliente asociada.
+            </p>
+            <a
+              href="/es/reservar"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-dark
+                       font-semibold rounded-xl hover:bg-gold/90 transition-colors"
+            >
+              <Calendar className="w-5 h-5" />
+              Reservar tu primera cita
+            </a>
+            <button
+              onClick={handleLogout}
+              className="block w-full mt-4 text-warm-gray hover:text-dark transition-colors"
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-white">
       {/* Header */}
       <header className="bg-white border-b border-beige-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -105,10 +248,10 @@ export default function PortalPage() {
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-dark">
-                {client.FirstName} {client.LastName}
+                {client?.FirstName} {client?.LastName}
               </p>
               <p className="text-xs text-warm-gray">
-                {client.Email || client.MobilePhone}
+                {client?.Email || client?.MobilePhone}
               </p>
             </div>
             <button
@@ -134,7 +277,7 @@ export default function PortalPage() {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-dark mb-2">
-            Hola, {client.FirstName}
+            Hola, {client?.FirstName || 'Cliente'}
           </h1>
           <p className="text-warm-gray">
             Bienvenido a tu portal personal de Mimosa Spa Retreat
@@ -523,5 +666,26 @@ export default function PortalPage() {
         </div>
       </footer>
     </div>
+  )
+}
+
+// Loading component for Suspense fallback
+function PortalLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-white">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
+        <p className="text-warm-gray">Cargando tu portal...</p>
+      </div>
+    </div>
+  )
+}
+
+// Export with Suspense wrapper for useSearchParams
+export default function PortalPage() {
+  return (
+    <Suspense fallback={<PortalLoading />}>
+      <PortalContent />
+    </Suspense>
   )
 }
