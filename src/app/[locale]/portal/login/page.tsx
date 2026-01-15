@@ -176,7 +176,7 @@ function PortalLoginContent() {
         <div className="w-full max-w-md text-center">
           {/* Logo */}
           <Image
-            src="/images/logo.png"
+            src="/logo.png"
             alt="Mimosa Spa Retreat"
             width={180}
             height={60}
@@ -226,7 +226,7 @@ function PortalLoginContent() {
           {/* Logo */}
           <div className="text-center mb-8">
             <Image
-              src="/images/logo.png"
+              src="/logo.png"
               alt="Mimosa Spa Retreat"
               width={180}
               height={60}
@@ -297,7 +297,7 @@ function PortalLoginContent() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Image
-            src="/images/logo.png"
+            src="/logo.png"
             alt="Mimosa Spa Retreat"
             width={180}
             height={60}

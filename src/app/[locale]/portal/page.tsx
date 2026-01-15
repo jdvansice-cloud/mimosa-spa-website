@@ -197,7 +197,7 @@ function PortalContent() {
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
         <div className="w-full max-w-md text-center">
           <Image
-            src="/images/logo.png"
+            src="/logo.png"
             alt="Mimosa Spa Retreat"
             width={180}
             height={60}
@@ -238,7 +238,7 @@ function PortalContent() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Image
-              src="/images/logo.png"
+              src="/logo.png"
               alt="Mimosa Spa Retreat"
               width={120}
               height={40}

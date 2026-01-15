@@ -263,7 +263,7 @@ export default function ProfileEditPage() {
               <ArrowLeft className="w-5 h-5 text-warm-gray" />
             </button>
             <Image
-              src="/images/logo.png"
+              src="/logo.png"
               alt="Mimosa Spa Retreat"
               width={100}
               height={33}
