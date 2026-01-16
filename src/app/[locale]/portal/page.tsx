@@ -99,32 +99,47 @@ function PortalContent() {
 
         // Check for clientId from URL (passed from magic link callback)
         const urlClientId = searchParams.get('clientId')
+        let foundClientId: number | null = null
+
         if (urlClientId) {
           const clientIdNum = parseInt(urlClientId, 10)
           if (!isNaN(clientIdNum)) {
-            // Fetch client details from Mindbody
-            const response = await fetch(`/api/portal/profile?clientId=${clientIdNum}`)
-            if (response.ok) {
-              const data = await response.json()
-              setMindbodyClient(data.client, clientIdNum)
-            }
-          }
-        } else if (mindbodyClientId && !client) {
-          // Have clientId from storage but no client data - fetch it
-          const response = await fetch(`/api/portal/profile?clientId=${mindbodyClientId}`)
-          if (response.ok) {
-            const data = await response.json()
-            setMindbodyClient(data.client, mindbodyClientId)
+            foundClientId = clientIdNum
           }
         }
 
-        // Also get client ID from user metadata if available
-        if (!mindbodyClientId && currentSession.user.user_metadata?.mindbody_client_id) {
-          const metaClientId = currentSession.user.user_metadata.mindbody_client_id
-          const response = await fetch(`/api/portal/profile?clientId=${metaClientId}`)
+        // If no URL clientId, try to get from Supabase profile (authoritative source)
+        if (!foundClientId) {
+          try {
+            const clientIdResponse = await fetch('/api/portal/client-id')
+            if (clientIdResponse.ok) {
+              const clientIdData = await clientIdResponse.json()
+              if (clientIdData.clientId) {
+                foundClientId = clientIdData.clientId
+                console.log('Got clientId from Supabase profile:', foundClientId)
+              }
+            }
+          } catch (err) {
+            console.error('Error fetching client ID from profile:', err)
+          }
+        }
+
+        // If still no clientId, try from local store
+        if (!foundClientId && mindbodyClientId) {
+          foundClientId = mindbodyClientId
+        }
+
+        // Last resort: check user metadata
+        if (!foundClientId && currentSession.user.user_metadata?.mindbody_client_id) {
+          foundClientId = currentSession.user.user_metadata.mindbody_client_id
+        }
+
+        // If we found a clientId, fetch the client details
+        if (foundClientId) {
+          const response = await fetch(`/api/portal/profile?clientId=${foundClientId}`)
           if (response.ok) {
             const data = await response.json()
-            setMindbodyClient(data.client, metaClientId)
+            setMindbodyClient(data.client, foundClientId)
           }
         }
 

@@ -4,8 +4,17 @@ import { NextResponse } from 'next/server'
 
 // Service role client bypasses RLS for profile operations
 function getServiceClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Missing Supabase env vars:', {
+      hasUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey
+    })
+    throw new Error('Missing Supabase configuration')
+  }
+
   return createServiceClient(supabaseUrl, supabaseServiceKey)
 }
 
@@ -56,8 +65,14 @@ export async function GET(
             // Use service role client to bypass RLS policies
             const serviceClient = getServiceClient()
 
+            console.log('About to upsert profile with:', {
+              id: data.user.id,
+              email: data.user.email,
+              mindbody_client_id: clientIdNum
+            })
+
             // UPSERT the user's profile with the Mindbody client ID
-            const { error: upsertError } = await serviceClient
+            const { data: upsertData, error: upsertError } = await serviceClient
               .from('profiles')
               .upsert({
                 id: data.user.id,
@@ -67,12 +82,27 @@ export async function GET(
               }, {
                 onConflict: 'id'
               })
+              .select()
 
             if (upsertError) {
               console.error('Failed to upsert profile:', upsertError)
             } else {
               console.log('Successfully saved Mindbody client ID to profile:', clientIdNum)
+              console.log('Upsert result:', upsertData)
             }
+
+            // Verify the profile was actually saved
+            const { data: verifyData, error: verifyError } = await serviceClient
+              .from('profiles')
+              .select('mindbody_client_id')
+              .eq('id', data.user.id)
+              .single()
+
+            console.log('Profile verification:', {
+              mindbody_client_id: verifyData?.mindbody_client_id,
+              error: verifyError?.message
+            })
+
           } catch (err) {
             console.error('Error saving profile:', err)
           }

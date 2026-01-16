@@ -63,12 +63,38 @@ function AuthStepContent() {
 
       if (session?.user) {
         // User is logged in
-        // Prefer URL clientId (from magic link), then user metadata
-        const mindbodyClientId = urlClientId
-          ? parseInt(urlClientId, 10)
-          : session.user.user_metadata?.mindbody_client_id
+        let mindbodyClientId: number | null = null
 
-        if (mindbodyClientId && !isNaN(mindbodyClientId)) {
+        // Priority 1: URL clientId (from magic link)
+        if (urlClientId) {
+          const parsed = parseInt(urlClientId, 10)
+          if (!isNaN(parsed)) {
+            mindbodyClientId = parsed
+          }
+        }
+
+        // Priority 2: Fetch from Supabase profile (authoritative source)
+        if (!mindbodyClientId) {
+          try {
+            const clientIdResponse = await fetch('/api/portal/client-id')
+            if (clientIdResponse.ok) {
+              const clientIdData = await clientIdResponse.json()
+              if (clientIdData.clientId) {
+                mindbodyClientId = clientIdData.clientId
+                console.log('AuthStep: Got clientId from Supabase profile:', mindbodyClientId)
+              }
+            }
+          } catch (err) {
+            console.error('Error fetching client ID from profile:', err)
+          }
+        }
+
+        // Priority 3: User metadata
+        if (!mindbodyClientId && session.user.user_metadata?.mindbody_client_id) {
+          mindbodyClientId = session.user.user_metadata.mindbody_client_id
+        }
+
+        if (mindbodyClientId) {
           // Fetch client info and proceed
           try {
             const response = await fetch(`/api/portal/profile?clientId=${mindbodyClientId}`)
