@@ -180,13 +180,14 @@ export default function ProfileEditPage() {
       )
 
       // Build custom fields array for update
+      // Always include the field if it exists, even with empty value (to allow clearing)
       const customClientFields: Array<{ Id: number; Value: string }> = []
 
-      if (rucFieldDef && formData.RUC) {
-        customClientFields.push({ Id: rucFieldDef.Id, Value: formData.RUC })
+      if (rucFieldDef) {
+        customClientFields.push({ Id: rucFieldDef.Id, Value: formData.RUC || '' })
       }
-      if (dvFieldDef && formData.DV) {
-        customClientFields.push({ Id: dvFieldDef.Id, Value: formData.DV })
+      if (dvFieldDef) {
+        customClientFields.push({ Id: dvFieldDef.Id, Value: formData.DV || '' })
       }
 
       const updates = {
