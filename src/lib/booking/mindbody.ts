@@ -517,18 +517,17 @@ export async function getAddons(locationId?: number) {
   })
 
   // Only include addons that have a matching session type (truly online bookable)
+  // Add-ons without valid session types CANNOT be booked as appointments
+  // (Mindbody requires a valid SessionTypeId, ProductId won't work)
   const onlineBookableAddons = addons.filter(s => {
-    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
+    const hasSessionType = findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
+    if (!hasSessionType) {
+      console.log(`Excluding addon "${s.Name}" - no valid SessionTypeId (has ProductId: ${s.ProductId})`)
+    }
+    return hasSessionType
   })
 
-  console.log('Online bookable add-ons with session type match:', onlineBookableAddons.length)
-
-  // If no addons match session types, return all filtered addons
-  // This handles cases where addons might not have separate session types
-  if (onlineBookableAddons.length === 0 && filteredAddons.length > 0) {
-    console.log('No session type matches - returning all SellOnline addons:', filteredAddons.length)
-    return addons
-  }
+  console.log('Online bookable add-ons with valid SessionTypeId:', onlineBookableAddons.length)
 
   return onlineBookableAddons
 }
