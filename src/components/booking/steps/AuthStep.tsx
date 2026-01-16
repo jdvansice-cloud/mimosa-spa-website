@@ -155,10 +155,11 @@ function AuthStepContent() {
   ) => {
     try {
       const supabase = getSupabase()
+      // Redirect to auth callback which saves clientId to profile, then redirects to /reservar
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: userEmail,
         options: {
-          emailRedirectTo: `${window.location.origin}/${locale}/reservar?clientId=${clientId}`,
+          emailRedirectTo: `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}&next=/${locale}/reservar`,
           data: {
             mindbody_client_id: clientId,
             first_name: firstName,
