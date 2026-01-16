@@ -11,18 +11,10 @@ export function createClient() {
       'Missing Supabase environment variables. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
     )
   }
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      // Keep session alive for 24 hours (in seconds)
-      // The session will auto-refresh before expiring
-      persistSession: true,
-      autoRefreshToken: true,
-      // Storage key for session persistence
-      storageKey: 'mimosa-spa-auth',
-      // Use localStorage for persistence across browser sessions
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    },
-  })
+  // Use default cookie-based storage from @supabase/ssr
+  // This is critical for PKCE flow to work across browser tabs
+  // The code verifier is stored in cookies and accessible by the server
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
 }
 
 // Singleton instance for client-side usage
