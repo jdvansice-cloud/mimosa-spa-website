@@ -74,6 +74,7 @@ export default function ProfileEditPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [resolvedClientId, setResolvedClientId] = useState<number | null>(null)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -93,34 +94,61 @@ export default function ProfileEditPage() {
     DV: ''
   })
 
-  // Check auth and redirect if needed
+  // Check auth and resolve client ID
   useEffect(() => {
-    const checkAuth = async () => {
+    const initializeProfile = async () => {
       const supabase = getSupabase()
       const { data: { session: currentSession } } = await supabase.auth.getSession()
+
       if (!currentSession) {
         router.push(`/${locale}/portal/login`)
+        return
+      }
+
+      // Resolve the client ID - first check store, then fetch from Supabase
+      let clientId = mindbodyClientId
+
+      if (!clientId) {
+        console.log('Profile page: No clientId in store, fetching from Supabase...')
+        try {
+          const response = await fetch('/api/portal/client-id')
+          if (response.ok) {
+            const data = await response.json()
+            if (data.clientId) {
+              clientId = data.clientId
+              console.log('Profile page: Got clientId from Supabase:', clientId)
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching client ID:', err)
+        }
+      }
+
+      if (clientId) {
+        setResolvedClientId(clientId)
+      } else {
+        setError('No se encontró ID de cliente. Por favor inicia sesión nuevamente.')
+        setIsLoading(false)
       }
     }
-    checkAuth()
-  }, [router, locale])
 
-  // Fetch profile data
+    initializeProfile()
+  }, [router, locale, mindbodyClientId])
+
+  // Fetch profile data when we have a resolved client ID
   useEffect(() => {
-    if (session && mindbodyClientId) {
-      fetchProfile()
+    if (resolvedClientId) {
+      fetchProfileWithId(resolvedClientId)
     }
-  }, [session, mindbodyClientId])
+  }, [resolvedClientId])
 
-  const fetchProfile = async () => {
-    if (!mindbodyClientId) return
-
+  const fetchProfileWithId = async (clientId: number) => {
     setIsLoading(true)
     setError(null)
 
     try {
       const response = await fetch(
-        `/api/portal/profile?clientId=${mindbodyClientId}&includeCustomFields=true`
+        `/api/portal/profile?clientId=${clientId}&includeCustomFields=true`
       )
       const data = await response.json()
 
@@ -167,7 +195,7 @@ export default function ProfileEditPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!mindbodyClientId || !profile) return
+    if (!resolvedClientId || !profile) return
 
     setIsSaving(true)
     setError(null)
@@ -211,7 +239,7 @@ export default function ProfileEditPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clientId: mindbodyClientId,
+          clientId: resolvedClientId,
           updates
         })
       })
@@ -225,7 +253,9 @@ export default function ProfileEditPage() {
       setSuccess('Perfil actualizado correctamente')
 
       // Refresh profile data
-      await fetchProfile()
+      if (resolvedClientId) {
+        await fetchProfileWithId(resolvedClientId)
+      }
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error de conexión')
@@ -241,8 +271,8 @@ export default function ProfileEditPage() {
     setSuccess(null)
   }
 
-  // Loading state while checking auth
-  if (!session || !mindbodyClientId) {
+  // Loading state while resolving client ID
+  if (!resolvedClientId && isLoading && !error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-white">
         <Loader2 className="w-8 h-8 animate-spin text-gold" />
