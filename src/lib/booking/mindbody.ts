@@ -454,9 +454,12 @@ export async function getServices(locationId?: number) {
 // Get add-ons by combining session types with sale services
 // Filter: ProgramId=8 (Adicionales), online bookable, single session, has price
 export async function getAddons(locationId?: number) {
-  // Fetch both session types and sale services in parallel
-  const [sessionTypes, saleServicesResponse] = await Promise.all([
-    getSessionTypes(true), // Only online bookable session types
+  // Fetch both session types (including non-online ones for matching) and sale services in parallel
+  // We fetch ALL session types because Adicionales might not be marked as "online" in session types
+  // but are still sellable online through sale/services
+  const [onlineSessionTypes, allSessionTypes, saleServicesResponse] = await Promise.all([
+    getSessionTypes(true),  // Online session types
+    getSessionTypes(false), // ALL session types (for better matching)
     mindbodyRequest<SaleServicesResponse>('/sale/services', {
       params: {
         limit: 200,
@@ -468,10 +471,13 @@ export async function getAddons(locationId?: number) {
 
   const allSaleServices = saleServicesResponse.Services || []
   console.log('Total sale/services for add-ons:', allSaleServices.length)
+  console.log('Online session types:', onlineSessionTypes.length)
+  console.log('All session types:', allSessionTypes.length)
 
-  // Create a map of session types by normalized name
+  // Create a map of ALL session types by normalized name (for better matching)
+  // This allows us to find session types for Adicionales even if they're not marked as "online"
   const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
-  for (const st of sessionTypes) {
+  for (const st of allSessionTypes) {
     const normalizedName = normalizeServiceName(st.Name)
     sessionTypeMap.set(normalizedName, {
       Id: st.Id,
