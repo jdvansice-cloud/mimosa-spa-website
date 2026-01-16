@@ -459,19 +459,20 @@ export async function getServices(locationId?: number) {
 }
 
 // Get add-ons (Adicionales) - only ProgramId 8
-// Filter: Online bookable, single session, has price, ONLY Adicionales
+// Filter: Online bookable, single session, has price, ONLY Adicionales, with session type match
 export async function getAddons(locationId?: number) {
-  const { services } = await fetchAllOnlineBookableServices(locationId)
+  const { services, sessionTypeMap } = await fetchAllOnlineBookableServices(locationId)
 
-  // Filter for Adicionales only (ProgramId 8)
-  // Note: Adicionales may not have matching session types, but we still show them
-  const adicionales = services.filter(s => s.ProgramId === 8)
+  // Filter for Adicionales only (ProgramId 8) and require session type match for booking
+  const onlineBookableAddons = services.filter(s =>
+    s.ProgramId === 8 && // Only Adicionales
+    findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
+  )
 
-  console.log('Online bookable addons (Adicionales only):', adicionales.length)
-  console.log('Addons with prices (tax removed):', adicionales.filter(s => s.Price > 0).length)
-  console.log('Addons with session type match:', adicionales.filter(s => s.HasSessionTypeMatch).length)
+  console.log('Online bookable addons (Adicionales only):', onlineBookableAddons.length)
+  console.log('Addons with prices (tax removed):', onlineBookableAddons.filter(s => s.Price > 0).length)
 
-  return adicionales
+  return onlineBookableAddons
 }
 
 // Get staff - basic endpoint without service filtering
