@@ -156,6 +156,15 @@ export default function ProfileEditPage() {
         throw new Error(data.error || 'Error al cargar perfil')
       }
 
+      console.log('Profile page - Received client data:', {
+        Id: data.client?.Id,
+        FirstName: data.client?.FirstName,
+        LastName: data.client?.LastName,
+        Email: data.client?.Email,
+        MobilePhone: data.client?.MobilePhone,
+        AddressLine1: data.client?.AddressLine1
+      })
+
       setProfile(data.client)
       setCustomFields(data.customFieldDefinitions || [])
 
