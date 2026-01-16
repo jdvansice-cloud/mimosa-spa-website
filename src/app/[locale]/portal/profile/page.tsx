@@ -105,23 +105,30 @@ export default function ProfileEditPage() {
         return
       }
 
-      // Resolve the client ID - first check store, then fetch from Supabase
-      let clientId = mindbodyClientId
+      // ALWAYS fetch the authoritative client ID from Supabase
+      // Don't rely on the store which might have stale data
+      let clientId: number | null = null
 
-      if (!clientId) {
-        console.log('Profile page: No clientId in store, fetching from Supabase...')
-        try {
-          const response = await fetch('/api/portal/client-id')
-          if (response.ok) {
-            const data = await response.json()
-            if (data.clientId) {
-              clientId = data.clientId
-              console.log('Profile page: Got clientId from Supabase:', clientId)
-            }
+      console.log('Profile page: Fetching clientId from Supabase (authoritative source)...')
+      try {
+        const response = await fetch('/api/portal/client-id')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.clientId) {
+            clientId = data.clientId
+            console.log('Profile page: Got clientId from Supabase:', clientId)
           }
-        } catch (err) {
-          console.error('Error fetching client ID:', err)
+        } else {
+          console.warn('Profile page: Failed to get clientId from Supabase, status:', response.status)
         }
+      } catch (err) {
+        console.error('Error fetching client ID:', err)
+      }
+
+      // Fallback to store only if Supabase doesn't have the ID
+      if (!clientId && mindbodyClientId) {
+        console.log('Profile page: Using clientId from store as fallback:', mindbodyClientId)
+        clientId = mindbodyClientId
       }
 
       if (clientId) {
