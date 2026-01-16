@@ -1,5 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+
+// Service role client bypasses RLS for profile operations
+function getServiceClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  return createServiceClient(supabaseUrl, supabaseServiceKey)
+}
 
 export async function GET(
   request: Request,
@@ -21,45 +29,35 @@ export async function GET(
       console.log('Auth successful for user:', data.user.id, data.user.email)
 
       // Successfully authenticated
-      // Save Mindbody client ID to Supabase profiles table
+      // Save Mindbody client ID to Supabase profiles table using service role (bypasses RLS)
       if (clientId) {
         const clientIdNum = parseInt(clientId, 10)
         console.log('Parsed clientId:', clientIdNum, 'from', clientId)
 
         if (!isNaN(clientIdNum) && clientIdNum > 0) {
-          // UPSERT the user's profile with the Mindbody client ID
-          // This ensures the profile exists and has the client ID
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { error: upsertError } = await (supabase as any)
-            .from('profiles')
-            .upsert({
-              id: data.user.id,
-              mindbody_client_id: clientIdNum,
-              updated_at: new Date().toISOString()
-            }, {
-              onConflict: 'id'
-            })
+          try {
+            // Use service role client to bypass RLS policies
+            const serviceClient = getServiceClient()
 
-          if (upsertError) {
-            console.error('Failed to save Mindbody client ID to profile:', upsertError)
-
-            // Try a simple insert if upsert fails (profile might not exist)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { error: insertError } = await (supabase as any)
+            // UPSERT the user's profile with the Mindbody client ID
+            const { error: upsertError } = await serviceClient
               .from('profiles')
-              .insert({
+              .upsert({
                 id: data.user.id,
+                email: data.user.email,
                 mindbody_client_id: clientIdNum,
                 updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'id'
               })
 
-            if (insertError && insertError.code !== '23505') { // Ignore duplicate key errors
-              console.error('Failed to insert profile:', insertError)
-            } else if (!insertError) {
-              console.log('Inserted new profile with Mindbody client ID:', clientIdNum)
+            if (upsertError) {
+              console.error('Failed to upsert profile:', upsertError)
+            } else {
+              console.log('Successfully saved Mindbody client ID to profile:', clientIdNum)
             }
-          } else {
-            console.log('Upserted Mindbody client ID to profile:', clientIdNum)
+          } catch (err) {
+            console.error('Error saving profile:', err)
           }
         }
       } else {

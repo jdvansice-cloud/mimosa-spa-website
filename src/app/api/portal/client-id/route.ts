@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+
+// Service role client bypasses RLS for profile operations
+function getServiceClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  return createServiceClient(supabaseUrl, supabaseServiceKey)
+}
 
 /**
  * GET /api/portal/client-id
@@ -20,9 +28,11 @@ export async function GET() {
       )
     }
 
+    // Use service role client to bypass RLS and read the profile
+    const serviceClient = getServiceClient()
+
     // Get the user's profile with Mindbody client ID
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: profile, error: profileError } = await (supabase as any)
+    const { data: profile, error: profileError } = await serviceClient
       .from('profiles')
       .select('mindbody_client_id')
       .eq('id', user.id)
