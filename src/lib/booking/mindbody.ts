@@ -515,7 +515,7 @@ export async function getAddons(locationId?: number) {
       // Always use Spanish category from PROGRAM_NAMES based on ProgramId
       Category: getSpanishCategory(s.ProgramId),
       ProgramId: s.ProgramId,
-      IsAddOn: true,
+      IsAddOn: false,
     }
   })
 
