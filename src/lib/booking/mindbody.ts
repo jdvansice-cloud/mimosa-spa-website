@@ -451,15 +451,12 @@ export async function getServices(locationId?: number) {
   return onlineBookableServices
 }
 
-// Get add-ons by combining session types with sale services
+// Get add-ons (Adicionales) - uses same method as getServices but filters for ProgramId=8
 // Filter: ProgramId=8 (Adicionales), online bookable, single session, has price
 export async function getAddons(locationId?: number) {
-  // Fetch both session types (including non-online ones for matching) and sale services in parallel
-  // We fetch ALL session types because Adicionales might not be marked as "online" in session types
-  // but are still sellable online through sale/services
-  const [onlineSessionTypes, allSessionTypes, saleServicesResponse] = await Promise.all([
-    getSessionTypes(true),  // Online session types
-    getSessionTypes(false), // ALL session types (for better matching)
+  // Fetch both session types and sale services in parallel (same as getServices)
+  const [sessionTypes, saleServicesResponse] = await Promise.all([
+    getSessionTypes(true), // Only online bookable session types
     mindbodyRequest<SaleServicesResponse>('/sale/services', {
       params: {
         limit: 200,
@@ -471,13 +468,11 @@ export async function getAddons(locationId?: number) {
 
   const allSaleServices = saleServicesResponse.Services || []
   console.log('Total sale/services for add-ons:', allSaleServices.length)
-  console.log('Online session types:', onlineSessionTypes.length)
-  console.log('All session types:', allSessionTypes.length)
+  console.log('Total online session types:', sessionTypes.length)
 
-  // Create a map of ALL session types by normalized name (for better matching)
-  // This allows us to find session types for Adicionales even if they're not marked as "online"
+  // Create a map of session types by normalized name for matching (same as getServices)
   const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
-  for (const st of allSessionTypes) {
+  for (const st of sessionTypes) {
     const normalizedName = normalizeServiceName(st.Name)
     sessionTypeMap.set(normalizedName, {
       Id: st.Id,
@@ -488,17 +483,18 @@ export async function getAddons(locationId?: number) {
 
   // Filter for Adicionales only (ProgramId 8)
   const filteredAddons = allSaleServices.filter(s =>
-    s.ProgramId === 8 && // Adicionales category
+    s.ProgramId === 8 && // Adicionales category ONLY
     s.SellOnline === true &&
     s.Count === 1 &&
     s.Price > 0
   )
   console.log('Filtered addons from sale/services (ProgramId=8, SellOnline):', filteredAddons.length)
 
-  // Transform and match with session types using flexible matching
+  // Transform and match with session types for correct Id (same as getServices)
   const addons = filteredAddons.map(s => {
     const sessionType = findSessionTypeMatch(s.Name, sessionTypeMap)
 
+    // Use SessionTypeId from session types if found, otherwise use ProductId
     const serviceId = sessionType?.Id || s.ProductId
     const duration = sessionType?.Duration || parseDurationFromName(s.Name)
 
@@ -522,18 +518,12 @@ export async function getAddons(locationId?: number) {
     }
   })
 
-  // Only include addons that have a matching session type (truly online bookable)
-  // Add-ons without valid session types CANNOT be booked as appointments
-  // (Mindbody requires a valid SessionTypeId, ProductId won't work)
+  // Only include addons that have a matching session type (same as getServices)
   const onlineBookableAddons = addons.filter(s => {
-    const hasSessionType = findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
-    if (!hasSessionType) {
-      console.log(`Excluding addon "${s.Name}" - no valid SessionTypeId (has ProductId: ${s.ProductId})`)
-    }
-    return hasSessionType
+    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
   })
 
-  console.log('Online bookable add-ons with valid SessionTypeId:', onlineBookableAddons.length)
+  console.log('Online bookable add-ons with session type match:', onlineBookableAddons.length)
 
   return onlineBookableAddons
 }
