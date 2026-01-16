@@ -115,8 +115,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Build appointments array with consecutive start times
-    const appointments = []
+    const appointments: Array<{
+      ClientId: number
+      LocationId: number
+      StaffId: number | undefined
+      SessionTypeId: number
+      StartDateTime: string
+      Notes: string | undefined
+    }> = []
     let currentStartTime = new Date(startDateTime)
+
+    console.log('=== BOOKING API ===')
+    console.log('Client ID:', clientId)
+    console.log('Location ID:', locationId)
+    console.log('Staff ID:', staffId)
+    console.log('Start DateTime:', startDateTime)
+    console.log('Services:', JSON.stringify(services, null, 2))
 
     for (const service of services as BookingService[]) {
       appointments.push({
@@ -136,8 +150,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('Appointments to create:', JSON.stringify(appointments, null, 2))
+
     // Submit all appointments
     const results = await addMultipleAppointments(appointments)
+
+    console.log('Booking results:', JSON.stringify(results, null, 2))
 
     // Check for any failures
     const failures = results.filter(r => !r.success)
@@ -171,14 +189,29 @@ export async function POST(request: NextRequest) {
     // Handle partial booking failures
     let partialBookingWarning: string | null = null
     if (failures.length > 0 && successes.length > 0) {
+      // Map failures to service names for better logging
+      const failedServiceDetails = failures.map((f, i) => {
+        const failedResult = f as { error: string; sessionTypeId?: number; startDateTime?: string }
+        const matchingService = (services as BookingService[]).find(s =>
+          appointments.findIndex(a =>
+            a.SessionTypeId === s.sessionTypeId &&
+            failedResult.sessionTypeId === s.sessionTypeId
+          ) >= 0
+        )
+        return {
+          index: i,
+          serviceName: matchingService?.name || 'Unknown',
+          sessionTypeId: failedResult.sessionTypeId,
+          startDateTime: failedResult.startDateTime,
+          error: failedResult.error
+        }
+      })
+
       console.warn('Partial booking failure:', {
         totalRequested: services.length,
         successful: successes.length,
         failed: failures.length,
-        failedServices: failures.map((f, i) => ({
-          index: i,
-          error: f.error
-        }))
+        failedServices: failedServiceDetails
       })
       partialBookingWarning = ERROR_MESSAGES.PARTIAL_BOOKING
     }

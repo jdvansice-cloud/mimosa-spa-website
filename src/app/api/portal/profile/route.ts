@@ -38,8 +38,15 @@ export async function GET(request: NextRequest) {
       customFieldDefinitions = await getCustomClientFields()
     }
 
+    // Ensure Id is a number for consistency with MindbodyClient type
+    // Mindbody API returns Id as string, but our types expect number
+    const normalizedClient = {
+      ...client,
+      Id: typeof client.Id === 'string' ? parseInt(client.Id, 10) : client.Id
+    }
+
     return NextResponse.json({
-      client,
+      client: normalizedClient,
       customFieldDefinitions
     })
 

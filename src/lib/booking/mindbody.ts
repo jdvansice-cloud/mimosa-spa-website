@@ -1019,13 +1019,50 @@ export async function addAppointment(appointmentData: {
         DisplayName?: string
       }
     }
+    Error?: {
+      Message: string
+      Code: string
+    }
   }
-  
+
+  console.log('=== addAppointment called ===')
+  console.log('Request data:', JSON.stringify(appointmentData, null, 2))
+
+  // Mindbody API expects specific field names - ensure proper casing
+  // The API is case-sensitive and expects these exact field names
+  const requestBody = {
+    ClientId: String(appointmentData.ClientId), // Mindbody expects string for ClientId
+    LocationId: appointmentData.LocationId,
+    StaffId: appointmentData.StaffId,
+    SessionTypeId: appointmentData.SessionTypeId,
+    StartDateTime: appointmentData.StartDateTime,
+    EndDateTime: appointmentData.EndDateTime,
+    Notes: appointmentData.Notes,
+  }
+
+  console.log('Final request body:', JSON.stringify(requestBody, null, 2))
+
   const response = await mindbodyRequest<AppointmentResponse>('/appointment/addappointment', {
     method: 'POST',
-    body: appointmentData
+    body: requestBody
   })
-  
+
+  console.log('Mindbody addAppointment response:', JSON.stringify(response, null, 2))
+
+  // Check for error in response
+  if (response.Error) {
+    console.error('Mindbody API returned error:', response.Error)
+    throw new Error(`Mindbody API error: ${response.Error.Message || response.Error.Code || 'Unknown error'}`)
+  }
+
+  // Validate that we got an appointment back
+  if (!response.Appointment || !response.Appointment.Id) {
+    console.error('Mindbody API did not return a valid appointment:', response)
+    throw new Error('Mindbody API did not return a valid appointment')
+  }
+
+  console.log('Successfully created appointment:', response.Appointment.Id)
+
   return response.Appointment
 }
 
@@ -1040,12 +1077,24 @@ export async function addMultipleAppointments(appointments: Array<{
 }>) {
   const results = []
 
-  for (const appointment of appointments) {
+  for (let i = 0; i < appointments.length; i++) {
+    const appointment = appointments[i]
     try {
+      console.log(`=== Creating appointment ${i + 1}/${appointments.length} ===`)
+      console.log('SessionTypeId:', appointment.SessionTypeId)
+      console.log('StartDateTime:', appointment.StartDateTime)
       const result = await addAppointment(appointment)
       results.push({ success: true, appointment: result })
     } catch (error) {
-      results.push({ success: false, error: String(error) })
+      console.error(`=== Appointment ${i + 1} FAILED ===`)
+      console.error('SessionTypeId:', appointment.SessionTypeId)
+      console.error('Error:', error)
+      results.push({
+        success: false,
+        error: String(error),
+        sessionTypeId: appointment.SessionTypeId,
+        startDateTime: appointment.StartDateTime
+      })
     }
   }
 

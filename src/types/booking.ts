@@ -216,6 +216,10 @@ export interface BookingConfirmation {
   location: MindbodyLocation
   client: MindbodyClient
   pricing: CartPricing
+  // Partial booking info
+  totalBooked?: number
+  totalRequested?: number
+  partialBookingWarning?: string | null
 }
 
 // ===========================================

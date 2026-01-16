@@ -148,7 +148,11 @@ export function ConfirmStep() {
         appointments: data.appointments,
         location: selectedLocation,
         client: clientInfo,
-        pricing: pricing!
+        pricing: pricing!,
+        // Include partial booking info
+        totalBooked: data.totalBooked,
+        totalRequested: data.totalRequested,
+        partialBookingWarning: data.partialBookingWarning
       })
 
     } catch (err) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle, Calendar, MapPin, Clock, User, Download, Home, Star } from 'lucide-react'
+import { CheckCircle, Calendar, MapPin, Clock, User, Download, Home, Star, AlertTriangle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import Link from 'next/link'
@@ -84,6 +84,22 @@ export function SuccessStep() {
           <div className="inline-block bg-beige-100 px-4 py-2 rounded-full mb-6">
             <span className="text-sm text-warm-gray">Número de confirmación: </span>
             <span className="font-bold text-dark">{bookingConfirmation.confirmationNumber}</span>
+          </div>
+        )}
+
+        {/* Partial Booking Warning */}
+        {bookingConfirmation?.partialBookingWarning && (
+          <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 max-w-md mx-auto mb-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-left">
+                <p className="font-semibold text-amber-800 mb-1">Reserva parcial</p>
+                <p className="text-sm text-amber-700">
+                  Se reservaron {bookingConfirmation.totalBooked} de {bookingConfirmation.totalRequested} servicios.
+                  Algunos servicios no pudieron ser reservados. Por favor contáctanos para completar tu reserva.
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </motion.div>
