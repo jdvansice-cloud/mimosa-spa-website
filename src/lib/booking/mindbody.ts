@@ -948,7 +948,7 @@ export async function addAppointment(appointmentData: {
   interface AppointmentResponse {
     Appointment: {
       Id: number
-      ClientId: number
+      ClientId: number | string
       LocationId: number
       StaffId: number
       StartDateTime: string
@@ -959,6 +959,13 @@ export async function addAppointment(appointmentData: {
         FirstName: string
         LastName: string
         DisplayName?: string
+      }
+      Client?: {
+        Id: string | number
+        FirstName: string
+        LastName: string
+        Email?: string
+        MobilePhone?: string
       }
     }
     Error?: {
@@ -990,6 +997,13 @@ export async function addAppointment(appointmentData: {
   })
 
   console.log('Mindbody addAppointment response:', JSON.stringify(response, null, 2))
+
+  // Log client info from response
+  if (response.Appointment?.Client) {
+    console.log('Client info from Mindbody response:', JSON.stringify(response.Appointment.Client, null, 2))
+  } else {
+    console.warn('No Client object in Mindbody appointment response - client name may be missing in Mindbody')
+  }
 
   // Check for error in response
   if (response.Error) {
@@ -1438,9 +1452,25 @@ export async function getClientWithCustomFields(clientId: string) {
   const queryParams = new URLSearchParams()
   queryParams.set('request.clientId', clientId)
 
+  console.log('getClientWithCustomFields - Fetching client ID:', clientId)
+
   const response = await mindbodyRequest<ClientWithFieldsResponse>(
     `/client/clients?${queryParams.toString()}`
   )
 
-  return response.Clients?.[0] || null
+  const client = response.Clients?.[0] || null
+
+  if (client) {
+    console.log('getClientWithCustomFields - Found client:', {
+      Id: client.Id,
+      UniqueId: client.UniqueId,
+      FirstName: client.FirstName,
+      LastName: client.LastName,
+      Email: client.Email
+    })
+  } else {
+    console.warn('getClientWithCustomFields - No client found for ID:', clientId)
+  }
+
+  return client
 }

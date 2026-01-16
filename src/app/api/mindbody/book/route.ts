@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { addMultipleAppointments } from '@/lib/booking/mindbody'
+import { addMultipleAppointments, getClientWithCustomFields } from '@/lib/booking/mindbody'
 import { sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
 import {
   validateRequired,
@@ -86,6 +86,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // CRITICAL: Verify the client exists in Mindbody and has a name
+    // This prevents bookings for non-existent or incomplete client records
+    const mindbodyClient = await getClientWithCustomFields(String(clientId))
+    if (!mindbodyClient) {
+      console.error('Client not found in Mindbody:', clientId)
+      return NextResponse.json(
+        {
+          error: 'Cliente no encontrado en Mindbody',
+          details: 'No pudimos encontrar tu cuenta en nuestro sistema. Por favor contacta al spa.'
+        },
+        { status: 404 }
+      )
+    }
+
+    // Warn if client has no name (but don't block - Mindbody might still work)
+    if (!mindbodyClient.FirstName && !mindbodyClient.LastName) {
+      console.warn('BOOKING WARNING: Mindbody client has no name:', {
+        Id: mindbodyClient.Id,
+        UniqueId: mindbodyClient.UniqueId,
+        Email: mindbodyClient.Email
+      })
+    } else {
+      console.log('Mindbody client verified:', {
+        Id: mindbodyClient.Id,
+        FirstName: mindbodyClient.FirstName,
+        LastName: mindbodyClient.LastName,
+        Email: mindbodyClient.Email
+      })
+    }
+
     // Validate services array
     if (!Array.isArray(services) || services.length === 0) {
       return NextResponse.json(
@@ -139,7 +169,9 @@ export async function POST(request: NextRequest) {
     let currentStartTime = new Date(startDateTime)
 
     console.log('=== BOOKING API ===')
-    console.log('Client ID:', clientId)
+    console.log('Client ID:', clientId, '(type:', typeof clientId, ')')
+    console.log('Client Name from request:', clientName)
+    console.log('Client Phone from request:', clientPhone)
     console.log('Location ID:', locationId)
     console.log('Staff ID:', staffId)
     console.log('Start DateTime:', startDateTime)

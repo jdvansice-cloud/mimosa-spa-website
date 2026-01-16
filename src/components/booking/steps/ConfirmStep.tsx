@@ -114,6 +114,13 @@ export function ConfirmStep() {
       }
 
       console.log('Using authorized client ID from Supabase:', authorizedClientId)
+      console.log('Client info from store:', {
+        Id: clientInfo.Id,
+        FirstName: clientInfo.FirstName,
+        LastName: clientInfo.LastName,
+        Email: clientInfo.Email,
+        MobilePhone: clientInfo.MobilePhone
+      })
 
       const services = [
         ...selectedServices.map(s => ({

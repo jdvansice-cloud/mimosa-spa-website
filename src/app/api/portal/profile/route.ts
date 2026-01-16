@@ -45,6 +45,14 @@ export async function GET(request: NextRequest) {
       Id: typeof client.Id === 'string' ? parseInt(client.Id, 10) : client.Id
     }
 
+    console.log('Portal profile returning client:', {
+      Id: normalizedClient.Id,
+      FirstName: normalizedClient.FirstName,
+      LastName: normalizedClient.LastName,
+      Email: normalizedClient.Email,
+      MobilePhone: normalizedClient.MobilePhone
+    })
+
     return NextResponse.json({
       client: normalizedClient,
       customFieldDefinitions
