@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { CheckCircle, ArrowLeft, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star } from 'lucide-react'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
 
@@ -19,6 +19,7 @@ export function ConfirmStep() {
     activePromotion,
     availableSlots,
     setBookingConfirmation,
+    setClientInfo,
     prevStep,
     setLoading,
     setError,
@@ -28,6 +29,50 @@ export function ConfirmStep() {
 
   const totalDuration = useBookingStore(selectTotalDuration)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [displayClientName, setDisplayClientName] = useState<string>('')
+
+  // Fetch client name on mount if missing from store
+  useEffect(() => {
+    const fetchClientIfNeeded = async () => {
+      // Build current name from store
+      const currentName = `${clientInfo?.FirstName || ''} ${clientInfo?.LastName || ''}`.trim()
+
+      if (currentName && currentName.length >= 2) {
+        setDisplayClientName(currentName)
+        return
+      }
+
+      // Name is missing - try to fetch from Supabase/Mindbody
+      try {
+        // First get the client ID from Supabase
+        const clientIdResponse = await fetch('/api/portal/client-id')
+        if (clientIdResponse.ok) {
+          const clientIdData = await clientIdResponse.json()
+          if (clientIdData.clientId) {
+            // Fetch full client profile from Mindbody
+            const profileResponse = await fetch(`/api/portal/profile?clientId=${clientIdData.clientId}`)
+            if (profileResponse.ok) {
+              const profileData = await profileResponse.json()
+              if (profileData.client) {
+                const fetchedName = `${profileData.client.FirstName || ''} ${profileData.client.LastName || ''}`.trim()
+                setDisplayClientName(fetchedName || 'Cliente')
+
+                // Also update the store so the booking uses the correct data
+                if (profileData.client.FirstName || profileData.client.LastName) {
+                  setClientInfo(profileData.client)
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch client name:', err)
+        setDisplayClientName('Cliente')
+      }
+    }
+
+    fetchClientIfNeeded()
+  }, [clientInfo?.FirstName, clientInfo?.LastName, setClientInfo])
 
   // Calculate pricing with useMemo
   const pricing = useMemo(() => {
@@ -122,6 +167,27 @@ export function ConfirmStep() {
         MobilePhone: clientInfo.MobilePhone
       })
 
+      // If client name is missing, fetch it from Mindbody
+      let finalClientName = `${clientInfo.FirstName || ''} ${clientInfo.LastName || ''}`.trim()
+      let finalClientPhone = clientInfo.MobilePhone
+
+      if (!finalClientName || finalClientName.length < 2) {
+        console.log('Client name missing, fetching from Mindbody...')
+        try {
+          const profileResponse = await fetch(`/api/portal/profile?clientId=${authorizedClientId}`)
+          if (profileResponse.ok) {
+            const profileData = await profileResponse.json()
+            if (profileData.client) {
+              finalClientName = `${profileData.client.FirstName || ''} ${profileData.client.LastName || ''}`.trim()
+              finalClientPhone = profileData.client.MobilePhone || finalClientPhone
+              console.log('Fetched client name from Mindbody:', finalClientName)
+            }
+          }
+        } catch (profileErr) {
+          console.warn('Could not fetch client profile:', profileErr)
+        }
+      }
+
       const services = [
         ...selectedServices.map(s => ({
           sessionTypeId: s.Id,
@@ -157,8 +223,8 @@ export function ConfirmStep() {
           staffId: staffIdToUse,
           startDateTime,
           promotionName: activePromotion?.title_es,
-          clientName: `${clientInfo.FirstName} ${clientInfo.LastName}`,
-          clientPhone: clientInfo.MobilePhone,
+          clientName: finalClientName, // Use fetched name if store had empty name
+          clientPhone: finalClientPhone, // Use fetched phone if store had empty phone
           locationName: selectedLocation.Name,
           therapistName: selectedStaff
             ? selectedStaff.DisplayName || `${selectedStaff.FirstName} ${selectedStaff.LastName}`
@@ -324,7 +390,7 @@ export function ConfirmStep() {
 
         {/* Client Info - Minimal */}
         <div className="text-xs text-warm-gray text-center">
-          Reserva a nombre de <span className="font-medium text-dark">{clientInfo?.FirstName} {clientInfo?.LastName}</span>
+          Reserva a nombre de <span className="font-medium text-dark">{displayClientName || 'Cargando...'}</span>
         </div>
 
         {/* Payment Notice - Compact */}

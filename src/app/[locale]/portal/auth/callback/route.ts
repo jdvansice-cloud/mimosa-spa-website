@@ -11,29 +11,59 @@ export async function GET(
   const clientId = searchParams.get('clientId')
   const next = searchParams.get('next') ?? `/${locale}/portal`
 
+  console.log('Auth callback received:', { code: !!code, clientId, next })
+
   if (code) {
     const supabase = await createClient()
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error && data.user) {
+      console.log('Auth successful for user:', data.user.id, data.user.email)
+
       // Successfully authenticated
       // Save Mindbody client ID to Supabase profiles table
       if (clientId) {
         const clientIdNum = parseInt(clientId, 10)
-        if (!isNaN(clientIdNum) && clientIdNum > 0) {
-          // Update the user's profile with the Mindbody client ID
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { error: updateError } = await (supabase as any)
-            .from('profiles')
-            .update({ mindbody_client_id: clientIdNum })
-            .eq('id', data.user.id)
+        console.log('Parsed clientId:', clientIdNum, 'from', clientId)
 
-          if (updateError) {
-            console.error('Failed to save Mindbody client ID to profile:', updateError)
+        if (!isNaN(clientIdNum) && clientIdNum > 0) {
+          // UPSERT the user's profile with the Mindbody client ID
+          // This ensures the profile exists and has the client ID
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { error: upsertError } = await (supabase as any)
+            .from('profiles')
+            .upsert({
+              id: data.user.id,
+              mindbody_client_id: clientIdNum,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'id'
+            })
+
+          if (upsertError) {
+            console.error('Failed to save Mindbody client ID to profile:', upsertError)
+
+            // Try a simple insert if upsert fails (profile might not exist)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { error: insertError } = await (supabase as any)
+              .from('profiles')
+              .insert({
+                id: data.user.id,
+                mindbody_client_id: clientIdNum,
+                updated_at: new Date().toISOString()
+              })
+
+            if (insertError && insertError.code !== '23505') { // Ignore duplicate key errors
+              console.error('Failed to insert profile:', insertError)
+            } else if (!insertError) {
+              console.log('Inserted new profile with Mindbody client ID:', clientIdNum)
+            }
           } else {
-            console.log('Saved Mindbody client ID to profile:', clientIdNum)
+            console.log('Upserted Mindbody client ID to profile:', clientIdNum)
           }
         }
+      } else {
+        console.warn('No clientId provided in auth callback')
       }
 
       // Redirect to portal with client ID in the URL for the store to pick up
@@ -46,6 +76,8 @@ export async function GET(
         redirectUrl = `${next}?clientId=${clientId}`
       }
 
+      console.log('Redirecting to:', redirectUrl)
+
       if (isLocalEnv) {
         return NextResponse.redirect(`${origin}${redirectUrl}`)
       } else if (forwardedHost) {
@@ -53,6 +85,8 @@ export async function GET(
       } else {
         return NextResponse.redirect(`${origin}${redirectUrl}`)
       }
+    } else {
+      console.error('Auth exchange failed:', error)
     }
   }
 
