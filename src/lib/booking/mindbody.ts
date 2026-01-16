@@ -451,7 +451,7 @@ export async function getServices(locationId?: number) {
   return onlineBookableServices
 }
 
-// Get add-ons (Adicionales) - uses same method as getServices but filters for ProgramId=8
+// Get add-ons (Adicionales) - same setup as treatments in Mindbody, just filtered by ProgramId=8
 // Filter: ProgramId=8 (Adicionales), online bookable, single session, has price
 export async function getAddons(locationId?: number) {
   // Fetch both session types and sale services in parallel (same as getServices)
@@ -470,12 +470,22 @@ export async function getAddons(locationId?: number) {
   console.log('Total sale/services for add-ons:', allSaleServices.length)
   console.log('Total online session types:', sessionTypes.length)
 
-  // Create a map of session types by normalized name for matching (same as getServices)
+  // Create a map of session types by normalized name for matching
   const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
   for (const st of sessionTypes) {
     const normalizedName = normalizeServiceName(st.Name)
     sessionTypeMap.set(normalizedName, {
       Id: st.Id,
+      Duration: st.DefaultTimeLength || 0,
+      ProgramId: st.ProgramId,
+    })
+  }
+
+  // Also create a map by session type ID for direct matching
+  const sessionTypeById = new Map<number, { Name: string; Duration: number; ProgramId: number }>()
+  for (const st of sessionTypes) {
+    sessionTypeById.set(st.Id, {
+      Name: st.Name,
       Duration: st.DefaultTimeLength || 0,
       ProgramId: st.ProgramId,
     })
@@ -490,20 +500,33 @@ export async function getAddons(locationId?: number) {
   )
   console.log('Filtered addons from sale/services (ProgramId=8, SellOnline):', filteredAddons.length)
 
-  // Transform and match with session types for correct Id (same as getServices)
+  // Log the filtered addons for debugging
+  filteredAddons.forEach(s => {
+    console.log(`Addon: "${s.Name}" ProductId=${s.ProductId}`)
+  })
+
+  // Transform addons - try to match with session types by name or use ProductId
   const addons = filteredAddons.map(s => {
-    const sessionType = findSessionTypeMatch(s.Name, sessionTypeMap)
+    // First try name matching
+    let sessionType = findSessionTypeMatch(s.Name, sessionTypeMap)
+
+    // If no name match, check if ProductId matches a SessionTypeId directly
+    if (!sessionType && sessionTypeById.has(s.ProductId)) {
+      const stById = sessionTypeById.get(s.ProductId)!
+      sessionType = { Id: s.ProductId, Duration: stById.Duration, ProgramId: stById.ProgramId }
+      console.log(`Addon "${s.Name}" matched by ProductId=${s.ProductId}`)
+    }
 
     // Use SessionTypeId from session types if found, otherwise use ProductId
     const serviceId = sessionType?.Id || s.ProductId
     const duration = sessionType?.Duration || parseDurationFromName(s.Name)
 
     if (!sessionType) {
-      console.log(`Warning: No session type match for addon: ${s.Name}`)
+      console.log(`Warning: No session type match for addon: "${s.Name}" (ProductId=${s.ProductId})`)
     }
 
     return {
-      Id: serviceId, // SessionTypeId for appointments
+      Id: serviceId,
       ProductId: s.ProductId,
       Name: s.Name,
       Description: '',
@@ -515,17 +538,16 @@ export async function getAddons(locationId?: number) {
       Category: 'Adicionales',
       ProgramId: s.ProgramId,
       IsAddOn: true,
+      HasValidSessionType: sessionType !== undefined,
     }
   })
 
-  // Only include addons that have a matching session type (same as getServices)
-  const onlineBookableAddons = addons.filter(s => {
-    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
-  })
+  // Return ALL addons - let the booking fail gracefully if SessionTypeId is invalid
+  // This way users can see all available addons and we log which ones might fail
+  console.log('Total addons returned:', addons.length)
+  console.log('Addons with valid SessionTypeId:', addons.filter(a => a.HasValidSessionType).length)
 
-  console.log('Online bookable add-ons with session type match:', onlineBookableAddons.length)
-
-  return onlineBookableAddons
+  return addons
 }
 
 // Get staff - basic endpoint without service filtering
