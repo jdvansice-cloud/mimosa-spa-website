@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/cita/layout,_N_T_/cita/resultado/layout,_N_T_/cita/resultado/page,_N_T_/cita/resultado"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/cita/resultado/__PAGE__",
+    "/cita/resultado",
+    "/cita",
+    "/_index",
+    "/_head"
+  ]
+}

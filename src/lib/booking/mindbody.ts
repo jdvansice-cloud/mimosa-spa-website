@@ -1321,12 +1321,12 @@ export async function getClientCompleteInfo(clientId: string) {
     }
   }
 
-  const queryParams = new URLSearchParams()
-  queryParams.set('request.clientId', clientId)
-
-  const response = await mindbodyRequest<ClientInfoResponse>(
-    `/client/clients?${queryParams.toString()}`
-  )
+  // Use the mindbodyRequest helper with ClientIds parameter (Mindbody API v6 format)
+  const response = await mindbodyRequest<ClientInfoResponse>('/client/clients', {
+    params: {
+      ClientIds: clientId
+    }
+  })
 
   // The API returns a Clients array, get the first one
   const clients = (response as unknown as { Clients: ClientInfoResponse['Client'][] }).Clients
@@ -1449,14 +1449,14 @@ export async function getClientWithCustomFields(clientId: string) {
     }>
   }
 
-  const queryParams = new URLSearchParams()
-  queryParams.set('request.clientId', clientId)
-
   console.log('getClientWithCustomFields - Fetching client ID:', clientId)
 
-  const response = await mindbodyRequest<ClientWithFieldsResponse>(
-    `/client/clients?${queryParams.toString()}`
-  )
+  // Use the mindbodyRequest helper with ClientIds parameter (Mindbody API v6 format)
+  const response = await mindbodyRequest<ClientWithFieldsResponse>('/client/clients', {
+    params: {
+      ClientIds: clientId
+    }
+  })
 
   const client = response.Clients?.[0] || null
 

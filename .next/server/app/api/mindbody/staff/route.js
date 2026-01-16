@@ -1,6 +1,7 @@
 var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/mindbody/staff/route.js")
-R.c("server/chunks/[root-of-the-server]__a5728bbd._.js")
-R.c("server/chunks/[root-of-the-server]__fd928bc0._.js")
-R.c("server/chunks/20032__next-internal_server_app_api_mindbody_staff_route_actions_ada4401c.js")
-R.m(27106)
-module.exports=R.m(27106).exports
+R.c("server/chunks/[root-of-the-server]__e9e67916._.js")
+R.c("server/chunks/[root-of-the-server]__7e94aeda._.js")
+R.c("server/chunks/e08ce_mimosa-spa-website_relaxed-black_src_lib_booking_mindbody_ts_1d785997._.js")
+R.c("server/chunks/39b8c__next-internal_server_app_api_mindbody_staff_route_actions_ceb2098e.js")
+R.m(62246)
+module.exports=R.m(62246).exports

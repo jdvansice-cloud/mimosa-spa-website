@@ -1,3 +1,0 @@
-module.exports=[64583,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(93890);a.n(d("[project]/Documents/GitHub/mimosa-spa-website/node_modules/next/dist/client/components/builtin/global-error.js <module evaluation>"))},8761,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(93890);a.n(d("[project]/Documents/GitHub/mimosa-spa-website/node_modules/next/dist/client/components/builtin/global-error.js"))},73953,a=>{"use strict";a.i(64583);var b=a.i(8761);a.n(b)}];
-
-//# sourceMappingURL=6b3ad_next_dist_client_components_builtin_global-error_89389fda.js.map

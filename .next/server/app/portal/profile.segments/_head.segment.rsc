@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[52859,["/_next/static/chunks/83990f27c26772c3.js","/_next/static/chunks/0a67cf22561d8169.js"],"ViewportBoundary"]
+3:I[52859,["/_next/static/chunks/83990f27c26772c3.js","/_next/static/chunks/0a67cf22561d8169.js"],"MetadataBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"ggy-4F10YeOz7Hq9fvDil","rsc":["$","$1","h",{"children":[null,["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Mi Portal | Mimosa Spa Retreat"}],["$","meta","1",{"name":"description","content":"Accede a tu historial de citas, compras y reserva nuevos tratamientos"}]]}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"loading":null,"isPartial":false}

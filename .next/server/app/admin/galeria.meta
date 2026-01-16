@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/galeria/layout,_N_T_/admin/galeria/page,_N_T_/admin/galeria"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/admin/galeria/__PAGE__",
+    "/admin/galeria",
+    "/admin",
+    "/_index",
+    "/_head"
+  ]
+}

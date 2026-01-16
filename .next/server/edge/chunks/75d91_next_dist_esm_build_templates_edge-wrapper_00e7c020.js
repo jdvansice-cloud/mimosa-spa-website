@@ -1,0 +1,3 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["chunks/75d91_next_dist_esm_build_templates_edge-wrapper_00e7c020.js",417,(e,t,l)=>{self._ENTRIES||={};let h=Promise.resolve().then(()=>e.i(19815));h.catch(()=>{}),self._ENTRIES.middleware_middleware=new Proxy(h,{get(e,t){if("then"===t)return(t,l)=>e.then(t,l);let l=(...l)=>e.then(e=>(0,e[t])(...l));return l.then=(l,h)=>e.then(e=>e[t]).then(l,h),l}})}]);
+
+//# sourceMappingURL=75d91_next_dist_esm_build_templates_edge-wrapper_00e7c020.js.map
