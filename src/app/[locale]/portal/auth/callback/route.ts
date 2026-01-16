@@ -13,10 +13,29 @@ export async function GET(
 
   if (code) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error) {
+    if (!error && data.user) {
       // Successfully authenticated
+      // Save Mindbody client ID to Supabase profiles table
+      if (clientId) {
+        const clientIdNum = parseInt(clientId, 10)
+        if (!isNaN(clientIdNum) && clientIdNum > 0) {
+          // Update the user's profile with the Mindbody client ID
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { error: updateError } = await (supabase as any)
+            .from('profiles')
+            .update({ mindbody_client_id: clientIdNum })
+            .eq('id', data.user.id)
+
+          if (updateError) {
+            console.error('Failed to save Mindbody client ID to profile:', updateError)
+          } else {
+            console.log('Saved Mindbody client ID to profile:', clientIdNum)
+          }
+        }
+      }
+
       // Redirect to portal with client ID in the URL for the store to pick up
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'

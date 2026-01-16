@@ -212,10 +212,34 @@ export interface LocalizedContent {
 
 export type WithLocale<T> = T & { locale: Locale }
 
+// Profile type (extends auth.users)
+export interface Profile {
+  id: string
+  email: string | null
+  full_name: string | null
+  role: 'user' | 'admin'
+  mindbody_client_id: number | null
+  created_at: string
+  updated_at: string
+}
+
+// Profile update type
+export interface ProfileUpdate {
+  email?: string | null
+  full_name?: string | null
+  role?: 'user' | 'admin'
+  mindbody_client_id?: number | null
+}
+
 // Supabase Database types (generated from schema)
 export interface Database {
   public: {
     Tables: {
+      profiles: {
+        Row: Profile
+        Insert: Omit<Profile, 'created_at' | 'updated_at'>
+        Update: ProfileUpdate
+      }
       promotions: {
         Row: Promotion
         Insert: Omit<Promotion, 'id' | 'created_at' | 'updated_at'>

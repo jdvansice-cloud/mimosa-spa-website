@@ -86,17 +86,35 @@ export function ConfirmStep() {
       return
     }
 
-    // CRITICAL: Validate Mindbody client ID exists and is valid
-    if (!clientInfo.Id || typeof clientInfo.Id !== 'number' || clientInfo.Id <= 0) {
-      setError('No se encontró tu ID de cliente en Mindbody. Por favor inicia sesión nuevamente.')
-      return
-    }
-
     setIsSubmitting(true)
     setLoading(true)
     setError(null)
 
     try {
+      // CRITICAL: Always fetch the authoritative client ID from Supabase
+      // This ensures we use the ID stored during authentication
+      const clientIdResponse = await fetch('/api/portal/client-id')
+      const clientIdData = await clientIdResponse.json()
+
+      if (!clientIdResponse.ok || !clientIdData.clientId) {
+        // Fallback to clientInfo.Id if Supabase doesn't have the ID
+        // but still validate it
+        if (!clientInfo.Id || typeof clientInfo.Id !== 'number' || clientInfo.Id <= 0) {
+          throw new Error('No se encontró tu ID de cliente. Por favor inicia sesión nuevamente.')
+        }
+        console.warn('Using clientInfo.Id as fallback:', clientInfo.Id)
+      }
+
+      // Use Supabase client ID (authoritative) or fallback to clientInfo.Id
+      const authorizedClientId = clientIdData.clientId || clientInfo.Id
+
+      // Final validation
+      if (!authorizedClientId || typeof authorizedClientId !== 'number' || authorizedClientId <= 0) {
+        throw new Error('ID de cliente inválido. Por favor inicia sesión nuevamente.')
+      }
+
+      console.log('Using authorized client ID from Supabase:', authorizedClientId)
+
       const services = [
         ...selectedServices.map(s => ({
           sessionTypeId: s.Id,
@@ -126,7 +144,7 @@ export function ConfirmStep() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clientId: clientInfo.Id,
+          clientId: authorizedClientId, // Use the authoritative ID from Supabase
           locationId: selectedLocation.Id,
           services,
           staffId: staffIdToUse,
