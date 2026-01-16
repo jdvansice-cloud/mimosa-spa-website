@@ -371,10 +371,9 @@ function findSessionTypeMatch(
   return undefined
 }
 
-// Get services by combining session types (for appointments) with sale services (for pricing)
-// This ensures we have the correct SessionTypeId for booking appointments
-// Filter: Online bookable, single session, has price, NOT Adicionales
-export async function getServices(locationId?: number) {
+// Shared function to fetch all online bookable services from Mindbody
+// Returns all services with session type matching applied
+async function fetchAllOnlineBookableServices(locationId?: number) {
   // Fetch both session types and sale services in parallel
   const [sessionTypes, saleServicesResponse] = await Promise.all([
     getSessionTypes(true), // Only online bookable session types
@@ -402,12 +401,11 @@ export async function getServices(locationId?: number) {
     })
   }
 
-  // Filter sale services and match with session types
+  // Filter all sale services (online bookable, single session, has price)
   const filteredServices = allSaleServices.filter(s =>
     s.SellOnline === true &&
     s.Count === 1 &&
-    s.Price > 0 &&
-    s.ProgramId !== 8 // Exclude Adicionales
+    s.Price > 0
   )
   console.log('Filtered sale services (SellOnline, single session, has price):', filteredServices.length)
 
@@ -420,7 +418,7 @@ export async function getServices(locationId?: number) {
     const duration = sessionType?.Duration || parseDurationFromName(s.Name)
 
     if (!sessionType) {
-      console.log(`Warning: No session type match for service: ${s.Name}`)
+      console.log(`Warning: No session type match for service: ${s.Name} (ProgramId=${s.ProgramId})`)
     }
 
     return {
@@ -433,101 +431,47 @@ export async function getServices(locationId?: number) {
       OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
       TaxIncluded: s.TaxIncluded,
       OnlineBooking: s.SellOnline,
-      // Always use Spanish category from PROGRAM_NAMES based on ProgramId
       Category: getSpanishCategory(s.ProgramId),
       ProgramId: s.ProgramId,
       IsAddOn: false,
+      HasSessionTypeMatch: sessionType !== undefined,
     }
   })
 
-  // Only include services that have a matching session type (truly online bookable)
-  const onlineBookableServices = services.filter(s => {
-    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
-  })
+  return { services, sessionTypeMap }
+}
 
-  console.log('Online bookable services with session type match:', onlineBookableServices.length)
+// Get services (treatments) - excludes Adicionales (ProgramId 8)
+// Filter: Online bookable, single session, has price, NOT Adicionales
+export async function getServices(locationId?: number) {
+  const { services, sessionTypeMap } = await fetchAllOnlineBookableServices(locationId)
+
+  // Filter out Adicionales (ProgramId 8) and only include services with session type match
+  const onlineBookableServices = services.filter(s =>
+    s.ProgramId !== 8 && // Exclude Adicionales
+    findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
+  )
+
+  console.log('Online bookable services (excluding Adicionales):', onlineBookableServices.length)
   console.log('Services with prices (tax removed):', onlineBookableServices.filter(s => s.Price > 0).length)
 
   return onlineBookableServices
 }
 
-// Get add-ons (Adicionales) - same setup as treatments in Mindbody, just filtered by ProgramId=8
-// Filter: ProgramId=8 (Adicionales), online bookable, single session, has price
+// Get add-ons (Adicionales) - only ProgramId 8
+// Filter: Online bookable, single session, has price, ONLY Adicionales
 export async function getAddons(locationId?: number) {
-  // Fetch both session types and sale services in parallel (same as getServices)
-  const [sessionTypes, saleServicesResponse] = await Promise.all([
-    getSessionTypes(true), // Only online bookable session types
-    mindbodyRequest<SaleServicesResponse>('/sale/services', {
-      params: {
-        limit: 200,
-        sellOnline: true,
-        ...(locationId ? { locationId: locationId } : {})
-      }
-    })
-  ])
-
-  const allSaleServices = saleServicesResponse.Services || []
-  console.log('Total sale/services for add-ons:', allSaleServices.length)
-  console.log('Total online session types:', sessionTypes.length)
-
-  // Create a map of session types by normalized name for matching
-  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
-  for (const st of sessionTypes) {
-    const normalizedName = normalizeServiceName(st.Name)
-    sessionTypeMap.set(normalizedName, {
-      Id: st.Id,
-      Duration: st.DefaultTimeLength || 0,
-      ProgramId: st.ProgramId,
-    })
-  }
+  const { services } = await fetchAllOnlineBookableServices(locationId)
 
   // Filter for Adicionales only (ProgramId 8)
-  const filteredAddons = allSaleServices.filter(s =>
-    s.ProgramId === 8 && // Adicionales category ONLY
-    s.SellOnline === true &&
-    s.Count === 1 &&
-    s.Price > 0
-  )
-  console.log('Filtered addons from sale/services (ProgramId=8, SellOnline):', filteredAddons.length)
+  // Note: Adicionales may not have matching session types, but we still show them
+  const adicionales = services.filter(s => s.ProgramId === 8)
 
-  // Transform and match with session types for correct Id
-  const addons = filteredAddons.map(s => {
-    const sessionType = findSessionTypeMatch(s.Name, sessionTypeMap)
+  console.log('Online bookable addons (Adicionales only):', adicionales.length)
+  console.log('Addons with prices (tax removed):', adicionales.filter(s => s.Price > 0).length)
+  console.log('Addons with session type match:', adicionales.filter(s => s.HasSessionTypeMatch).length)
 
-    // Use SessionTypeId from session types if found, otherwise use ProductId
-    const serviceId = sessionType?.Id || s.ProductId
-    const duration = sessionType?.Duration || parseDurationFromName(s.Name)
-
-    if (!sessionType) {
-      console.log(`Warning: No session type match for addon: ${s.Name}`)
-    }
-
-    return {
-      Id: serviceId, // SessionTypeId for appointments
-      ProductId: s.ProductId,
-      Name: s.Name,
-      Description: '',
-      Duration: duration,
-      Price: removeTaxFromPrice(s.Price || s.OnlinePrice || 0),
-      OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
-      TaxIncluded: s.TaxIncluded,
-      OnlineBooking: s.SellOnline,
-      // Always use Spanish category from PROGRAM_NAMES based on ProgramId
-      Category: getSpanishCategory(s.ProgramId),
-      ProgramId: s.ProgramId,
-      IsAddOn: false,
-    }
-  })
-
-  // Only include addons that have a matching session type (truly online bookable)
-  const onlineBookableAddons = addons.filter(s => {
-    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
-  })
-
-  console.log('Online bookable addons with session type match:', onlineBookableAddons.length)
-  console.log('Addons with prices (tax removed):', onlineBookableAddons.filter(s => s.Price > 0).length)
-
-  return onlineBookableAddons
+  return adicionales
 }
 
 // Get staff - basic endpoint without service filtering
