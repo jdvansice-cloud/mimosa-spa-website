@@ -86,6 +86,12 @@ export function ConfirmStep() {
       return
     }
 
+    // CRITICAL: Validate Mindbody client ID exists and is valid
+    if (!clientInfo.Id || typeof clientInfo.Id !== 'number' || clientInfo.Id <= 0) {
+      setError('No se encontró tu ID de cliente en Mindbody. Por favor inicia sesión nuevamente.')
+      return
+    }
+
     setIsSubmitting(true)
     setLoading(true)
     setError(null)

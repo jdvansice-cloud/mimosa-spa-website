@@ -73,6 +73,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // CRITICAL: Validate Mindbody client ID is a valid number
+    // This prevents bookings without a proper Mindbody client record
+    if (!clientId || typeof clientId !== 'number' || clientId <= 0 || !Number.isInteger(clientId)) {
+      console.error('Invalid Mindbody client ID:', clientId, typeof clientId)
+      return NextResponse.json(
+        {
+          error: 'ID de cliente Mindbody inválido',
+          details: 'Se requiere un ID de cliente válido de Mindbody para crear la reserva. Por favor inicia sesión nuevamente.'
+        },
+        { status: 400 }
+      )
+    }
+
     // Validate services array
     if (!Array.isArray(services) || services.length === 0) {
       return NextResponse.json(
