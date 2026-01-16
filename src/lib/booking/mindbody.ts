@@ -1412,7 +1412,8 @@ export async function updateClient(clientData: UpdateClientData) {
   const response = await mindbodyRequest<UpdateClientResponse>('/client/updateclient', {
     method: 'POST',
     body: {
-      Client: clientData
+      Client: clientData,
+      CrossRegionalUpdate: false  // Required for single-site updates
     }
   })
 
