@@ -14,16 +14,33 @@ export async function GET(
   { params }: { params: Promise<{ locale: string }> }
 ) {
   const { locale } = await params
-  const { searchParams, origin } = new URL(request.url)
+  const requestUrl = new URL(request.url)
+  const { searchParams, origin } = requestUrl
   const code = searchParams.get('code')
   const clientId = searchParams.get('clientId')
   const next = searchParams.get('next') ?? `/${locale}/portal`
 
-  console.log('Auth callback received:', { code: !!code, clientId, next })
+  // Log all parameters for debugging
+  console.log('Auth callback received:', {
+    code: !!code,
+    codeValue: code ? code.substring(0, 20) + '...' : null,
+    clientId,
+    next,
+    allParams: Object.fromEntries(searchParams.entries()),
+    fullUrl: requestUrl.toString().substring(0, 200)
+  })
 
+  // Handle PKCE flow (code parameter)
   if (code) {
+    console.log('Attempting to exchange code for session...')
     const supabase = await createClient()
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+    console.log('Exchange result:', {
+      success: !error,
+      hasUser: !!data?.user,
+      error: error?.message
+    })
 
     if (!error && data.user) {
       console.log('Auth successful for user:', data.user.id, data.user.email)
@@ -86,9 +103,12 @@ export async function GET(
     } else {
       console.error('Auth exchange failed:', error)
     }
+  } else {
+    console.error('No code parameter found in callback URL')
   }
 
   // Auth failed - redirect to login with error
+  console.log('Auth callback failed, redirecting to login with error')
   return NextResponse.redirect(
     `${origin}/${locale}/portal/login?error=${encodeURIComponent('Error al verificar el enlace. Por favor intenta de nuevo.')}`
   )
