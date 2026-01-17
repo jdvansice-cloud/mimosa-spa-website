@@ -54,7 +54,7 @@ export function Header() {
           <Link href={`/${locale}`} className="flex-shrink-0">
             <div className="relative h-12 w-40">
               <Image
-                src="/logo.png"
+                src="/Logo_mimosa.png"
                 alt="Mimosa Spa Retreat"
                 fill
                 className="object-contain object-left"

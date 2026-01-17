@@ -43,7 +43,7 @@ export async function generateMetadata({
     keywords: meta?.keywords || 'spa, masajes, bienestar, Panamá',
     icons: {
       icon: '/favicon.png',
-      apple: '/apple-touch-icon.png',
+      apple: '/favicon.png',
     },
     openGraph: {
       title: meta?.title || 'Mimosa Spa Retreat',
@@ -86,7 +86,7 @@ export default async function LocaleLayout({
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#FCCF08" />
         <meta name="mobile-web-app-capable" content="yes" />
