@@ -352,8 +352,8 @@ function normalizeServiceName(name: string): string {
 // Find matching session type with flexible matching
 function findSessionTypeMatch(
   name: string,
-  sessionTypeMap: Map<string, { Id: number; Duration: number; ProgramId: number }>
-): { Id: number; Duration: number; ProgramId: number } | undefined {
+  sessionTypeMap: Map<string, { Id: number; Duration: number; ProgramId: number; Description?: string }>
+): { Id: number; Duration: number; ProgramId: number; Description?: string } | undefined {
   const normalizedName = normalizeServiceName(name)
 
   // Try exact match first
@@ -391,13 +391,14 @@ async function fetchAllOnlineBookableServices(locationId?: number) {
   console.log('Total online session types:', sessionTypes.length)
 
   // Create a map of session types by normalized name for matching
-  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
+  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number; Description: string }>()
   for (const st of sessionTypes) {
     const normalizedName = normalizeServiceName(st.Name)
     sessionTypeMap.set(normalizedName, {
       Id: st.Id,
       Duration: st.DefaultTimeLength || 0,
       ProgramId: st.ProgramId,
+      Description: st.OnlineDescription || st.Description || '',
     })
   }
 
@@ -425,7 +426,7 @@ async function fetchAllOnlineBookableServices(locationId?: number) {
       Id: serviceId, // SessionTypeId for appointments
       ProductId: s.ProductId,
       Name: s.Name,
-      Description: '',
+      Description: sessionType?.Description || '',
       Duration: duration,
       Price: removeTaxFromPrice(s.Price || s.OnlinePrice || 0),
       OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
