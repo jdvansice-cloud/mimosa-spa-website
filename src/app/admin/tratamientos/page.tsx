@@ -295,27 +295,28 @@ export default function AdminTreatmentsPage() {
                       </button>
                     </td>
                     <td className="p-3 text-center">
-                      <button
-                        onClick={() => toggleBookingButton(treatment.mindbody_service_id)}
-                        disabled={!treatment.is_online_bookable}
-                        className={cn(
-                          "px-3 py-1 rounded-lg text-xs font-medium transition-colors",
-                          !treatment.is_online_bookable
-                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                            : treatment.show_booking_button
+                      {treatment.is_online_bookable ? (
+                        <button
+                          onClick={() => toggleBookingButton(treatment.mindbody_service_id)}
+                          className={cn(
+                            "px-3 py-1 rounded-lg text-xs font-medium transition-colors",
+                            treatment.show_booking_button
                               ? "bg-gold text-dark hover:bg-gold/80"
                               : "bg-beige-200 text-warm-gray hover:bg-beige-300"
-                        )}
-                        title={
-                          !treatment.is_online_bookable
-                            ? 'No disponible para reservas online'
-                            : treatment.show_booking_button
+                          )}
+                          title={
+                            treatment.show_booking_button
                               ? 'Ocultar botón de reservar'
                               : 'Mostrar botón de reservar'
-                        }
-                      >
-                        {treatment.show_booking_button ? 'Reservar' : 'Sin botón'}
-                      </button>
+                          }
+                        >
+                          {treatment.show_booking_button ? 'Activado' : 'Desactivado'}
+                        </button>
+                      ) : (
+                        <span className="px-3 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-400">
+                          N/A
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
