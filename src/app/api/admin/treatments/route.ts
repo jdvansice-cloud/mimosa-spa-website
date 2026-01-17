@@ -131,9 +131,9 @@ export async function POST(request: NextRequest) {
       .select()
 
     if (error) {
-      console.error('Error upserting treatment settings:', error)
+      console.error('Error upserting treatment settings:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { error: 'Error al guardar configuración' },
+        { error: `Error al guardar configuración: ${error.message || error.code || 'Unknown error'}`, details: error },
         { status: 500 }
       )
     }
@@ -141,8 +141,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data })
   } catch (error) {
     console.error('Error updating treatments:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Error al actualizar tratamientos' },
+      { error: `Error al actualizar tratamientos: ${errorMessage}` },
       { status: 500 }
     )
   }
