@@ -124,6 +124,8 @@ function PortalContent() {
   // State for expanded date sections (keys are date strings like "2024-01-15")
   const [expandedUpcoming, setExpandedUpcoming] = useState<Set<string>>(new Set())
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set())
+  const [expandedDashboardUpcoming, setExpandedDashboardUpcoming] = useState<Set<string>>(new Set())
+  const [expandedDashboardHistory, setExpandedDashboardHistory] = useState<Set<string>>(new Set())
 
   // Toggle a date section's expanded state
   const toggleUpcomingDate = (dateKey: string) => {
@@ -140,6 +142,30 @@ function PortalContent() {
 
   const toggleHistoryDate = (dateKey: string) => {
     setExpandedHistory(prev => {
+      const next = new Set(prev)
+      if (next.has(dateKey)) {
+        next.delete(dateKey)
+      } else {
+        next.add(dateKey)
+      }
+      return next
+    })
+  }
+
+  const toggleDashboardUpcomingDate = (dateKey: string) => {
+    setExpandedDashboardUpcoming(prev => {
+      const next = new Set(prev)
+      if (next.has(dateKey)) {
+        next.delete(dateKey)
+      } else {
+        next.add(dateKey)
+      }
+      return next
+    })
+  }
+
+  const toggleDashboardHistoryDate = (dateKey: string) => {
+    setExpandedDashboardHistory(prev => {
       const next = new Set(prev)
       if (next.has(dateKey)) {
         next.delete(dateKey)
@@ -510,41 +536,82 @@ function PortalContent() {
                       Ver todas <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="p-4">
+                  <div>
                     {upcomingAppointments.length === 0 ? (
                       <p className="text-warm-gray text-center py-4">
                         No tienes citas programadas
                       </p>
                     ) : (
-                      <div className="space-y-3">
-                        {upcomingAppointments.slice(0, 3).map((apt) => (
-                          <div
-                            key={apt.AppointmentId}
-                            className="flex items-center justify-between p-3 bg-beige-50 rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium text-dark">{apt.Name}</p>
-                              <p className="text-sm text-warm-gray flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {formatDate(apt.StartDateTime)} - {formatTime(apt.StartDateTime)}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              {apt.Staff && (
-                                <p className="text-sm text-dark">
-                                  {apt.Staff.DisplayName || `${apt.Staff.FirstName} ${apt.Staff.LastName}`}
-                                </p>
+                      (() => {
+                        const grouped = groupAppointmentsByDate(upcomingAppointments as Appointment[])
+                        const sortedDates = sortDateKeys(Array.from(grouped.keys()), true)
+                        // Limit to first 3 dates for dashboard preview
+                        return sortedDates.slice(0, 3).map((dateKey) => {
+                          const appointments = grouped.get(dateKey)!
+                          const isExpanded = expandedDashboardUpcoming.has(dateKey)
+                          const firstTime = formatTime(appointments[0].StartDateTime)
+                          return (
+                            <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
+                              <button
+                                onClick={() => toggleDashboardUpcomingDate(dateKey)}
+                                className="w-full p-3 flex items-center justify-between hover:bg-beige-50 transition-colors"
+                              >
+                                <div className="flex items-center gap-2">
+                                  {isExpanded ? (
+                                    <ChevronDown className="w-4 h-4 text-gold" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4 text-gold" />
+                                  )}
+                                  <div className="text-left">
+                                    <p className="font-medium text-dark capitalize text-sm">
+                                      {formatDateHeader(dateKey)}
+                                    </p>
+                                    <p className="text-xs text-warm-gray">
+                                      {appointments.length} cita{appointments.length !== 1 ? 's' : ''} · Primera a las {firstTime}
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                  Confirmada{appointments.length !== 1 ? 's' : ''}
+                                </span>
+                              </button>
+                              {isExpanded && (
+                                <div className="px-3 pb-3 space-y-2">
+                                  {appointments.map((apt) => (
+                                    <div
+                                      key={apt.AppointmentId}
+                                      className="p-3 bg-beige-50 rounded-lg ml-6"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <p className="font-medium text-dark text-sm">{apt.Name}</p>
+                                          <p className="text-xs text-warm-gray flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            {formatTime(apt.StartDateTime)} - {formatTime(apt.EndDateTime)}
+                                          </p>
+                                        </div>
+                                        <div className="text-right">
+                                          {apt.Staff && (
+                                            <p className="text-xs text-dark">
+                                              {apt.Staff.DisplayName || `${apt.Staff.FirstName} ${apt.Staff.LastName}`}
+                                            </p>
+                                          )}
+                                          {apt.Location && (
+                                            <p className="text-xs text-warm-gray flex items-center gap-1 justify-end">
+                                              <MapPin className="w-3 h-3" />
+                                              {apt.Location.Name}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               )}
-                              {apt.Location && (
-                                <p className="text-xs text-warm-gray flex items-center gap-1 justify-end">
-                                  <MapPin className="w-3 h-3" />
-                                  {apt.Location.Name}
-                                </p>
-                              )}
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          )
+                        })
+                      })()
                     )}
                   </div>
                 </div>
@@ -563,31 +630,87 @@ function PortalContent() {
                       Ver todas <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="p-4">
+                  <div>
                     {visits.length === 0 ? (
                       <p className="text-warm-gray text-center py-4">
                         No hay visitas registradas
                       </p>
                     ) : (
-                      <div className="space-y-3">
-                        {visits.slice(0, 3).map((visit) => (
-                          <div
-                            key={visit.AppointmentId}
-                            className="flex items-center justify-between p-3 bg-beige-50 rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium text-dark">{visit.Name}</p>
-                              <p className="text-sm text-warm-gray">
-                                {formatDate(visit.StartDateTime)}
-                              </p>
+                      (() => {
+                        const grouped = groupAppointmentsByDate(visits as Appointment[])
+                        const sortedDates = sortDateKeys(Array.from(grouped.keys()), true)
+                        // Limit to first 3 dates for dashboard preview
+                        return sortedDates.slice(0, 3).map((dateKey) => {
+                          const appointments = grouped.get(dateKey)!
+                          const isExpanded = expandedDashboardHistory.has(dateKey)
+                          const firstTime = formatTime(appointments[0].StartDateTime)
+                          const completedCount = appointments.filter(a => a.SignedIn).length
+                          const cancelledCount = appointments.filter(a => a.LateCancelled).length
+                          return (
+                            <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
+                              <button
+                                onClick={() => toggleDashboardHistoryDate(dateKey)}
+                                className="w-full p-3 flex items-center justify-between hover:bg-beige-50 transition-colors"
+                              >
+                                <div className="flex items-center gap-2">
+                                  {isExpanded ? (
+                                    <ChevronDown className="w-4 h-4 text-gold" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4 text-gold" />
+                                  )}
+                                  <div className="text-left">
+                                    <p className="font-medium text-dark capitalize text-sm">
+                                      {formatDateHeader(dateKey)}
+                                    </p>
+                                    <p className="text-xs text-warm-gray">
+                                      {appointments.length} visita{appointments.length !== 1 ? 's' : ''} · Primera a las {firstTime}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex gap-1">
+                                  {completedCount > 0 && (
+                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                      {completedCount}
+                                    </span>
+                                  )}
+                                  {cancelledCount > 0 && (
+                                    <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                                      {cancelledCount}
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                              {isExpanded && (
+                                <div className="px-3 pb-3 space-y-2">
+                                  {appointments.map((visit) => (
+                                    <div
+                                      key={visit.AppointmentId}
+                                      className="p-3 bg-beige-50 rounded-lg ml-6"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <p className="font-medium text-dark text-sm">{visit.Name}</p>
+                                          <p className="text-xs text-warm-gray flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            {formatTime(visit.StartDateTime)}
+                                          </p>
+                                        </div>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium
+                                          ${visit.SignedIn ? 'bg-green-100 text-green-700' :
+                                            visit.LateCancelled ? 'bg-red-100 text-red-700' :
+                                            'bg-gray-100 text-gray-600'}`}>
+                                          {visit.SignedIn ? 'Completada' :
+                                           visit.LateCancelled ? 'Cancelada' : 'Pendiente'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium
-                              ${visit.SignedIn ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                              {visit.SignedIn ? 'Completada' : 'Pendiente'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                          )
+                        })
+                      })()
                     )}
                   </div>
                 </div>
@@ -621,6 +744,7 @@ function PortalContent() {
                       return sortedDates.map((dateKey) => {
                         const appointments = grouped.get(dateKey)!
                         const isExpanded = expandedUpcoming.has(dateKey)
+                        const firstTime = formatTime(appointments[0].StartDateTime)
                         return (
                           <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
                             <button
@@ -638,7 +762,7 @@ function PortalContent() {
                                     {formatDateHeader(dateKey)}
                                   </p>
                                   <p className="text-sm text-warm-gray">
-                                    {appointments.length} cita{appointments.length !== 1 ? 's' : ''}
+                                    {appointments.length} cita{appointments.length !== 1 ? 's' : ''} · Primera a las {firstTime}
                                   </p>
                                 </div>
                               </div>
@@ -708,6 +832,7 @@ function PortalContent() {
                       return sortedDates.map((dateKey) => {
                         const appointments = grouped.get(dateKey)!
                         const isExpanded = expandedHistory.has(dateKey)
+                        const firstTime = formatTime(appointments[0].StartDateTime)
                         const completedCount = appointments.filter(a => a.SignedIn).length
                         const cancelledCount = appointments.filter(a => a.LateCancelled).length
                         return (
@@ -727,7 +852,7 @@ function PortalContent() {
                                     {formatDateHeader(dateKey)}
                                   </p>
                                   <p className="text-sm text-warm-gray">
-                                    {appointments.length} visita{appointments.length !== 1 ? 's' : ''}
+                                    {appointments.length} visita{appointments.length !== 1 ? 's' : ''} · Primera a las {firstTime}
                                   </p>
                                 </div>
                               </div>
