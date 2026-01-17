@@ -178,15 +178,22 @@ export async function POST(request: NextRequest) {
     console.log('Services:', JSON.stringify(services, null, 2))
 
     for (const service of services as BookingService[]) {
+      // Build notes: always include "Reservado en línea" + optional promotion + optional custom notes
+      const noteParts: string[] = ['Reservado en línea']
+      if (promotionName) {
+        noteParts.push(`Promoción: ${promotionName}`)
+      }
+      if (notes) {
+        noteParts.push(notes)
+      }
+
       appointments.push({
         ClientId: clientId,
         LocationId: locationId,
         StaffId: staffId || undefined,
         SessionTypeId: service.sessionTypeId,
         StartDateTime: currentStartTime.toISOString(),
-        Notes: promotionName
-          ? `Promoción: ${promotionName}${notes ? ` | ${notes}` : ''}`
-          : notes,
+        Notes: noteParts.join(' | '),
       })
 
       // Move start time for next service
