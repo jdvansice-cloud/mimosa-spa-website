@@ -15,6 +15,7 @@ interface TreatmentSetting {
 
 interface ServiceWithSettings extends MindbodyService {
   showBookingButton?: boolean
+  isOnlineBookable?: boolean
 }
 
 interface ServicesListProps {
@@ -34,9 +35,10 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
       setError(null)
 
       try {
-        // Fetch services and treatment settings in parallel
+        // Fetch services (including offline) and treatment settings in parallel
+        // includeOffline=true ensures we get all services from Mindbody, not just online bookable ones
         const [servicesResponse, settingsResponse] = await Promise.all([
-          fetch('/api/mindbody/services?type=all'),
+          fetch('/api/mindbody/services?type=all&includeOffline=true'),
           fetch('/api/treatments/settings')
         ])
 
@@ -70,15 +72,15 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
               return acc
             }
 
-            // Add showBookingButton based on settings
-            // Default to true if no setting exists (show booking for online bookable services)
-            const showBookingButton = setting
-              ? setting.show_booking_button
-              : service.OnlineBooking
+            // showBookingButton: Only true if service is online bookable AND admin hasn't disabled it
+            // For booking widget to work, service must be online bookable in Mindbody
+            const isOnlineBookable = service.OnlineBooking === true
+            const showBookingButton = isOnlineBookable && (setting ? setting.show_booking_button : true)
 
             acc.push({
               ...service,
-              showBookingButton
+              showBookingButton,
+              isOnlineBookable
             })
           }
           return acc

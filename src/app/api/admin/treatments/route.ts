@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { getServices, getAddons } from '@/lib/booking/mindbody'
+import { getAllServices } from '@/lib/booking/mindbody'
 
 // Lazy-initialized Supabase client to avoid build-time errors
 let supabaseAdmin: SupabaseClient | null = null
@@ -33,13 +33,8 @@ export interface TreatmentSetting {
 // GET - Fetch all treatments with their settings
 export async function GET() {
   try {
-    // Fetch all services from Mindbody (including non-online bookable for admin view)
-    const [services, addons] = await Promise.all([
-      getServices(),
-      getAddons()
-    ])
-
-    const allServices = [...services, ...addons]
+    // Fetch ALL services from Mindbody (including non-online bookable for admin view)
+    const allServices = await getAllServices()
 
     // Fetch existing settings from Supabase
     const { data: settings, error: settingsError } = await getSupabaseAdmin()

@@ -476,6 +476,79 @@ export async function getAddons(locationId?: number) {
   return onlineBookableAddons
 }
 
+// ===========================================
+// GET ALL SERVICES (for admin menu management)
+// Returns ALL services from Mindbody, including non-online-bookable ones
+// Used by admin to manage which services appear on menu pages
+// ===========================================
+export async function getAllServices(locationId?: number) {
+  // Fetch ALL session types (including non-online bookable)
+  const [allSessionTypes, saleServicesResponse] = await Promise.all([
+    getSessionTypes(false), // Include ALL session types, not just online
+    mindbodyRequest<SaleServicesResponse>('/sale/services', {
+      params: {
+        limit: 200,
+        // Don't filter by sellOnline - get all services
+        ...(locationId ? { locationId: locationId } : {})
+      }
+    })
+  ])
+
+  const allSaleServices = saleServicesResponse.Services || []
+  console.log('Total sale/services from Mindbody (all):', allSaleServices.length)
+  console.log('Total session types (all):', allSessionTypes.length)
+
+  // Create a map of session types by normalized name for matching
+  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number; Description: string }>()
+  for (const st of allSessionTypes) {
+    const normalizedName = normalizeServiceName(st.Name)
+    sessionTypeMap.set(normalizedName, {
+      Id: st.Id,
+      Duration: st.DefaultTimeLength || 0,
+      ProgramId: st.ProgramId,
+      Description: st.OnlineDescription || st.Description || '',
+    })
+  }
+
+  // Filter for single session services with price (but don't require SellOnline)
+  const filteredServices = allSaleServices.filter(s =>
+    s.Count === 1 && // Single session only
+    s.Price > 0 // Has price
+  )
+  console.log('Filtered sale services (single session, has price):', filteredServices.length)
+
+  // Transform services - include both online and offline bookable
+  const services = filteredServices.map(s => {
+    const sessionType = findSessionTypeMatch(s.Name, sessionTypeMap)
+
+    // Use SessionTypeId from session types if found, otherwise use ProductId
+    const serviceId = sessionType?.Id || s.ProductId
+    const duration = sessionType?.Duration || parseDurationFromName(s.Name)
+
+    return {
+      Id: serviceId,
+      ProductId: s.ProductId,
+      Name: s.Name,
+      Description: sessionType?.Description || '',
+      Duration: duration,
+      Price: removeTaxFromPrice(s.Price || s.OnlinePrice || 0),
+      OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
+      TaxIncluded: s.TaxIncluded,
+      OnlineBooking: s.SellOnline, // True if can be booked online
+      Category: getSpanishCategory(s.ProgramId),
+      ProgramId: s.ProgramId,
+      IsAddOn: s.ProgramId === 8,
+      HasSessionTypeMatch: sessionType !== undefined,
+    }
+  })
+
+  console.log('All services for admin:', services.length)
+  console.log('Online bookable services:', services.filter(s => s.OnlineBooking).length)
+  console.log('Offline only services:', services.filter(s => !s.OnlineBooking).length)
+
+  return services
+}
+
 // Get staff - basic endpoint without service filtering
 export async function getStaff(locationId?: number) {
   interface StaffResponse {
