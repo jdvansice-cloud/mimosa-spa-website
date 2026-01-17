@@ -7,13 +7,23 @@ import Link from 'next/link'
 import type { MindbodyService } from '@/types/booking'
 import { useTranslations } from 'next-intl'
 
+interface TreatmentSetting {
+  mindbody_service_id: number
+  is_visible: boolean
+  show_booking_button: boolean
+}
+
+interface ServiceWithSettings extends MindbodyService {
+  showBookingButton?: boolean
+}
+
 interface ServicesListProps {
   programIds: number[]
   locale: string
 }
 
 export function ServicesList({ programIds, locale }: ServicesListProps) {
-  const [services, setServices] = useState<MindbodyService[]>([])
+  const [services, setServices] = useState<ServiceWithSettings[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const t = useTranslations('menu')
@@ -24,23 +34,52 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
       setError(null)
 
       try {
-        // Fetch services from both locations and merge
-        const response = await fetch('/api/mindbody/services?type=all')
-        const data = await response.json()
+        // Fetch services and treatment settings in parallel
+        const [servicesResponse, settingsResponse] = await Promise.all([
+          fetch('/api/mindbody/services?type=all'),
+          fetch('/api/treatments/settings')
+        ])
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Error al cargar servicios')
+        const servicesData = await servicesResponse.json()
+        const settingsData = await settingsResponse.json()
+
+        if (!servicesResponse.ok) {
+          throw new Error(servicesData.error || 'Error al cargar servicios')
+        }
+
+        // Create a map of settings by mindbody_service_id
+        const settingsMap = new Map<number, TreatmentSetting>()
+        if (settingsData.settings) {
+          for (const setting of settingsData.settings) {
+            settingsMap.set(setting.mindbody_service_id, setting)
+          }
         }
 
         // Filter services by programIds
-        const filteredServices = data.services.filter(
+        const filteredServices = servicesData.services.filter(
           (service: MindbodyService) => programIds.includes(service.ProgramId)
         )
 
-        // Remove duplicates by name (same service might exist at multiple locations)
-        const uniqueServices = filteredServices.reduce((acc: MindbodyService[], service: MindbodyService) => {
+        // Remove duplicates by name and apply visibility settings
+        const uniqueServices = filteredServices.reduce((acc: ServiceWithSettings[], service: MindbodyService) => {
           if (!acc.find(s => s.Name === service.Name)) {
-            acc.push(service)
+            const setting = settingsMap.get(service.Id)
+
+            // If setting exists and is_visible is false, skip this service
+            if (setting && !setting.is_visible) {
+              return acc
+            }
+
+            // Add showBookingButton based on settings
+            // Default to true if no setting exists (show booking for online bookable services)
+            const showBookingButton = setting
+              ? setting.show_booking_button
+              : service.OnlineBooking
+
+            acc.push({
+              ...service,
+              showBookingButton
+            })
           }
           return acc
         }, [])
@@ -122,12 +161,14 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
                 <span className="text-xl font-bold text-gold-600">
                   {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
                 </span>
-                <Link
-                  href={`/${locale}/reservar`}
-                  className="inline-flex items-center px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg hover:bg-gold/90 transition-colors"
-                >
-                  {t('bookNow')}
-                </Link>
+                {service.showBookingButton && (
+                  <Link
+                    href={`/${locale}/reservar`}
+                    className="inline-flex items-center px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg hover:bg-gold/90 transition-colors"
+                  >
+                    {t('bookNow')}
+                  </Link>
+                )}
               </div>
             </div>
           </div>

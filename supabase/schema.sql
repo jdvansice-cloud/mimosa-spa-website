@@ -248,6 +248,54 @@ CREATE POLICY "Admins can delete from assets" ON storage.objects
   );
 
 -- ===========================================
+-- TREATMENT SETTINGS TABLE
+-- Stores visibility and display settings for Mindbody services
+-- ===========================================
+CREATE TABLE IF NOT EXISTS public.treatment_settings (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  mindbody_service_id INTEGER NOT NULL UNIQUE,
+  service_name TEXT NOT NULL,
+  program_id INTEGER NOT NULL,
+  category TEXT,
+  price DECIMAL(10,2),
+  duration INTEGER,
+  description TEXT,
+  is_visible BOOLEAN DEFAULT true,
+  show_booking_button BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create index for faster lookups
+CREATE INDEX IF NOT EXISTS idx_treatment_settings_mindbody_service_id
+ON public.treatment_settings(mindbody_service_id);
+
+CREATE INDEX IF NOT EXISTS idx_treatment_settings_program_id
+ON public.treatment_settings(program_id);
+
+-- Enable RLS
+ALTER TABLE public.treatment_settings ENABLE ROW LEVEL SECURITY;
+
+-- Treatment settings policies
+CREATE POLICY "Anyone can view treatment settings" ON public.treatment_settings
+  FOR SELECT USING (true);
+
+CREATE POLICY "Admins can manage treatment settings" ON public.treatment_settings
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+-- Trigger for updated_at
+CREATE TRIGGER update_treatment_settings_updated_at
+  BEFORE UPDATE ON public.treatment_settings
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ===========================================
 -- SEED DATA (Optional)
 -- ===========================================
 

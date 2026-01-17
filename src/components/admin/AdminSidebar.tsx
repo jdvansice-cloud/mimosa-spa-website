@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { 
-  LayoutDashboard, 
-  Tag, 
-  Image, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Tag,
+  Image,
+  Settings,
   LogOut,
   ExternalLink,
-  User
+  User,
+  Sparkles
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
@@ -17,6 +18,7 @@ import { useAuthStore } from '@/lib/auth/store'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },
   { href: '/admin/galeria', label: 'Galería', icon: Image },
   { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
