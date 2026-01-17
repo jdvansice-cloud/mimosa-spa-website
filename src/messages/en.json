@@ -57,6 +57,7 @@
     },
     "duration": "min",
     "bookNow": "Book",
+    "bookViaWhatsApp": "Book via WhatsApp",
     "view": "View",
     "loading": "Loading treatments...",
     "noServices": "No services available at this time."

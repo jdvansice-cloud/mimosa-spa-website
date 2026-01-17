@@ -57,6 +57,7 @@
     },
     "duration": "min",
     "bookNow": "Reservar",
+    "bookViaWhatsApp": "Reservar por WhatsApp",
     "view": "Ver",
     "loading": "Cargando tratamientos...",
     "noServices": "No hay servicios disponibles en este momento."

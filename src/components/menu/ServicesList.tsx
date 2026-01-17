@@ -1,11 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Clock, Loader2 } from 'lucide-react'
+import { Clock, Loader2, MessageCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import type { MindbodyService } from '@/types/booking'
 import { useTranslations } from 'next-intl'
+import { getWhatsAppUrl } from '@/lib/utils'
+
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '50767SEE-ENV'
 
 interface TreatmentSetting {
   mindbody_service_id: number
@@ -164,13 +167,26 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
                 <span className="text-xl font-bold text-gold-600">
                   {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
                 </span>
-                {service.showBookingButton && (
+                {service.showBookingButton ? (
                   <Link
                     href={`/${locale}/reservar`}
                     className="inline-flex items-center px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg hover:bg-gold/90 transition-colors"
                   >
                     {t('bookNow')}
                   </Link>
+                ) : (
+                  <a
+                    href={getWhatsAppUrl(
+                      WHATSAPP_NUMBER,
+                      `Hola, me gustaría reservar: ${service.Name}${service.Price > 0 ? ` ($${service.Price.toFixed(0)})` : ''}`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white text-sm font-semibold rounded-lg hover:bg-[#128C7E] transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    {t('bookViaWhatsApp')}
+                  </a>
                 )}
               </div>
             </div>
