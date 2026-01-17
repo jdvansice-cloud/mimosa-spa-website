@@ -117,10 +117,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`Upserting ${treatments.length} treatment settings...`)
+    console.log(`Processing ${treatments.length} treatment settings...`)
+
+    // Deduplicate by mindbody_service_id (keep first occurrence)
+    // This prevents "ON CONFLICT DO UPDATE command cannot affect row a second time" error
+    const seenIds = new Set<number>()
+    const uniqueTreatments = treatments.filter(t => {
+      if (seenIds.has(t.mindbody_service_id)) {
+        console.log(`Skipping duplicate mindbody_service_id: ${t.mindbody_service_id}`)
+        return false
+      }
+      seenIds.add(t.mindbody_service_id)
+      return true
+    })
+
+    console.log(`Upserting ${uniqueTreatments.length} unique treatment settings...`)
 
     // Upsert all treatment settings
-    const upsertData = treatments.map(t => ({
+    const upsertData = uniqueTreatments.map(t => ({
       mindbody_service_id: t.mindbody_service_id,
       service_name: t.service_name,
       program_id: t.program_id,
