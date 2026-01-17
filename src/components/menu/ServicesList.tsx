@@ -101,9 +101,10 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
                 {service.Name}
               </h3>
               {service.Description && (
-                <p className="text-sm text-warm-gray-600 leading-relaxed">
-                  {service.Description}
-                </p>
+                <div
+                  className="text-sm text-warm-gray-600 leading-relaxed [&_p]:mb-2 [&_br]:hidden"
+                  dangerouslySetInnerHTML={{ __html: service.Description }}
+                />
               )}
             </div>
 

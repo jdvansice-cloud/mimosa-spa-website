@@ -46,6 +46,38 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/menu(?:/)?$"
     },
     {
+      "page": "/[locale]/menu/corporales",
+      "regex": "^/([^/]+?)/menu/corporales(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/menu/corporales(?:/)?$"
+    },
+    {
+      "page": "/[locale]/menu/corporales-deluxe",
+      "regex": "^/([^/]+?)/menu/corporales\\-deluxe(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/menu/corporales\\-deluxe(?:/)?$"
+    },
+    {
+      "page": "/[locale]/menu/faciales",
+      "regex": "^/([^/]+?)/menu/faciales(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/menu/faciales(?:/)?$"
+    },
+    {
+      "page": "/[locale]/menu/paquetes",
+      "regex": "^/([^/]+?)/menu/paquetes(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/menu/paquetes(?:/)?$"
+    },
+    {
       "page": "/[locale]/nosotros",
       "regex": "^/([^/]+?)/nosotros(?:/)?$",
       "routeKeys": {

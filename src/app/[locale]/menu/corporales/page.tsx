@@ -23,7 +23,7 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero Section with Image */}
-      <section className="relative h-[40vh] md:h-[50vh] overflow-hidden">
+      <section className="relative h-[25vh] md:h-[30vh] overflow-hidden">
         <Image
           src="/Tratamientos Corporales.png"
           alt={t('title')}

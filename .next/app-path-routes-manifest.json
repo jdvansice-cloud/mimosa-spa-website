@@ -1,6 +1,10 @@
 {
   "/[locale]/galeria/page": "/[locale]/galeria",
+  "/[locale]/menu/corporales-deluxe/page": "/[locale]/menu/corporales-deluxe",
+  "/[locale]/menu/corporales/page": "/[locale]/menu/corporales",
+  "/[locale]/menu/faciales/page": "/[locale]/menu/faciales",
   "/[locale]/menu/page": "/[locale]/menu",
+  "/[locale]/menu/paquetes/page": "/[locale]/menu/paquetes",
   "/[locale]/nosotros/page": "/[locale]/nosotros",
   "/[locale]/page": "/[locale]",
   "/[locale]/portal/auth/callback/route": "/[locale]/portal/auth/callback",
