@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation'
 import { Home, BookOpen, Tag, Calendar, User, ShoppingBag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useBookingStore } from '@/lib/booking/store'
+import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
 
 export function MobileBottomNav() {
   const t = useTranslations('navigation')
@@ -52,9 +53,9 @@ export function MobileBottomNav() {
 
           if (item.primary) {
             return (
-              <Link
+              <HomeBookingButton
                 key={item.href}
-                href={item.href}
+                locale={locale}
                 className="flex flex-col items-center justify-center -mt-6 relative"
               >
                 <div
@@ -69,7 +70,7 @@ export function MobileBottomNav() {
                 <span className="text-xs mt-1 font-medium text-dark">
                   {item.label}
                 </span>
-              </Link>
+              </HomeBookingButton>
             )
           }
 

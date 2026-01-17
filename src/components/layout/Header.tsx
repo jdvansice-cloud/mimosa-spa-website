@@ -7,7 +7,12 @@ import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { Menu, X, Calendar, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button, LanguageSwitcher } from '@/components/ui'
+import { LanguageSwitcher } from '@/components/ui'
+import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
+
+// Button styles for sm and md sizes (matches Button component)
+const smButtonStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gold text-dark hover:bg-gold-600 active:bg-gold-700 focus:ring-gold-500 shadow-sm hover:shadow-md px-4 py-2 text-sm gap-1.5"
+const mdButtonStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gold text-dark hover:bg-gold-600 active:bg-gold-700 focus:ring-gold-500 shadow-sm hover:shadow-md px-6 py-3 text-base gap-2"
 
 export function Header() {
   const t = useTranslations('navigation')
@@ -86,11 +91,10 @@ export function Header() {
             >
               <User className="h-5 w-5" />
             </Link>
-            <Link href={`/${locale}/reservar`}>
-              <Button size="sm" leftIcon={<Calendar className="h-4 w-4" />}>
-                {t('book')}
-              </Button>
-            </Link>
+            <HomeBookingButton locale={locale} className={smButtonStyles}>
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              {t('book')}
+            </HomeBookingButton>
           </div>
 
           {/* Mobile Menu Button */}
@@ -142,11 +146,14 @@ export function Header() {
 
           <div className="pt-4 flex items-center justify-between">
             <LanguageSwitcher variant="dark" />
-            <Link href={`/${locale}/reservar`} onClick={() => setIsMobileMenuOpen(false)}>
-              <Button size="md" leftIcon={<Calendar className="h-4 w-4" />}>
-                {t('book')}
-              </Button>
-            </Link>
+            <HomeBookingButton
+              locale={locale}
+              className={mdButtonStyles}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              {t('book')}
+            </HomeBookingButton>
           </div>
         </div>
       </div>

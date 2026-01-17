@@ -5,6 +5,10 @@ import { useTranslations, useLocale } from 'next-intl'
 import { Calendar, ChevronDown } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui'
+import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
+
+// Button styles for HomeBookingButton (matches Button component's lg primary variant)
+const bookingButtonStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gold text-dark hover:bg-gold-600 active:bg-gold-700 focus:ring-gold-500 shadow-sm hover:shadow-md px-8 py-4 text-lg gap-2.5 w-full sm:w-auto"
 
 export function HeroSection() {
   const t = useTranslations('home.hero')
@@ -70,15 +74,13 @@ export function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href={`/${locale}/reservar`}>
-              <Button
-                size="lg"
-                leftIcon={<Calendar className="h-5 w-5" />}
-                className="w-full sm:w-auto shadow-lg"
-              >
-                {t('cta')}
-              </Button>
-            </Link>
+            <HomeBookingButton
+              locale={locale}
+              className={bookingButtonStyles}
+            >
+              <Calendar className="h-5 w-5 flex-shrink-0" />
+              {t('cta')}
+            </HomeBookingButton>
             <Link href={`/${locale}/menu`}>
               <Button
                 variant="outline"

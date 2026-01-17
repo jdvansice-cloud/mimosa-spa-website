@@ -39,18 +39,22 @@ function PortalLoginContent() {
   const [multipleClients, setMultipleClients] = useState<ClientOption[] | null>(null)
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null)
 
+  // Get redirect URL from query params (for booking flow)
+  const redirectUrl = searchParams.get('redirect')
+
   // Check if user is already logged in
   useEffect(() => {
     const checkSession = async () => {
       const supabase = getSupabase()
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        // User is already authenticated, redirect to portal
-        router.push(`/${locale}/portal`)
+        // User is already authenticated, redirect to intended destination or portal
+        const destination = redirectUrl ? decodeURIComponent(redirectUrl) : `/${locale}/portal`
+        router.push(destination)
       }
     }
     checkSession()
-  }, [router, locale])
+  }, [router, locale, redirectUrl])
 
   // Handle error from callback
   useEffect(() => {
@@ -100,11 +104,15 @@ function PortalLoginContent() {
       setSelectedClientId(clientId)
 
       // Send magic link via Supabase
+      // Include redirect URL in callback if provided (for booking flow)
       const supabase = getSupabase()
+      const callbackUrl = redirectUrl
+        ? `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}&next=${encodeURIComponent(decodeURIComponent(redirectUrl))}`
+        : `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}`
       const { error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}`,
+          emailRedirectTo: callbackUrl,
           data: {
             mindbody_client_id: clientId,
             first_name: data.firstName,
@@ -138,11 +146,15 @@ function PortalLoginContent() {
 
     try {
       // Send magic link via Supabase
+      // Include redirect URL in callback if provided (for booking flow)
       const supabase = getSupabase()
+      const callbackUrl = redirectUrl
+        ? `${window.location.origin}/${locale}/portal/auth/callback?clientId=${client.Id}&next=${encodeURIComponent(decodeURIComponent(redirectUrl))}`
+        : `${window.location.origin}/${locale}/portal/auth/callback?clientId=${client.Id}`
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: client.Email,
         options: {
-          emailRedirectTo: `${window.location.origin}/${locale}/portal/auth/callback?clientId=${client.Id}`,
+          emailRedirectTo: callbackUrl,
           data: {
             mindbody_client_id: client.Id,
             first_name: client.FirstName,

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Mail, ArrowRight, Loader2, CheckCircle, User, UserPlus, Phone } from 'lucide-react'
 import { useBookingStore } from '@/lib/booking/store'
-import type { MindbodyClient } from '@/types/booking'
+import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
 
 type AuthState = 'email' | 'sending' | 'sent' | 'verifying' | 'select-client' | 'register'
 
@@ -24,6 +24,9 @@ function AuthStepContent() {
   const {
     setClientInfo,
     nextStep,
+    setStep,
+    addService,
+    loadPromotion,
     setLoading,
     setError,
     isLoading,
@@ -60,6 +63,10 @@ function AuthStepContent() {
 
       // Check for clientId in URL (from magic link callback)
       const urlClientId = searchParams.get('clientId')
+      // Check for serviceId in URL (pre-selected service from menu)
+      const serviceId = searchParams.get('serviceId')
+      // Check for promotionId in URL (pre-selected promotion)
+      const promotionId = searchParams.get('promotionId')
 
       if (session?.user) {
         // User is logged in
@@ -101,6 +108,46 @@ function AuthStepContent() {
             if (response.ok) {
               const data = await response.json()
               setClientInfo(data.client as MindbodyClient)
+
+              // If there's a pre-selected promotionId, fetch and load the promotion
+              if (promotionId) {
+                try {
+                  const promotionResponse = await fetch(`/api/promotions/${promotionId}/with-services`)
+                  if (promotionResponse.ok) {
+                    const promotionData = await promotionResponse.json()
+                    const promotionWithServices = promotionData.data as PromotionWithServices
+                    if (promotionWithServices && promotionWithServices.services && promotionWithServices.services.length > 0) {
+                      loadPromotion(promotionWithServices)
+                      // loadPromotion sets step to 'addons', but we need location first
+                      setStep('location')
+                      return
+                    }
+                  }
+                } catch (err) {
+                  console.error('Error fetching promotion for pre-selection:', err)
+                }
+              }
+
+              // If there's a pre-selected serviceId, fetch and add the service
+              if (serviceId) {
+                try {
+                  const servicesResponse = await fetch('/api/mindbody/services?type=all&includeOffline=true')
+                  const servicesData = await servicesResponse.json()
+                  if (servicesData.services) {
+                    const parsedServiceId = parseInt(serviceId, 10)
+                    const service = servicesData.services.find((s: { Id: number }) => s.Id === parsedServiceId)
+                    if (service) {
+                      addService(service)
+                      // Skip to location step (auth is done, service is pre-selected)
+                      setStep('location')
+                      return
+                    }
+                  }
+                } catch (err) {
+                  console.error('Error fetching service for pre-selection:', err)
+                }
+              }
+
               nextStep()
               return
             }
@@ -117,7 +164,7 @@ function AuthStepContent() {
     }
 
     checkSession()
-  }, [setClientInfo, nextStep, searchParams])
+  }, [setClientInfo, nextStep, setStep, addService, loadPromotion, searchParams])
 
   const handleEmailSubmit = async () => {
     if (!email.trim()) {
@@ -181,11 +228,22 @@ function AuthStepContent() {
   ) => {
     try {
       const supabase = getSupabase()
+
+      // Build the redirect URL preserving serviceId or promotionId from current URL
+      const serviceId = searchParams.get('serviceId')
+      const promotionId = searchParams.get('promotionId')
+      let nextUrl = `/${locale}/reservar`
+      if (serviceId) {
+        nextUrl += `?serviceId=${serviceId}`
+      } else if (promotionId) {
+        nextUrl += `?promotionId=${promotionId}`
+      }
+
       // Redirect to auth callback which saves clientId to profile, then redirects to /reservar
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: userEmail,
         options: {
-          emailRedirectTo: `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}&next=/${locale}/reservar`,
+          emailRedirectTo: `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}&next=${encodeURIComponent(nextUrl)}`,
           data: {
             mindbody_client_id: clientId,
             first_name: firstName,

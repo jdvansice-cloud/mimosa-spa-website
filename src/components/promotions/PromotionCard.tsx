@@ -1,10 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
-import { Card, Button } from '@/components/ui'
+import { Card } from '@/components/ui'
 import { formatPrice, formatDate, getLocalizedContent } from '@/lib/utils'
+import { PromotionBookingButton } from './PromotionBookingButton'
 import type { Promotion } from '@/types'
 
 interface PromotionCardProps {
@@ -84,11 +84,12 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
           </p>
 
           {/* Book Button */}
-          <Link href={`/${locale}/reservar`} className="block">
-            <Button className="w-full" size="sm">
-              {t('bookNow')}
-            </Button>
-          </Link>
+          <PromotionBookingButton
+            promotion={promotion}
+            locale={locale}
+            label={t('bookNow')}
+            className="w-full"
+          />
         </div>
       </div>
     </Card>

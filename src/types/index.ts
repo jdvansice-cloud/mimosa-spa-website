@@ -13,6 +13,7 @@ export interface Promotion {
   description_en: string | null
   services: string[]
   price: number
+  original_price: number | null
   duration_minutes: number | null
   image_url: string | null
   valid_from: string
@@ -20,6 +21,7 @@ export interface Promotion {
   is_active: boolean
   sort_order: number
   mindbody_service_id: string | null
+  mindbody_service_ids: number[]
   created_at: string
   updated_at: string
 }
@@ -163,11 +165,13 @@ export interface PromotionFormData {
   description_en: string
   services: string[]
   price: number
+  original_price: number | null
   duration_minutes: number
   valid_from: string
   valid_until: string
   is_active: boolean
   sort_order: number
+  mindbody_service_ids: number[]
 }
 
 export interface GalleryFormData {

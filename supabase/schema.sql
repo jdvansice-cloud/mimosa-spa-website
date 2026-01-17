@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS public.promotions (
   description_en TEXT,
   services TEXT[] DEFAULT '{}',
   price DECIMAL(10,2) NOT NULL,
+  original_price DECIMAL(10,2),
   duration_minutes INTEGER,
   image_url TEXT,
   valid_from DATE NOT NULL,
@@ -60,9 +61,14 @@ CREATE TABLE IF NOT EXISTS public.promotions (
   is_active BOOLEAN DEFAULT true,
   sort_order INTEGER DEFAULT 0,
   mindbody_service_id TEXT,
+  mindbody_service_ids INTEGER[] DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Comments for documentation
+COMMENT ON COLUMN public.promotions.mindbody_service_ids IS 'Array of Mindbody service IDs included in this promotion';
+COMMENT ON COLUMN public.promotions.original_price IS 'Original combined price of all services before promotional discount';
 
 -- Enable RLS
 ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
