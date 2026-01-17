@@ -67,7 +67,7 @@ export async function GET() {
         price: service.Price,
         duration: service.Duration,
         description: service.Description || '',
-        is_visible: existingSetting?.is_visible ?? true,
+        is_visible: existingSetting?.is_visible ?? false, // Default: hidden until admin enables
         show_booking_button: existingSetting?.show_booking_button ?? service.OnlineBooking,
         sort_order: existingSetting?.sort_order ?? 0,
         is_online_bookable: service.OnlineBooking
@@ -189,7 +189,7 @@ export async function PATCH(request: NextRequest) {
           price: updates.price || 0,
           duration: updates.duration || 0,
           description: updates.description || '',
-          is_visible: updates.is_visible ?? true,
+          is_visible: updates.is_visible ?? false, // Default: hidden until admin enables
           show_booking_button: updates.show_booking_button ?? true,
           sort_order: updates.sort_order ?? 0
         })

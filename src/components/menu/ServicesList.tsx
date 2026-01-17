@@ -67,15 +67,16 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
           if (!acc.find(s => s.Name === service.Name)) {
             const setting = settingsMap.get(service.Id)
 
-            // If setting exists and is_visible is false, skip this service
-            if (setting && !setting.is_visible) {
+            // Only show services that have a setting with is_visible = true
+            // New services (no setting) are hidden by default until admin enables them
+            if (!setting || !setting.is_visible) {
               return acc
             }
 
             // showBookingButton: Only true if service is online bookable AND admin hasn't disabled it
             // For booking widget to work, service must be online bookable in Mindbody
             const isOnlineBookable = service.OnlineBooking === true
-            const showBookingButton = isOnlineBookable && (setting ? setting.show_booking_button : true)
+            const showBookingButton = isOnlineBookable && setting.show_booking_button
 
             acc.push({
               ...service,

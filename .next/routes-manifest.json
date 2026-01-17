@@ -184,6 +184,18 @@
       "namedRegex": "^/admin/promociones(?:/)?$"
     },
     {
+      "page": "/admin/tratamientos",
+      "regex": "^/admin/tratamientos(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/tratamientos(?:/)?$"
+    },
+    {
+      "page": "/api/admin/treatments",
+      "regex": "^/api/admin/treatments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/treatments(?:/)?$"
+    },
+    {
       "page": "/api/cita/cancelar",
       "regex": "^/api/cita/cancelar(?:/)?$",
       "routeKeys": {},
@@ -284,6 +296,12 @@
       "regex": "^/api/promotions(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/promotions(?:/)?$"
+    },
+    {
+      "page": "/api/treatments/settings",
+      "regex": "^/api/treatments/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/treatments/settings(?:/)?$"
     },
     {
       "page": "/cita/resultado",

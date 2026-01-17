@@ -260,7 +260,7 @@ CREATE TABLE IF NOT EXISTS public.treatment_settings (
   price DECIMAL(10,2),
   duration INTEGER,
   description TEXT,
-  is_visible BOOLEAN DEFAULT true,
+  is_visible BOOLEAN DEFAULT false,  -- Hidden by default until admin enables
   show_booking_button BOOLEAN DEFAULT true,
   sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
