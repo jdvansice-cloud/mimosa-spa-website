@@ -98,6 +98,15 @@ export async function GET() {
 // POST - Update treatment settings
 export async function POST(request: NextRequest) {
   try {
+    // Validate environment variables
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing Supabase environment variables')
+      return NextResponse.json(
+        { error: 'Server configuration error: Missing database credentials' },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const { treatments } = body as { treatments: TreatmentSetting[] }
 
@@ -107,6 +116,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    console.log(`Upserting ${treatments.length} treatment settings...`)
 
     // Upsert all treatment settings
     const upsertData = treatments.map(t => ({
