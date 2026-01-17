@@ -13,31 +13,31 @@ const categories = [
   {
     id: 'body',
     titleKey: 'body',
-    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
+    image: '/Tratamientos Corporales.png',
     href: '/menu/corporales',
+  },
+  {
+    id: 'bodyDeluxe',
+    titleKey: 'bodyDeluxe',
+    image: '/Tratamientos Corporales Deluxe.png',
+    href: '/menu/corporales-deluxe',
   },
   {
     id: 'facial',
     titleKey: 'facial',
-    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
+    image: '/Tratamientos Faciales.png',
     href: '/menu/faciales',
   },
   {
     id: 'packages',
     titleKey: 'packages',
-    image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
+    image: '/Tratamientos en Paquetes.png',
     href: '/menu/paquetes',
-  },
-  {
-    id: 'membership',
-    titleKey: 'membership',
-    image: 'https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=800',
-    href: '/menu/membresia',
   },
   {
     id: 'giftcards',
     titleKey: 'giftcards',
-    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=800',
+    image: '/Giftcards.png',
     href: '/menu/giftcards',
   },
   {
