@@ -107,6 +107,7 @@ export default function AdminTreatmentsPage() {
       const data = await response.json()
 
       if (!response.ok) {
+        console.error('Save error details:', data)
         throw new Error(data.error || 'Error al guardar')
       }
 
