@@ -15,10 +15,82 @@ import {
   Loader2,
   MapPin,
   RefreshCw,
-  Settings
+  Settings,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react'
 import { usePortalStore, usePortalData } from '@/lib/portal/store'
 import { PANAMA_TIMEZONE } from '@/lib/booking/constants'
+
+// Type for appointments
+interface Appointment {
+  AppointmentId: number
+  Name: string
+  StartDateTime: string
+  EndDateTime: string
+  SignedIn?: boolean
+  LateCancelled?: boolean
+  Staff?: {
+    FirstName: string
+    LastName: string
+    DisplayName?: string
+  }
+  Location?: {
+    Name: string
+  }
+}
+
+// Get date key for grouping (YYYY-MM-DD in Panama timezone)
+function getDateKey(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-CA', {
+    timeZone: PANAMA_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+}
+
+// Format date for group header (more readable)
+function formatDateHeader(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('es-PA', {
+    timeZone: PANAMA_TIMEZONE,
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
+// Group appointments by date
+function groupAppointmentsByDate(appointments: Appointment[]): Map<string, Appointment[]> {
+  const groups = new Map<string, Appointment[]>()
+
+  for (const apt of appointments) {
+    const dateKey = getDateKey(apt.StartDateTime)
+    if (!groups.has(dateKey)) {
+      groups.set(dateKey, [])
+    }
+    groups.get(dateKey)!.push(apt)
+  }
+
+  // Sort each group by time
+  for (const [, apts] of groups) {
+    apts.sort((a, b) => new Date(a.StartDateTime).getTime() - new Date(b.StartDateTime).getTime())
+  }
+
+  return groups
+}
+
+// Sort date keys (ascending for upcoming, descending for history)
+function sortDateKeys(keys: string[], ascending: boolean): string[] {
+  return [...keys].sort((a, b) => {
+    const dateA = new Date(a).getTime()
+    const dateB = new Date(b).getTime()
+    return ascending ? dateA - dateB : dateB - dateA
+  })
+}
 
 // Format date for display
 function formatDate(dateStr: string) {
@@ -52,6 +124,35 @@ function PortalContent() {
   const supabaseRef = useRef<SupabaseClient | null>(null)
   const [isInitializing, setIsInitializing] = useState(true)
   const dataFetchedRef = useRef(false)
+
+  // State for expanded date sections (keys are date strings like "2024-01-15")
+  const [expandedUpcoming, setExpandedUpcoming] = useState<Set<string>>(new Set())
+  const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set())
+
+  // Toggle a date section's expanded state
+  const toggleUpcomingDate = (dateKey: string) => {
+    setExpandedUpcoming(prev => {
+      const next = new Set(prev)
+      if (next.has(dateKey)) {
+        next.delete(dateKey)
+      } else {
+        next.add(dateKey)
+      }
+      return next
+    })
+  }
+
+  const toggleHistoryDate = (dateKey: string) => {
+    setExpandedHistory(prev => {
+      const next = new Set(prev)
+      if (next.has(dateKey)) {
+        next.delete(dateKey)
+      } else {
+        next.add(dateKey)
+      }
+      return next
+    })
+  }
 
   // Lazy load Supabase client
   const getSupabase = (): SupabaseClient => {
@@ -519,7 +620,7 @@ function PortalContent() {
                 <div className="p-4 border-b border-beige-200">
                   <h2 className="font-semibold text-dark">Próximas Citas</h2>
                 </div>
-                <div className="divide-y divide-beige-200">
+                <div>
                   {upcomingAppointments.length === 0 ? (
                     <div className="p-8 text-center">
                       <CalendarCheck className="w-12 h-12 text-beige-300 mx-auto mb-4" />
@@ -534,40 +635,75 @@ function PortalContent() {
                       </a>
                     </div>
                   ) : (
-                    upcomingAppointments.map((apt) => (
-                      <div key={apt.AppointmentId} className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-semibold text-dark text-lg">{apt.Name}</p>
-                            <div className="mt-2 space-y-1">
-                              <p className="text-warm-gray flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-gold" />
-                                {formatDate(apt.StartDateTime)}
-                              </p>
-                              <p className="text-warm-gray flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-gold" />
-                                {formatTime(apt.StartDateTime)} - {formatTime(apt.EndDateTime)}
-                              </p>
-                              {apt.Staff && (
-                                <p className="text-warm-gray flex items-center gap-2">
-                                  <User className="w-4 h-4 text-gold" />
-                                  {apt.Staff.DisplayName || `${apt.Staff.FirstName} ${apt.Staff.LastName}`}
-                                </p>
-                              )}
-                              {apt.Location && (
-                                <p className="text-warm-gray flex items-center gap-2">
-                                  <MapPin className="w-4 h-4 text-gold" />
-                                  {apt.Location.Name}
-                                </p>
-                              )}
-                            </div>
+                    (() => {
+                      const grouped = groupAppointmentsByDate(upcomingAppointments as Appointment[])
+                      const sortedDates = sortDateKeys(Array.from(grouped.keys()), true) // ascending for upcoming
+                      return sortedDates.map((dateKey) => {
+                        const appointments = grouped.get(dateKey)!
+                        const isExpanded = expandedUpcoming.has(dateKey)
+                        return (
+                          <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
+                            <button
+                              onClick={() => toggleUpcomingDate(dateKey)}
+                              className="w-full p-4 flex items-center justify-between hover:bg-beige-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                {isExpanded ? (
+                                  <ChevronDown className="w-5 h-5 text-gold" />
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 text-gold" />
+                                )}
+                                <div className="text-left">
+                                  <p className="font-semibold text-dark capitalize">
+                                    {formatDateHeader(dateKey)}
+                                  </p>
+                                  <p className="text-sm text-warm-gray">
+                                    {appointments.length} cita{appointments.length !== 1 ? 's' : ''}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                                Confirmada{appointments.length !== 1 ? 's' : ''}
+                              </span>
+                            </button>
+                            {isExpanded && (
+                              <div className="px-4 pb-4 space-y-3">
+                                {appointments.map((apt) => (
+                                  <div
+                                    key={apt.AppointmentId}
+                                    className="p-4 bg-beige-50 rounded-xl ml-8"
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <p className="font-semibold text-dark text-lg">{apt.Name}</p>
+                                        <div className="mt-2 space-y-1">
+                                          <p className="text-warm-gray flex items-center gap-2">
+                                            <Clock className="w-4 h-4 text-gold" />
+                                            {formatTime(apt.StartDateTime)} - {formatTime(apt.EndDateTime)}
+                                          </p>
+                                          {apt.Staff && (
+                                            <p className="text-warm-gray flex items-center gap-2">
+                                              <User className="w-4 h-4 text-gold" />
+                                              {apt.Staff.DisplayName || `${apt.Staff.FirstName} ${apt.Staff.LastName}`}
+                                            </p>
+                                          )}
+                                          {apt.Location && (
+                                            <p className="text-warm-gray flex items-center gap-2">
+                                              <MapPin className="w-4 h-4 text-gold" />
+                                              {apt.Location.Name}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                            Confirmada
-                          </span>
-                        </div>
-                      </div>
-                    ))
+                        )
+                      })
+                    })()
                   )}
                 </div>
               </div>
@@ -579,44 +715,100 @@ function PortalContent() {
                 <div className="p-4 border-b border-beige-200">
                   <h2 className="font-semibold text-dark">Historial de Visitas</h2>
                 </div>
-                <div className="divide-y divide-beige-200">
+                <div>
                   {visits.length === 0 ? (
                     <div className="p-8 text-center">
                       <History className="w-12 h-12 text-beige-300 mx-auto mb-4" />
                       <p className="text-warm-gray">No hay visitas registradas</p>
                     </div>
                   ) : (
-                    visits.map((visit) => (
-                      <div key={visit.AppointmentId} className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-semibold text-dark">{visit.Name}</p>
-                            <div className="mt-1 space-y-1">
-                              <p className="text-sm text-warm-gray">
-                                {formatDate(visit.StartDateTime)} - {formatTime(visit.StartDateTime)}
-                              </p>
-                              {visit.Staff && (
-                                <p className="text-sm text-warm-gray">
-                                  Terapeuta: {visit.Staff.DisplayName || `${visit.Staff.FirstName} ${visit.Staff.LastName}`}
-                                </p>
-                              )}
-                              {visit.Location && (
-                                <p className="text-sm text-warm-gray">
-                                  {visit.Location.Name}
-                                </p>
-                              )}
-                            </div>
+                    (() => {
+                      const grouped = groupAppointmentsByDate(visits as Appointment[])
+                      const sortedDates = sortDateKeys(Array.from(grouped.keys()), true) // ascending - earliest at top
+                      return sortedDates.map((dateKey) => {
+                        const appointments = grouped.get(dateKey)!
+                        const isExpanded = expandedHistory.has(dateKey)
+                        const completedCount = appointments.filter(a => a.SignedIn).length
+                        const cancelledCount = appointments.filter(a => a.LateCancelled).length
+                        return (
+                          <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
+                            <button
+                              onClick={() => toggleHistoryDate(dateKey)}
+                              className="w-full p-4 flex items-center justify-between hover:bg-beige-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                {isExpanded ? (
+                                  <ChevronDown className="w-5 h-5 text-gold" />
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 text-gold" />
+                                )}
+                                <div className="text-left">
+                                  <p className="font-semibold text-dark capitalize">
+                                    {formatDateHeader(dateKey)}
+                                  </p>
+                                  <p className="text-sm text-warm-gray">
+                                    {appointments.length} visita{appointments.length !== 1 ? 's' : ''}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                {completedCount > 0 && (
+                                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                    {completedCount} completada{completedCount !== 1 ? 's' : ''}
+                                  </span>
+                                )}
+                                {cancelledCount > 0 && (
+                                  <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                                    {cancelledCount} cancelada{cancelledCount !== 1 ? 's' : ''}
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                            {isExpanded && (
+                              <div className="px-4 pb-4 space-y-3">
+                                {appointments.map((visit) => (
+                                  <div
+                                    key={visit.AppointmentId}
+                                    className="p-4 bg-beige-50 rounded-xl ml-8"
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <p className="font-semibold text-dark">{visit.Name}</p>
+                                        <div className="mt-1 space-y-1">
+                                          <p className="text-sm text-warm-gray flex items-center gap-2">
+                                            <Clock className="w-4 h-4 text-gold" />
+                                            {formatTime(visit.StartDateTime)}
+                                          </p>
+                                          {visit.Staff && (
+                                            <p className="text-sm text-warm-gray flex items-center gap-2">
+                                              <User className="w-4 h-4 text-gold" />
+                                              {visit.Staff.DisplayName || `${visit.Staff.FirstName} ${visit.Staff.LastName}`}
+                                            </p>
+                                          )}
+                                          {visit.Location && (
+                                            <p className="text-sm text-warm-gray flex items-center gap-2">
+                                              <MapPin className="w-4 h-4 text-gold" />
+                                              {visit.Location.Name}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <span className={`px-2 py-1 rounded-full text-xs font-medium
+                                        ${visit.SignedIn ? 'bg-green-100 text-green-700' :
+                                          visit.LateCancelled ? 'bg-red-100 text-red-700' :
+                                          'bg-gray-100 text-gray-600'}`}>
+                                        {visit.SignedIn ? 'Completada' :
+                                         visit.LateCancelled ? 'Cancelada' : 'Pendiente'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium
-                            ${visit.SignedIn ? 'bg-green-100 text-green-700' :
-                              visit.LateCancelled ? 'bg-red-100 text-red-700' :
-                              'bg-gray-100 text-gray-600'}`}>
-                            {visit.SignedIn ? 'Completada' :
-                             visit.LateCancelled ? 'Cancelada' : 'Pendiente'}
-                          </span>
-                        </div>
-                      </div>
-                    ))
+                        )
+                      })
+                    })()
                   )}
                 </div>
               </div>
