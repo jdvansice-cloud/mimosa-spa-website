@@ -482,9 +482,10 @@ export async function getAddons(locationId?: number) {
 // Used by admin to manage which services appear on menu pages
 // ===========================================
 export async function getAllServices(locationId?: number) {
-  // Fetch ALL session types (including non-online bookable)
-  const [allSessionTypes, saleServicesResponse] = await Promise.all([
-    getSessionTypes(false), // Include ALL session types, not just online
+  // Fetch ALL session types, ONLINE-ONLY session types, and sale services in parallel
+  const [allSessionTypes, onlineSessionTypes, saleServicesResponse] = await Promise.all([
+    getSessionTypes(false), // Include ALL session types
+    getSessionTypes(true),  // Only online bookable session types
     mindbodyRequest<SaleServicesResponse>('/sale/services', {
       params: {
         limit: 200,
@@ -497,6 +498,11 @@ export async function getAllServices(locationId?: number) {
   const allSaleServices = saleServicesResponse.Services || []
   console.log('Total sale/services from Mindbody (all):', allSaleServices.length)
   console.log('Total session types (all):', allSessionTypes.length)
+  console.log('Total ONLINE session types:', onlineSessionTypes.length)
+
+  // Create a set of online bookable session type IDs for quick lookup
+  const onlineSessionTypeIds = new Set(onlineSessionTypes.map(st => st.Id))
+  console.log('Online bookable session type IDs:', Array.from(onlineSessionTypeIds))
 
   // Create a map of session types by normalized name for matching
   const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number; Description: string }>()
@@ -525,6 +531,10 @@ export async function getAllServices(locationId?: number) {
     const serviceId = sessionType?.Id || s.ProductId
     const duration = sessionType?.Duration || parseDurationFromName(s.Name)
 
+    // Determine online bookability from session type, NOT from sale/services SellOnline
+    // A service is online bookable only if its session type ID is in the online session types list
+    const isOnlineBookable = sessionType ? onlineSessionTypeIds.has(sessionType.Id) : false
+
     return {
       Id: serviceId,
       ProductId: s.ProductId,
@@ -534,7 +544,7 @@ export async function getAllServices(locationId?: number) {
       Price: removeTaxFromPrice(s.Price || s.OnlinePrice || 0),
       OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
       TaxIncluded: s.TaxIncluded,
-      OnlineBooking: s.SellOnline, // True if can be booked online
+      OnlineBooking: isOnlineBookable, // True only if session type is in online bookable list
       Category: getSpanishCategory(s.ProgramId),
       ProgramId: s.ProgramId,
       IsAddOn: s.ProgramId === 8,
