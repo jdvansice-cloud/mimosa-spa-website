@@ -27,7 +27,7 @@ export function MobileBottomNav() {
     { href: `/${locale}/menu`, label: t('menu'), icon: BookOpen },
     { href: `/${locale}/reservar`, label: t('book'), icon: Calendar, primary: true },
     { href: `/${locale}/promociones`, label: t('promotions'), icon: Tag },
-    { href: `/${locale}/nosotros`, label: t('about'), icon: User, isAbout: true },
+    { href: `/portal`, label: 'Mi Portal', icon: User, isPortal: true },
   ]
 
   const isActive = (href: string) => {
@@ -40,12 +40,12 @@ export function MobileBottomNav() {
   return (
     <nav
       className={cn(
-        'lg:hidden fixed bottom-0 left-0 right-0 z-40',
-        'bg-cream/95 backdrop-blur-md border-t border-beige-300',
-        'safe-bottom'
+        'lg:hidden fixed left-0 right-0 z-40',
+        'bg-cream/95 backdrop-blur-md border-t border-beige-300'
       )}
+      style={{ bottom: 0, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      <div className="flex items-center justify-around px-2 py-2">
+      <div className="grid grid-cols-5 items-end px-2 py-2">
         {navItems.map((item) => {
           const active = isActive(item.href)
           const Icon = item.icon
@@ -55,10 +55,7 @@ export function MobileBottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  'flex flex-col items-center justify-center',
-                  '-mt-6 relative'
-                )}
+                className="flex flex-col items-center justify-center -mt-6 relative"
               >
                 <div
                   className={cn(
@@ -76,14 +73,14 @@ export function MobileBottomNav() {
             )
           }
 
-          // Replace "Nosotros" with cart button when on booking page with items
-          if (item.isAbout && isOnBookingPage && hasCartItems) {
+          // Replace "Mi Portal" with cart button when on booking page with items
+          if (item.isPortal && isOnBookingPage && hasCartItems) {
             return (
               <button
                 key="cart-button"
                 onClick={openCart}
                 className={cn(
-                  'flex flex-col items-center justify-center py-2 px-3 rounded-lg',
+                  'flex flex-col items-center justify-center py-2 rounded-lg',
                   'transition-colors relative',
                   'text-gold'
                 )}
@@ -108,7 +105,7 @@ export function MobileBottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center py-2 px-3 rounded-lg',
+                'flex flex-col items-center justify-center py-2 rounded-lg',
                 'transition-colors',
                 active
                   ? 'text-gold'
