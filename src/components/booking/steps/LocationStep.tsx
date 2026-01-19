@@ -168,8 +168,8 @@ export function LocationStep() {
         </div>
       )}
       
-      {/* Back Button */}
-      <div className="mt-6 pt-2 border-t border-beige-200">
+      {/* Back Button - Hidden on mobile (using MobileBookingNav), shown on desktop */}
+      <div className="hidden md:block mt-6 pt-2 border-t border-beige-200">
         <button
           onClick={prevStep}
           className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"

@@ -401,8 +401,8 @@ export function ConfirmStep() {
         </div>
       </div>
 
-      {/* Navigation - Sticky at bottom */}
-      <div className="sticky bottom-0 bg-white border-t border-beige-200 py-2 -mx-6 px-6 mt-auto">
+      {/* Navigation - Hidden on mobile (using MobileBookingNav), shown on desktop */}
+      <div className="hidden md:block sticky bottom-0 bg-white border-t border-beige-200 py-2 -mx-6 px-6 mt-auto">
         <div className="flex items-center justify-between">
           <button
             onClick={prevStep}
@@ -433,6 +433,16 @@ export function ConfirmStep() {
             )}
           </button>
         </div>
+      </div>
+
+      {/* Mobile Confirm Button - Fixed at bottom via MobileBookingNav */}
+      <div className="md:hidden">
+        <button
+          onClick={handleConfirmBooking}
+          disabled={isSubmitting || isLoading}
+          className="hidden"
+          id="mobile-confirm-btn"
+        />
       </div>
     </div>
   )

@@ -275,8 +275,8 @@ export function StaffStep() {
         </div>
       )}
 
-      {/* Navigation */}
-      <div className="mt-6 pt-2 border-t border-beige-200 flex items-center justify-between">
+      {/* Navigation - Hidden on mobile (using MobileBookingNav), shown on desktop */}
+      <div className="hidden md:flex mt-6 pt-2 border-t border-beige-200 items-center justify-between">
         <button
           onClick={prevStep}
           className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
