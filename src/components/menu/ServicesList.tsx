@@ -242,10 +242,10 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
 
   return (
     <div className="space-y-4 md:space-y-8">
-      {/* Top Picks Section */}
+      {/* Recommendations Section (Top Picks) */}
       {topPicks.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-2 md:mb-4">
+        <div className="bg-gradient-to-r from-gold-50 to-beige-50 rounded-xl p-4 md:p-6 border border-gold-200">
+          <div className="flex items-center gap-2 mb-3 md:mb-5">
             <Star className="w-5 h-5 md:w-6 md:h-6 text-gold-500 fill-gold-500" />
             <h2 className="text-lg md:text-xl font-semibold text-dark">{t('topPicks')}</h2>
           </div>
