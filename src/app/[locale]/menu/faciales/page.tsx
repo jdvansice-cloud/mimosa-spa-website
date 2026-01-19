@@ -22,8 +22,8 @@ export default async function FacialesPage({ params }: { params: Promise<{ local
 
   return (
     <div className="min-h-screen bg-cream">
-      {/* Hero Section with Image */}
-      <section className="relative h-[25vh] md:h-[30vh] overflow-hidden">
+      {/* Hero Section with Image - Compact on mobile */}
+      <section className="relative h-[12vh] md:h-[30vh] overflow-hidden">
         <Image
           src="/Tratamientos Faciales.png"
           alt={t('title')}
@@ -34,25 +34,25 @@ export default async function FacialesPage({ params }: { params: Promise<{ local
         <div className="absolute inset-0 bg-dark/50" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white px-4">
-            <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-wide mb-4">
+            <h1 className="text-xl md:text-5xl font-display font-semibold tracking-wide mb-0 md:mb-4">
               {t('title')}
             </h1>
           </div>
         </div>
       </section>
 
-      {/* Intro Section */}
-      <section className="py-12 md:py-16 bg-beige">
-        <div className="container-spa max-w-3xl text-center">
-          <p className="text-lg md:text-xl text-warm-gray-700 leading-relaxed">
+      {/* Intro Section - Compact on mobile */}
+      <section className="py-3 md:py-16 bg-beige">
+        <div className="container-spa max-w-3xl text-center px-3 md:px-4">
+          <p className="text-xs md:text-xl text-warm-gray-700 leading-relaxed">
             {t('intro')}
           </p>
         </div>
       </section>
 
-      {/* Services List */}
-      <section className="section">
-        <div className="container-spa">
+      {/* Services List - Compact padding on mobile */}
+      <section className="py-3 md:py-12">
+        <div className="container-spa px-3 md:px-4">
           <Suspense fallback={<Spinner size="lg" className="py-12" />}>
             <ServicesList
               programIds={[PROGRAM_IDS.TRATAMIENTOS_FACIALES]}

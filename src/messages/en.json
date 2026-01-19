@@ -62,7 +62,9 @@
     "loading": "Loading treatments...",
     "noServices": "No services available at this time.",
     "topPicks": "Our Recommendations",
-    "allServices": "All Services"
+    "allServices": "All Services",
+    "seeMore": "see more",
+    "seeLess": "see less"
   },
   "menuPages": {
     "corporales": {
