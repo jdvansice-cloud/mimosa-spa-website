@@ -277,18 +277,13 @@ export default function AdminPromotionsPage() {
     // Calculate the promotional price using the helper function
     const promoPrice = calculatePromoPrice(totalPrice, discountType, discountAmount)
 
-    // Build description including the Mindbody services for reference
-    const applicableServicesList = applicableItems.map(s => s.Name).join(', ')
-    const descriptionNote = matchedServiceIds.length === 0 && applicableItems.length > 0
-      ? `\n\n[Servicios en Mindbody: ${applicableServicesList}]`
-      : ''
-
     setFormData({
       ...formData,
       title_es: promoCode.Name,
       title_en: promoCode.Name,
-      description_es: `${discountType === 'Percent' ? discountAmount + '%' : '$' + discountAmount} de descuento. Código: ${promoCode.Code}${descriptionNote}`,
-      description_en: `${discountType === 'Percent' ? discountAmount + '%' : '$' + discountAmount} off. Code: ${promoCode.Code}`,
+      // Don't auto-fill descriptions - leave them empty for user to fill
+      description_es: '',
+      description_en: '',
       price: Math.round(promoPrice * 100) / 100,
       original_price: totalPrice,
       duration_minutes: totalDuration,
