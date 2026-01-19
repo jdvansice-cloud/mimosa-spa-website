@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Spinner } from '@/components/ui'
 import { ServicesList } from '@/components/menu/ServicesList'
 import { PROGRAM_IDS } from '@/lib/booking/constants'
+import { getSiteImage } from '@/lib/site-images'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -19,13 +20,14 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'menuPages.corporales' })
   const tCommon = await getTranslations({ locale, namespace: 'common' })
+  const bannerImage = await getSiteImage('menu_corporales_banner')
 
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero Section with Image - compact on mobile */}
       <section className="relative h-[12vh] md:h-[30vh] overflow-hidden">
         <Image
-          src="/Tratamientos Corporales.png"
+          src={bannerImage}
           alt={t('title')}
           fill
           className="object-cover"

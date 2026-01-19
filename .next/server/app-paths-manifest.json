@@ -44,6 +44,7 @@
   "/api/portal/profile/route": "app/api/portal/profile/route.js",
   "/api/promotions/[id]/with-services/route": "app/api/promotions/[id]/with-services/route.js",
   "/api/promotions/route": "app/api/promotions/route.js",
+  "/api/site-images/route": "app/api/site-images/route.js",
   "/api/treatments/settings/route": "app/api/treatments/settings/route.js",
   "/cita/resultado/page": "app/cita/resultado/page.js",
   "/page": "app/page.js",

@@ -330,6 +330,12 @@
       "namedRegex": "^/api/promotions(?:/)?$"
     },
     {
+      "page": "/api/site-images",
+      "regex": "^/api/site\\-images(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/site\\-images(?:/)?$"
+    },
+    {
       "page": "/api/treatments/settings",
       "regex": "^/api/treatments/settings(?:/)?$",
       "routeKeys": {},
