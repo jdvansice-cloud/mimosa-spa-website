@@ -20,8 +20,14 @@ interface MindbodyPromoCode {
   Id: number
   Code: string
   Name: string
-  DiscountType: 'Percent' | 'Amount'
-  DiscountAmount: number
+  // Mindbody API returns Discount as nested object with Type and Amount
+  Discount?: {
+    Type: 'Percent' | 'Amount'
+    Amount: number
+  }
+  // Alternative flat field names (for backwards compatibility)
+  DiscountType?: 'Percent' | 'Amount'
+  DiscountAmount?: number
   IsActive: boolean
   ActivationDate: string
   ExpirationDate: string
@@ -234,6 +240,10 @@ export default function AdminPromotionsPage() {
 
   // Import promo code data into form
   const importPromoCode = (promoCode: MindbodyPromoCode) => {
+    // Debug: Log the full promo code object to see actual field names
+    console.log('Full promo code object:', JSON.stringify(promoCode, null, 2))
+    console.log('DiscountType:', promoCode.DiscountType, 'DiscountAmount:', promoCode.DiscountAmount)
+
     // Get the applicable items from the promo code (can be Service or Item type)
     const applicableItems = promoCode.ApplicableItems || []
 
@@ -258,9 +268,11 @@ export default function AdminPromotionsPage() {
     // Calculate totals from the matched services
     const { totalPrice, totalDuration } = calculateTotals(matchedServiceIds)
 
-    // Get discount info from promo code - always set these
-    const discountType = promoCode.DiscountType || null
-    const discountAmount = promoCode.DiscountAmount || null
+    // Get discount info from promo code - handle both nested (Discount.Type/Amount) and flat (DiscountType/DiscountAmount) structures
+    const discountType = promoCode.Discount?.Type || promoCode.DiscountType || null
+    const discountAmount = promoCode.Discount?.Amount ?? promoCode.DiscountAmount ?? null
+
+    console.log('Extracted discount - Type:', discountType, 'Amount:', discountAmount)
 
     // Calculate the promotional price using the helper function
     const promoPrice = calculatePromoPrice(totalPrice, discountType, discountAmount)
@@ -678,7 +690,9 @@ export default function AdminPromotionsPage() {
                               </div>
                               <div className="text-right flex-shrink-0">
                                 <p className="font-semibold text-green-600">
-                                  {pc.DiscountType === 'Percent' ? `${pc.DiscountAmount}%` : `$${pc.DiscountAmount}`} OFF
+                                  {(pc.Discount?.Type || pc.DiscountType) === 'Percent'
+                                    ? `${pc.Discount?.Amount ?? pc.DiscountAmount}%`
+                                    : `$${pc.Discount?.Amount ?? pc.DiscountAmount}`} OFF
                                 </p>
                                 <span className={cn(
                                   'text-xs px-2 py-0.5 rounded-full inline-block',
