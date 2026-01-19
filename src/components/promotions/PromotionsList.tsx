@@ -1,83 +1,41 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
+import { Loader2 } from 'lucide-react'
 import { PromotionCard } from './PromotionCard'
-
-// Sample promotions - will be replaced with Supabase data
-const promotions = [
-  {
-    id: '1',
-    title_es: 'Esencia de Paz',
-    title_en: 'Essence of Peace',
-    description_es: 'Masaje de Piernas Cansadas + Masaje Craneo-Facial',
-    description_en: 'Tired Legs Massage + Cranio-Facial Massage',
-    services: ['Masaje de Piernas Cansadas', 'Masaje Craneo-Facial'],
-    price: 79,
-    original_price: null,
-    duration_minutes: 65,
-    image_url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800',
-    valid_from: '2026-01-01',
-    valid_until: '2026-01-31',
-    is_active: true,
-    sort_order: 1,
-    mindbody_service_id: null,
-    mindbody_service_ids: [],
-    promo_code: null,
-    discount_type: null,
-    discount_amount: null,
-    created_at: '2026-01-01',
-    updated_at: '2026-01-01',
-  },
-  {
-    id: '2',
-    title_es: 'Suspiro de Serenidad',
-    title_en: 'Sigh of Serenity',
-    description_es: 'Masaje Liberador de Tensión + Masaje de Pies en Camilla + Masaje Craneofacial',
-    description_en: 'Tension Release Massage + Table Foot Massage + Craniofacial Massage',
-    services: ['Masaje Liberador de Tensión', 'Masaje de Pies en Camilla', 'Masaje Craneofacial'],
-    price: 99,
-    original_price: null,
-    duration_minutes: 85,
-    image_url: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
-    valid_from: '2026-01-01',
-    valid_until: '2026-01-31',
-    is_active: true,
-    sort_order: 2,
-    mindbody_service_id: null,
-    mindbody_service_ids: [],
-    promo_code: null,
-    discount_type: null,
-    discount_amount: null,
-    created_at: '2026-01-01',
-    updated_at: '2026-01-01',
-  },
-  {
-    id: '3',
-    title_es: 'Calma Total',
-    title_en: 'Total Calm',
-    description_es: 'Masaje Relajante + Exfoliación Corporal + Masaje de Piedras Calientes + Mascarilla Hidratante',
-    description_en: 'Relaxing Massage + Body Exfoliation + Hot Stone Massage + Hydrating Mask',
-    services: ['Masaje Relajante', 'Exfoliación Corporal', 'Masaje de Piedras Calientes', 'Mascarilla Hidratante'],
-    price: 129,
-    original_price: null,
-    duration_minutes: 110,
-    image_url: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
-    valid_from: '2026-01-01',
-    valid_until: '2026-01-31',
-    is_active: true,
-    sort_order: 3,
-    mindbody_service_id: null,
-    mindbody_service_ids: [],
-    promo_code: null,
-    discount_type: null,
-    discount_amount: null,
-    created_at: '2026-01-01',
-    updated_at: '2026-01-01',
-  },
-]
+import type { Promotion } from '@/types'
 
 export function PromotionsList() {
   const t = useTranslations('promotions')
+  const [promotions, setPromotions] = useState<Promotion[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchPromotions() {
+      try {
+        const response = await fetch('/api/promotions?active=true')
+        const data = await response.json()
+        if (response.ok && data.data) {
+          setPromotions(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching promotions:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPromotions()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 text-gold animate-spin" />
+      </div>
+    )
+  }
 
   if (promotions.length === 0) {
     return (
