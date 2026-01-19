@@ -1,10 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check } from 'lucide-react'
+import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
+
+interface TreatmentSetting {
+  mindbody_service_id: number
+  is_visible: boolean
+  show_booking_button: boolean
+  is_top_pick: boolean
+}
 
 // Category configuration with icons and colors
 const CATEGORY_CONFIG: Record<string, { icon: string; color: string; gradient: string }> = {
@@ -91,11 +98,13 @@ export function ServiceStep() {
 
   const hasServices = useBookingStore(selectHasServices)
   const [groupedServices, setGroupedServices] = useState<Record<string, MindbodyService[]>>({})
+  const [topPickServices, setTopPickServices] = useState<MindbodyService[]>([])
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+  const [isRecommendationsExpanded, setIsRecommendationsExpanded] = useState(true)
   const [isLoadingServices, setIsLoadingServices] = useState(false)
   const [servicesError, setServicesError] = useState<string | null>(null)
 
-  // Fetch services on mount
+  // Fetch services and treatment settings on mount
   useEffect(() => {
     async function fetchServices() {
       if (!selectedLocation) return
@@ -103,20 +112,39 @@ export function ServiceStep() {
       setIsLoadingServices(true)
       setServicesError(null)
       try {
-        const response = await fetch(
-          `/api/mindbody/services?locationId=${selectedLocation.Id}&type=main`
-        )
-        const data = await response.json()
+        // Fetch services and treatment settings in parallel
+        const [servicesResponse, settingsResponse] = await Promise.all([
+          fetch(`/api/mindbody/services?locationId=${selectedLocation.Id}&type=main`),
+          fetch('/api/treatments/settings')
+        ])
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Error al cargar servicios')
+        const servicesData = await servicesResponse.json()
+        const settingsData = await settingsResponse.json()
+
+        if (!servicesResponse.ok) {
+          throw new Error(servicesData.error || 'Error al cargar servicios')
         }
 
-        setServices(data.services)
-        setGroupedServices(data.grouped)
+        // Create a map of settings by mindbody_service_id
+        const settingsMap = new Map<number, TreatmentSetting>()
+        if (settingsData.settings) {
+          for (const setting of settingsData.settings) {
+            settingsMap.set(setting.mindbody_service_id, setting)
+          }
+        }
+
+        // Filter top pick services
+        const topPicks = servicesData.services.filter((service: MindbodyService) => {
+          const setting = settingsMap.get(service.Id)
+          return setting?.is_top_pick === true
+        })
+
+        setServices(servicesData.services)
+        setGroupedServices(servicesData.grouped)
+        setTopPickServices(topPicks)
 
         // Start with all categories collapsed (empty set)
-        // User will expand what they're interested in
+        // Recommendations section starts expanded
         setExpandedCategories(new Set())
       } catch (err) {
         setServicesError(err instanceof Error ? err.message : 'Error de conexión')
@@ -188,6 +216,65 @@ export function ServiceStep() {
       {servicesError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-6">
           {servicesError}
+        </div>
+      )}
+
+      {/* Recommendations Section (Top Picks) */}
+      {!isLoadingServices && topPickServices.length > 0 && (
+        <div className="mb-4 rounded-2xl border border-gold-300 overflow-hidden bg-gradient-to-r from-gold-50 to-beige-50 shadow-sm">
+          {/* Recommendations Header */}
+          <button
+            onClick={() => setIsRecommendationsExpanded(!isRecommendationsExpanded)}
+            className="w-full px-4 py-4 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200"
+          >
+            <div className="flex items-center gap-3">
+              <Star className="w-6 h-6 text-gold-500 fill-gold-500" />
+              <div className="text-left">
+                <h3 className="font-semibold text-dark">Nuestras Recomendaciones</h3>
+                <p className="text-xs text-warm-gray">
+                  {topPickServices.length} tratamiento{topPickServices.length !== 1 ? 's' : ''} destacado{topPickServices.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+
+            <div className={`
+              w-8 h-8 rounded-full flex items-center justify-center
+              ${isRecommendationsExpanded ? 'bg-gold/20' : 'bg-white/50'}
+              transition-colors
+            `}>
+              {isRecommendationsExpanded ? (
+                <ChevronUp className="w-5 h-5 text-dark" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-warm-gray" />
+              )}
+            </div>
+          </button>
+
+          {/* Recommendations Services */}
+          <AnimatePresence>
+            {isRecommendationsExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="p-4 pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {topPickServices.map((service) => (
+                      <ServiceTile
+                        key={service.Id}
+                        service={service}
+                        isSelected={isServiceSelected(service.Id)}
+                        onToggle={() => handleToggleService(service)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 

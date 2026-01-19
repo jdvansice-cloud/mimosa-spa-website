@@ -113,10 +113,10 @@ export function Header() {
         </nav>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - z-[60] to appear above BookingNav which has z-50 */}
       <div
         className={cn(
-          'lg:hidden fixed inset-x-0 top-20 bg-dark/98 backdrop-blur-md',
+          'lg:hidden fixed inset-x-0 top-20 z-[60] bg-dark/98 backdrop-blur-md',
           'border-b border-cream/10 shadow-lg',
           'transition-all duration-300 ease-in-out',
           isMobileMenuOpen
