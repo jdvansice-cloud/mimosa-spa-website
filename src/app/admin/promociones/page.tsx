@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Edit, Trash2, Search, Loader2, RefreshCw, Check, X } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, Loader2, RefreshCw, Check, X, Download, Tag } from 'lucide-react'
 import { Button, Card, Modal } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { Promotion } from '@/types'
@@ -13,6 +13,25 @@ interface MindbodyService {
   Duration: number
   Category: string
   OnlineBooking: boolean
+}
+
+interface MindbodyPromoCode {
+  Id: number
+  Code: string
+  Name: string
+  DiscountType: 'Percent' | 'Amount'
+  DiscountAmount: number
+  IsActive: boolean
+  ActivationDate: string
+  ExpirationDate: string
+  MaxUses: number | null
+  TimesUsed: number
+  AllowOnlineRedemption: boolean
+  ApplicableItems: Array<{
+    Id: number
+    Name: string
+    Type: string
+  }>
 }
 
 interface PromotionFormData {
@@ -60,6 +79,13 @@ export default function AdminPromotionsPage() {
   const [formData, setFormData] = useState<PromotionFormData>(defaultFormData)
   const [serviceSearch, setServiceSearch] = useState('')
 
+  // Promo code lookup state
+  const [promoCodeSearch, setPromoCodeSearch] = useState('')
+  const [isPromoCodeLoading, setIsPromoCodeLoading] = useState(false)
+  const [promoCodeResults, setPromoCodeResults] = useState<MindbodyPromoCode[]>([])
+  const [promoCodeError, setPromoCodeError] = useState<string | null>(null)
+  const [showPromoLookup, setShowPromoLookup] = useState(false)
+
   // Fetch promotions from API
   const fetchPromotions = useCallback(async () => {
     setIsLoading(true)
@@ -98,6 +124,72 @@ export default function AdminPromotionsPage() {
     fetchPromotions()
     fetchMindbodyServices()
   }, [fetchPromotions, fetchMindbodyServices])
+
+  // Search Mindbody promo codes
+  const searchPromoCodes = async () => {
+    if (!promoCodeSearch.trim()) return
+
+    setIsPromoCodeLoading(true)
+    setPromoCodeError(null)
+    setPromoCodeResults([])
+
+    try {
+      const response = await fetch(`/api/mindbody/promocodes?search=${encodeURIComponent(promoCodeSearch)}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al buscar códigos promocionales')
+      }
+
+      setPromoCodeResults(data.promoCodes || [])
+      if ((data.promoCodes || []).length === 0) {
+        setPromoCodeError('No se encontraron códigos promocionales')
+      }
+    } catch (err) {
+      setPromoCodeError(err instanceof Error ? err.message : 'Error de conexión')
+    } finally {
+      setIsPromoCodeLoading(false)
+    }
+  }
+
+  // Import promo code data into form
+  const importPromoCode = (promoCode: MindbodyPromoCode) => {
+    // Find the service IDs from the applicable items
+    const serviceIds = promoCode.ApplicableItems
+      .filter(item => item.Type === 'Service')
+      .map(item => item.Id)
+
+    // Calculate totals from the applicable services
+    const { totalPrice, totalDuration, serviceNames } = calculateTotals(serviceIds)
+
+    // Calculate the promotional price based on discount type
+    let promoPrice = totalPrice
+    if (promoCode.DiscountType === 'Percent') {
+      promoPrice = totalPrice * (1 - promoCode.DiscountAmount / 100)
+    } else {
+      promoPrice = totalPrice - promoCode.DiscountAmount
+    }
+
+    setFormData({
+      ...formData,
+      title_es: promoCode.Name,
+      title_en: promoCode.Name,
+      description_es: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} de descuento. Código: ${promoCode.Code}`,
+      description_en: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} off. Code: ${promoCode.Code}`,
+      price: Math.round(promoPrice * 100) / 100,
+      original_price: totalPrice,
+      duration_minutes: totalDuration,
+      valid_from: promoCode.ActivationDate.split('T')[0],
+      valid_until: promoCode.ExpirationDate.split('T')[0],
+      is_active: promoCode.IsActive,
+      services: serviceNames,
+      mindbody_service_ids: serviceIds,
+    })
+
+    setShowPromoLookup(false)
+    setPromoCodeSearch('')
+    setPromoCodeResults([])
+  }
 
   // Filter promotions by search
   const filteredPromotions = promotions.filter((p) =>
@@ -357,6 +449,99 @@ export default function AdminPromotionsPage() {
         size="xl"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Mindbody Promo Code Lookup */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <button
+              type="button"
+              onClick={() => setShowPromoLookup(!showPromoLookup)}
+              className="flex items-center gap-2 text-blue-700 font-medium w-full"
+            >
+              <Tag className="w-4 h-4" />
+              <span>Importar desde Mindbody</span>
+              <span className="text-xs text-blue-500 ml-auto">
+                {showPromoLookup ? '▲ Ocultar' : '▼ Mostrar'}
+              </span>
+            </button>
+
+            {showPromoLookup && (
+              <div className="mt-4 space-y-3">
+                <p className="text-sm text-blue-600">
+                  Busca un código promocional de Mindbody para importar sus datos automáticamente.
+                </p>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    className="input flex-1"
+                    value={promoCodeSearch}
+                    onChange={(e) => setPromoCodeSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), searchPromoCodes())}
+                    placeholder="Buscar por código o nombre..."
+                  />
+                  <Button
+                    type="button"
+                    onClick={searchPromoCodes}
+                    disabled={isPromoCodeLoading || !promoCodeSearch.trim()}
+                    leftIcon={isPromoCodeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  >
+                    Buscar
+                  </Button>
+                </div>
+
+                {promoCodeError && (
+                  <p className="text-sm text-red-600">{promoCodeError}</p>
+                )}
+
+                {promoCodeResults.length > 0 && (
+                  <div className="bg-white border border-blue-200 rounded-lg max-h-64 overflow-y-auto">
+                    {promoCodeResults.map((pc) => (
+                      <div
+                        key={pc.Id}
+                        className="p-3 border-b border-blue-100 last:border-b-0 hover:bg-blue-50 cursor-pointer"
+                        onClick={() => importPromoCode(pc)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-medium text-dark">{pc.Name}</p>
+                            <p className="text-sm text-warm-gray">
+                              Código: <span className="font-mono bg-gray-100 px-1 rounded">{pc.Code}</span>
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-green-600">
+                              {pc.DiscountType === 'Percent' ? `${pc.DiscountAmount}%` : `$${pc.DiscountAmount}`} OFF
+                            </p>
+                            <span className={cn(
+                              'text-xs px-2 py-0.5 rounded-full',
+                              pc.IsActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                            )}>
+                              {pc.IsActive ? 'Activo' : 'Inactivo'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-xs text-warm-gray">
+                          <span>Válido: {pc.ActivationDate.split('T')[0]} - {pc.ExpirationDate.split('T')[0]}</span>
+                          {pc.MaxUses && <span className="ml-2">| Máx. usos: {pc.MaxUses}</span>}
+                          <span className="ml-2">| Usado: {pc.TimesUsed} veces</span>
+                        </div>
+                        {pc.ApplicableItems.length > 0 && (
+                          <div className="mt-2 text-xs text-blue-600">
+                            Servicios: {pc.ApplicableItems.map(i => i.Name).join(', ')}
+                          </div>
+                        )}
+                        <div className="mt-2 flex justify-end">
+                          <span className="text-xs text-blue-600 flex items-center gap-1">
+                            <Download className="w-3 h-3" /> Click para importar
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

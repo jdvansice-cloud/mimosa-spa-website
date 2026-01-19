@@ -1559,3 +1559,71 @@ export async function getClientWithCustomFields(clientId: string) {
 
   return client
 }
+
+// ===========================================
+// PROMO CODES
+// ===========================================
+
+export interface MindbodyPromoCode {
+  Id: number
+  Code: string
+  Name: string
+  DiscountType: 'Percent' | 'Amount'
+  DiscountAmount: number
+  IsActive: boolean
+  ActivationDate: string
+  ExpirationDate: string
+  MaxUses: number | null // null means unlimited
+  TimesUsed: number
+  AllowOnlineRedemption: boolean
+  ApplicableItems: Array<{
+    Id: number
+    Name: string
+    Type: string // 'Service', 'Product', etc.
+  }>
+}
+
+interface PromoCodesResponse {
+  PromoCodes: MindbodyPromoCode[]
+  PaginationResponse?: {
+    RequestedLimit: number
+    RequestedOffset: number
+    PageSize: number
+    TotalResults: number
+  }
+}
+
+// Get all promo codes from Mindbody
+export async function getPromoCodes(options?: {
+  searchText?: string
+  activeOnly?: boolean
+}): Promise<MindbodyPromoCode[]> {
+  const params: Record<string, ParamValue> = {}
+
+  if (options?.searchText) {
+    params.SearchText = options.searchText
+  }
+
+  // Mindbody might have a filter for active only
+  if (options?.activeOnly !== undefined) {
+    params.ActiveOnly = options.activeOnly
+  }
+
+  const response = await mindbodyRequest<PromoCodesResponse>('/sale/promocodes', {
+    params
+  })
+
+  return response.PromoCodes || []
+}
+
+// Get a single promo code by code string
+export async function getPromoCodeByCode(code: string): Promise<MindbodyPromoCode | null> {
+  const promoCodes = await getPromoCodes({ searchText: code })
+
+  // Find exact match
+  const exactMatch = promoCodes.find(
+    pc => pc.Code.toLowerCase() === code.toLowerCase()
+  )
+
+  return exactMatch || null
+}
