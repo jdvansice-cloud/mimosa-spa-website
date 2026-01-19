@@ -44,6 +44,21 @@ export interface GalleryImage {
 
 export type GalleryCategory = 'spa' | 'treatments' | 'facilities' | 'team' | 'ambiance'
 
+export interface SiteImage {
+  id: string
+  key: string
+  name: string
+  description: string | null
+  image_url: string
+  recommended_width: number | null
+  recommended_height: number | null
+  aspect_ratio: string | null
+  category: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface SiteSetting {
   id: string
   key: string

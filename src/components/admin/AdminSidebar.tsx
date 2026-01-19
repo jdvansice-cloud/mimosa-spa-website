@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Tag,
   Image,
+  ImagePlus,
   Settings,
   LogOut,
   ExternalLink,
@@ -21,6 +22,7 @@ const navItems = [
   { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },
   { href: '/admin/galeria', label: 'Galería', icon: Image },
+  { href: '/admin/imagenes', label: 'Imágenes del Sitio', icon: ImagePlus },
   { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
 ]
 
