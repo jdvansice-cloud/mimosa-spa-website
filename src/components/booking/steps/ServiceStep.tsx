@@ -1,10 +1,81 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check, Star } from 'lucide-react'
+import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check, Star, Info, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
+
+// Description Modal Component
+function DescriptionModal({
+  service,
+  onClose
+}: {
+  service: MindbodyService
+  onClose: () => void
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* Modal */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        className="relative bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-beige-200 bg-gradient-to-r from-gold-50 to-beige-50">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <h3 className="font-semibold text-dark text-lg leading-snug">
+                {service.Name}
+              </h3>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-gold-600 font-bold">
+                  {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
+                </span>
+                {service.Duration > 0 && (
+                  <span className="flex items-center gap-1 text-xs text-warm-gray bg-white/80 px-2 py-0.5 rounded-full">
+                    <Clock className="w-3 h-3" />
+                    {service.Duration} min
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-full hover:bg-white/80 transition-colors"
+            >
+              <X className="w-5 h-5 text-warm-gray" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="px-5 py-4 overflow-y-auto max-h-[50vh]">
+          {service.Description ? (
+            <div
+              className="text-sm text-warm-gray-600 leading-relaxed prose prose-sm [&_p]:mb-2 [&_br]:hidden"
+              dangerouslySetInnerHTML={{ __html: service.Description }}
+            />
+          ) : (
+            <p className="text-sm text-warm-gray italic">
+              No hay descripción disponible para este tratamiento.
+            </p>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  )
+}
 
 interface TreatmentSetting {
   mindbody_service_id: number
@@ -30,16 +101,16 @@ const DEFAULT_CONFIG = { icon: '🌸', color: 'bg-beige-100', gradient: 'from-go
 function ServiceTile({
   service,
   isSelected,
-  onToggle
+  onToggle,
+  onShowDescription
 }: {
   service: MindbodyService
   isSelected: boolean
   onToggle: () => void
+  onShowDescription: () => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={onToggle}
+    <div
       className={`
         relative rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full
         ${isSelected
@@ -48,17 +119,22 @@ function ServiceTile({
         }
       `}
     >
-      {/* Selected Badge */}
-      {isSelected && (
-        <div className="absolute top-2 right-2 z-10">
-          <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
-            <Check className="w-4 h-4 text-dark" />
+      {/* Main clickable area */}
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full text-left p-3"
+      >
+        {/* Selected Badge */}
+        {isSelected && (
+          <div className="absolute top-2 right-2 z-10">
+            <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
+              <Check className="w-4 h-4 text-dark" />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Tile Content */}
-      <div className="p-3">
+        {/* Tile Content */}
         {/* Service Name */}
         <div className="pr-8 mb-2">
           <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug">
@@ -81,8 +157,21 @@ function ServiceTile({
             </span>
           )}
         </div>
-      </div>
-    </button>
+      </button>
+
+      {/* Info Icon - positioned at bottom right */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          onShowDescription()
+        }}
+        className="absolute bottom-2 right-2 p-1.5 rounded-full bg-gold/10 hover:bg-gold/20 transition-colors"
+        title="Ver descripción"
+      >
+        <Info className="w-4 h-4 text-gold-600" />
+      </button>
+    </div>
   )
 }
 
@@ -103,6 +192,7 @@ export function ServiceStep() {
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] = useState(true)
   const [isLoadingServices, setIsLoadingServices] = useState(false)
   const [servicesError, setServicesError] = useState<string | null>(null)
+  const [descriptionService, setDescriptionService] = useState<MindbodyService | null>(null)
 
   // Fetch services and treatment settings on mount
   useEffect(() => {
@@ -268,6 +358,7 @@ export function ServiceStep() {
                         service={service}
                         isSelected={isServiceSelected(service.Id)}
                         onToggle={() => handleToggleService(service)}
+                        onShowDescription={() => setDescriptionService(service)}
                       />
                     ))}
                   </div>
@@ -356,6 +447,7 @@ export function ServiceStep() {
                               service={service}
                               isSelected={isServiceSelected(service.Id)}
                               onToggle={() => handleToggleService(service)}
+                              onShowDescription={() => setDescriptionService(service)}
                             />
                           ))}
                         </div>
@@ -377,6 +469,16 @@ export function ServiceStep() {
         </div>
       )}
       </div>
+
+      {/* Description Modal */}
+      <AnimatePresence>
+        {descriptionService && (
+          <DescriptionModal
+            service={descriptionService}
+            onClose={() => setDescriptionService(null)}
+          />
+        )}
+      </AnimatePresence>
 
     </div>
   )
