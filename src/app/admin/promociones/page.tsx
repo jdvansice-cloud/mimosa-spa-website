@@ -211,6 +211,27 @@ export default function AdminPromotionsPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Calculate totals from selected services
+  const calculateTotals = (serviceIds: number[]) => {
+    const selectedServices = mindbodyServices.filter(s => serviceIds.includes(s.Id))
+    const totalPrice = selectedServices.reduce((sum, s) => sum + s.Price, 0)
+    const totalDuration = selectedServices.reduce((sum, s) => sum + s.Duration, 0)
+    const serviceNames = selectedServices.map(s => s.Name)
+    return { totalPrice, totalDuration, serviceNames }
+  }
+
+  // Calculate promotional price based on discount
+  const calculatePromoPrice = (subtotal: number, discountType: 'Percent' | 'Amount' | null, discountAmount: number | null): number => {
+    if (!discountType || discountAmount === null || discountAmount === 0) {
+      return subtotal
+    }
+    if (discountType === 'Percent') {
+      return Math.max(0, subtotal * (1 - discountAmount / 100))
+    } else {
+      return Math.max(0, subtotal - discountAmount)
+    }
+  }
+
   // Import promo code data into form
   const importPromoCode = (promoCode: MindbodyPromoCode) => {
     // Get the applicable items from the promo code (can be Service or Item type)
@@ -237,15 +258,12 @@ export default function AdminPromotionsPage() {
     // Calculate totals from the matched services
     const { totalPrice, totalDuration } = calculateTotals(matchedServiceIds)
 
-    // Calculate the promotional price based on discount type
-    let promoPrice = 0
-    if (matchedServiceIds.length > 0 && totalPrice > 0) {
-      if (promoCode.DiscountType === 'Percent') {
-        promoPrice = totalPrice * (1 - promoCode.DiscountAmount / 100)
-      } else {
-        promoPrice = Math.max(0, totalPrice - promoCode.DiscountAmount)
-      }
-    }
+    // Get discount info from promo code - always set these
+    const discountType = promoCode.DiscountType || null
+    const discountAmount = promoCode.DiscountAmount || null
+
+    // Calculate the promotional price using the helper function
+    const promoPrice = calculatePromoPrice(totalPrice, discountType, discountAmount)
 
     // Build description including the Mindbody services for reference
     const applicableServicesList = applicableItems.map(s => s.Name).join(', ')
@@ -257,16 +275,16 @@ export default function AdminPromotionsPage() {
       ...formData,
       title_es: promoCode.Name,
       title_en: promoCode.Name,
-      description_es: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} de descuento. Código: ${promoCode.Code}${descriptionNote}`,
-      description_en: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} off. Code: ${promoCode.Code}`,
-      price: promoPrice > 0 ? Math.round(promoPrice * 100) / 100 : formData.price,
-      original_price: totalPrice > 0 ? totalPrice : formData.original_price,
-      duration_minutes: totalDuration > 0 ? totalDuration : formData.duration_minutes,
+      description_es: `${discountType === 'Percent' ? discountAmount + '%' : '$' + discountAmount} de descuento. Código: ${promoCode.Code}${descriptionNote}`,
+      description_en: `${discountType === 'Percent' ? discountAmount + '%' : '$' + discountAmount} off. Code: ${promoCode.Code}`,
+      price: Math.round(promoPrice * 100) / 100,
+      original_price: totalPrice,
+      duration_minutes: totalDuration,
       services: matchedServiceNames.length > 0 ? matchedServiceNames : applicableItems.map(s => s.Name),
       mindbody_service_ids: matchedServiceIds,
       promo_code: promoCode.Code,
-      discount_type: promoCode.DiscountType,
-      discount_amount: promoCode.DiscountAmount,
+      discount_type: discountType,
+      discount_amount: discountAmount,
     })
 
     // If no services matched, pre-fill the service search to help user find services manually
@@ -300,27 +318,6 @@ export default function AdminPromotionsPage() {
     s.Name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
     s.Category.toLowerCase().includes(serviceSearch.toLowerCase())
   )
-
-  // Calculate totals from selected services
-  const calculateTotals = (serviceIds: number[]) => {
-    const selectedServices = mindbodyServices.filter(s => serviceIds.includes(s.Id))
-    const totalPrice = selectedServices.reduce((sum, s) => sum + s.Price, 0)
-    const totalDuration = selectedServices.reduce((sum, s) => sum + s.Duration, 0)
-    const serviceNames = selectedServices.map(s => s.Name)
-    return { totalPrice, totalDuration, serviceNames }
-  }
-
-  // Calculate promotional price based on discount
-  const calculatePromoPrice = (subtotal: number, discountType: 'Percent' | 'Amount' | null, discountAmount: number | null): number => {
-    if (!discountType || discountAmount === null || discountAmount === 0) {
-      return subtotal
-    }
-    if (discountType === 'Percent') {
-      return Math.max(0, subtotal * (1 - discountAmount / 100))
-    } else {
-      return Math.max(0, subtotal - discountAmount)
-    }
-  }
 
   // Handle service selection toggle
   const toggleService = (serviceId: number) => {
