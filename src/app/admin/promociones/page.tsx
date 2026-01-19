@@ -310,6 +310,18 @@ export default function AdminPromotionsPage() {
     return { totalPrice, totalDuration, serviceNames }
   }
 
+  // Calculate promotional price based on discount
+  const calculatePromoPrice = (subtotal: number, discountType: 'Percent' | 'Amount' | null, discountAmount: number | null): number => {
+    if (!discountType || discountAmount === null || discountAmount === 0) {
+      return subtotal
+    }
+    if (discountType === 'Percent') {
+      return Math.max(0, subtotal * (1 - discountAmount / 100))
+    } else {
+      return Math.max(0, subtotal - discountAmount)
+    }
+  }
+
   // Handle service selection toggle
   const toggleService = (serviceId: number) => {
     setFormData(prev => {
@@ -318,15 +330,41 @@ export default function AdminPromotionsPage() {
         : [...prev.mindbody_service_ids, serviceId]
 
       const { totalPrice, totalDuration, serviceNames } = calculateTotals(newIds)
+      const promoPrice = calculatePromoPrice(totalPrice, prev.discount_type, prev.discount_amount)
 
       return {
         ...prev,
         mindbody_service_ids: newIds,
         original_price: totalPrice,
+        price: Math.round(promoPrice * 100) / 100,
         duration_minutes: totalDuration,
         services: serviceNames,
         // Auto-set description if empty
         description_es: prev.description_es || serviceNames.join(' + '),
+      }
+    })
+  }
+
+  // Handle discount type change
+  const handleDiscountTypeChange = (newType: 'Percent' | 'Amount' | null) => {
+    setFormData(prev => {
+      const promoPrice = calculatePromoPrice(prev.original_price || 0, newType, prev.discount_amount)
+      return {
+        ...prev,
+        discount_type: newType,
+        price: Math.round(promoPrice * 100) / 100,
+      }
+    })
+  }
+
+  // Handle discount amount change
+  const handleDiscountAmountChange = (newAmount: number | null) => {
+    setFormData(prev => {
+      const promoPrice = calculatePromoPrice(prev.original_price || 0, prev.discount_type, newAmount)
+      return {
+        ...prev,
+        discount_amount: newAmount,
+        price: Math.round(promoPrice * 100) / 100,
       }
     })
   }
@@ -724,10 +762,7 @@ export default function AdminPromotionsPage() {
               <select
                 className="input"
                 value={formData.discount_type || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  discount_type: e.target.value as 'Percent' | 'Amount' | null || null
-                })}
+                onChange={(e) => handleDiscountTypeChange(e.target.value as 'Percent' | 'Amount' | null || null)}
               >
                 <option value="">Sin descuento</option>
                 <option value="Percent">Porcentaje (%)</option>
@@ -742,10 +777,7 @@ export default function AdminPromotionsPage() {
                 type="number"
                 className="input"
                 value={formData.discount_amount || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  discount_amount: e.target.value ? parseFloat(e.target.value) : null
-                })}
+                onChange={(e) => handleDiscountAmountChange(e.target.value ? parseFloat(e.target.value) : null)}
                 placeholder={formData.discount_type === 'Percent' ? 'Ej: 15' : 'Ej: 20'}
                 min="0"
                 step={formData.discount_type === 'Percent' ? '0.01' : '0.01'}
@@ -843,28 +875,38 @@ export default function AdminPromotionsPage() {
             </div>
           </div>
 
-          {/* Pricing */}
+          {/* Price Calculation Display */}
+          {formData.mindbody_service_ids.length > 0 && formData.discount_type && formData.discount_amount !== null && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h4 className="font-medium text-dark mb-3">Cálculo del Precio</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-warm-gray">Subtotal (servicios):</span>
+                  <span className="font-medium">${formData.original_price?.toFixed(2) || '0.00'}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-warm-gray">
+                    Descuento ({formData.discount_type === 'Percent' ? `${formData.discount_amount}%` : `$${formData.discount_amount}`}):
+                  </span>
+                  <span className="font-medium text-red-600">
+                    -${formData.discount_type === 'Percent'
+                      ? ((formData.original_price || 0) * formData.discount_amount / 100).toFixed(2)
+                      : formData.discount_amount.toFixed(2)
+                    }
+                  </span>
+                </div>
+                <div className="border-t border-green-300 pt-2 flex justify-between">
+                  <span className="font-semibold text-dark">Precio Promocional:</span>
+                  <span className="font-bold text-lg text-green-700">${formData.price.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Duration Display */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Precio Promocional ($) *</label>
-              <input
-                type="number"
-                className="input"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                placeholder="79"
-                min="0"
-                step="0.01"
-                required
-              />
-              {formData.original_price && formData.price < formData.original_price && (
-                <p className="text-sm text-green-600 mt-1">
-                  Descuento: ${(formData.original_price - formData.price).toFixed(0)} ({Math.round((1 - formData.price / formData.original_price) * 100)}%)
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="label">Duración (min)</label>
+              <label className="label">Duración Total (min)</label>
               <input
                 type="number"
                 className="input bg-beige-50"
@@ -872,7 +914,7 @@ export default function AdminPromotionsPage() {
                 readOnly
                 placeholder="Auto-calculado"
               />
-              <p className="text-xs text-warm-gray mt-1">Calculado automáticamente</p>
+              <p className="text-xs text-warm-gray mt-1">Calculado automáticamente desde servicios</p>
             </div>
           </div>
 
