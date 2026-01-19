@@ -179,9 +179,8 @@ export default function AdminPromotionsPage() {
       price: Math.round(promoPrice * 100) / 100,
       original_price: totalPrice,
       duration_minutes: totalDuration,
-      valid_from: promoCode.ActivationDate.split('T')[0],
-      valid_until: promoCode.ExpirationDate.split('T')[0],
-      is_active: promoCode.IsActive,
+      // Keep existing dates - don't import from Mindbody
+      // valid_from and valid_until are set manually for website availability
       services: serviceNames,
       mindbody_service_ids: serviceIds,
     })
