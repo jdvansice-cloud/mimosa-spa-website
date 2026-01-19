@@ -26,6 +26,7 @@ export interface TreatmentSetting {
   description: string
   is_visible: boolean
   show_booking_button: boolean
+  is_top_pick: boolean
   sort_order: number
   is_online_bookable?: boolean // From Mindbody, not stored
 }
@@ -69,6 +70,7 @@ export async function GET() {
         description: service.Description || '',
         is_visible: existingSetting?.is_visible ?? false, // Default: hidden until admin enables
         show_booking_button: existingSetting?.show_booking_button ?? service.OnlineBooking,
+        is_top_pick: existingSetting?.is_top_pick ?? false,
         sort_order: existingSetting?.sort_order ?? 0,
         is_online_bookable: service.OnlineBooking
       }
@@ -144,6 +146,7 @@ export async function POST(request: NextRequest) {
       description: t.description,
       is_visible: t.is_visible,
       show_booking_button: t.show_booking_button,
+      is_top_pick: t.is_top_pick,
       sort_order: t.sort_order
     }))
 
@@ -217,6 +220,7 @@ export async function PATCH(request: NextRequest) {
           description: updates.description || '',
           is_visible: updates.is_visible ?? false, // Default: hidden until admin enables
           show_booking_button: updates.show_booking_button ?? true,
+          is_top_pick: updates.is_top_pick ?? false,
           sort_order: updates.sort_order ?? 0
         })
         .select()

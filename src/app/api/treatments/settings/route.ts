@@ -18,14 +18,15 @@ export interface PublicTreatmentSetting {
   mindbody_service_id: number
   is_visible: boolean
   show_booking_button: boolean
+  is_top_pick: boolean
 }
 
-// GET - Fetch public treatment settings (visibility and booking button status)
+// GET - Fetch public treatment settings (visibility, booking button status, and top picks)
 export async function GET() {
   try {
     const { data: settings, error } = await getSupabaseAdmin()
       .from('treatment_settings')
-      .select('mindbody_service_id, is_visible, show_booking_button')
+      .select('mindbody_service_id, is_visible, show_booking_button, is_top_pick')
 
     if (error) {
       console.error('Error fetching treatment settings:', error)

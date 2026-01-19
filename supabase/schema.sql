@@ -268,6 +268,7 @@ CREATE TABLE IF NOT EXISTS public.treatment_settings (
   description TEXT,
   is_visible BOOLEAN DEFAULT false,  -- Hidden by default until admin enables
   show_booking_button BOOLEAN DEFAULT true,
+  is_top_pick BOOLEAN DEFAULT false,  -- Featured treatment shown at top of menu pages
   sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

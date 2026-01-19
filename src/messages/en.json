@@ -60,7 +60,9 @@
     "bookViaWhatsApp": "Book via WhatsApp",
     "view": "View",
     "loading": "Loading treatments...",
-    "noServices": "No services available at this time."
+    "noServices": "No services available at this time.",
+    "topPicks": "Our Recommendations",
+    "allServices": "All Services"
   },
   "menuPages": {
     "corporales": {

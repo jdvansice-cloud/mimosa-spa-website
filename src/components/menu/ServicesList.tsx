@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Clock, Loader2 } from 'lucide-react'
+import { Clock, Loader2, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { MindbodyService } from '@/types/booking'
 import { useTranslations } from 'next-intl'
@@ -11,11 +11,13 @@ interface TreatmentSetting {
   mindbody_service_id: number
   is_visible: boolean
   show_booking_button: boolean
+  is_top_pick: boolean
 }
 
 interface ServiceWithSettings extends MindbodyService {
   showBookingButton?: boolean
   isOnlineBookable?: boolean
+  isTopPick?: boolean
 }
 
 interface ServicesListProps {
@@ -77,11 +79,13 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
             // For booking widget to work, service must be online bookable in Mindbody
             const isOnlineBookable = service.OnlineBooking === true
             const showBookingButton = isOnlineBookable && setting.show_booking_button
+            const isTopPick = setting.is_top_pick === true
 
             acc.push({
               ...service,
               showBookingButton,
-              isOnlineBookable
+              isOnlineBookable,
+              isTopPick
             })
           }
           return acc
@@ -126,57 +130,94 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
     )
   }
 
-  return (
-    <div className="space-y-4">
-      {services.map((service, index) => (
-        <motion.div
-          key={service.Id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: index * 0.05 }}
-          className="bg-white rounded-xl border border-beige-200 p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow"
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* Service Info */}
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-dark mb-2">
-                {service.Name}
-              </h3>
-              {service.Description && (
-                <div
-                  className="text-sm text-warm-gray-600 leading-relaxed [&_p]:mb-2 [&_br]:hidden"
-                  dangerouslySetInnerHTML={{ __html: service.Description }}
-                />
-              )}
-            </div>
+  // Separate top picks from regular services
+  const topPicks = services.filter(s => s.isTopPick)
+  const regularServices = services.filter(s => !s.isTopPick)
 
-            {/* Price and Duration */}
-            <div className="flex items-center gap-4 md:flex-col md:items-end md:gap-2">
-              <div className="flex items-center gap-2">
-                {service.Duration > 0 && (
-                  <span className="flex items-center gap-1 text-sm text-warm-gray bg-beige-100 px-3 py-1 rounded-full">
-                    <Clock className="w-4 h-4" />
-                    {service.Duration} {t('duration')}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xl font-bold text-gold-600">
-                  {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
-                </span>
-                {service.showBookingButton && (
-                  <BookingButton
-                    service={service}
-                    locale={locale}
-                    label={t('bookNow')}
-                    className="inline-flex items-center px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg hover:bg-gold/90 transition-colors"
-                  />
-                )}
-              </div>
-            </div>
+  // Render a single service card
+  const renderServiceCard = (service: ServiceWithSettings, index: number, isTopPick: boolean = false) => (
+    <motion.div
+      key={service.Id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
+      className={`bg-white rounded-xl border p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow ${
+        isTopPick ? 'border-gold-300 ring-1 ring-gold-200' : 'border-beige-200'
+      }`}
+    >
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        {/* Service Info */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            {isTopPick && (
+              <Star className="w-5 h-5 text-gold-500 fill-gold-500 flex-shrink-0" />
+            )}
+            <h3 className="text-lg font-semibold text-dark">
+              {service.Name}
+            </h3>
           </div>
-        </motion.div>
-      ))}
+          {service.Description && (
+            <div
+              className="text-sm text-warm-gray-600 leading-relaxed [&_p]:mb-2 [&_br]:hidden"
+              dangerouslySetInnerHTML={{ __html: service.Description }}
+            />
+          )}
+        </div>
+
+        {/* Price and Duration */}
+        <div className="flex items-center gap-4 md:flex-col md:items-end md:gap-2">
+          <div className="flex items-center gap-2">
+            {service.Duration > 0 && (
+              <span className="flex items-center gap-1 text-sm text-warm-gray bg-beige-100 px-3 py-1 rounded-full">
+                <Clock className="w-4 h-4" />
+                {service.Duration} {t('duration')}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xl font-bold text-gold-600">
+              {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
+            </span>
+            {service.showBookingButton && (
+              <BookingButton
+                service={service}
+                locale={locale}
+                label={t('bookNow')}
+                className="inline-flex items-center px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg hover:bg-gold/90 transition-colors"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+
+  return (
+    <div className="space-y-8">
+      {/* Top Picks Section */}
+      {topPicks.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Star className="w-6 h-6 text-gold-500 fill-gold-500" />
+            <h2 className="text-xl font-semibold text-dark">{t('topPicks')}</h2>
+          </div>
+          <div className="space-y-4">
+            {topPicks.map((service, index) => renderServiceCard(service, index, true))}
+          </div>
+        </div>
+      )}
+
+      {/* Regular Services Section */}
+      {regularServices.length > 0 && (
+        <div>
+          {topPicks.length > 0 && (
+            <h2 className="text-xl font-semibold text-dark mb-4">{t('allServices')}</h2>
+          )}
+          <div className="space-y-4">
+            {regularServices.map((service, index) => renderServiceCard(service, index))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

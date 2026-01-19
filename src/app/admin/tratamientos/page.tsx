@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw } from 'lucide-react'
+import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw, Star, ChevronDown, ChevronRight } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { PROGRAM_NAMES } from '@/lib/booking/constants'
@@ -17,6 +17,7 @@ interface Treatment {
   description: string
   is_visible: boolean
   show_booking_button: boolean
+  is_top_pick: boolean
   sort_order: number
   is_online_bookable?: boolean
 }
@@ -29,9 +30,29 @@ export default function AdminTreatmentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [hasChanges, setHasChanges] = useState(false)
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
 
   // Get unique categories from treatments
   const categories = Array.from(new Set(treatments.map(t => t.category))).sort()
+
+  // Toggle category collapsed state
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(category)) {
+        newSet.delete(category)
+      } else {
+        newSet.add(category)
+      }
+      return newSet
+    })
+  }
+
+  // Expand all categories
+  const expandAll = () => setCollapsedCategories(new Set())
+
+  // Collapse all categories
+  const collapseAll = () => setCollapsedCategories(new Set(categories))
 
   // Fetch treatments on mount
   useEffect(() => {
@@ -88,6 +109,16 @@ export default function AdminTreatmentsPage() {
     setTreatments(prev => prev.map(t =>
       t.mindbody_service_id === mindbodyServiceId
         ? { ...t, show_booking_button: !t.show_booking_button }
+        : t
+    ))
+    setHasChanges(true)
+  }
+
+  // Toggle top pick
+  const toggleTopPick = (mindbodyServiceId: number) => {
+    setTreatments(prev => prev.map(t =>
+      t.mindbody_service_id === mindbodyServiceId
+        ? { ...t, is_top_pick: !t.is_top_pick }
         : t
     ))
     setHasChanges(true)
@@ -193,7 +224,7 @@ export default function AdminTreatmentsPage() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <Card variant="default" padding="md">
           <p className="text-sm text-warm-gray">Total</p>
           <p className="text-2xl font-semibold text-dark">{treatments.length}</p>
@@ -211,6 +242,12 @@ export default function AdminTreatmentsPage() {
           </p>
         </Card>
         <Card variant="default" padding="md">
+          <p className="text-sm text-warm-gray">Top Picks</p>
+          <p className="text-2xl font-semibold text-gold-600">
+            {treatments.filter(t => t.is_top_pick).length}
+          </p>
+        </Card>
+        <Card variant="default" padding="md">
           <p className="text-sm text-warm-gray">Reservables Online</p>
           <p className="text-2xl font-semibold text-blue-600">
             {treatments.filter(t => t.is_online_bookable).length}
@@ -218,18 +255,54 @@ export default function AdminTreatmentsPage() {
         </Card>
       </div>
 
+      {/* Expand/Collapse All */}
+      <div className="flex justify-end gap-2 mb-4">
+        <button
+          onClick={expandAll}
+          className="text-sm text-warm-gray hover:text-dark transition-colors"
+        >
+          Expandir todo
+        </button>
+        <span className="text-warm-gray">|</span>
+        <button
+          onClick={collapseAll}
+          className="text-sm text-warm-gray hover:text-dark transition-colors"
+        >
+          Colapsar todo
+        </button>
+      </div>
+
       {/* Treatments by Category */}
-      {Object.entries(groupedTreatments).map(([category, categoryTreatments]) => (
+      {Object.entries(groupedTreatments).map(([category, categoryTreatments]) => {
+        const isCollapsed = collapsedCategories.has(category)
+        const topPicksInCategory = categoryTreatments.filter(t => t.is_top_pick).length
+
+        return (
         <Card key={category} variant="default" padding="none" className="mb-6">
-          <div className="bg-beige px-4 py-3 border-b border-beige-300">
+          <button
+            onClick={() => toggleCategory(category)}
+            className="w-full bg-beige px-4 py-3 border-b border-beige-300 flex items-center justify-between hover:bg-beige-200 transition-colors"
+          >
             <h2 className="font-semibold text-dark flex items-center gap-2">
+              {isCollapsed ? (
+                <ChevronRight className="w-5 h-5 text-warm-gray" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-warm-gray" />
+              )}
               {category}
               <span className="text-sm font-normal text-warm-gray">
                 ({categoryTreatments.length} tratamientos)
               </span>
+              {topPicksInCategory > 0 && (
+                <span className="flex items-center gap-1 text-sm font-normal text-gold-600">
+                  <Star className="w-4 h-4 fill-gold-500" />
+                  {topPicksInCategory}
+                </span>
+              )}
             </h2>
-          </div>
+          </button>
 
+          {!isCollapsed && (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-beige-100 border-b border-beige-200">
@@ -239,6 +312,7 @@ export default function AdminTreatmentsPage() {
                   <th className="text-left p-3 text-sm font-medium text-dark">Duración</th>
                   <th className="text-center p-3 text-sm font-medium text-dark">Online</th>
                   <th className="text-center p-3 text-sm font-medium text-dark">Visible</th>
+                  <th className="text-center p-3 text-sm font-medium text-dark">Top Pick</th>
                   <th className="text-center p-3 text-sm font-medium text-dark">Botón Reservar</th>
                 </tr>
               </thead>
@@ -295,6 +369,25 @@ export default function AdminTreatmentsPage() {
                       </button>
                     </td>
                     <td className="p-3 text-center">
+                      <button
+                        onClick={() => toggleTopPick(treatment.mindbody_service_id)}
+                        className={cn(
+                          "p-2 rounded-lg transition-colors",
+                          treatment.is_top_pick
+                            ? "bg-gold-100 text-gold-700 hover:bg-gold-200"
+                            : "bg-beige-100 text-beige-400 hover:bg-beige-200"
+                        )}
+                        title={treatment.is_top_pick ? 'Quitar de Top Picks' : 'Agregar a Top Picks'}
+                      >
+                        <Star
+                          className={cn(
+                            "w-4 h-4",
+                            treatment.is_top_pick && "fill-gold-500"
+                          )}
+                        />
+                      </button>
+                    </td>
+                    <td className="p-3 text-center">
                       {treatment.is_online_bookable ? (
                         <button
                           onClick={() => toggleBookingButton(treatment.mindbody_service_id)}
@@ -323,8 +416,10 @@ export default function AdminTreatmentsPage() {
               </tbody>
             </table>
           </div>
+          )}
         </Card>
-      ))}
+        )
+      })}
 
       {filteredTreatments.length === 0 && (
         <Card variant="default" padding="lg" className="text-center">
