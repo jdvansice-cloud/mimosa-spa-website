@@ -4,9 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
-import { Home, BookOpen, Tag, Calendar, User, ShoppingBag } from 'lucide-react'
+import { Home, BookOpen, Tag, Calendar, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useBookingStore } from '@/lib/booking/store'
 import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
 
 export function MobileBottomNav() {
@@ -15,13 +14,13 @@ export function MobileBottomNav() {
   const params = useParams()
   const locale = params.locale as string
 
-  // Get cart state from booking store
-  const { selectedServices, selectedAddons, activePromotion, openCart } = useBookingStore()
-  const cartItemCount = selectedServices.length + selectedAddons.length
-  const hasCartItems = cartItemCount > 0 || activePromotion !== null
-
-  // Check if we're on the booking page
+  // Check if we're on the booking page - hide bottom nav to give more screen space
   const isOnBookingPage = pathname.includes('/reservar')
+
+  // Hide bottom nav on booking page to maximize screen space for booking widget
+  if (isOnBookingPage) {
+    return null
+  }
 
   const navItems = [
     { href: `/${locale}`, label: t('home'), icon: Home },
@@ -71,33 +70,6 @@ export function MobileBottomNav() {
                   {item.label}
                 </span>
               </HomeBookingButton>
-            )
-          }
-
-          // Replace "Mi Portal" with cart button when on booking page with items
-          if (item.isPortal && isOnBookingPage && hasCartItems) {
-            return (
-              <button
-                key="cart-button"
-                onClick={openCart}
-                className={cn(
-                  'flex flex-col items-center justify-center py-2 rounded-lg',
-                  'transition-colors relative',
-                  'text-gold'
-                )}
-              >
-                <div className="relative">
-                  <ShoppingBag className="h-5 w-5 stroke-[2.5]" />
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-gold text-dark text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartItemCount}
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs mt-1 font-medium">
-                  Carrito
-                </span>
-              </button>
             )
           }
 
