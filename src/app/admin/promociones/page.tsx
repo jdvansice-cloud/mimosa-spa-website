@@ -120,9 +120,9 @@ export default function AdminPromotionsPage() {
       const response = await fetch('/api/mindbody/services?type=all&includeOffline=true')
       const data = await response.json()
       if (response.ok && data.services) {
-        // Filter only online bookable services for promotions
-        const bookableServices = data.services.filter((s: MindbodyService) => s.OnlineBooking)
-        setMindbodyServices(bookableServices)
+        // Include ALL services for promo matching (ProductId lookup)
+        // The promo's ApplicableItems can include add-ons and offline services
+        setMindbodyServices(data.services)
       }
     } catch (err) {
       console.error('Error fetching Mindbody services:', err)
