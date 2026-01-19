@@ -206,13 +206,40 @@ export default function AdminPromotionsPage() {
 
   // Import promo code data into form
   const importPromoCode = (promoCode: MindbodyPromoCode) => {
-    // Find the service IDs from the applicable items
-    const serviceIds = promoCode.ApplicableItems
+    // Get the applicable service names from the promo code
+    const applicableServiceNames = promoCode.ApplicableItems
       .filter(item => item.Type === 'Service')
-      .map(item => item.Id)
+      .map(item => item.Name.toLowerCase().trim())
 
-    // Calculate totals from the applicable services
-    const { totalPrice, totalDuration, serviceNames } = calculateTotals(serviceIds)
+    // Match services by name (case-insensitive, partial match)
+    // This is more reliable than matching by ID since promo codes use Product IDs
+    // while our services list uses SessionType IDs
+    const matchedServiceIds: number[] = []
+    const matchedServiceNames: string[] = []
+
+    for (const service of mindbodyServices) {
+      const serviceName = service.Name.toLowerCase().trim()
+      // Check if this service name matches any applicable item name
+      const isMatch = applicableServiceNames.some(applicableName =>
+        serviceName.includes(applicableName) ||
+        applicableName.includes(serviceName) ||
+        // Also try without duration suffix (e.g., "Masaje - 60 min" matches "Masaje")
+        serviceName.split('-')[0].trim().includes(applicableName.split('-')[0].trim()) ||
+        applicableName.split('-')[0].trim().includes(serviceName.split('-')[0].trim())
+      )
+
+      if (isMatch) {
+        matchedServiceIds.push(service.Id)
+        matchedServiceNames.push(service.Name)
+      }
+    }
+
+    console.log('Promo code applicable items:', promoCode.ApplicableItems)
+    console.log('Matched service IDs:', matchedServiceIds)
+    console.log('Matched service names:', matchedServiceNames)
+
+    // Calculate totals from the matched services
+    const { totalPrice, totalDuration } = calculateTotals(matchedServiceIds)
 
     // Calculate the promotional price based on discount type
     let promoPrice = totalPrice
@@ -222,6 +249,11 @@ export default function AdminPromotionsPage() {
       promoPrice = totalPrice - promoCode.DiscountAmount
     }
 
+    // If no services matched but we have applicable items, use the promo code's own names
+    const finalServiceNames = matchedServiceNames.length > 0
+      ? matchedServiceNames
+      : promoCode.ApplicableItems.filter(i => i.Type === 'Service').map(i => i.Name)
+
     setFormData({
       ...formData,
       title_es: promoCode.Name,
@@ -229,13 +261,18 @@ export default function AdminPromotionsPage() {
       description_es: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} de descuento. Código: ${promoCode.Code}`,
       description_en: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} off. Code: ${promoCode.Code}`,
       price: Math.round(promoPrice * 100) / 100,
-      original_price: totalPrice,
+      original_price: totalPrice > 0 ? totalPrice : null,
       duration_minutes: totalDuration,
       // Keep existing dates - don't import from Mindbody
       // valid_from and valid_until are set manually for website availability
-      services: serviceNames,
-      mindbody_service_ids: serviceIds,
+      services: finalServiceNames,
+      mindbody_service_ids: matchedServiceIds,
     })
+
+    // Show feedback if no services were matched
+    if (matchedServiceIds.length === 0 && promoCode.ApplicableItems.length > 0) {
+      console.warn('No local services matched the promo code applicable items. You may need to select services manually.')
+    }
 
     setShowPromoLookup(false)
     setPromoCodeSearch('')
