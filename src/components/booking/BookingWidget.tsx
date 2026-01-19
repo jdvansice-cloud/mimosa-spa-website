@@ -7,7 +7,7 @@ import { StepProgress } from './shared/StepProgress'
 import { CartSummary } from './shared/CartSummary'
 import { FloatingCart } from './shared/FloatingCart'
 import { ClientSelector } from './shared/ClientSelector'
-import { MobileBookingNav } from './shared/MobileBookingNav'
+import { BookingNav } from './shared/BookingNav'
 import { AuthStep } from './steps/AuthStep'
 import { LocationStep } from './steps/LocationStep'
 import { ServiceStep } from './steps/ServiceStep'
@@ -183,12 +183,14 @@ export function BookingWidget() {
           />
         )}
 
-        {/* Mobile bottom padding to account for fixed nav */}
-        <div className="md:hidden h-20" />
+        {/* Bottom padding to account for fixed nav */}
+        {currentStep !== 'auth' && currentStep !== 'success' && (
+          <div className="h-20" />
+        )}
       </div>
 
-      {/* Mobile Fixed Bottom Navigation */}
-      <MobileBookingNav />
+      {/* Fixed Bottom Navigation */}
+      <BookingNav />
     </>
   )
 }

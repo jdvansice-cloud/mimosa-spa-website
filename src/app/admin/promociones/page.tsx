@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Plus, Edit, Trash2, Search, Loader2, RefreshCw, Check, X, Download, Tag } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Plus, Edit, Trash2, Search, Loader2, RefreshCw, Check, X, Download, Tag, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button, Card, Modal } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { Promotion } from '@/types'
@@ -85,6 +85,10 @@ export default function AdminPromotionsPage() {
   const [promoCodeResults, setPromoCodeResults] = useState<MindbodyPromoCode[]>([])
   const [promoCodeError, setPromoCodeError] = useState<string | null>(null)
   const [showPromoLookup, setShowPromoLookup] = useState(false)
+  const [showPromoResults, setShowPromoResults] = useState(false)
+  const promoSearchRef = useRef<HTMLInputElement>(null)
+  const promoResultsRef = useRef<HTMLDivElement>(null)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Fetch promotions from API
   const fetchPromotions = useCallback(async () => {
@@ -125,32 +129,80 @@ export default function AdminPromotionsPage() {
     fetchMindbodyServices()
   }, [fetchPromotions, fetchMindbodyServices])
 
-  // Search Mindbody promo codes
-  const searchPromoCodes = async () => {
-    if (!promoCodeSearch.trim()) return
+  // Search Mindbody promo codes with debounce
+  const searchPromoCodes = useCallback(async (searchText: string) => {
+    if (!searchText.trim() || searchText.length < 2) {
+      setPromoCodeResults([])
+      setPromoCodeError(null)
+      setShowPromoResults(false)
+      return
+    }
 
     setIsPromoCodeLoading(true)
     setPromoCodeError(null)
-    setPromoCodeResults([])
+    setShowPromoResults(true)
 
     try {
-      const response = await fetch(`/api/mindbody/promocodes?search=${encodeURIComponent(promoCodeSearch)}`)
+      const response = await fetch(`/api/mindbody/promocodes?search=${encodeURIComponent(searchText)}&activeOnly=true`)
       const data = await response.json()
 
       if (!response.ok) {
         throw new Error(data.error || 'Error al buscar códigos promocionales')
       }
 
-      setPromoCodeResults(data.promoCodes || [])
-      if ((data.promoCodes || []).length === 0) {
-        setPromoCodeError('No se encontraron códigos promocionales')
+      const results = data.promoCodes || []
+      setPromoCodeResults(results)
+      if (results.length === 0) {
+        setPromoCodeError('No se encontraron promociones con ese texto')
       }
     } catch (err) {
       setPromoCodeError(err instanceof Error ? err.message : 'Error de conexión')
+      setPromoCodeResults([])
     } finally {
       setIsPromoCodeLoading(false)
     }
+  }, [])
+
+  // Handle promo code search input change with debounce
+  const handlePromoSearchChange = (value: string) => {
+    setPromoCodeSearch(value)
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    // Set new timeout for debounced search
+    searchTimeoutRef.current = setTimeout(() => {
+      searchPromoCodes(value)
+    }, 400)
   }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        promoResultsRef.current &&
+        !promoResultsRef.current.contains(event.target as Node) &&
+        promoSearchRef.current &&
+        !promoSearchRef.current.contains(event.target as Node)
+      ) {
+        setShowPromoResults(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Import promo code data into form
   const importPromoCode = (promoCode: MindbodyPromoCode) => {
@@ -188,6 +240,7 @@ export default function AdminPromotionsPage() {
     setShowPromoLookup(false)
     setPromoCodeSearch('')
     setPromoCodeResults([])
+    setShowPromoResults(false)
   }
 
   // Filter promotions by search
@@ -452,13 +505,27 @@ export default function AdminPromotionsPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <button
               type="button"
-              onClick={() => setShowPromoLookup(!showPromoLookup)}
+              onClick={() => {
+                setShowPromoLookup(!showPromoLookup)
+                if (!showPromoLookup) {
+                  // Focus the search input when opening
+                  setTimeout(() => promoSearchRef.current?.focus(), 100)
+                }
+              }}
               className="flex items-center gap-2 text-blue-700 font-medium w-full"
             >
               <Tag className="w-4 h-4" />
               <span>Importar desde Mindbody</span>
-              <span className="text-xs text-blue-500 ml-auto">
-                {showPromoLookup ? '▲ Ocultar' : '▼ Mostrar'}
+              <span className="text-xs text-blue-500 ml-auto flex items-center gap-1">
+                {showPromoLookup ? (
+                  <>
+                    <ChevronUp className="w-4 h-4" /> Ocultar
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" /> Mostrar
+                  </>
+                )}
               </span>
             </button>
 
@@ -468,74 +535,98 @@ export default function AdminPromotionsPage() {
                   Busca un código promocional de Mindbody para importar sus datos automáticamente.
                 </p>
 
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    className="input flex-1"
-                    value={promoCodeSearch}
-                    onChange={(e) => setPromoCodeSearch(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), searchPromoCodes())}
-                    placeholder="Buscar por código o nombre..."
-                  />
-                  <Button
-                    type="button"
-                    onClick={searchPromoCodes}
-                    disabled={isPromoCodeLoading || !promoCodeSearch.trim()}
-                    leftIcon={isPromoCodeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                  >
-                    Buscar
-                  </Button>
+                {/* Search input with dropdown results */}
+                <div className="relative">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-warm-gray" />
+                    <input
+                      ref={promoSearchRef}
+                      type="text"
+                      className="input pl-10 pr-10"
+                      value={promoCodeSearch}
+                      onChange={(e) => handlePromoSearchChange(e.target.value)}
+                      onFocus={() => {
+                        if (promoCodeResults.length > 0) {
+                          setShowPromoResults(true)
+                        }
+                      }}
+                      placeholder="Ej: 2026, Día de la Madre, Especial..."
+                      autoComplete="off"
+                    />
+                    {isPromoCodeLoading && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500 animate-spin" />
+                    )}
+                  </div>
+
+                  {/* Results dropdown */}
+                  {showPromoResults && (promoCodeResults.length > 0 || promoCodeError) && (
+                    <div
+                      ref={promoResultsRef}
+                      className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-blue-200 rounded-lg shadow-lg max-h-80 overflow-y-auto"
+                    >
+                      {promoCodeError && promoCodeResults.length === 0 ? (
+                        <div className="p-4 text-center text-sm">
+                          {promoCodeError.includes('API error') || promoCodeError.includes('404') || promoCodeError.includes('500') ? (
+                            <div className="text-amber-600">
+                              <p className="font-medium mb-1">La API de Mindbody no está disponible</p>
+                              <p className="text-xs text-warm-gray">
+                                Ingresa los datos de la promoción manualmente usando los campos abajo.
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="text-warm-gray">{promoCodeError}</span>
+                          )}
+                        </div>
+                      ) : (
+                        promoCodeResults.map((pc) => (
+                          <div
+                            key={pc.Id}
+                            className="p-3 border-b border-blue-100 last:border-b-0 hover:bg-blue-50 cursor-pointer transition-colors"
+                            onClick={() => importPromoCode(pc)}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-dark truncate">{pc.Name}</p>
+                                <p className="text-sm text-warm-gray">
+                                  Código: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs">{pc.Code}</span>
+                                </p>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="font-semibold text-green-600">
+                                  {pc.DiscountType === 'Percent' ? `${pc.DiscountAmount}%` : `$${pc.DiscountAmount}`} OFF
+                                </p>
+                                <span className={cn(
+                                  'text-xs px-2 py-0.5 rounded-full inline-block',
+                                  pc.IsActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                                )}>
+                                  {pc.IsActive ? 'Activo' : 'Inactivo'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {pc.ApplicableItems.length > 0 && (
+                              <div className="mt-2 text-xs text-blue-600 line-clamp-2">
+                                <span className="font-medium">Servicios:</span> {pc.ApplicableItems.map(i => i.Name).join(', ')}
+                              </div>
+                            )}
+
+                            <div className="mt-2 flex items-center justify-between">
+                              <span className="text-xs text-warm-gray">
+                                {pc.ActivationDate.split('T')[0]} → {pc.ExpirationDate.split('T')[0]}
+                              </span>
+                              <span className="text-xs text-blue-600 flex items-center gap-1 font-medium">
+                                <Download className="w-3 h-3" /> Seleccionar
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {promoCodeError && (
-                  <p className="text-sm text-red-600">{promoCodeError}</p>
-                )}
-
-                {promoCodeResults.length > 0 && (
-                  <div className="bg-white border border-blue-200 rounded-lg max-h-64 overflow-y-auto">
-                    {promoCodeResults.map((pc) => (
-                      <div
-                        key={pc.Id}
-                        className="p-3 border-b border-blue-100 last:border-b-0 hover:bg-blue-50 cursor-pointer"
-                        onClick={() => importPromoCode(pc)}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-medium text-dark">{pc.Name}</p>
-                            <p className="text-sm text-warm-gray">
-                              Código: <span className="font-mono bg-gray-100 px-1 rounded">{pc.Code}</span>
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-green-600">
-                              {pc.DiscountType === 'Percent' ? `${pc.DiscountAmount}%` : `$${pc.DiscountAmount}`} OFF
-                            </p>
-                            <span className={cn(
-                              'text-xs px-2 py-0.5 rounded-full',
-                              pc.IsActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                            )}>
-                              {pc.IsActive ? 'Activo' : 'Inactivo'}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="mt-2 text-xs text-warm-gray">
-                          <span>Válido: {pc.ActivationDate.split('T')[0]} - {pc.ExpirationDate.split('T')[0]}</span>
-                          {pc.MaxUses && <span className="ml-2">| Máx. usos: {pc.MaxUses}</span>}
-                          <span className="ml-2">| Usado: {pc.TimesUsed} veces</span>
-                        </div>
-                        {pc.ApplicableItems.length > 0 && (
-                          <div className="mt-2 text-xs text-blue-600">
-                            Servicios: {pc.ApplicableItems.map(i => i.Name).join(', ')}
-                          </div>
-                        )}
-                        <div className="mt-2 flex justify-end">
-                          <span className="text-xs text-blue-600 flex items-center gap-1">
-                            <Download className="w-3 h-3" /> Click para importar
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                {promoCodeSearch.length > 0 && promoCodeSearch.length < 2 && (
+                  <p className="text-xs text-warm-gray">Escribe al menos 2 caracteres para buscar</p>
                 )}
               </div>
             )}

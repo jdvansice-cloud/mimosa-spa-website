@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { CheckCircle, ArrowLeft, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star } from 'lucide-react'
+import { CheckCircle, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star } from 'lucide-react'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
 
 // Tax rate constant
@@ -20,7 +20,6 @@ export function ConfirmStep() {
     availableSlots,
     setBookingConfirmation,
     setClientInfo,
-    prevStep,
     setLoading,
     setError,
     isLoading,
@@ -401,49 +400,13 @@ export function ConfirmStep() {
         </div>
       </div>
 
-      {/* Navigation - Hidden on mobile (using MobileBookingNav), shown on desktop */}
-      <div className="hidden md:block sticky bottom-0 bg-white border-t border-beige-200 py-2 -mx-6 px-6 mt-auto">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={prevStep}
-            disabled={isSubmitting}
-            className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
-          </button>
-
-          <button
-            onClick={handleConfirmBooking}
-            disabled={isSubmitting || isLoading}
-            className="flex items-center gap-1 px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
-                     hover:bg-gold/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Procesando...
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-4 h-4" />
-                Confirmar
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Confirm Button - Fixed at bottom via MobileBookingNav */}
-      <div className="md:hidden">
-        <button
-          onClick={handleConfirmBooking}
-          disabled={isSubmitting || isLoading}
-          className="hidden"
-          id="mobile-confirm-btn"
-        />
-      </div>
+      {/* Hidden Confirm Button - Triggered by fixed bottom nav */}
+      <button
+        onClick={handleConfirmBooking}
+        disabled={isSubmitting || isLoading}
+        className="hidden"
+        id="mobile-confirm-btn"
+      />
     </div>
   )
 }

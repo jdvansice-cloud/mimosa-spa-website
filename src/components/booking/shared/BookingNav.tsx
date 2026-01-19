@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 
-export function MobileBookingNav() {
+export function BookingNav() {
   const {
     currentStep,
     selectedAddons,
@@ -71,8 +71,8 @@ export function MobileBookingNav() {
   const showNextButton = currentStep !== 'location'
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-      <div className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+      <div className="max-w-4xl mx-auto px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between">
           <button
             onClick={prevStep}

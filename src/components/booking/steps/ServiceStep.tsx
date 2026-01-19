@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sparkles, ArrowLeft, ArrowRight, Loader2, ChevronDown, ChevronUp, Clock, Check, Plus } from 'lucide-react'
+import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
@@ -87,8 +87,6 @@ export function ServiceStep() {
     selectedServices,
     addService,
     removeService,
-    nextStep,
-    prevStep,
   } = useBookingStore()
 
   const hasServices = useBookingStore(selectHasServices)
@@ -293,28 +291,6 @@ export function ServiceStep() {
       )}
       </div>
 
-      {/* Navigation - Hidden on mobile (using MobileBookingNav), shown on desktop */}
-      <div className="hidden md:block sticky bottom-0 bg-white border-t border-beige-200 py-2 -mx-6 px-6 mt-auto">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={prevStep}
-            className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
-          </button>
-
-          <button
-            onClick={nextStep}
-            disabled={!hasServices}
-            className="flex items-center gap-1 px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
-                     hover:bg-gold/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Continuar
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
     </div>
   )
 }

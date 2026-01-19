@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { User, ArrowLeft, ArrowRight, Loader2, Users } from 'lucide-react'
+import { User, Loader2, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyStaff } from '@/types/booking'
@@ -275,28 +275,6 @@ export function StaffStep() {
         </div>
       )}
 
-      {/* Navigation - Hidden on mobile (using MobileBookingNav), shown on desktop */}
-      <div className="hidden md:flex mt-6 pt-2 border-t border-beige-200 items-center justify-between">
-        <button
-          onClick={prevStep}
-          className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver
-        </button>
-
-        {/* Continue button only if staff not yet selected (auto-advances on selection) */}
-        {selectedStaff !== undefined && (
-          <button
-            onClick={nextStep}
-            className="flex items-center gap-1 px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
-                     hover:bg-gold/90 transition-all"
-          >
-            Continuar
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        )}
-      </div>
     </div>
   )
 }

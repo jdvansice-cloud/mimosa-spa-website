@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, ArrowLeft, ArrowRight, Loader2, Clock, Check, Sparkles } from 'lucide-react'
+import { Plus, Loader2, Clock, Check, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
@@ -74,7 +74,6 @@ export function AddonsStep() {
     addAddon,
     removeAddon,
     nextStep,
-    prevStep,
   } = useBookingStore()
 
   const [localAddons, setLocalAddons] = useState<MindbodyService[]>([])
@@ -191,27 +190,6 @@ export function AddonsStep() {
       )}
       </div>
 
-      {/* Navigation - Hidden on mobile (using MobileBookingNav), shown on desktop */}
-      <div className="hidden md:block sticky bottom-0 bg-white border-t border-beige-200 py-2 -mx-6 px-6 mt-auto">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={prevStep}
-            className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
-          </button>
-
-          <button
-            onClick={nextStep}
-            className="flex items-center gap-1 px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
-                     hover:bg-gold/90 transition-all"
-          >
-            {selectedAddons.length > 0 ? 'Continuar' : 'Saltar'}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
