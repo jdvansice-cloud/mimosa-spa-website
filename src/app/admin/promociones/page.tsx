@@ -8,6 +8,7 @@ import type { Promotion } from '@/types'
 
 interface MindbodyService {
   Id: number
+  ProductId: number
   Name: string
   Price: number
   Duration: number
@@ -48,6 +49,9 @@ interface PromotionFormData {
   sort_order: number
   services: string[]
   mindbody_service_ids: number[]
+  promo_code: string
+  discount_type: 'Percent' | 'Amount' | null
+  discount_amount: number | null
 }
 
 const defaultFormData: PromotionFormData = {
@@ -64,6 +68,9 @@ const defaultFormData: PromotionFormData = {
   sort_order: 0,
   services: [],
   mindbody_service_ids: [],
+  promo_code: '',
+  discount_type: null,
+  discount_amount: null,
 }
 
 export default function AdminPromotionsPage() {
@@ -206,47 +213,24 @@ export default function AdminPromotionsPage() {
 
   // Import promo code data into form
   const importPromoCode = (promoCode: MindbodyPromoCode) => {
-    // Get the applicable service items from the promo code
-    const applicableServices = promoCode.ApplicableItems
-      .filter(item => item.Type === 'Service')
+    // Get the applicable items from the promo code (can be Service or Item type)
+    const applicableItems = promoCode.ApplicableItems || []
 
-    // Try to match services by name using flexible matching
+    // Match services by ProductId (ApplicableItems.Id matches service.ProductId)
     const matchedServiceIds: number[] = []
     const matchedServiceNames: string[] = []
 
-    // Helper to extract keywords from a name for matching
-    const getKeywords = (name: string): string[] => {
-      return name
-        .toLowerCase()
-        .replace(/\d+\s*min(utos?)?/gi, '') // Remove duration
-        .replace(/[^\w\sáéíóúñü]/g, ' ') // Remove special chars except accents
-        .split(/\s+/)
-        .filter(w => w.length > 2) // Only words with 3+ chars
-    }
-
-    for (const service of mindbodyServices) {
-      const serviceKeywords = getKeywords(service.Name)
-
-      // Check if this service matches any applicable item
-      const isMatch = applicableServices.some(applicable => {
-        const applicableKeywords = getKeywords(applicable.Name)
-
-        // Match if any significant keyword matches
-        return serviceKeywords.some(sk =>
-          applicableKeywords.some(ak =>
-            sk.includes(ak) || ak.includes(sk)
-          )
-        )
-      })
-
-      if (isMatch) {
-        matchedServiceIds.push(service.Id)
-        matchedServiceNames.push(service.Name)
+    for (const applicable of applicableItems) {
+      // Find service where ProductId matches the applicable item's Id
+      const matchedService = mindbodyServices.find(s => s.ProductId === applicable.Id)
+      if (matchedService) {
+        matchedServiceIds.push(matchedService.Id)
+        matchedServiceNames.push(matchedService.Name)
       }
     }
 
-    console.log('Promo code applicable items:', applicableServices.map(s => s.Name))
-    console.log('Available local services:', mindbodyServices.map(s => s.Name).slice(0, 10), '...')
+    console.log('Promo code applicable items:', applicableItems.map(s => ({ Id: s.Id, Name: s.Name, Type: s.Type })))
+    console.log('Available services with ProductIds:', mindbodyServices.slice(0, 5).map(s => ({ Id: s.Id, ProductId: s.ProductId, Name: s.Name })))
     console.log('Matched service IDs:', matchedServiceIds)
     console.log('Matched service names:', matchedServiceNames)
 
@@ -264,8 +248,8 @@ export default function AdminPromotionsPage() {
     }
 
     // Build description including the Mindbody services for reference
-    const applicableServicesList = applicableServices.map(s => s.Name).join(', ')
-    const descriptionNote = matchedServiceIds.length === 0 && applicableServices.length > 0
+    const applicableServicesList = applicableItems.map(s => s.Name).join(', ')
+    const descriptionNote = matchedServiceIds.length === 0 && applicableItems.length > 0
       ? `\n\n[Servicios en Mindbody: ${applicableServicesList}]`
       : ''
 
@@ -278,14 +262,17 @@ export default function AdminPromotionsPage() {
       price: promoPrice > 0 ? Math.round(promoPrice * 100) / 100 : formData.price,
       original_price: totalPrice > 0 ? totalPrice : formData.original_price,
       duration_minutes: totalDuration > 0 ? totalDuration : formData.duration_minutes,
-      services: matchedServiceNames.length > 0 ? matchedServiceNames : applicableServices.map(s => s.Name),
+      services: matchedServiceNames.length > 0 ? matchedServiceNames : applicableItems.map(s => s.Name),
       mindbody_service_ids: matchedServiceIds,
+      promo_code: promoCode.Code,
+      discount_type: promoCode.DiscountType,
+      discount_amount: promoCode.DiscountAmount,
     })
 
     // If no services matched, pre-fill the service search to help user find services manually
-    if (matchedServiceIds.length === 0 && applicableServices.length > 0) {
-      // Try to extract a useful search term from the first applicable service
-      const firstService = applicableServices[0].Name
+    if (matchedServiceIds.length === 0 && applicableItems.length > 0) {
+      // Try to extract a useful search term from the first applicable item
+      const firstService = applicableItems[0].Name
       const searchTerm = firstService
         .split(/[-–]/)[0]  // Get text before dash
         .replace(/\d+\s*min(utos?)?/gi, '') // Remove duration
@@ -369,6 +356,9 @@ export default function AdminPromotionsPage() {
       sort_order: promotion.sort_order,
       services: promotion.services || [],
       mindbody_service_ids: promotion.mindbody_service_ids || [],
+      promo_code: promotion.promo_code || '',
+      discount_type: promotion.discount_type || null,
+      discount_amount: promotion.discount_amount || null,
     })
     setServiceSearch('')
     setIsModalOpen(true)
@@ -713,6 +703,52 @@ export default function AdminPromotionsPage() {
                 value={formData.title_en}
                 onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
                 placeholder="Ej: Essence of Peace"
+              />
+            </div>
+          </div>
+
+          {/* Promo Code and Discount Info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="label">Código Promocional</label>
+              <input
+                type="text"
+                className="input font-mono"
+                value={formData.promo_code}
+                onChange={(e) => setFormData({ ...formData, promo_code: e.target.value })}
+                placeholder="Ej: 26ene129"
+              />
+            </div>
+            <div>
+              <label className="label">Tipo de Descuento</label>
+              <select
+                className="input"
+                value={formData.discount_type || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  discount_type: e.target.value as 'Percent' | 'Amount' | null || null
+                })}
+              >
+                <option value="">Sin descuento</option>
+                <option value="Percent">Porcentaje (%)</option>
+                <option value="Amount">Monto fijo ($)</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">
+                {formData.discount_type === 'Percent' ? 'Porcentaje (%)' : 'Monto ($)'}
+              </label>
+              <input
+                type="number"
+                className="input"
+                value={formData.discount_amount || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  discount_amount: e.target.value ? parseFloat(e.target.value) : null
+                })}
+                placeholder={formData.discount_type === 'Percent' ? 'Ej: 15' : 'Ej: 20'}
+                min="0"
+                step={formData.discount_type === 'Percent' ? '0.01' : '0.01'}
               />
             </div>
           </div>

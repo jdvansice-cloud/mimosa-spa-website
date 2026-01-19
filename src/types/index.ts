@@ -22,6 +22,9 @@ export interface Promotion {
   sort_order: number
   mindbody_service_id: string | null
   mindbody_service_ids: number[]
+  promo_code: string | null
+  discount_type: 'Percent' | 'Amount' | null
+  discount_amount: number | null
   created_at: string
   updated_at: string
 }

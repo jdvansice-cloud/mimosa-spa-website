@@ -62,6 +62,9 @@ CREATE TABLE IF NOT EXISTS public.promotions (
   sort_order INTEGER DEFAULT 0,
   mindbody_service_id TEXT,
   mindbody_service_ids INTEGER[] DEFAULT '{}',
+  promo_code VARCHAR(50),
+  discount_type VARCHAR(10) CHECK (discount_type IS NULL OR discount_type IN ('Percent', 'Amount')),
+  discount_amount DECIMAL(10,2),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -69,6 +72,9 @@ CREATE TABLE IF NOT EXISTS public.promotions (
 -- Comments for documentation
 COMMENT ON COLUMN public.promotions.mindbody_service_ids IS 'Array of Mindbody service IDs included in this promotion';
 COMMENT ON COLUMN public.promotions.original_price IS 'Original combined price of all services before promotional discount';
+COMMENT ON COLUMN public.promotions.promo_code IS 'Mindbody promotional code string';
+COMMENT ON COLUMN public.promotions.discount_type IS 'Type of discount: Percent or Amount';
+COMMENT ON COLUMN public.promotions.discount_amount IS 'Discount value (percentage or fixed amount)';
 
 -- Enable RLS
 ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
