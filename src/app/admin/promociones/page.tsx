@@ -206,27 +206,38 @@ export default function AdminPromotionsPage() {
 
   // Import promo code data into form
   const importPromoCode = (promoCode: MindbodyPromoCode) => {
-    // Get the applicable service names from the promo code
-    const applicableServiceNames = promoCode.ApplicableItems
+    // Get the applicable service items from the promo code
+    const applicableServices = promoCode.ApplicableItems
       .filter(item => item.Type === 'Service')
-      .map(item => item.Name.toLowerCase().trim())
 
-    // Match services by name (case-insensitive, partial match)
-    // This is more reliable than matching by ID since promo codes use Product IDs
-    // while our services list uses SessionType IDs
+    // Try to match services by name using flexible matching
     const matchedServiceIds: number[] = []
     const matchedServiceNames: string[] = []
 
+    // Helper to extract keywords from a name for matching
+    const getKeywords = (name: string): string[] => {
+      return name
+        .toLowerCase()
+        .replace(/\d+\s*min(utos?)?/gi, '') // Remove duration
+        .replace(/[^\w\sáéíóúñü]/g, ' ') // Remove special chars except accents
+        .split(/\s+/)
+        .filter(w => w.length > 2) // Only words with 3+ chars
+    }
+
     for (const service of mindbodyServices) {
-      const serviceName = service.Name.toLowerCase().trim()
-      // Check if this service name matches any applicable item name
-      const isMatch = applicableServiceNames.some(applicableName =>
-        serviceName.includes(applicableName) ||
-        applicableName.includes(serviceName) ||
-        // Also try without duration suffix (e.g., "Masaje - 60 min" matches "Masaje")
-        serviceName.split('-')[0].trim().includes(applicableName.split('-')[0].trim()) ||
-        applicableName.split('-')[0].trim().includes(serviceName.split('-')[0].trim())
-      )
+      const serviceKeywords = getKeywords(service.Name)
+
+      // Check if this service matches any applicable item
+      const isMatch = applicableServices.some(applicable => {
+        const applicableKeywords = getKeywords(applicable.Name)
+
+        // Match if any significant keyword matches
+        return serviceKeywords.some(sk =>
+          applicableKeywords.some(ak =>
+            sk.includes(ak) || ak.includes(sk)
+          )
+        )
+      })
 
       if (isMatch) {
         matchedServiceIds.push(service.Id)
@@ -234,7 +245,8 @@ export default function AdminPromotionsPage() {
       }
     }
 
-    console.log('Promo code applicable items:', promoCode.ApplicableItems)
+    console.log('Promo code applicable items:', applicableServices.map(s => s.Name))
+    console.log('Available local services:', mindbodyServices.map(s => s.Name).slice(0, 10), '...')
     console.log('Matched service IDs:', matchedServiceIds)
     console.log('Matched service names:', matchedServiceNames)
 
@@ -242,36 +254,47 @@ export default function AdminPromotionsPage() {
     const { totalPrice, totalDuration } = calculateTotals(matchedServiceIds)
 
     // Calculate the promotional price based on discount type
-    let promoPrice = totalPrice
-    if (promoCode.DiscountType === 'Percent') {
-      promoPrice = totalPrice * (1 - promoCode.DiscountAmount / 100)
-    } else {
-      promoPrice = totalPrice - promoCode.DiscountAmount
+    let promoPrice = 0
+    if (matchedServiceIds.length > 0 && totalPrice > 0) {
+      if (promoCode.DiscountType === 'Percent') {
+        promoPrice = totalPrice * (1 - promoCode.DiscountAmount / 100)
+      } else {
+        promoPrice = Math.max(0, totalPrice - promoCode.DiscountAmount)
+      }
     }
 
-    // If no services matched but we have applicable items, use the promo code's own names
-    const finalServiceNames = matchedServiceNames.length > 0
-      ? matchedServiceNames
-      : promoCode.ApplicableItems.filter(i => i.Type === 'Service').map(i => i.Name)
+    // Build description including the Mindbody services for reference
+    const applicableServicesList = applicableServices.map(s => s.Name).join(', ')
+    const descriptionNote = matchedServiceIds.length === 0 && applicableServices.length > 0
+      ? `\n\n[Servicios en Mindbody: ${applicableServicesList}]`
+      : ''
 
     setFormData({
       ...formData,
       title_es: promoCode.Name,
       title_en: promoCode.Name,
-      description_es: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} de descuento. Código: ${promoCode.Code}`,
+      description_es: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} de descuento. Código: ${promoCode.Code}${descriptionNote}`,
       description_en: `${promoCode.DiscountType === 'Percent' ? promoCode.DiscountAmount + '%' : '$' + promoCode.DiscountAmount} off. Code: ${promoCode.Code}`,
-      price: Math.round(promoPrice * 100) / 100,
-      original_price: totalPrice > 0 ? totalPrice : null,
-      duration_minutes: totalDuration,
-      // Keep existing dates - don't import from Mindbody
-      // valid_from and valid_until are set manually for website availability
-      services: finalServiceNames,
+      price: promoPrice > 0 ? Math.round(promoPrice * 100) / 100 : formData.price,
+      original_price: totalPrice > 0 ? totalPrice : formData.original_price,
+      duration_minutes: totalDuration > 0 ? totalDuration : formData.duration_minutes,
+      services: matchedServiceNames.length > 0 ? matchedServiceNames : applicableServices.map(s => s.Name),
       mindbody_service_ids: matchedServiceIds,
     })
 
-    // Show feedback if no services were matched
-    if (matchedServiceIds.length === 0 && promoCode.ApplicableItems.length > 0) {
-      console.warn('No local services matched the promo code applicable items. You may need to select services manually.')
+    // If no services matched, pre-fill the service search to help user find services manually
+    if (matchedServiceIds.length === 0 && applicableServices.length > 0) {
+      // Try to extract a useful search term from the first applicable service
+      const firstService = applicableServices[0].Name
+      const searchTerm = firstService
+        .split(/[-–]/)[0]  // Get text before dash
+        .replace(/\d+\s*min(utos?)?/gi, '') // Remove duration
+        .trim()
+        .split(' ')[0] // Get first word
+
+      if (searchTerm.length > 2) {
+        setServiceSearch(searchTerm)
+      }
     }
 
     setShowPromoLookup(false)
