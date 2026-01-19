@@ -22,6 +22,14 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/api/promotions/[id]/with-services",
+      "regex": "^/api/promotions/([^/]+?)/with\\-services(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/promotions/(?<nxtPid>[^/]+?)/with\\-services(?:/)?$"
+    },
+    {
       "page": "/[locale]",
       "regex": "^/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -172,6 +180,12 @@
       "namedRegex": "^/admin/galeria(?:/)?$"
     },
     {
+      "page": "/admin/imagenes",
+      "regex": "^/admin/imagenes(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/imagenes(?:/)?$"
+    },
+    {
       "page": "/admin/login",
       "regex": "^/admin/login(?:/)?$",
       "routeKeys": {},
@@ -188,6 +202,18 @@
       "regex": "^/admin/tratamientos(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/tratamientos(?:/)?$"
+    },
+    {
+      "page": "/api/admin/site-images",
+      "regex": "^/api/admin/site\\-images(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/site\\-images(?:/)?$"
+    },
+    {
+      "page": "/api/admin/site-images/upload",
+      "regex": "^/api/admin/site\\-images/upload(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/site\\-images/upload(?:/)?$"
     },
     {
       "page": "/api/admin/treatments",
@@ -248,6 +274,12 @@
       "regex": "^/api/mindbody/locations(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/mindbody/locations(?:/)?$"
+    },
+    {
+      "page": "/api/mindbody/promocodes",
+      "regex": "^/api/mindbody/promocodes(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/mindbody/promocodes(?:/)?$"
     },
     {
       "page": "/api/mindbody/services",

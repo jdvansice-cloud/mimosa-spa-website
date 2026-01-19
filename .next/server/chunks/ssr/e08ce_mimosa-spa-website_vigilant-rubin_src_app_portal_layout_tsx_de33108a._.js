@@ -1,0 +1,3 @@
+module.exports=[53158,a=>{"use strict";var b=a.i(28229);function c({children:a}){return(0,b.jsx)("div",{className:"min-h-screen bg-gradient-to-br from-beige-50 to-white",children:a})}a.s(["default",()=>c,"metadata",0,{title:"Mi Portal | Mimosa Spa Retreat",description:"Accede a tu historial de citas, compras y reserva nuevos tratamientos"}])}];
+
+//# sourceMappingURL=e08ce_mimosa-spa-website_vigilant-rubin_src_app_portal_layout_tsx_de33108a._.js.map

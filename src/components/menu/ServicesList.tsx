@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import type { MindbodyService } from '@/types/booking'
 import { useTranslations } from 'next-intl'
 import { BookingButton } from './BookingButton'
+import { ExpandableDescription } from './ExpandableDescription'
 
 interface TreatmentSetting {
   mindbody_service_id: number
@@ -134,18 +135,65 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
   const topPicks = services.filter(s => s.isTopPick)
   const regularServices = services.filter(s => !s.isTopPick)
 
-  // Render a single service card
+  // Render a single service card - optimized for mobile
   const renderServiceCard = (service: ServiceWithSettings, index: number, isTopPick: boolean = false) => (
     <motion.div
       key={service.Id}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      className={`bg-white rounded-xl border p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow ${
+      transition={{ duration: 0.3, delay: index * 0.03 }}
+      className={`bg-white rounded-lg md:rounded-xl border p-3 md:p-6 shadow-sm hover:shadow-md transition-shadow ${
         isTopPick ? 'border-gold-300 ring-1 ring-gold-200' : 'border-beige-200'
       }`}
     >
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      {/* Mobile Layout: Compact single column */}
+      <div className="md:hidden">
+        {/* Header row: Title + Duration + Price */}
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            {isTopPick && (
+              <Star className="w-4 h-4 text-gold-500 fill-gold-500 flex-shrink-0" />
+            )}
+            <h3 className="text-sm font-semibold text-dark truncate">
+              {service.Name}
+            </h3>
+            {service.Duration > 0 && (
+              <span className="text-xs text-warm-gray flex-shrink-0">
+                - {service.Duration} {t('duration')}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Description - expandable on mobile */}
+        {service.Description && (
+          <ExpandableDescription
+            html={service.Description}
+            maxLines={2}
+            seeMoreText={t('seeMore')}
+            seeLessText={t('seeLess')}
+            className="mb-2"
+          />
+        )}
+
+        {/* Price and Book button row */}
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-bold text-gold-600">
+            {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
+          </span>
+          {service.showBookingButton && (
+            <BookingButton
+              service={service}
+              locale={locale}
+              label={t('bookNow')}
+              className="inline-flex items-center px-3 py-1.5 bg-gold text-dark text-xs font-semibold rounded-lg hover:bg-gold/90 transition-colors"
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Desktop Layout: Original side-by-side */}
+      <div className="hidden md:flex md:flex-row md:items-center md:justify-between gap-4">
         {/* Service Info */}
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -193,15 +241,15 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
   )
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Top Picks Section */}
       {topPicks.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Star className="w-6 h-6 text-gold-500 fill-gold-500" />
-            <h2 className="text-xl font-semibold text-dark">{t('topPicks')}</h2>
+          <div className="flex items-center gap-2 mb-2 md:mb-4">
+            <Star className="w-5 h-5 md:w-6 md:h-6 text-gold-500 fill-gold-500" />
+            <h2 className="text-lg md:text-xl font-semibold text-dark">{t('topPicks')}</h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-2 md:space-y-4">
             {topPicks.map((service, index) => renderServiceCard(service, index, true))}
           </div>
         </div>
@@ -211,9 +259,9 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
       {regularServices.length > 0 && (
         <div>
           {topPicks.length > 0 && (
-            <h2 className="text-xl font-semibold text-dark mb-4">{t('allServices')}</h2>
+            <h2 className="text-lg md:text-xl font-semibold text-dark mb-2 md:mb-4">{t('allServices')}</h2>
           )}
-          <div className="space-y-4">
+          <div className="space-y-2 md:space-y-4">
             {regularServices.map((service, index) => renderServiceCard(service, index))}
           </div>
         </div>

@@ -1594,26 +1594,50 @@ interface PromoCodesResponse {
 }
 
 // Get all promo codes from Mindbody
+// Note: This endpoint requires staff user authorization
+// Per API docs: GET /public/v6/site/promocodes (not /sale/promocodes)
 export async function getPromoCodes(options?: {
   searchText?: string
   activeOnly?: boolean
 }): Promise<MindbodyPromoCode[]> {
-  const params: Record<string, ParamValue> = {}
-
-  if (options?.searchText) {
-    params.SearchText = options.searchText
+  const params: Record<string, ParamValue> = {
+    'request.limit': 100,
+    'request.offset': 0,
   }
 
-  // Mindbody might have a filter for active only
+  // Active only filter - defaults to true per API docs
   if (options?.activeOnly !== undefined) {
-    params.ActiveOnly = options.activeOnly
+    params['request.activeOnly'] = options.activeOnly
   }
 
-  const response = await mindbodyRequest<PromoCodesResponse>('/sale/promocodes', {
-    params
-  })
+  // Note: The API doesn't have a native search parameter,
+  // so we fetch all and filter client-side for partial text matching
+  console.log('Fetching promo codes from Mindbody with params:', params)
 
-  return response.PromoCodes || []
+  try {
+    const response = await mindbodyRequest<PromoCodesResponse>('/site/promocodes', {
+      params
+    })
+
+    let promoCodes = response.PromoCodes || []
+    console.log('Received', promoCodes.length, 'promo codes from Mindbody')
+
+    // If searchText provided, filter client-side by name, code, or applicable item names
+    if (options?.searchText) {
+      const searchLower = options.searchText.toLowerCase()
+      promoCodes = promoCodes.filter(pc =>
+        pc.Name?.toLowerCase().includes(searchLower) ||
+        pc.Code?.toLowerCase().includes(searchLower) ||
+        pc.ApplicableItems?.some(item => item.Name?.toLowerCase().includes(searchLower))
+      )
+      console.log('Filtered to', promoCodes.length, 'promo codes matching:', options.searchText)
+    }
+
+    return promoCodes
+  } catch (error) {
+    console.error('Error fetching promo codes:', error)
+    throw error
+  }
 }
 
 // Get a single promo code by code string

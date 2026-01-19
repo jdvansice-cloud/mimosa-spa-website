@@ -22,8 +22,8 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
 
   return (
     <div className="min-h-screen bg-cream">
-      {/* Hero Section with Image */}
-      <section className="relative h-[25vh] md:h-[30vh] overflow-hidden">
+      {/* Hero Section with Image - compact on mobile */}
+      <section className="relative h-[12vh] md:h-[30vh] overflow-hidden">
         <Image
           src="/Tratamientos Corporales.png"
           alt={t('title')}
@@ -34,25 +34,25 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
         <div className="absolute inset-0 bg-dark/50" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white px-4">
-            <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-wide mb-4">
+            <h1 className="text-xl md:text-5xl font-display font-semibold tracking-wide">
               {t('title')}
             </h1>
           </div>
         </div>
       </section>
 
-      {/* Intro Section */}
-      <section className="py-12 md:py-16 bg-beige">
-        <div className="container-spa max-w-3xl text-center">
-          <p className="text-lg md:text-xl text-warm-gray-700 leading-relaxed">
+      {/* Intro Section - compact on mobile */}
+      <section className="py-3 md:py-16 bg-beige">
+        <div className="container-spa max-w-3xl text-center px-4">
+          <p className="text-xs md:text-xl text-warm-gray-700 leading-relaxed">
             {t('intro')}
           </p>
         </div>
       </section>
 
       {/* Services List */}
-      <section className="section">
-        <div className="container-spa">
+      <section className="py-3 md:py-12">
+        <div className="container-spa px-3 md:px-4">
           <Suspense fallback={<Spinner size="lg" className="py-12" />}>
             <ServicesList
               programIds={[PROGRAM_IDS.TRATAMIENTOS_CORPORALES]}
@@ -63,11 +63,11 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
       </section>
 
       {/* Back to Menu */}
-      <section className="pb-12">
+      <section className="pb-6 md:pb-12">
         <div className="container-spa text-center">
           <Link
             href={`/${locale}/menu`}
-            className="inline-flex items-center text-gold-600 hover:text-gold-700 font-medium transition-colors"
+            className="inline-flex items-center text-gold-600 hover:text-gold-700 font-medium transition-colors text-sm md:text-base"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
