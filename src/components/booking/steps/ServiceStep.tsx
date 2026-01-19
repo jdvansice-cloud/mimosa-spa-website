@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check, Star, Info, X } from 'lucide-react'
+import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check, Star, Info, X, Tag, Percent } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
-import type { MindbodyService } from '@/types/booking'
+import type { MindbodyService, PromotionWithServices } from '@/types/booking'
+import type { Promotion } from '@/types'
 
 // Description Modal Component
 function DescriptionModal({
@@ -82,6 +83,100 @@ interface TreatmentSetting {
   is_visible: boolean
   show_booking_button: boolean
   is_top_pick: boolean
+}
+
+// Promotion Tile Component
+function PromotionTile({
+  promotion,
+  isSelected,
+  isLoading,
+  onSelect
+}: {
+  promotion: Promotion
+  isSelected: boolean
+  isLoading: boolean
+  onSelect: () => void
+}) {
+  const discount = promotion.original_price && promotion.price
+    ? Math.round(((promotion.original_price - promotion.price) / promotion.original_price) * 100)
+    : 0
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={isLoading}
+      className={`
+        relative rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full p-4
+        ${isSelected
+          ? 'border-gold bg-gradient-to-br from-gold/20 to-gold/5 shadow-lg ring-2 ring-gold/30'
+          : 'border-gold/30 bg-gradient-to-br from-gold/10 to-beige-50 hover:border-gold/60 hover:shadow-md'
+        }
+        ${isLoading ? 'opacity-70 cursor-wait' : ''}
+      `}
+    >
+      {/* Discount Badge */}
+      {discount > 0 && (
+        <div className="absolute top-2 right-2 z-10">
+          <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+            <Percent className="w-3 h-3" />
+            {discount}% OFF
+          </div>
+        </div>
+      )}
+
+      {/* Selected Badge */}
+      {isSelected && (
+        <div className="absolute top-2 left-2 z-10">
+          <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
+            <Check className="w-4 h-4 text-dark" />
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className={isSelected ? 'pl-8' : ''}>
+        <div className="flex items-start gap-2 mb-2">
+          <Tag className="w-4 h-4 text-gold-600 mt-0.5 flex-shrink-0" />
+          <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug pr-16">
+            {promotion.title_es}
+          </h4>
+        </div>
+
+        {/* Service count hint */}
+        {promotion.mindbody_service_ids && promotion.mindbody_service_ids.length > 0 && (
+          <p className="text-xs text-warm-gray mb-2 ml-6">
+            Incluye {promotion.mindbody_service_ids.length} servicio{promotion.mindbody_service_ids.length !== 1 ? 's' : ''}
+          </p>
+        )}
+
+        {/* Price Row */}
+        <div className="flex items-center gap-3 ml-6">
+          <span className="text-lg font-bold text-gold-700">
+            ${promotion.price.toFixed(0)}
+          </span>
+          {promotion.original_price && promotion.original_price > promotion.price && (
+            <span className="text-sm text-warm-gray line-through">
+              ${promotion.original_price.toFixed(0)}
+            </span>
+          )}
+          {promotion.duration_minutes && (
+            <span className="flex items-center gap-1 text-xs text-warm-gray bg-white/60 px-2 py-0.5 rounded-full">
+              <Clock className="w-3 h-3" />
+              {promotion.duration_minutes} min
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-xl">
+          <Loader2 className="w-6 h-6 text-gold animate-spin" />
+        </div>
+      )}
+    </button>
+  )
 }
 
 // Category configuration with icons and colors
@@ -183,6 +278,10 @@ export function ServiceStep() {
     selectedServices,
     addService,
     removeService,
+    activePromotion,
+    loadPromotion,
+    clearPromotion,
+    setStep,
   } = useBookingStore()
 
   const hasServices = useBookingStore(selectHasServices)
@@ -190,26 +289,33 @@ export function ServiceStep() {
   const [topPickServices, setTopPickServices] = useState<MindbodyService[]>([])
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] = useState(true)
+  const [isPromotionsExpanded, setIsPromotionsExpanded] = useState(true)
   const [isLoadingServices, setIsLoadingServices] = useState(false)
   const [servicesError, setServicesError] = useState<string | null>(null)
   const [descriptionService, setDescriptionService] = useState<MindbodyService | null>(null)
 
-  // Fetch services and treatment settings on mount
+  // Promotion state
+  const [activePromotions, setActivePromotions] = useState<Promotion[]>([])
+  const [loadingPromotionId, setLoadingPromotionId] = useState<string | null>(null)
+
+  // Fetch services, treatment settings, and active promotions on mount
   useEffect(() => {
-    async function fetchServices() {
+    async function fetchServicesAndPromotions() {
       if (!selectedLocation) return
 
       setIsLoadingServices(true)
       setServicesError(null)
       try {
-        // Fetch services and treatment settings in parallel
-        const [servicesResponse, settingsResponse] = await Promise.all([
+        // Fetch services, treatment settings, and promotions in parallel
+        const [servicesResponse, settingsResponse, promotionsResponse] = await Promise.all([
           fetch(`/api/mindbody/services?locationId=${selectedLocation.Id}&type=main`),
-          fetch('/api/treatments/settings')
+          fetch('/api/treatments/settings'),
+          fetch('/api/promotions?active=true')
         ])
 
         const servicesData = await servicesResponse.json()
         const settingsData = await settingsResponse.json()
+        const promotionsData = await promotionsResponse.json()
 
         if (!servicesResponse.ok) {
           throw new Error(servicesData.error || 'Error al cargar servicios')
@@ -233,8 +339,16 @@ export function ServiceStep() {
         setGroupedServices(servicesData.grouped)
         setTopPickServices(topPicks)
 
+        // Set active promotions (filter only those with mindbody_service_ids)
+        if (promotionsData.data) {
+          const promotionsWithServices = promotionsData.data.filter(
+            (p: Promotion) => p.mindbody_service_ids && p.mindbody_service_ids.length > 0
+          )
+          setActivePromotions(promotionsWithServices)
+        }
+
         // Start with all categories collapsed (empty set)
-        // Recommendations section starts expanded
+        // Recommendations and promotions sections start expanded
         setExpandedCategories(new Set())
       } catch (err) {
         setServicesError(err instanceof Error ? err.message : 'Error de conexión')
@@ -243,8 +357,42 @@ export function ServiceStep() {
       }
     }
 
-    fetchServices()
+    fetchServicesAndPromotions()
   }, [selectedLocation, setServices])
+
+  // Handle selecting a promotion
+  const handleSelectPromotion = async (promotion: Promotion) => {
+    // If clicking the already selected promotion, deselect it
+    if (activePromotion?.id === promotion.id) {
+      clearPromotion()
+      return
+    }
+
+    setLoadingPromotionId(promotion.id)
+    try {
+      // Fetch promotion with full Mindbody services
+      const response = await fetch(`/api/promotions/${promotion.id}/with-services`)
+
+      if (!response.ok) {
+        console.error('Failed to fetch promotion services')
+        return
+      }
+
+      const { data: promotionWithServices } = await response.json() as { data: PromotionWithServices }
+
+      // Load promotion into cart (this will set selectedServices and activePromotion)
+      loadPromotion(promotionWithServices)
+
+      // loadPromotion sets step to 'addons', but we want to stay on services
+      // so user can see what was added and continue browsing
+      setStep('services')
+
+    } catch (error) {
+      console.error('Error loading promotion:', error)
+    } finally {
+      setLoadingPromotionId(null)
+    }
+  }
   
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
@@ -306,6 +454,69 @@ export function ServiceStep() {
       {servicesError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-6">
           {servicesError}
+        </div>
+      )}
+
+      {/* Active Promotions Section */}
+      {!isLoadingServices && activePromotions.length > 0 && (
+        <div className="mb-4 rounded-2xl border-2 border-gold/40 overflow-hidden bg-gradient-to-br from-gold/15 via-gold/5 to-beige-50 shadow-sm">
+          {/* Promotions Header */}
+          <button
+            onClick={() => setIsPromotionsExpanded(!isPromotionsExpanded)}
+            className="w-full px-4 py-4 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/70 rounded-full flex items-center justify-center shadow-md">
+                <Percent className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-dark">Promociones Activas</h3>
+                <p className="text-xs text-warm-gray">
+                  {activePromotions.length} oferta{activePromotions.length !== 1 ? 's' : ''} especial{activePromotions.length !== 1 ? 'es' : ''}
+                  {activePromotion && (
+                    <span className="ml-2 text-gold-600 font-medium">• 1 seleccionada</span>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className={`
+              w-8 h-8 rounded-full flex items-center justify-center
+              ${isPromotionsExpanded ? 'bg-gold/20' : 'bg-white/50'}
+              transition-colors
+            `}>
+              {isPromotionsExpanded ? (
+                <ChevronUp className="w-5 h-5 text-dark" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-warm-gray" />
+              )}
+            </div>
+          </button>
+
+          {/* Promotions List */}
+          <AnimatePresence>
+            {isPromotionsExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="p-4 pt-0 space-y-3">
+                  {activePromotions.map((promotion) => (
+                    <PromotionTile
+                      key={promotion.id}
+                      promotion={promotion}
+                      isSelected={activePromotion?.id === promotion.id}
+                      isLoading={loadingPromotionId === promotion.id}
+                      onSelect={() => handleSelectPromotion(promotion)}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 

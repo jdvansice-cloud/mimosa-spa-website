@@ -14,8 +14,19 @@ These email templates are designed to match the Mimosa Spa website branding.
 ### magic-link.html
 Used for passwordless login (Magic Link authentication).
 
+**Supabase Template:** Magic Link
+
 **Supabase Variables:**
 - `{{ .ConfirmationURL }}` - The magic link URL
+- `{{ .SiteURL }}` - Your site URL
+
+### confirm-signup.html
+Used when a new user signs up and needs to confirm their email address.
+
+**Supabase Template:** Confirm signup
+
+**Supabase Variables:**
+- `{{ .ConfirmationURL }}` - The confirmation URL
 - `{{ .SiteURL }}` - Your site URL
 
 ### How to Update
