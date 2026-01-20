@@ -24,7 +24,8 @@ export interface TreatmentSetting {
   price: number
   duration: number
   description: string
-  is_visible: boolean
+  is_visible: boolean // Show on menu pages
+  show_in_booking: boolean // Show in booking widget for direct selection
   show_booking_button: boolean
   is_top_pick: boolean
   sort_order: number
@@ -100,6 +101,7 @@ export async function GET() {
         duration: service.Duration,
         description: service.Description || '',
         is_visible: existingSetting?.is_visible ?? false, // Default: hidden until admin enables
+        show_in_booking: existingSetting?.show_in_booking ?? service.OnlineBooking, // Default: same as online bookable
         show_booking_button: existingSetting?.show_booking_button ?? service.OnlineBooking,
         is_top_pick: existingSetting?.is_top_pick ?? false,
         sort_order: existingSetting?.sort_order ?? 0,
@@ -176,6 +178,7 @@ export async function POST(request: NextRequest) {
       duration: t.duration,
       description: t.description,
       is_visible: t.is_visible,
+      show_in_booking: t.show_in_booking,
       show_booking_button: t.show_booking_button,
       is_top_pick: t.is_top_pick,
       sort_order: t.sort_order
@@ -250,6 +253,7 @@ export async function PATCH(request: NextRequest) {
           duration: updates.duration || 0,
           description: updates.description || '',
           is_visible: updates.is_visible ?? false, // Default: hidden until admin enables
+          show_in_booking: updates.show_in_booking ?? true, // Default: show in booking widget
           show_booking_button: updates.show_booking_button ?? true,
           is_top_pick: updates.is_top_pick ?? false,
           sort_order: updates.sort_order ?? 0

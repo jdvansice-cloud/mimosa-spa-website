@@ -16,17 +16,18 @@ function getSupabaseAdmin() {
 
 export interface PublicTreatmentSetting {
   mindbody_service_id: number
-  is_visible: boolean
+  is_visible: boolean // Show on menu pages
+  show_in_booking: boolean // Show in booking widget for direct selection
   show_booking_button: boolean
   is_top_pick: boolean
 }
 
-// GET - Fetch public treatment settings (visibility, booking button status, and top picks)
+// GET - Fetch public treatment settings (visibility, booking widget visibility, booking button status, and top picks)
 export async function GET() {
   try {
     const { data: settings, error } = await getSupabaseAdmin()
       .from('treatment_settings')
-      .select('mindbody_service_id, is_visible, show_booking_button, is_top_pick')
+      .select('mindbody_service_id, is_visible, show_in_booking, show_booking_button, is_top_pick')
 
     if (error) {
       console.error('Error fetching treatment settings:', error)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw, Star, ChevronDown, ChevronRight } from 'lucide-react'
+import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw, Star, ChevronDown, ChevronRight, ShoppingBag } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { PROGRAM_NAMES } from '@/lib/booking/constants'
@@ -15,7 +15,8 @@ interface Treatment {
   price: number
   duration: number
   description: string
-  is_visible: boolean
+  is_visible: boolean // Show on menu pages
+  show_in_booking: boolean // Show in booking widget for direct selection
   show_booking_button: boolean
   is_top_pick: boolean
   sort_order: number
@@ -94,11 +95,21 @@ export default function AdminTreatmentsPage() {
     return acc
   }, {} as Record<string, Treatment[]>)
 
-  // Toggle visibility
+  // Toggle visibility (menu pages)
   const toggleVisibility = (mindbodyServiceId: number) => {
     setTreatments(prev => prev.map(t =>
       t.mindbody_service_id === mindbodyServiceId
         ? { ...t, is_visible: !t.is_visible }
+        : t
+    ))
+    setHasChanges(true)
+  }
+
+  // Toggle show in booking widget
+  const toggleShowInBooking = (mindbodyServiceId: number) => {
+    setTreatments(prev => prev.map(t =>
+      t.mindbody_service_id === mindbodyServiceId
+        ? { ...t, show_in_booking: !t.show_in_booking }
         : t
     ))
     setHasChanges(true)
@@ -167,7 +178,7 @@ export default function AdminTreatmentsPage() {
         <div>
           <h1 className="text-3xl font-display font-semibold text-dark">Tratamientos</h1>
           <p className="text-warm-gray mt-1">
-            Gestiona la visibilidad de los tratamientos en el menú del sitio web
+            Gestiona la visibilidad de los tratamientos en el menú y en el widget de reservas
           </p>
         </div>
         <div className="flex gap-2">
@@ -224,21 +235,21 @@ export default function AdminTreatmentsPage() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <Card variant="default" padding="md">
           <p className="text-sm text-warm-gray">Total</p>
           <p className="text-2xl font-semibold text-dark">{treatments.length}</p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">Visibles</p>
+          <p className="text-sm text-warm-gray">En Menú</p>
           <p className="text-2xl font-semibold text-green-600">
             {treatments.filter(t => t.is_visible).length}
           </p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">Ocultos</p>
-          <p className="text-2xl font-semibold text-red-600">
-            {treatments.filter(t => !t.is_visible).length}
+          <p className="text-sm text-warm-gray">En Widget</p>
+          <p className="text-2xl font-semibold text-purple-600">
+            {treatments.filter(t => t.show_in_booking).length}
           </p>
         </Card>
         <Card variant="default" padding="md">
@@ -248,9 +259,15 @@ export default function AdminTreatmentsPage() {
           </p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">Reservables Online</p>
+          <p className="text-sm text-warm-gray">Online</p>
           <p className="text-2xl font-semibold text-blue-600">
             {treatments.filter(t => t.is_online_bookable).length}
+          </p>
+        </Card>
+        <Card variant="default" padding="md">
+          <p className="text-sm text-warm-gray">Ocultos</p>
+          <p className="text-2xl font-semibold text-red-600">
+            {treatments.filter(t => !t.is_visible && !t.show_in_booking).length}
           </p>
         </Card>
       </div>
@@ -311,7 +328,8 @@ export default function AdminTreatmentsPage() {
                   <th className="text-left p-3 text-sm font-medium text-dark">Precio</th>
                   <th className="text-left p-3 text-sm font-medium text-dark">Duración</th>
                   <th className="text-center p-3 text-sm font-medium text-dark">Online</th>
-                  <th className="text-center p-3 text-sm font-medium text-dark">Visible</th>
+                  <th className="text-center p-3 text-sm font-medium text-dark" title="Visible en páginas de menú">Menú</th>
+                  <th className="text-center p-3 text-sm font-medium text-dark" title="Visible en widget de reservas para selección directa">Widget</th>
                   <th className="text-center p-3 text-sm font-medium text-dark">Top Pick</th>
                   <th className="text-center p-3 text-sm font-medium text-dark">Botón Reservar</th>
                 </tr>
@@ -367,6 +385,26 @@ export default function AdminTreatmentsPage() {
                           <EyeOff className="w-4 h-4" />
                         )}
                       </button>
+                    </td>
+                    <td className="p-3 text-center">
+                      {treatment.is_online_bookable ? (
+                        <button
+                          onClick={() => toggleShowInBooking(treatment.mindbody_service_id)}
+                          className={cn(
+                            "p-2 rounded-lg transition-colors",
+                            treatment.show_in_booking
+                              ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                              : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                          )}
+                          title={treatment.show_in_booking ? 'Ocultar del widget de reservas' : 'Mostrar en el widget de reservas'}
+                        >
+                          <ShoppingBag className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center p-2 rounded-lg bg-gray-50 text-gray-300">
+                          <ShoppingBag className="w-4 h-4" />
+                        </span>
+                      )}
                     </td>
                     <td className="p-3 text-center">
                       <button

@@ -81,6 +81,7 @@ function DescriptionModal({
 interface TreatmentSetting {
   mindbody_service_id: number
   is_visible: boolean
+  show_in_booking: boolean // Show in booking widget for direct selection
   show_booking_button: boolean
   is_top_pick: boolean
 }
@@ -326,6 +327,7 @@ export function ServiceStep() {
   const hasServices = useBookingStore(selectHasServices)
   const [groupedServices, setGroupedServices] = useState<Record<string, MindbodyService[]>>({})
   const [topPickServices, setTopPickServices] = useState<MindbodyService[]>([])
+  const [treatmentSettings, setTreatmentSettings] = useState<Map<number, TreatmentSetting>>(new Map())
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] = useState(true)
   const [isPromotionsExpanded, setIsPromotionsExpanded] = useState(true)
@@ -367,15 +369,33 @@ export function ServiceStep() {
             settingsMap.set(setting.mindbody_service_id, setting)
           }
         }
+        setTreatmentSettings(settingsMap)
 
-        // Filter top pick services
+        // Helper to check if service should be shown in booking widget
+        // Default to true if no setting exists (allow services without explicit settings)
+        const shouldShowInBooking = (serviceId: number) => {
+          const setting = settingsMap.get(serviceId)
+          return setting?.show_in_booking !== false // Show if not explicitly hidden
+        }
+
+        // Filter top pick services (must be top pick AND show_in_booking)
         const topPicks = servicesData.services.filter((service: MindbodyService) => {
           const setting = settingsMap.get(service.Id)
-          return setting?.is_top_pick === true
+          return setting?.is_top_pick === true && shouldShowInBooking(service.Id)
         })
 
-        setServices(servicesData.services)
-        setGroupedServices(servicesData.grouped)
+        // Filter grouped services to only show those with show_in_booking: true
+        const filteredGrouped: Record<string, MindbodyService[]> = {}
+        for (const [category, categoryServices] of Object.entries(servicesData.grouped as Record<string, MindbodyService[]>)) {
+          const filtered = categoryServices.filter((service: MindbodyService) => shouldShowInBooking(service.Id))
+          // Only include categories that have at least one visible service
+          if (filtered.length > 0) {
+            filteredGrouped[category] = filtered
+          }
+        }
+
+        setServices(servicesData.services) // Keep all services for promotion lookups
+        setGroupedServices(filteredGrouped)
         setTopPickServices(topPicks)
 
         // Set active promotions (filter only those with mindbody_service_ids)
