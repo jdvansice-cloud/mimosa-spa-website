@@ -339,7 +339,7 @@ export async function getSessionTypes(onlineOnly: boolean = true) {
   return sessionTypes
 }
 
-// Normalize name for flexible matching between sale/services and sessiontypes
+// Normalize name for matching between sale/services and sessiontypes
 function normalizeServiceName(name: string): string {
   return name
     .toLowerCase()
@@ -349,43 +349,16 @@ function normalizeServiceName(name: string): string {
     .replace(/[–—]/g, '-') // Different dash types
 }
 
-// Strip duration suffix from name for base name comparison
-// Handles patterns like "- 30 min", "- 35 min", "30 min", etc.
-function stripDurationFromName(name: string): string {
-  return name
-    .replace(/\s*-?\s*\d+\s*min\.?\s*$/i, '') // Remove " - 30 min" or "30 min" at end
-    .trim()
-}
-
-// Find matching session type with flexible matching
+// Find matching session type - exact match only
 function findSessionTypeMatch(
   name: string,
   sessionTypeMap: Map<string, { Id: number; Duration: number; ProgramId: number; Description?: string }>
 ): { Id: number; Duration: number; ProgramId: number; Description?: string } | undefined {
   const normalizedName = normalizeServiceName(name)
 
-  // Try exact match first
+  // Exact match only
   if (sessionTypeMap.has(normalizedName)) {
     return sessionTypeMap.get(normalizedName)
-  }
-
-  // Try partial match - service name contains session type name or vice versa
-  for (const [stName, stData] of sessionTypeMap.entries()) {
-    if (normalizedName.includes(stName) || stName.includes(normalizedName)) {
-      return stData
-    }
-  }
-
-  // Try base name match (without duration suffix)
-  // This handles cases like "Service - 30 min" matching "Service - 35 min"
-  const baseName = stripDurationFromName(normalizedName)
-  if (baseName.length > 5) { // Only try if base name is meaningful
-    for (const [stName, stData] of sessionTypeMap.entries()) {
-      const stBaseName = stripDurationFromName(stName)
-      if (baseName === stBaseName) {
-        return stData
-      }
-    }
   }
 
   return undefined

@@ -55,6 +55,37 @@ export async function GET() {
       }
     }
 
+    // Get the set of valid Mindbody service IDs
+    const validMindbodyIds = new Set(allServices.map(s => s.Id))
+
+    // Find orphaned settings (in Supabase but not in Mindbody)
+    const orphanedIds: number[] = []
+    for (const [mindbodyId] of settingsMap) {
+      if (!validMindbodyIds.has(mindbodyId)) {
+        orphanedIds.push(mindbodyId)
+      }
+    }
+
+    // Delete orphaned settings from Supabase
+    if (orphanedIds.length > 0) {
+      console.log(`Cleaning up ${orphanedIds.length} orphaned treatment settings:`, orphanedIds)
+      const { error: deleteError } = await getSupabaseAdmin()
+        .from('treatment_settings')
+        .delete()
+        .in('mindbody_service_id', orphanedIds)
+
+      if (deleteError) {
+        console.error('Error deleting orphaned settings:', deleteError)
+        // Continue anyway - not a critical error
+      } else {
+        console.log(`Successfully removed ${orphanedIds.length} orphaned treatment settings`)
+        // Remove from the map so they don't appear in the response
+        for (const id of orphanedIds) {
+          settingsMap.delete(id)
+        }
+      }
+    }
+
     // Merge Mindbody services with settings
     const treatments: TreatmentSetting[] = allServices.map(service => {
       const existingSetting = settingsMap.get(service.Id)
