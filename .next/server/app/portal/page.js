@@ -2,7 +2,7 @@ var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/portal/page
 R.c("server/chunks/ssr/[root-of-the-server]__ae0f649a._.js")
 R.c("server/chunks/ssr/98928_next_dist_b42aca34._.js")
 R.c("server/chunks/ssr/_claude-worktrees_mimosa-spa-website_vigilant-rubin_f9995454._.js")
-R.c("server/chunks/ssr/[root-of-the-server]__85d581eb._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__95492540._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__8f07f982._.js")
 R.c("server/chunks/ssr/98928_next_dist_4539a0a2._.js")
 R.c("server/chunks/ssr/98928_next_dist_client_components_builtin_global-error_bf5d7dd3.js")

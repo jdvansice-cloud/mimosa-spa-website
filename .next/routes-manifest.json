@@ -322,6 +322,12 @@
       "namedRegex": "^/api/promotions(?:/)?$"
     },
     {
+      "page": "/api/promotions/upload",
+      "regex": "^/api/promotions/upload(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/promotions/upload(?:/)?$"
+    },
+    {
       "page": "/api/site-images",
       "regex": "^/api/site\\-images(?:/)?$",
       "routeKeys": {},

@@ -43,6 +43,7 @@
   "/api/portal/profile/route": "/api/portal/profile",
   "/api/promotions/[id]/with-services/route": "/api/promotions/[id]/with-services",
   "/api/promotions/route": "/api/promotions",
+  "/api/promotions/upload/route": "/api/promotions/upload",
   "/api/site-images/route": "/api/site-images",
   "/api/treatments/settings/route": "/api/treatments/settings",
   "/cita/resultado/page": "/cita/resultado",

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Plus, Edit, Trash2, Search, Loader2, RefreshCw, Check, X, Download, Tag, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, Loader2, RefreshCw, Check, X, Download, Tag, ChevronDown, ChevronUp, Upload, Image as ImageIcon } from 'lucide-react'
+import Image from 'next/image'
 import { Button, Card, Modal } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { Promotion } from '@/types'
@@ -58,6 +59,7 @@ interface PromotionFormData {
   promo_code: string
   discount_type: 'Percent' | 'Amount' | null
   discount_amount: number | null
+  image_url: string | null
 }
 
 const defaultFormData: PromotionFormData = {
@@ -77,6 +79,7 @@ const defaultFormData: PromotionFormData = {
   promo_code: '',
   discount_type: null,
   discount_amount: null,
+  image_url: null,
 }
 
 export default function AdminPromotionsPage() {
@@ -102,6 +105,12 @@ export default function AdminPromotionsPage() {
   const promoSearchRef = useRef<HTMLInputElement>(null)
   const promoResultsRef = useRef<HTMLDivElement>(null)
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+
+  // Image upload state
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   // Fetch promotions from API
   const fetchPromotions = useCallback(async () => {
@@ -373,11 +382,60 @@ export default function AdminPromotionsPage() {
     })
   }
 
+  // Handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setImageUploadError(null)
+    setIsUploadingImage(true)
+
+    // Show preview
+    const reader = new FileReader()
+    reader.onload = () => setImagePreview(reader.result as string)
+    reader.readAsDataURL(file)
+
+    try {
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+
+      const response = await fetch('/api/promotions/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al subir imagen')
+      }
+
+      setFormData(prev => ({ ...prev, image_url: data.url }))
+      setImagePreview(null)
+    } catch (err) {
+      setImageUploadError(err instanceof Error ? err.message : 'Error al subir imagen')
+      setImagePreview(null)
+    } finally {
+      setIsUploadingImage(false)
+      if (imageInputRef.current) {
+        imageInputRef.current.value = ''
+      }
+    }
+  }
+
+  // Remove image
+  const handleRemoveImage = () => {
+    setFormData(prev => ({ ...prev, image_url: null }))
+    setImagePreview(null)
+  }
+
   // Open create modal
   const handleCreate = () => {
     setEditingPromotion(null)
     setFormData(defaultFormData)
     setServiceSearch('')
+    setImagePreview(null)
+    setImageUploadError(null)
     setIsModalOpen(true)
   }
 
@@ -401,8 +459,11 @@ export default function AdminPromotionsPage() {
       promo_code: promotion.promo_code || '',
       discount_type: promotion.discount_type || null,
       discount_amount: promotion.discount_amount || null,
+      image_url: promotion.image_url || null,
     })
     setServiceSearch('')
+    setImagePreview(null)
+    setImageUploadError(null)
     setIsModalOpen(true)
   }
 
@@ -748,6 +809,89 @@ export default function AdminPromotionsPage() {
                 onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
                 placeholder="Ej: Essence of Peace"
               />
+            </div>
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <label className="label">Imagen de la Promoción</label>
+            <p className="text-sm text-warm-gray mb-2">
+              Se mostrará en la página de promociones. Recomendado: imagen cuadrada, mínimo 400x400px.
+            </p>
+
+            <div className="flex items-start gap-4">
+              {/* Image Preview */}
+              <div className="w-32 h-32 flex-shrink-0 bg-beige-100 rounded-lg overflow-hidden relative border-2 border-dashed border-beige-300">
+                {(imagePreview || formData.image_url) ? (
+                  <>
+                    <Image
+                      src={imagePreview || formData.image_url || ''}
+                      alt="Preview"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                    {isUploadingImage && (
+                      <div className="absolute inset-0 bg-dark/50 flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageIcon className="w-8 h-8 text-beige-400" />
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Controls */}
+              <div className="flex-1 space-y-2">
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={isUploadingImage}
+                />
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={isUploadingImage}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-beige-300",
+                      "text-warm-gray hover:border-gold hover:text-gold transition-colors",
+                      isUploadingImage && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      {isUploadingImage ? 'Subiendo...' : formData.image_url ? 'Cambiar' : 'Subir imagen'}
+                    </span>
+                  </button>
+
+                  {formData.image_url && !isUploadingImage && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                      <span className="text-sm font-medium">Quitar</span>
+                    </button>
+                  )}
+                </div>
+
+                {imageUploadError && (
+                  <p className="text-sm text-red-600">{imageUploadError}</p>
+                )}
+
+                <p className="text-xs text-warm-gray">
+                  Formatos: JPEG, PNG, WebP, GIF. Máximo 5MB.
+                </p>
+              </div>
             </div>
           </div>
 

@@ -2,7 +2,7 @@ var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/_not-found/
 R.c("server/chunks/ssr/[root-of-the-server]__f67b593c._.js")
 R.c("server/chunks/ssr/98928_next_dist_b42aca34._.js")
 R.c("server/chunks/ssr/98928_next_dist_esm_build_templates_app-page_0a0a687c.js")
-R.c("server/chunks/ssr/[root-of-the-server]__8f1704e5._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__b18a3195._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__8f07f982._.js")
 R.c("server/chunks/ssr/98928_next_dist_4539a0a2._.js")
 R.c("server/chunks/ssr/_claude-worktrees_mimosa-spa-website_vigilant-rubin_src_app_layout_tsx_2f2681d2._.js")
