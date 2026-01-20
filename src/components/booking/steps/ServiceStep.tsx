@@ -347,7 +347,9 @@ export function ServiceStep() {
       setIsLoadingServices(true)
       setServicesError(null)
       try {
-        // Fetch services, treatment settings, and promotions in parallel
+        // Fetch online bookable services, treatment settings, and promotions in parallel
+        // Note: Services must be online bookable in Mindbody to be booked
+        // The show_in_booking setting only controls visibility for direct selection, not for promotions
         const [servicesResponse, settingsResponse, promotionsResponse] = await Promise.all([
           fetch(`/api/mindbody/services?locationId=${selectedLocation.Id}&type=main`),
           fetch('/api/treatments/settings'),

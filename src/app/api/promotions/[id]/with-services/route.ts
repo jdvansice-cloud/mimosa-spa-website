@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { getAllServices } from '@/lib/booking/mindbody'
+import { getServices } from '@/lib/booking/mindbody'
 
 // Lazy-initialized Supabase client
 let supabaseAdmin: SupabaseClient | null = null
@@ -71,12 +71,14 @@ export async function GET(
       })
     }
 
-    // Fetch all services from Mindbody using existing utility
+    // Fetch online bookable services from Mindbody
+    // Only online bookable services can be booked - the show_in_booking admin setting
+    // only controls visibility in the booking widget, not bookability
     try {
-      const allServices = await getAllServices()
+      const onlineServices = await getServices()
 
-      // Filter services to only include those in the promotion
-      const promotionServices = allServices.filter(service =>
+      // Filter services to only include those in the promotion that are online bookable
+      const promotionServices = onlineServices.filter(service =>
         promotion.mindbody_service_ids.includes(service.Id)
       )
 
