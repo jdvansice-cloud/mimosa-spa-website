@@ -24,9 +24,12 @@ interface ServiceWithSettings extends MindbodyService {
 interface ServicesListProps {
   programIds: number[]
   locale: string
+  showTopPicks?: boolean // Whether to show the top picks section (default: true)
+  hideTopPicksFromList?: boolean // Whether to hide top picks from the regular list (default: false)
+  onlyTopPicks?: boolean // Only show top picks, hide the regular services section entirely (default: false)
 }
 
-export function ServicesList({ programIds, locale }: ServicesListProps) {
+export function ServicesList({ programIds, locale, showTopPicks = true, hideTopPicksFromList = false, onlyTopPicks = false }: ServicesListProps) {
   const [services, setServices] = useState<ServiceWithSettings[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -133,7 +136,10 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
 
   // Separate top picks from regular services
   const topPicks = services.filter(s => s.isTopPick)
-  const regularServices = services.filter(s => !s.isTopPick)
+  // If hideTopPicksFromList is true, exclude top picks from the regular list
+  const regularServices = hideTopPicksFromList
+    ? services.filter(s => !s.isTopPick)
+    : services
 
   // Render a single service card - optimized for mobile
   const renderServiceCard = (service: ServiceWithSettings, index: number, isTopPick: boolean = false) => (
@@ -240,10 +246,28 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
     </motion.div>
   )
 
+  // If onlyTopPicks is true, only show the top picks section
+  if (onlyTopPicks) {
+    if (topPicks.length === 0) {
+      return null // Don't render anything if there are no top picks
+    }
+    return (
+      <div className="bg-gradient-to-r from-gold-50 to-beige-50 rounded-xl p-4 md:p-6 border border-gold-200">
+        <div className="flex items-center gap-2 mb-3 md:mb-5">
+          <Star className="w-5 h-5 md:w-6 md:h-6 text-gold-500 fill-gold-500" />
+          <h2 className="text-lg md:text-xl font-semibold text-dark">{t('topPicks')}</h2>
+        </div>
+        <div className="space-y-2 md:space-y-4">
+          {topPicks.map((service, index) => renderServiceCard(service, index, true))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4 md:space-y-8">
-      {/* Recommendations Section (Top Picks) */}
-      {topPicks.length > 0 && (
+      {/* Recommendations Section (Top Picks) - only show if showTopPicks is true */}
+      {showTopPicks && topPicks.length > 0 && (
         <div className="bg-gradient-to-r from-gold-50 to-beige-50 rounded-xl p-4 md:p-6 border border-gold-200">
           <div className="flex items-center gap-2 mb-3 md:mb-5">
             <Star className="w-5 h-5 md:w-6 md:h-6 text-gold-500 fill-gold-500" />
@@ -258,7 +282,7 @@ export function ServicesList({ programIds, locale }: ServicesListProps) {
       {/* Regular Services Section */}
       {regularServices.length > 0 && (
         <div>
-          {topPicks.length > 0 && (
+          {showTopPicks && topPicks.length > 0 && (
             <h2 className="text-lg md:text-xl font-semibold text-dark mb-2 md:mb-4">{t('allServices')}</h2>
           )}
           <div className="space-y-2 md:space-y-4">

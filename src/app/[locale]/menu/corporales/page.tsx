@@ -53,16 +53,14 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
         </div>
       </section>
 
-      {/* Deluxe Services Section */}
+      {/* Recommended Section - Top Picks from both programs */}
       <section className="py-3 md:py-12">
         <div className="container-spa px-3 md:px-4">
-          <h2 className="text-lg md:text-2xl font-display font-semibold text-dark mb-4 md:mb-6 text-center">
-            {tDeluxe('title')}
-          </h2>
           <Suspense fallback={<Spinner size="lg" className="py-12" />}>
             <ServicesList
-              programIds={[PROGRAM_IDS.PAQUETES_DELUXE]}
+              programIds={[PROGRAM_IDS.PAQUETES_DELUXE, PROGRAM_IDS.TRATAMIENTOS_CORPORALES]}
               locale={locale}
+              onlyTopPicks={true}
             />
           </Suspense>
         </div>
@@ -73,7 +71,29 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
         <hr className="border-beige-300" />
       </div>
 
-      {/* Regular Corporales Services Section */}
+      {/* Deluxe Services Section - without top picks */}
+      <section className="py-3 md:py-12">
+        <div className="container-spa px-3 md:px-4">
+          <h2 className="text-lg md:text-2xl font-display font-semibold text-dark mb-4 md:mb-6 text-center">
+            {tDeluxe('title')}
+          </h2>
+          <Suspense fallback={<Spinner size="lg" className="py-12" />}>
+            <ServicesList
+              programIds={[PROGRAM_IDS.PAQUETES_DELUXE]}
+              locale={locale}
+              showTopPicks={false}
+              hideTopPicksFromList={true}
+            />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="container-spa px-4">
+        <hr className="border-beige-300" />
+      </div>
+
+      {/* Regular Corporales Services Section - without top picks */}
       <section className="py-3 md:py-12">
         <div className="container-spa px-3 md:px-4">
           <h2 className="text-lg md:text-2xl font-display font-semibold text-dark mb-4 md:mb-6 text-center">
@@ -83,6 +103,8 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
             <ServicesList
               programIds={[PROGRAM_IDS.TRATAMIENTOS_CORPORALES]}
               locale={locale}
+              showTopPicks={false}
+              hideTopPicksFromList={true}
             />
           </Suspense>
         </div>
