@@ -85,25 +85,36 @@ interface TreatmentSetting {
   is_top_pick: boolean
 }
 
-// Promotion Tile Component - Shows only final price, no original price or discount
+// Promotion Tile Component - Shows only final price, with expandable services list
 function PromotionTile({
   promotion,
   isSelected,
   isLoading,
-  onSelect
+  onSelect,
+  allServices
 }: {
   promotion: Promotion
   isSelected: boolean
   isLoading: boolean
   onSelect: () => void
+  allServices: MindbodyService[]
 }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  // Get service names from the allServices list
+  const includedServices = promotion.mindbody_service_ids
+    ? allServices.filter(s => promotion.mindbody_service_ids!.includes(s.Id))
+    : []
+
+  const handleToggleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsExpanded(!isExpanded)
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      disabled={isLoading}
+    <div
       className={`
-        relative rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full p-4
+        relative rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full
         ${isSelected
           ? 'border-gold bg-gradient-to-br from-gold/20 to-gold/5 shadow-lg ring-2 ring-gold/30'
           : 'border-gold/30 bg-gradient-to-br from-gold/10 to-beige-50 hover:border-gold/60 hover:shadow-md'
@@ -111,52 +122,99 @@ function PromotionTile({
         ${isLoading ? 'opacity-70 cursor-wait' : ''}
       `}
     >
-      {/* Selected Badge */}
-      {isSelected && (
-        <div className="absolute top-2 right-2 z-10">
-          <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
-            <Check className="w-4 h-4 text-dark" />
+      {/* Main content - clickable to select */}
+      <button
+        type="button"
+        onClick={onSelect}
+        disabled={isLoading}
+        className="w-full text-left p-4"
+      >
+        {/* Selected Badge */}
+        {isSelected && (
+          <div className="absolute top-2 right-2 z-10">
+            <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
+              <Check className="w-4 h-4 text-dark" />
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Content */}
-      <div>
-        <div className="flex items-start gap-2 mb-2">
-          <Tag className="w-4 h-4 text-gold-600 mt-0.5 flex-shrink-0" />
-          <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug pr-8">
-            {promotion.title_es}
-          </h4>
-        </div>
-
-        {/* Service count hint */}
-        {promotion.mindbody_service_ids && promotion.mindbody_service_ids.length > 0 && (
-          <p className="text-xs text-warm-gray mb-2 ml-6">
-            Incluye {promotion.mindbody_service_ids.length} servicio{promotion.mindbody_service_ids.length !== 1 ? 's' : ''}
-          </p>
         )}
 
-        {/* Price Row - Only final price, no original price */}
-        <div className="flex items-center gap-3 ml-6">
-          <span className="text-lg font-bold text-gold-700">
-            ${promotion.price.toFixed(0)}
-          </span>
-          {promotion.duration_minutes && (
-            <span className="flex items-center gap-1 text-xs text-warm-gray bg-white/60 px-2 py-0.5 rounded-full">
-              <Clock className="w-3 h-3" />
-              {promotion.duration_minutes} min
-            </span>
-          )}
-        </div>
-      </div>
+        {/* Content */}
+        <div>
+          <div className="flex items-start gap-2 mb-2">
+            <Tag className="w-4 h-4 text-gold-600 mt-0.5 flex-shrink-0" />
+            <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug pr-8">
+              {promotion.title_es}
+            </h4>
+          </div>
 
-      {/* Loading indicator */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-xl">
-          <Loader2 className="w-6 h-6 text-gold animate-spin" />
+          {/* Price Row - Only final price, no original price */}
+          <div className="flex items-center gap-3 ml-6">
+            <span className="text-lg font-bold text-gold-700">
+              ${promotion.price.toFixed(0)}
+            </span>
+            {promotion.duration_minutes && (
+              <span className="flex items-center gap-1 text-xs text-warm-gray bg-white/60 px-2 py-0.5 rounded-full">
+                <Clock className="w-3 h-3" />
+                {promotion.duration_minutes} min
+              </span>
+            )}
+          </div>
         </div>
+
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-xl">
+            <Loader2 className="w-6 h-6 text-gold animate-spin" />
+          </div>
+        )}
+      </button>
+
+      {/* Expandable services section */}
+      {includedServices.length > 0 && (
+        <>
+          <button
+            type="button"
+            onClick={handleToggleExpand}
+            className="w-full px-4 py-2 border-t border-gold/20 flex items-center justify-between text-xs text-gold-700 hover:bg-gold/5 transition-colors"
+          >
+            <span>
+              Ver {includedServices.length} servicio{includedServices.length !== 1 ? 's' : ''} incluido{includedServices.length !== 1 ? 's' : ''}
+            </span>
+            {isExpanded ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </button>
+
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pb-3 pt-1 space-y-1.5 bg-white/50">
+                  {includedServices.map((service) => (
+                    <div key={service.Id} className="flex items-start gap-2">
+                      <span className="text-gold-600 text-xs mt-0.5">✓</span>
+                      <div>
+                        <p className="text-sm text-dark">{service.Name}</p>
+                        {service.Duration > 0 && (
+                          <p className="text-xs text-warm-gray">{service.Duration} min</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
       )}
-    </button>
+    </div>
   )
 }
 
@@ -492,6 +550,7 @@ export function ServiceStep() {
                       isSelected={activePromotion?.id === promotion.id}
                       isLoading={loadingPromotionId === promotion.id}
                       onSelect={() => handleSelectPromotion(promotion)}
+                      allServices={services}
                     />
                   ))}
                 </div>
