@@ -1,6 +1,5 @@
 {
   "/[locale]/galeria/page": "app/[locale]/galeria/page.js",
-  "/[locale]/menu/corporales-deluxe/page": "app/[locale]/menu/corporales-deluxe/page.js",
   "/[locale]/menu/corporales/page": "app/[locale]/menu/corporales/page.js",
   "/[locale]/menu/faciales/page": "app/[locale]/menu/faciales/page.js",
   "/[locale]/menu/page": "app/[locale]/menu/page.js",

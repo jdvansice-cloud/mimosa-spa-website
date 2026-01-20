@@ -17,12 +17,6 @@ const categories = [
     href: '/menu/corporales',
   },
   {
-    id: 'bodyDeluxe',
-    titleKey: 'bodyDeluxe',
-    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800',
-    href: '/menu/corporales-deluxe',
-  },
-  {
     id: 'facial',
     titleKey: 'facial',
     image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
