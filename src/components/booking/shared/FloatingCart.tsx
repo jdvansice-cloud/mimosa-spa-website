@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useCallback } from 'react'
-import { ShoppingBag, X, Trash2, Clock, Tag, Star } from 'lucide-react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { ShoppingBag, X, Trash2, Clock, Tag, Star, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 
@@ -18,6 +18,10 @@ export function FloatingCart() {
     isCartOpen,
     closeCart,
   } = useBookingStore()
+
+  // Collapsible section states
+  const [isPromoExpanded, setIsPromoExpanded] = useState(false)
+  const [isPricingExpanded, setIsPricingExpanded] = useState(false)
 
   const itemCount = selectedServices.length + selectedAddons.length
 
@@ -174,58 +178,77 @@ export function FloatingCart() {
                 ) : (
                   <div>
                     {/* ============================================ */}
-                    {/* PROMOTION SECTION - Gold themed */}
+                    {/* PROMOTION SECTION - Collapsible, Gold themed */}
                     {/* ============================================ */}
                     {pricing.hasPromotion && promotionServices.length > 0 && (
                       <div className="border-b-2 border-gold bg-gradient-to-b from-gold/10 to-gold/5">
-                        {/* Promotion Header */}
-                        <div className="bg-gradient-to-r from-gold to-gold/80 text-dark px-4 py-2.5">
+                        {/* Promotion Header - Clickable to expand/collapse */}
+                        <button
+                          onClick={() => setIsPromoExpanded(!isPromoExpanded)}
+                          className="w-full bg-gradient-to-r from-gold to-gold/80 text-dark px-4 py-2.5 flex items-center justify-between"
+                        >
                           <span className="flex items-center gap-2 font-semibold text-sm">
                             <Star className="h-4 w-4" />
                             PROMOCIÓN: {pricing.promotionName}
                           </span>
-                        </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold">${pricing.promotionPrice.toFixed(2)}</span>
+                            {isPromoExpanded ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            )}
+                          </div>
+                        </button>
 
-                        {/* Promotion Services with slashed prices */}
-                        <div className="p-4 space-y-2">
-                          <p className="text-xs font-semibold text-gold-700 uppercase tracking-wider mb-2">
-                            Servicios Incluidos
-                          </p>
-
-                          {promotionServices.map((service) => (
-                            <div
-                              key={service.Id}
-                              className="flex items-start justify-between py-1.5"
+                        {/* Collapsible Promotion Details */}
+                        <AnimatePresence>
+                          {isPromoExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
                             >
-                              <div className="flex items-start gap-2">
-                                <span className="text-gold-600">✓</span>
-                                <div>
-                                  <p className="text-sm font-medium text-dark">{service.Name}</p>
-                                  <p className="text-xs text-warm-gray">{service.Duration} min</p>
+                              <div className="p-4 space-y-2">
+                                <p className="text-xs font-semibold text-gold-700 uppercase tracking-wider mb-2">
+                                  Servicios Incluidos
+                                </p>
+
+                                {promotionServices.map((service) => (
+                                  <div
+                                    key={service.Id}
+                                    className="flex items-start justify-between py-1.5"
+                                  >
+                                    <div className="flex items-start gap-2">
+                                      <span className="text-gold-600">✓</span>
+                                      <div>
+                                        <p className="text-sm font-medium text-dark">{service.Name}</p>
+                                        <p className="text-xs text-warm-gray">{service.Duration} min</p>
+                                      </div>
+                                    </div>
+                                    <span className="text-sm text-warm-gray line-through">
+                                      ${service.Price.toFixed(2)}
+                                    </span>
+                                  </div>
+                                ))}
+
+                                {/* Promotion Pricing Summary */}
+                                <div className="mt-3 pt-3 border-t border-gold/30 space-y-1.5">
+                                  <div className="flex justify-between text-sm text-warm-gray">
+                                    <span>Subtotal servicios:</span>
+                                    <span className="line-through">${pricing.promotionServicesSubtotal.toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm text-green-600">
+                                    <span>Descuento:</span>
+                                    <span>-${pricing.promotionDiscount.toFixed(2)}</span>
+                                  </div>
                                 </div>
                               </div>
-                              <span className="text-sm text-warm-gray line-through">
-                                ${service.Price.toFixed(2)}
-                              </span>
-                            </div>
-                          ))}
-
-                          {/* Promotion Pricing Summary */}
-                          <div className="mt-3 pt-3 border-t border-gold/30 space-y-1.5">
-                            <div className="flex justify-between text-sm text-warm-gray">
-                              <span>Subtotal servicios:</span>
-                              <span className="line-through">${pricing.promotionServicesSubtotal.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm text-green-600">
-                              <span>Descuento:</span>
-                              <span>-${pricing.promotionDiscount.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between font-bold text-gold-700 pt-1">
-                              <span>Precio Promoción:</span>
-                              <span>${pricing.promotionPrice.toFixed(2)}</span>
-                            </div>
-                          </div>
-                        </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     )}
 
@@ -326,12 +349,13 @@ export function FloatingCart() {
               </div>
               
               {/* Sidebar Footer - Pricing Summary (Fixed at bottom) */}
+              {/* Added extra bottom padding (pb-24) to ensure TOTAL is visible above BookingNav */}
               {itemCount > 0 && pricing && (
-                <div className="flex-shrink-0 border-t-2 border-beige-200 bg-gradient-to-b from-beige-50 to-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                <div className="flex-shrink-0 border-t-2 border-beige-200 bg-gradient-to-b from-beige-50 to-white p-4 pb-24">
                   <div className="space-y-2">
-                    {/* Duration */}
+                    {/* Duration - Always visible */}
                     {pricing.totalDuration > 0 && (
-                      <div className="flex justify-between text-sm mb-3">
+                      <div className="flex justify-between text-sm">
                         <span className="text-warm-gray flex items-center gap-1">
                           <Clock className="w-4 h-4" />
                           Duración total:
@@ -340,38 +364,70 @@ export function FloatingCart() {
                       </div>
                     )}
 
-                    {/* Price Breakdown */}
-                    <div className="border-t border-beige-200 pt-3 space-y-2">
-                      {/* Show breakdown when there's a promotion */}
-                      {pricing.hasPromotion && (
-                        <>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-warm-gray">Promoción:</span>
-                            <span className="text-gold-600 font-medium">${pricing.promotionPrice.toFixed(2)}</span>
-                          </div>
-                          {pricing.regularItemsTotal > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-warm-gray">Adicionales:</span>
-                              <span className="text-dark">${pricing.regularItemsTotal.toFixed(2)}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
+                    {/* Collapsible Price Details */}
+                    <button
+                      onClick={() => setIsPricingExpanded(!isPricingExpanded)}
+                      className="w-full flex items-center justify-between text-sm text-warm-gray hover:text-dark transition-colors py-1"
+                    >
+                      <span className="flex items-center gap-1">
+                        Ver detalles de precio
+                        {isPricingExpanded ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </span>
+                      <span className="text-xs">
+                        Subtotal: ${pricing.subtotalBeforeTax.toFixed(2)}
+                      </span>
+                    </button>
 
-                      <div className="flex justify-between text-sm">
-                        <span className="text-warm-gray">Subtotal:</span>
-                        <span className="text-dark">${pricing.subtotalBeforeTax.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-warm-gray">ITBM ({(pricing.itbmRate * 100).toFixed(0)}%):</span>
-                        <span className="text-dark">${pricing.itbmAmount.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between text-lg font-bold pt-2 border-t border-beige-300">
-                        <span className="text-dark">TOTAL:</span>
-                        <span className={pricing.hasPromotion ? 'text-gold-600' : 'text-dark'}>
-                          ${pricing.totalWithTax.toFixed(2)}
-                        </span>
-                      </div>
+                    {/* Expandable Price Breakdown */}
+                    <AnimatePresence>
+                      {isPricingExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-beige-200 pt-2 space-y-1.5">
+                            {/* Show breakdown when there's a promotion */}
+                            {pricing.hasPromotion && (
+                              <>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-warm-gray">Promoción:</span>
+                                  <span className="text-gold-600 font-medium">${pricing.promotionPrice.toFixed(2)}</span>
+                                </div>
+                                {pricing.regularItemsTotal > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-warm-gray">Adicionales:</span>
+                                    <span className="text-dark">${pricing.regularItemsTotal.toFixed(2)}</span>
+                                  </div>
+                                )}
+                              </>
+                            )}
+
+                            <div className="flex justify-between text-sm">
+                              <span className="text-warm-gray">Subtotal:</span>
+                              <span className="text-dark">${pricing.subtotalBeforeTax.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-warm-gray">ITBM ({(pricing.itbmRate * 100).toFixed(0)}%):</span>
+                              <span className="text-dark">${pricing.itbmAmount.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* TOTAL - Always visible */}
+                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-beige-300">
+                      <span className="text-dark">TOTAL:</span>
+                      <span className={pricing.hasPromotion ? 'text-gold-600' : 'text-dark'}>
+                        ${pricing.totalWithTax.toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>
