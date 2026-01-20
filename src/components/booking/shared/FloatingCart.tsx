@@ -132,8 +132,8 @@ export function FloatingCart() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-full sm:w-96
-                       bg-white shadow-2xl z-50 flex flex-col"
+              className="fixed inset-y-0 right-0 w-full sm:w-96
+                       bg-white shadow-2xl z-50 flex flex-col max-h-[100dvh]"
             >
               {/* Sidebar Header (Fixed at top) */}
               <div className="flex-shrink-0 flex items-center justify-between px-5 py-4
@@ -157,7 +157,10 @@ export function FloatingCart() {
               </div>
               
               {/* Sidebar Content - Scrollable */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 overscroll-contain">
+              <div
+                className="flex-1 overflow-y-scroll overflow-x-hidden min-h-0 overscroll-contain"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
                 {itemCount === 0 ? (
                   <div className="py-16 px-6 text-center">
                     <div className="w-20 h-20 bg-beige-100 rounded-full flex items-center justify-center mx-auto mb-4">
