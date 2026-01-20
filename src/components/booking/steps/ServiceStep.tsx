@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check, Star, Info, X, Tag, Percent } from 'lucide-react'
+import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check, Star, Info, X, Tag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 import type { MindbodyService, PromotionWithServices } from '@/types/booking'
@@ -85,7 +85,7 @@ interface TreatmentSetting {
   is_top_pick: boolean
 }
 
-// Promotion Tile Component
+// Promotion Tile Component - Shows only final price, no original price or discount
 function PromotionTile({
   promotion,
   isSelected,
@@ -97,10 +97,6 @@ function PromotionTile({
   isLoading: boolean
   onSelect: () => void
 }) {
-  const discount = promotion.original_price && promotion.price
-    ? Math.round(((promotion.original_price - promotion.price) / promotion.original_price) * 100)
-    : 0
-
   return (
     <button
       type="button"
@@ -115,19 +111,9 @@ function PromotionTile({
         ${isLoading ? 'opacity-70 cursor-wait' : ''}
       `}
     >
-      {/* Discount Badge */}
-      {discount > 0 && (
-        <div className="absolute top-2 right-2 z-10">
-          <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-            <Percent className="w-3 h-3" />
-            {discount}% OFF
-          </div>
-        </div>
-      )}
-
       {/* Selected Badge */}
       {isSelected && (
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute top-2 right-2 z-10">
           <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
             <Check className="w-4 h-4 text-dark" />
           </div>
@@ -135,10 +121,10 @@ function PromotionTile({
       )}
 
       {/* Content */}
-      <div className={isSelected ? 'pl-8' : ''}>
+      <div>
         <div className="flex items-start gap-2 mb-2">
           <Tag className="w-4 h-4 text-gold-600 mt-0.5 flex-shrink-0" />
-          <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug pr-16">
+          <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug pr-8">
             {promotion.title_es}
           </h4>
         </div>
@@ -150,16 +136,11 @@ function PromotionTile({
           </p>
         )}
 
-        {/* Price Row */}
+        {/* Price Row - Only final price, no original price */}
         <div className="flex items-center gap-3 ml-6">
           <span className="text-lg font-bold text-gold-700">
             ${promotion.price.toFixed(0)}
           </span>
-          {promotion.original_price && promotion.original_price > promotion.price && (
-            <span className="text-sm text-warm-gray line-through">
-              ${promotion.original_price.toFixed(0)}
-            </span>
-          )}
           {promotion.duration_minutes && (
             <span className="flex items-center gap-1 text-xs text-warm-gray bg-white/60 px-2 py-0.5 rounded-full">
               <Clock className="w-3 h-3" />
@@ -467,7 +448,7 @@ export function ServiceStep() {
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/70 rounded-full flex items-center justify-center shadow-md">
-                <Percent className="w-5 h-5 text-white" />
+                <Tag className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
                 <h3 className="font-semibold text-dark">Promociones Activas</h3>

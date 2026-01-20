@@ -201,7 +201,7 @@ export function FloatingCart() {
                           </div>
                         </button>
 
-                        {/* Collapsible Promotion Details */}
+                        {/* Collapsible Promotion Details - Services only, no prices */}
                         <AnimatePresence>
                           {isPromoExpanded && (
                             <motion.div
@@ -219,32 +219,17 @@ export function FloatingCart() {
                                 {promotionServices.map((service) => (
                                   <div
                                     key={service.Id}
-                                    className="flex items-start justify-between py-1.5"
+                                    className="flex items-start gap-2 py-1.5"
                                   >
-                                    <div className="flex items-start gap-2">
-                                      <span className="text-gold-600">✓</span>
-                                      <div>
-                                        <p className="text-sm font-medium text-dark">{service.Name}</p>
+                                    <span className="text-gold-600">✓</span>
+                                    <div>
+                                      <p className="text-sm font-medium text-dark">{service.Name}</p>
+                                      {service.Duration > 0 && (
                                         <p className="text-xs text-warm-gray">{service.Duration} min</p>
-                                      </div>
+                                      )}
                                     </div>
-                                    <span className="text-sm text-warm-gray line-through">
-                                      ${service.Price.toFixed(2)}
-                                    </span>
                                   </div>
                                 ))}
-
-                                {/* Promotion Pricing Summary */}
-                                <div className="mt-3 pt-3 border-t border-gold/30 space-y-1.5">
-                                  <div className="flex justify-between text-sm text-warm-gray">
-                                    <span>Subtotal servicios:</span>
-                                    <span className="line-through">${pricing.promotionServicesSubtotal.toFixed(2)}</span>
-                                  </div>
-                                  <div className="flex justify-between text-sm text-green-600">
-                                    <span>Descuento:</span>
-                                    <span>-${pricing.promotionDiscount.toFixed(2)}</span>
-                                  </div>
-                                </div>
                               </div>
                             </motion.div>
                           )}
