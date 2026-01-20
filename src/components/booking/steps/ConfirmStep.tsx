@@ -349,27 +349,17 @@ export function ConfirmStep() {
             {selectedServices.map((service) => (
               <div key={service.Id} className="flex justify-between text-sm">
                 <span className="text-dark">{service.Name}</span>
-                <span className={pricing.hasPromotion ? 'text-warm-gray line-through' : 'text-dark'}>
-                  ${service.Price.toFixed(2)}
-                </span>
               </div>
             ))}
             {selectedAddons.map((addon) => (
               <div key={addon.Id} className="flex justify-between text-sm">
                 <span className="text-dark">+ {addon.Name}</span>
-                <span className="text-dark">${addon.Price.toFixed(2)}</span>
               </div>
             ))}
           </div>
 
-          {/* Pricing Summary */}
+          {/* Pricing Summary - Simple: Subtotal + ITBM + Total */}
           <div className="mt-3 pt-3 border-t border-beige-200 space-y-1.5">
-            {pricing.hasPromotion && (
-              <div className="flex justify-between text-sm text-green-600">
-                <span>Descuento</span>
-                <span>-${pricing.promotionDiscount.toFixed(2)}</span>
-              </div>
-            )}
             <div className="flex justify-between text-sm">
               <span className="text-warm-gray">Subtotal</span>
               <span className="text-dark">${pricing.subtotalBeforeTax.toFixed(2)}</span>
@@ -380,9 +370,7 @@ export function ConfirmStep() {
             </div>
             <div className="flex justify-between font-bold text-base pt-1 border-t border-beige-200">
               <span className="text-dark">Total</span>
-              <span className={pricing.hasPromotion ? 'text-gold' : 'text-dark'}>
-                ${pricing.totalWithTax.toFixed(2)}
-              </span>
+              <span className="text-dark">${pricing.totalWithTax.toFixed(2)}</span>
             </div>
           </div>
         </div>
