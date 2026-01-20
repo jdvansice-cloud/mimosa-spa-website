@@ -166,7 +166,7 @@ export function BookingWidget() {
                 animate={{ width: 320, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="hidden lg:block border-l border-beige-200 bg-beige-50/50 p-4 overflow-hidden"
+                className="hidden lg:block border-l border-beige-200 bg-beige-50/50 p-4 max-h-[calc(100vh-280px)] overflow-y-auto"
               >
                 <CartSummary showCloseButton={true} />
               </motion.div>

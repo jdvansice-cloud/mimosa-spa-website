@@ -136,8 +136,8 @@ export function FloatingCart() {
               className="fixed top-0 right-0 h-full w-full sm:w-96 
                        bg-white shadow-2xl z-50 flex flex-col"
             >
-              {/* Sidebar Header */}
-              <div className="flex items-center justify-between px-5 py-4 
+              {/* Sidebar Header (Fixed at top) */}
+              <div className="flex-shrink-0 flex items-center justify-between px-5 py-4
                             bg-gradient-to-r from-beige-50 to-white border-b border-beige-200">
                 <h2 className="text-lg font-semibold text-dark flex items-center gap-2">
                   <ShoppingBag className="w-5 h-5 text-gold" />
@@ -158,7 +158,7 @@ export function FloatingCart() {
               </div>
               
               {/* Sidebar Content - Scrollable */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto min-h-0">
                 {itemCount === 0 ? (
                   <div className="py-16 px-6 text-center">
                     <div className="w-20 h-20 bg-beige-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -323,9 +323,9 @@ export function FloatingCart() {
                 )}
               </div>
               
-              {/* Sidebar Footer - Pricing Summary */}
+              {/* Sidebar Footer - Pricing Summary (Fixed at bottom) */}
               {itemCount > 0 && pricing && (
-                <div className="border-t-2 border-beige-200 bg-gradient-to-b from-beige-50 to-white p-5">
+                <div className="flex-shrink-0 border-t-2 border-beige-200 bg-gradient-to-b from-beige-50 to-white p-5">
                   <div className="space-y-2">
                     {/* Duration */}
                     {pricing.totalDuration > 0 && (
