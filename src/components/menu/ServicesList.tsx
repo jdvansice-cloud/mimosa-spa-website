@@ -218,26 +218,25 @@ export function ServicesList({ programIds, locale, showTopPicks = true, hideTopP
           )}
         </div>
 
-        {/* Price and Duration */}
-        <div className="flex items-center gap-4 md:flex-col md:items-end md:gap-2">
-          <div className="flex items-center gap-2">
-            {service.Duration > 0 && (
-              <span className="flex items-center gap-1 text-sm text-warm-gray bg-beige-100 px-3 py-1 rounded-full">
-                <Clock className="w-4 h-4" />
-                {service.Duration} {t('duration')}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xl font-bold text-gold-600">
-              {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
+        {/* Price, Duration and Book Button - fixed width for consistent alignment */}
+        <div className="flex items-center gap-4 flex-shrink-0">
+          {service.Duration > 0 && (
+            <span className="flex items-center gap-1 text-sm text-warm-gray bg-beige-100 px-3 py-1 rounded-full">
+              <Clock className="w-4 h-4" />
+              {service.Duration} {t('duration')}
             </span>
+          )}
+          <span className="text-xl font-bold text-gold-600 w-16 text-right">
+            {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
+          </span>
+          {/* Fixed width container for button to maintain alignment */}
+          <div className="w-24">
             {service.showBookingButton && (
               <BookingButton
                 service={service}
                 locale={locale}
                 label={t('bookNow')}
-                className="inline-flex items-center px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg hover:bg-gold/90 transition-colors"
+                className="inline-flex items-center justify-center w-full px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg hover:bg-gold/90 transition-colors"
               />
             )}
           </div>
