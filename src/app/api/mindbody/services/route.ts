@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServices, getAddons, getAllServices } from '@/lib/booking/mindbody'
+import { getServices, getAddons, getAllServices, getOnlineBookableServicesForPromotions } from '@/lib/booking/mindbody'
 import { sanitizeError, ERROR_MESSAGES, PROGRAM_IDS } from '@/lib/booking/constants'
 
-// GET /api/mindbody/services?locationId=1&type=main|addons|all&includeOffline=true
+// GET /api/mindbody/services?locationId=1&type=main|addons|all&includeOffline=true&forPromotions=true
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const locationId = searchParams.get('locationId')
     const type = searchParams.get('type') || 'main' // main, addons, or all
     const includeOffline = searchParams.get('includeOffline') === 'true' // Include non-online-bookable services
+    const forPromotions = searchParams.get('forPromotions') === 'true' // Include all online bookable services for promotions
 
     // Validate locationId if provided
     let parsedLocationId: number | undefined
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log('Fetching services for locationId:', locationId, 'type:', type, 'includeOffline:', includeOffline)
+    console.log('Fetching services for locationId:', locationId, 'type:', type, 'includeOffline:', includeOffline, 'forPromotions:', forPromotions)
 
     let filteredServices: Array<{
       Id: number
@@ -49,7 +50,37 @@ export async function GET(request: NextRequest) {
       TaxIncluded?: number
     }> = []
 
-    if (type === 'addons') {
+    if (forPromotions) {
+      // For promotions - include ALL online bookable services (no session type filter)
+      // This ensures promotion services are visible even if they don't have exact name matches
+      const allOnlineServices = await getOnlineBookableServicesForPromotions(parsedLocationId)
+
+      // Validate API response
+      if (!Array.isArray(allOnlineServices)) {
+        console.error('Invalid Mindbody response: services is not an array')
+        return NextResponse.json(
+          { error: ERROR_MESSAGES.SERVICES_LOAD_FAILED },
+          { status: 500 }
+        )
+      }
+
+      console.log('Total online services for promotions:', allOnlineServices.length)
+
+      if (type === 'main') {
+        // Exclude Adicionales category
+        filteredServices = allOnlineServices.filter(
+          s => s.ProgramId !== PROGRAM_IDS.ADICIONALES
+        )
+      } else if (type === 'addons') {
+        // Only Adicionales
+        filteredServices = allOnlineServices.filter(
+          s => s.ProgramId === PROGRAM_IDS.ADICIONALES
+        )
+      } else {
+        // type === 'all'
+        filteredServices = allOnlineServices
+      }
+    } else if (type === 'addons') {
       // For add-ons, use the sale/services endpoint which has actual prices
       filteredServices = await getAddons(parsedLocationId)
     } else if (includeOffline) {

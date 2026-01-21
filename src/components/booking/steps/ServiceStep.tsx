@@ -340,6 +340,9 @@ export function ServiceStep() {
   const [loadingPromotionId, setLoadingPromotionId] = useState<string | null>(null)
 
   // Fetch services, treatment settings, and active promotions on mount
+  // State for all online services (for promotion lookups - no session type filter)
+  const [allOnlineServices, setAllOnlineServices] = useState<MindbodyService[]>([])
+
   useEffect(() => {
     async function fetchServicesAndPromotions() {
       if (!selectedLocation) return
@@ -347,16 +350,19 @@ export function ServiceStep() {
       setIsLoadingServices(true)
       setServicesError(null)
       try {
-        // Fetch online bookable services, treatment settings, and promotions in parallel
-        // Note: Services must be online bookable in Mindbody to be booked
-        // The show_in_booking setting only controls visibility for direct selection, not for promotions
-        const [servicesResponse, settingsResponse, promotionsResponse] = await Promise.all([
+        // Fetch services twice:
+        // 1. Regular services (with session type filter) for direct booking
+        // 2. All online services (no session type filter) for promotion display
+        // Also fetch treatment settings and active promotions
+        const [servicesResponse, allServicesResponse, settingsResponse, promotionsResponse] = await Promise.all([
           fetch(`/api/mindbody/services?locationId=${selectedLocation.Id}&type=main`),
+          fetch(`/api/mindbody/services?locationId=${selectedLocation.Id}&type=main&forPromotions=true`),
           fetch('/api/treatments/settings'),
           fetch('/api/promotions?active=true')
         ])
 
         const servicesData = await servicesResponse.json()
+        const allServicesData = await allServicesResponse.json()
         const settingsData = await settingsResponse.json()
         const promotionsData = await promotionsResponse.json()
 
@@ -396,7 +402,8 @@ export function ServiceStep() {
           }
         }
 
-        setServices(servicesData.services) // Keep all services for promotion lookups
+        setServices(servicesData.services) // Services with session type filter for direct booking
+        setAllOnlineServices(allServicesData.services || []) // ALL online services for promotion lookups
         setGroupedServices(filteredGrouped)
         setTopPickServices(topPicks)
 
@@ -572,7 +579,7 @@ export function ServiceStep() {
                       isSelected={activePromotion?.id === promotion.id}
                       isLoading={loadingPromotionId === promotion.id}
                       onSelect={() => handleSelectPromotion(promotion)}
-                      allServices={services}
+                      allServices={allOnlineServices}
                     />
                   ))}
                 </div>

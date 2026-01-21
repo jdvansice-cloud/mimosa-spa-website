@@ -452,6 +452,21 @@ export async function getServices(locationId?: number) {
   return onlineBookableServices
 }
 
+// Get ALL online bookable services for promotions (including those without session type match)
+// Used to display promotion services in the booking widget
+// These services are online bookable in Mindbody but may not have exact session type name matches
+export async function getOnlineBookableServicesForPromotions(locationId?: number) {
+  const { services } = await fetchAllOnlineBookableServices(locationId)
+
+  // Return all online bookable services except Adicionales (those are add-ons)
+  // Don't filter by session type match - promotions need to show all included services
+  const allOnlineServices = services.filter(s => s.ProgramId !== 8)
+
+  console.log('All online bookable services for promotions (no session type filter):', allOnlineServices.length)
+
+  return allOnlineServices
+}
+
 // Get add-ons (Adicionales) - only ProgramId 8
 // Filter: Online bookable, single session, has price, ONLY Adicionales, with session type match
 export async function getAddons(locationId?: number) {
