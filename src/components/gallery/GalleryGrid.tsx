@@ -123,11 +123,7 @@ export function GalleryGrid({ locale }: GalleryGridProps) {
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               />
-              <div className="absolute inset-0 bg-dark/0 group-hover:bg-dark/40 transition-colors flex items-center justify-center">
-                <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-                  {locale === 'es' ? image.title_es : (image.title_en || image.title_es)}
-                </span>
-              </div>
+              <div className="absolute inset-0 bg-dark/0 group-hover:bg-dark/20 transition-colors" />
             </motion.div>
           ))}
         </AnimatePresence>
