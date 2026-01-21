@@ -103,8 +103,12 @@ function PromotionTile({
   const [isExpanded, setIsExpanded] = useState(false)
 
   // Get service names from the allServices list
+  // Check both Id (SessionTypeId) and ProductId since promotions might store either
   const includedServices = promotion.mindbody_service_ids
-    ? allServices.filter(s => promotion.mindbody_service_ids!.includes(s.Id))
+    ? allServices.filter(s =>
+        promotion.mindbody_service_ids!.includes(s.Id) ||
+        (s.ProductId && promotion.mindbody_service_ids!.includes(s.ProductId))
+      )
     : []
 
   const handleToggleExpand = (e: React.MouseEvent) => {

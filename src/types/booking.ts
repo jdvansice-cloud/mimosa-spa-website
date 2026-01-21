@@ -21,6 +21,7 @@ export interface MindbodyLocation {
 
 export interface MindbodyService {
   Id: number
+  ProductId?: number // Original Mindbody product ID (different from SessionTypeId)
   Name: string
   Description: string | null
   Duration: number // in minutes

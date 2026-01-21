@@ -78,8 +78,10 @@ export async function GET(
       const onlineServices = await getOnlineBookableServicesForPromotions()
 
       // Filter services to only include those in the promotion that are online bookable
+      // Check both Id (SessionTypeId) and ProductId since promotions might store either
       const promotionServices = onlineServices.filter(service =>
-        promotion.mindbody_service_ids.includes(service.Id)
+        promotion.mindbody_service_ids.includes(service.Id) ||
+        (service.ProductId && promotion.mindbody_service_ids.includes(service.ProductId))
       )
 
       // Map to our MindbodyService format
