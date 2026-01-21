@@ -28,6 +28,7 @@ export function GalleryGrid({ locale }: GalleryGridProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right')
 
   // Fetch gallery images from API
   useEffect(() => {
@@ -51,19 +52,40 @@ export function GalleryGrid({ locale }: GalleryGridProps) {
     ? images
     : images.filter((img) => img.category === selectedCategory)
 
-  const openLightbox = (index: number) => setLightboxIndex(index)
+  const openLightbox = (index: number) => {
+    setSlideDirection('right')
+    setLightboxIndex(index)
+  }
   const closeLightbox = () => setLightboxIndex(null)
-  
+
   const goToPrevious = () => {
     if (lightboxIndex !== null) {
+      setSlideDirection('left')
       setLightboxIndex(lightboxIndex === 0 ? filteredImages.length - 1 : lightboxIndex - 1)
     }
   }
-  
+
   const goToNext = () => {
     if (lightboxIndex !== null) {
+      setSlideDirection('right')
       setLightboxIndex(lightboxIndex === filteredImages.length - 1 ? 0 : lightboxIndex + 1)
     }
+  }
+
+  // Slide animation variants
+  const slideVariants = {
+    enter: (direction: 'left' | 'right') => ({
+      x: direction === 'right' ? 300 : -300,
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: 'left' | 'right') => ({
+      x: direction === 'right' ? -300 : 300,
+      opacity: 0
+    })
   }
 
   if (isLoading) {
@@ -160,21 +182,27 @@ export function GalleryGrid({ locale }: GalleryGridProps) {
               <ChevronRight className="h-10 w-10" />
             </button>
 
-            <motion.div
-              key={lightboxIndex}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative max-w-[90vw] max-h-[90vh]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Image
-                src={filteredImages[lightboxIndex].image_url}
-                alt={locale === 'es' ? filteredImages[lightboxIndex].title_es : (filteredImages[lightboxIndex].title_en || filteredImages[lightboxIndex].title_es)}
-                width={1200}
-                height={800}
-                className="object-contain max-h-[85vh] w-auto"
-              />
-            </motion.div>
+            <AnimatePresence initial={false} custom={slideDirection} mode="popLayout">
+              <motion.div
+                key={lightboxIndex}
+                custom={slideDirection}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: 'tween', duration: 0.3, ease: 'easeInOut' }}
+                className="relative max-w-[90vw] max-h-[90vh]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Image
+                  src={filteredImages[lightboxIndex].image_url}
+                  alt={locale === 'es' ? filteredImages[lightboxIndex].title_es : (filteredImages[lightboxIndex].title_en || filteredImages[lightboxIndex].title_es)}
+                  width={1200}
+                  height={800}
+                  className="object-contain max-h-[85vh] w-auto"
+                />
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
