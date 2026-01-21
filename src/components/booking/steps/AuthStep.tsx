@@ -327,34 +327,38 @@ function AuthStepContent() {
   // Success state - magic link sent
   if (authState === 'sent') {
     return (
-      <div className="auth-step max-w-md mx-auto text-center">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-green-600" />
+      <div className="auth-step flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto pb-4">
+          <div className="max-w-md mx-auto text-center">
+            <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-7 h-7 text-green-600" />
+            </div>
+
+            <h2 className="text-lg font-bold text-dark mb-2">
+              Revisa tu correo
+            </h2>
+
+            <p className="text-sm text-warm-gray mb-4">
+              Hemos enviado un enlace de acceso a<br />
+              <span className="font-semibold text-dark">{email}</span>
+            </p>
+
+            <div className="bg-gold/10 rounded-xl p-4 text-sm text-dark/80">
+              <p>Haz clic en el enlace del correo para continuar con tu reserva.</p>
+              <p className="mt-2 text-warm-gray">El enlace expira en 1 hora.</p>
+            </div>
+
+            <button
+              onClick={() => {
+                setAuthState('email')
+                setEmail('')
+              }}
+              className="mt-4 text-gold hover:text-gold/80 font-medium transition-colors"
+            >
+              Usar otro correo
+            </button>
+          </div>
         </div>
-
-        <h2 className="text-2xl font-bold text-dark mb-3">
-          Revisa tu correo
-        </h2>
-
-        <p className="text-warm-gray mb-6">
-          Hemos enviado un enlace de acceso a<br />
-          <span className="font-semibold text-dark">{email}</span>
-        </p>
-
-        <div className="bg-gold/10 rounded-xl p-4 text-sm text-dark/80">
-          <p>Haz clic en el enlace del correo para continuar con tu reserva.</p>
-          <p className="mt-2 text-warm-gray">El enlace expira en 1 hora.</p>
-        </div>
-
-        <button
-          onClick={() => {
-            setAuthState('email')
-            setEmail('')
-          }}
-          className="mt-6 text-gold hover:text-gold/80 font-medium transition-colors"
-        >
-          Usar otro correo
-        </button>
       </div>
     )
   }
@@ -362,63 +366,67 @@ function AuthStepContent() {
   // Multiple clients selection
   if (authState === 'select-client') {
     return (
-      <div className="auth-step max-w-md mx-auto">
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold/60 rounded-full
-                        flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <User className="w-8 h-8 text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-dark mb-2">
-            Selecciona tu Perfil
-          </h2>
-          <p className="text-warm-gray">
-            Encontramos varias cuentas asociadas a este correo
-          </p>
-        </div>
+      <div className="auth-step flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto pb-4">
+          <div className="max-w-md mx-auto">
+            <div className="text-center mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                            flex items-center justify-center mx-auto mb-2 shadow-md">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-dark mb-0.5">
+                Selecciona tu Perfil
+              </h2>
+              <p className="text-xs text-warm-gray">
+                Encontramos varias cuentas asociadas a este correo
+              </p>
+            </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-            {error}
-          </div>
-        )}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                {error}
+              </div>
+            )}
 
-        <div className="space-y-3 mb-6">
-          {availableClients.map((client) => (
+            <div className="space-y-3 mb-4">
+              {availableClients.map((client) => (
+                <button
+                  key={client.Id}
+                  onClick={() => handleSelectClient(client)}
+                  disabled={!client.Email || isLoading}
+                  className={`w-full p-3 bg-white border rounded-xl transition-all
+                           flex items-center gap-3 text-left
+                           ${client.Email
+                             ? 'border-beige-200 hover:border-gold hover:shadow-md cursor-pointer'
+                             : 'border-gray-200 opacity-50 cursor-not-allowed'}`}
+                >
+                  <div className="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-gold" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark text-sm">
+                      {client.FirstName} {client.LastName}
+                    </p>
+                    <p className="text-xs text-warm-gray">
+                      {client.Email || 'Sin correo registrado'}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
             <button
-              key={client.Id}
-              onClick={() => handleSelectClient(client)}
-              disabled={!client.Email || isLoading}
-              className={`w-full p-4 bg-white border rounded-xl transition-all
-                       flex items-center gap-4 text-left
-                       ${client.Email
-                         ? 'border-beige-200 hover:border-gold hover:shadow-md cursor-pointer'
-                         : 'border-gray-200 opacity-50 cursor-not-allowed'}`}
+              onClick={() => {
+                setAvailableClients([])
+                setAuthState('email')
+                setError(null)
+              }}
+              className="w-full py-2 text-sm text-warm-gray hover:text-dark transition-colors"
             >
-              <div className="w-12 h-12 bg-gold/10 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-gold" />
-              </div>
-              <div>
-                <p className="font-semibold text-dark">
-                  {client.FirstName} {client.LastName}
-                </p>
-                <p className="text-sm text-warm-gray">
-                  {client.Email || 'Sin correo registrado'}
-                </p>
-              </div>
+              ← Usar otro correo
             </button>
-          ))}
+          </div>
         </div>
-
-        <button
-          onClick={() => {
-            setAvailableClients([])
-            setAuthState('email')
-            setError(null)
-          }}
-          className="w-full py-3 text-warm-gray hover:text-dark transition-colors"
-        >
-          ← Usar otro correo
-        </button>
       </div>
     )
   }
@@ -426,126 +434,130 @@ function AuthStepContent() {
   // Registration form
   if (authState === 'register') {
     return (
-      <div className="auth-step max-w-md mx-auto">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold/60 rounded-full
-                        flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <UserPlus className="w-8 h-8 text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-dark mb-2">
-            Crear Cuenta
-          </h2>
-          <p className="text-warm-gray">
-            No encontramos una cuenta con ese correo. Completa tus datos para continuar.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-dark mb-1">
-                Nombre
-              </label>
-              <input
-                type="text"
-                value={registrationData.firstName}
-                onChange={(e) => setRegistrationData(prev => ({ ...prev, firstName: e.target.value }))}
-                className="w-full px-4 py-3 border border-beige-200 rounded-xl
-                         focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
-                         transition-all"
-                placeholder="Tu nombre"
-              />
+      <div className="auth-step flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto pb-4">
+          <div className="max-w-md mx-auto">
+            <div className="text-center mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                            flex items-center justify-center mx-auto mb-2 shadow-md">
+                <UserPlus className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-dark mb-0.5">
+                Crear Cuenta
+              </h2>
+              <p className="text-xs text-warm-gray">
+                No encontramos una cuenta con ese correo. Completa tus datos.
+              </p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-dark mb-1">
-                Apellido
-              </label>
-              <input
-                type="text"
-                value={registrationData.lastName}
-                onChange={(e) => setRegistrationData(prev => ({ ...prev, lastName: e.target.value }))}
-                className="w-full px-4 py-3 border border-beige-200 rounded-xl
-                         focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
-                         transition-all"
-                placeholder="Tu apellido"
-              />
+
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-dark mb-1">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    value={registrationData.firstName}
+                    onChange={(e) => setRegistrationData(prev => ({ ...prev, firstName: e.target.value }))}
+                    className="w-full px-3 py-2.5 border border-beige-200 rounded-xl text-sm
+                             focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                             transition-all"
+                    placeholder="Tu nombre"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-dark mb-1">
+                    Apellido
+                  </label>
+                  <input
+                    type="text"
+                    value={registrationData.lastName}
+                    onChange={(e) => setRegistrationData(prev => ({ ...prev, lastName: e.target.value }))}
+                    className="w-full px-3 py-2.5 border border-beige-200 rounded-xl text-sm
+                             focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                             transition-all"
+                    placeholder="Tu apellido"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-dark mb-1">
+                  Correo Electrónico
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray" />
+                  <input
+                    type="email"
+                    value={registrationData.email}
+                    onChange={(e) => setRegistrationData(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full pl-10 pr-3 py-2.5 border border-beige-200 rounded-xl text-sm
+                             focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                             transition-all"
+                    placeholder="correo@ejemplo.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-dark mb-1">
+                  Teléfono / WhatsApp
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray" />
+                  <input
+                    type="tel"
+                    value={registrationData.phone}
+                    onChange={(e) => setRegistrationData(prev => ({ ...prev, phone: e.target.value }))}
+                    className="w-full pl-10 pr-3 py-2.5 border border-beige-200 rounded-xl text-sm
+                             focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                             transition-all"
+                    placeholder="50766124546"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-dark mb-1">
-              Correo Electrónico
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
-              <input
-                type="email"
-                value={registrationData.email}
-                onChange={(e) => setRegistrationData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full pl-12 pr-4 py-3 border border-beige-200 rounded-xl
-                         focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
-                         transition-all"
-                placeholder="correo@ejemplo.com"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-dark mb-1">
-              Teléfono / WhatsApp
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
-              <input
-                type="tel"
-                value={registrationData.phone}
-                onChange={(e) => setRegistrationData(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full pl-12 pr-4 py-3 border border-beige-200 rounded-xl
-                         focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
-                         transition-all"
-                placeholder="50766124546"
-              />
-            </div>
-          </div>
-        </div>
-
-        {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="mt-6 space-y-3">
-          <button
-            onClick={handleRegistration}
-            disabled={isLoading}
-            className="w-full py-4 bg-gradient-to-r from-gold to-gold/90 text-dark
-                     font-semibold rounded-xl hover:shadow-lg transition-all
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Creando cuenta...
-              </>
-            ) : (
-              <>
-                Crear Cuenta y Continuar
-                <ArrowRight className="w-5 h-5" />
-              </>
+            {error && (
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                {error}
+              </div>
             )}
-          </button>
 
-          <button
-            onClick={() => {
-              setAuthState('email')
-              setError(null)
-            }}
-            className="w-full py-3 text-warm-gray hover:text-dark transition-colors"
-          >
-            ← Volver
-          </button>
+            <div className="mt-4 space-y-2">
+              <button
+                onClick={handleRegistration}
+                disabled={isLoading}
+                className="w-full py-3 bg-gradient-to-r from-gold to-gold/90 text-dark
+                         font-semibold rounded-xl hover:shadow-lg transition-all text-sm
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Creando cuenta...
+                  </>
+                ) : (
+                  <>
+                    Crear Cuenta y Continuar
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setAuthState('email')
+                  setError(null)
+                }}
+                className="w-full py-2 text-sm text-warm-gray hover:text-dark transition-colors"
+              >
+                ← Volver
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -553,83 +565,87 @@ function AuthStepContent() {
 
   // Main email input form
   return (
-    <div className="auth-step max-w-md mx-auto">
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold/60 rounded-full
-                      flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <Mail className="w-8 h-8 text-white" />
+    <div className="auth-step flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto pb-4">
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-4">
+            <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                          flex items-center justify-center mx-auto mb-2 shadow-md">
+              <Mail className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-lg font-bold text-dark mb-0.5">
+              ¡Bienvenido!
+            </h2>
+            <p className="text-xs text-warm-gray">
+              Ingresa tu correo electrónico para comenzar tu reserva
+            </p>
+          </div>
+
+          {/* Benefits */}
+          <div className="mb-4 p-3 bg-beige-50 rounded-xl">
+            <p className="text-xs font-medium text-dark mb-1.5">Al iniciar sesión podrás:</p>
+            <ul className="text-xs text-warm-gray space-y-0.5">
+              <li>• Ver tu historial de citas y compras</li>
+              <li>• Gestionar tus próximas reservaciones</li>
+              <li>• Recibir ofertas exclusivas</li>
+              <li>• Agilizar futuras reservas</li>
+            </ul>
+          </div>
+
+          {/* Email Input */}
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray">
+              <Mail className="w-4 h-4" />
+            </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={authState === 'sending'}
+              className="w-full pl-10 pr-3 py-3 border-2 border-beige-200 rounded-xl
+                       text-sm focus:outline-none focus:ring-2 focus:ring-gold/50
+                       focus:border-gold transition-all disabled:opacity-50"
+              placeholder="correo@ejemplo.com"
+              autoFocus
+            />
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Continue Button */}
+          <button
+            onClick={handleEmailSubmit}
+            disabled={authState === 'sending' || !email.trim()}
+            className="w-full mt-4 py-3 bg-gradient-to-r from-gold to-gold/90 text-dark
+                     font-semibold rounded-xl hover:shadow-lg transition-all text-sm
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     flex items-center justify-center gap-2"
+          >
+            {authState === 'sending' ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Verificando...
+              </>
+            ) : (
+              <>
+                Continuar
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+
+          {/* Info text */}
+          <p className="mt-3 text-center text-xs text-warm-gray">
+            Te enviaremos un enlace seguro a tu correo para verificar tu identidad
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-dark mb-2">
-          ¡Bienvenido!
-        </h2>
-        <p className="text-warm-gray">
-          Ingresa tu correo electrónico para comenzar tu reserva
-        </p>
       </div>
-
-      {/* Benefits */}
-      <div className="mb-6 p-4 bg-beige-50 rounded-xl">
-        <p className="text-sm font-medium text-dark mb-2">Al iniciar sesión podrás:</p>
-        <ul className="text-sm text-warm-gray space-y-1">
-          <li>• Ver tu historial de citas y compras</li>
-          <li>• Gestionar tus próximas reservaciones</li>
-          <li>• Recibir ofertas exclusivas</li>
-          <li>• Agilizar futuras reservas</li>
-        </ul>
-      </div>
-
-      {/* Email Input */}
-      <div className="relative">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-gray">
-          <Mail className="w-5 h-5" />
-        </div>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyPress={handleKeyPress}
-          disabled={authState === 'sending'}
-          className="w-full pl-12 pr-4 py-4 border-2 border-beige-200 rounded-xl
-                   text-lg focus:outline-none focus:ring-2 focus:ring-gold/50
-                   focus:border-gold transition-all disabled:opacity-50"
-          placeholder="correo@ejemplo.com"
-          autoFocus
-        />
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Continue Button */}
-      <button
-        onClick={handleEmailSubmit}
-        disabled={authState === 'sending' || !email.trim()}
-        className="w-full mt-6 py-4 bg-gradient-to-r from-gold to-gold/90 text-dark
-                 font-semibold rounded-xl hover:shadow-lg transition-all
-                 disabled:opacity-50 disabled:cursor-not-allowed
-                 flex items-center justify-center gap-2"
-      >
-        {authState === 'sending' ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Verificando...
-          </>
-        ) : (
-          <>
-            Continuar
-            <ArrowRight className="w-5 h-5" />
-          </>
-        )}
-      </button>
-
-      {/* Info text */}
-      <p className="mt-4 text-center text-sm text-warm-gray">
-        Te enviaremos un enlace seguro a tu correo para verificar tu identidad
-      </p>
     </div>
   )
 }
@@ -637,9 +653,13 @@ function AuthStepContent() {
 // Loading fallback
 function AuthStepLoading() {
   return (
-    <div className="auth-step max-w-md mx-auto text-center py-12">
-      <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
-      <p className="text-warm-gray">Cargando...</p>
+    <div className="auth-step flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto pb-4">
+        <div className="max-w-md mx-auto text-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-gold mx-auto mb-3" />
+          <p className="text-sm text-warm-gray">Cargando...</p>
+        </div>
+      </div>
     </div>
   )
 }

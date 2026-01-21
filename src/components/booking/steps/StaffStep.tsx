@@ -98,17 +98,19 @@ export function StaffStep() {
   }, [selectedDate])
 
   return (
-    <div className="staff-step">
+    <div className="staff-step flex flex-col h-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto pb-4">
       {/* Header */}
-      <div className="text-center mb-6">
-        <div className="w-14 h-14 bg-gradient-to-br from-gold to-gold/60 rounded-full
-                      flex items-center justify-center mx-auto mb-3 shadow-lg">
-          <User className="w-7 h-7 text-white" />
+      <div className="text-center mb-4">
+        <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                      flex items-center justify-center mx-auto mb-2 shadow-md">
+          <User className="w-5 h-5 text-white" />
         </div>
-        <h2 className="text-xl font-bold text-dark mb-1">
+        <h2 className="text-lg font-bold text-dark mb-0.5">
           Selecciona tu Terapeuta
         </h2>
-        <p className="text-sm text-warm-gray">
+        <p className="text-xs text-warm-gray">
           {selectedDate && selectedTime && (
             <span className="block text-xs text-gold-600 font-medium mb-1">
               {formattedDate} a las {selectedSlot?.displayTime || selectedTime}
@@ -274,7 +276,7 @@ export function StaffStep() {
           </div>
         </div>
       )}
-
+      </div>
     </div>
   )
 }

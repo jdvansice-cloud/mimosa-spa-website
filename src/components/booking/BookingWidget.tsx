@@ -105,8 +105,8 @@ export function BookingWidget() {
           </div>
         )}
 
-        {/* Main Content Area */}
-        <div className="p-4 sm:p-6 min-h-[400px] max-h-[calc(100vh-280px)] overflow-y-auto">
+        {/* Main Content Area - Fixed height container that fills to bottom nav */}
+        <div className="p-4 sm:p-6 h-[calc(100vh-200px)] sm:h-[calc(100vh-220px)] flex flex-col">
           <AnimatePresence mode="wait" custom={stepNumber}>
             <motion.div
               key={currentStep}
@@ -116,7 +116,7 @@ export function BookingWidget() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="h-full"
+              className="flex-1 min-h-0 overflow-y-auto"
             >
               {renderStep()}
             </motion.div>
