@@ -1,10 +1,36 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react'
 import { Logo } from './Logo'
+
+interface SiteSettings {
+  phone_costa_del_este: string
+  email: string
+  instagram_url: string
+  facebook_url: string
+}
+
+const defaultSettings: SiteSettings = {
+  phone_costa_del_este: '398-5295',
+  email: 'info@mimosaretreat.com',
+  instagram_url: 'https://instagram.com/mimosasparetreat',
+  facebook_url: 'https://facebook.com/mimosasparetreat',
+}
+
+// Format phone number for display
+function formatPhoneDisplay(phone: string): string {
+  // If it already looks formatted with +507, return as-is
+  if (phone.startsWith('+507')) return phone
+  // If it already has dashes/spaces, add +507 prefix
+  if (phone.includes('-') || phone.includes(' ')) return `+507 ${phone}`
+  // Otherwise format as +507 XXX-XXXX
+  if (phone.length === 7) return `+507 ${phone.slice(0, 3)}-${phone.slice(3)}`
+  return phone
+}
 
 export function Footer() {
   const t = useTranslations('footer')
@@ -14,7 +40,33 @@ export function Footer() {
   const params = useParams()
   const locale = params.locale as string
 
+  const [settings, setSettings] = useState<SiteSettings>(defaultSettings)
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const response = await fetch('/api/settings')
+        if (response.ok) {
+          const { data } = await response.json()
+          if (data) {
+            setSettings({
+              phone_costa_del_este: data.phone_costa_del_este || defaultSettings.phone_costa_del_este,
+              email: data.email || defaultSettings.email,
+              instagram_url: data.instagram_url || defaultSettings.instagram_url,
+              facebook_url: data.facebook_url || defaultSettings.facebook_url,
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error)
+      }
+    }
+    fetchSettings()
+  }, [])
+
   const currentYear = new Date().getFullYear()
+  const phoneDisplay = formatPhoneDisplay(settings.phone_costa_del_este)
+  const phoneLink = `tel:+507${settings.phone_costa_del_este.replace(/\D/g, '')}`
 
   const navLinks = [
     { href: `/${locale}`, label: tNav('home') },
@@ -43,11 +95,11 @@ export function Footer() {
               </div>
             </div>
             <p className="text-cream/70 text-sm mt-4">{t('tagline')}</p>
-            
+
             {/* Social Links */}
             <div className="flex gap-4 mt-6">
               <a
-                href="https://instagram.com/mimosasparetreat"
+                href={settings.instagram_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-cream/10 hover:bg-gold hover:text-dark transition-colors"
@@ -56,7 +108,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://facebook.com/mimosasparetreat"
+                href={settings.facebook_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-cream/10 hover:bg-gold hover:text-dark transition-colors"
@@ -114,19 +166,19 @@ export function Footer() {
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-gold" />
                 <a
-                  href="tel:+5076000000"
+                  href={phoneLink}
                   className="text-cream/70 hover:text-gold transition-colors"
                 >
-                  +507 6000-0000
+                  {phoneDisplay}
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-gold" />
                 <a
-                  href="mailto:info@mimosaretreat.com"
+                  href={`mailto:${settings.email}`}
                   className="text-cream/70 hover:text-gold transition-colors"
                 >
-                  info@mimosaretreat.com
+                  {settings.email}
                 </a>
               </li>
               <li className="flex gap-3">
