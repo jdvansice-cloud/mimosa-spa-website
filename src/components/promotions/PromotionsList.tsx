@@ -46,13 +46,15 @@ export function PromotionsList() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
-      {promotions.map((promotion) => (
-        <PromotionCard
-          key={promotion.id}
-          promotion={promotion}
-        />
-      ))}
+    <div className="flex justify-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
+        {promotions.map((promotion) => (
+          <PromotionCard
+            key={promotion.id}
+            promotion={promotion}
+          />
+        ))}
+      </div>
     </div>
   )
 }

@@ -48,7 +48,7 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
         </div>
 
         {/* Content Box */}
-        <div className="mx-4 -mt-4 relative z-10">
+        <div className="mx-4 mt-2">
           <div className="bg-warm-gray-500 text-cream p-5 rounded-lg">
             {/* Services List */}
             <div className="space-y-1 text-center">
