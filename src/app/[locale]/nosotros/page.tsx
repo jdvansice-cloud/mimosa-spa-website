@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 import { useTranslations } from 'next-intl'
 import { Sparkles, Award, Heart } from 'lucide-react'
+import { LocationsSection } from '@/components/home/LocationsSection'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -68,6 +69,13 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       <section className="section bg-beige">
         <div className="container-spa">
           <ValuesSection />
+        </div>
+      </section>
+
+      {/* Locations Section */}
+      <section className="section bg-cream">
+        <div className="container-spa">
+          <LocationsSection />
         </div>
       </section>
     </div>

@@ -22,6 +22,14 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/api/gallery/[id]",
+      "regex": "^/api/gallery/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/gallery/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/api/promotions/[id]/with-services",
       "regex": "^/api/promotions/([^/]+?)/with\\-services(?:/)?$",
       "routeKeys": {
@@ -230,6 +238,12 @@
       "regex": "^/api/gallery(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/gallery(?:/)?$"
+    },
+    {
+      "page": "/api/gallery/upload",
+      "regex": "^/api/gallery/upload(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/gallery/upload(?:/)?$"
     },
     {
       "page": "/api/health",
