@@ -51,8 +51,9 @@ export async function GET(request: NextRequest) {
     }> = []
 
     if (forPromotions) {
-      // For promotions - include ALL online bookable services (no session type filter)
-      // This ensures promotion services are visible even if they don't have exact name matches
+      // For promotions - include ALL online bookable services (no filters)
+      // This ensures promotion services are visible regardless of category or session type match
+      // Promotions can include main services AND add-ons
       const allOnlineServices = await getOnlineBookableServicesForPromotions(parsedLocationId)
 
       // Validate API response
@@ -66,20 +67,9 @@ export async function GET(request: NextRequest) {
 
       console.log('Total online services for promotions:', allOnlineServices.length)
 
-      if (type === 'main') {
-        // Exclude Adicionales category
-        filteredServices = allOnlineServices.filter(
-          s => s.ProgramId !== PROGRAM_IDS.ADICIONALES
-        )
-      } else if (type === 'addons') {
-        // Only Adicionales
-        filteredServices = allOnlineServices.filter(
-          s => s.ProgramId === PROGRAM_IDS.ADICIONALES
-        )
-      } else {
-        // type === 'all'
-        filteredServices = allOnlineServices
-      }
+      // Return ALL services for promotions - no ProgramId filtering
+      // Promotions can include services from any category including Adicionales
+      filteredServices = allOnlineServices
     } else if (type === 'addons') {
       // For add-ons, use the sale/services endpoint which has actual prices
       filteredServices = await getAddons(parsedLocationId)

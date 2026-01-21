@@ -458,13 +458,11 @@ export async function getServices(locationId?: number) {
 export async function getOnlineBookableServicesForPromotions(locationId?: number) {
   const { services } = await fetchAllOnlineBookableServices(locationId)
 
-  // Return all online bookable services except Adicionales (those are add-ons)
-  // Don't filter by session type match - promotions need to show all included services
-  const allOnlineServices = services.filter(s => s.ProgramId !== 8)
+  // Return ALL online bookable services including add-ons (Adicionales)
+  // Promotions can include any service type
+  console.log('All online bookable services for promotions (no filters):', services.length)
 
-  console.log('All online bookable services for promotions (no session type filter):', allOnlineServices.length)
-
-  return allOnlineServices
+  return services
 }
 
 // Get add-ons (Adicionales) - only ProgramId 8
