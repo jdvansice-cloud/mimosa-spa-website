@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Cormorant_Garamond, Lato } from 'next/font/google'
 import { Header, Footer, MobileBottomNav } from '@/components/layout'
+import { GoogleTagManager, GoogleTagManagerNoScript } from '@/components/analytics'
 import '@/app/globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -83,6 +84,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${cormorant.variable} ${lato.variable}`}>
       <head>
+        <GoogleTagManager />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
@@ -94,6 +96,7 @@ export default async function LocaleLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="min-h-screen bg-cream font-body antialiased">
+        <GoogleTagManagerNoScript />
         <NextIntlClientProvider messages={messages}>
           <div className="flex flex-col min-h-screen">
             <Header />
