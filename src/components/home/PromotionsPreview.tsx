@@ -41,16 +41,9 @@ export function PromotionsPreview() {
   return (
     <div>
       {/* Section Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
-        <div>
-          <h2 className="title-decorated">{t('title').toUpperCase()}</h2>
-          <p className="text-warm-gray mt-2">Enero 2026</p>
-        </div>
-        <Link href={`/${locale}/promociones`}>
-          <Button variant="ghost" rightIcon={<ArrowRight className="h-4 w-4" />}>
-            {t('viewAll')}
-          </Button>
-        </Link>
+      <div className="text-center mb-12">
+        <h2 className="title-decorated">{t('title').toUpperCase()}</h2>
+        <p className="text-warm-gray mt-2">Enero 2026</p>
       </div>
 
       {/* Promotions Grid */}
