@@ -82,6 +82,21 @@
     "paquetes": {
       "title": "Tratamientos en Paquetes",
       "intro": "Maximiza tu experiencia de spa con nuestros paquetes especialmente diseñados. Combinaciones perfectas de tratamientos que te permiten disfrutar de múltiples beneficios en una sola visita. Ideal para quienes buscan una experiencia completa de relajación y rejuvenecimiento a un valor excepcional."
+    },
+    "giftcards": {
+      "title": "Gift Cards",
+      "purchaseConditions": "Condiciones de Compra"
+    },
+    "membresia": {
+      "title": "Membresía Privilege",
+      "tableHeaders": {
+        "card": "Tarjeta",
+        "validity": "Valida por",
+        "guests": "# de huespedes por visita",
+        "value": "Valor de consumo",
+        "benefit": "Beneficio"
+      },
+      "months": "meses"
     }
   },
   "promotions": {

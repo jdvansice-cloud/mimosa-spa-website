@@ -78,6 +78,22 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/menu/faciales(?:/)?$"
     },
     {
+      "page": "/[locale]/menu/giftcards",
+      "regex": "^/([^/]+?)/menu/giftcards(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/menu/giftcards(?:/)?$"
+    },
+    {
+      "page": "/[locale]/menu/membresia",
+      "regex": "^/([^/]+?)/menu/membresia(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/menu/membresia(?:/)?$"
+    },
+    {
       "page": "/[locale]/menu/paquetes",
       "regex": "^/([^/]+?)/menu/paquetes(?:/)?$",
       "routeKeys": {
@@ -180,6 +196,12 @@
       "namedRegex": "^/admin/galeria(?:/)?$"
     },
     {
+      "page": "/admin/giftcards",
+      "regex": "^/admin/giftcards(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/giftcards(?:/)?$"
+    },
+    {
       "page": "/admin/imagenes",
       "regex": "^/admin/imagenes(?:/)?$",
       "routeKeys": {},
@@ -192,6 +214,12 @@
       "namedRegex": "^/admin/login(?:/)?$"
     },
     {
+      "page": "/admin/membresia",
+      "regex": "^/admin/membresia(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/membresia(?:/)?$"
+    },
+    {
       "page": "/admin/promociones",
       "regex": "^/admin/promociones(?:/)?$",
       "routeKeys": {},
@@ -202,6 +230,12 @@
       "regex": "^/admin/tratamientos(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/tratamientos(?:/)?$"
+    },
+    {
+      "page": "/api/admin/settings",
+      "regex": "^/api/admin/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/settings(?:/)?$"
     },
     {
       "page": "/api/admin/site-images",
@@ -246,10 +280,22 @@
       "namedRegex": "^/api/gallery/upload(?:/)?$"
     },
     {
+      "page": "/api/giftcards",
+      "regex": "^/api/giftcards(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/giftcards(?:/)?$"
+    },
+    {
       "page": "/api/health",
       "regex": "^/api/health(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/health(?:/)?$"
+    },
+    {
+      "page": "/api/membership",
+      "regex": "^/api/membership(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/membership(?:/)?$"
     },
     {
       "page": "/api/mindbody/auth",
@@ -340,6 +386,12 @@
       "regex": "^/api/promotions/upload(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/promotions/upload(?:/)?$"
+    },
+    {
+      "page": "/api/settings",
+      "regex": "^/api/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/settings(?:/)?$"
     },
     {
       "page": "/api/site-images",

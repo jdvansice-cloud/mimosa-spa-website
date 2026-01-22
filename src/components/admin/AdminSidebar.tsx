@@ -11,7 +11,9 @@ import {
   LogOut,
   ExternalLink,
   User,
-  Sparkles
+  Sparkles,
+  Gift,
+  Award
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
@@ -21,6 +23,8 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },
+  { href: '/admin/giftcards', label: 'Gift Cards', icon: Gift },
+  { href: '/admin/membresia', label: 'Membresía', icon: Award },
   { href: '/admin/galeria', label: 'Galería', icon: Image },
   { href: '/admin/imagenes', label: 'Imágenes del Sitio', icon: ImagePlus },
   { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
