@@ -5,13 +5,27 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 // Default fallback images for each key
 const DEFAULT_IMAGES: Record<string, string> = {
+  // Menu banners
   menu_corporales_banner: '/Tratamientos Corporales.png',
   menu_corporales_deluxe_banner: '/Tratamientos Corporales Deluxe.png',
   menu_faciales_banner: '/Tratamientos Faciales.png',
   menu_paquetes_banner: '/Tratamientos en Paquetes.png',
   logo: '/logo.png',
+  // Hero section
   hero_banner: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070',
   booking_cta_background: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?q=80&w=2070',
+  // Featured categories
+  category_body_treatments: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
+  category_facial_treatments: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
+  category_packages: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
+  // Location cards
+  location_costa_del_este: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800',
+  location_san_francisco: 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?q=80&w=800',
+  // About page
+  about_image_1: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600',
+  about_image_2: 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?q=80&w=600',
+  // Promotions fallback
+  promotion_default: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800',
 }
 
 /**

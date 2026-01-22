@@ -18,12 +18,25 @@ const defaultSettings: SiteSettings = {
   whatsapp_number: '50764049464',
 }
 
-const locations = [
+// Default fallback images
+const DEFAULT_IMAGES = {
+  costaDelEste: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800',
+  sanFrancisco: 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?q=80&w=800',
+}
+
+interface LocationsSectionProps {
+  images?: {
+    costaDelEste?: string
+    sanFrancisco?: string
+  }
+}
+
+const getLocations = (images?: LocationsSectionProps['images']) => [
   {
     id: 1,
     nameKey: 'costaDelEste',
     phoneKey: 'phone_costa_del_este' as const,
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800',
+    image: images?.costaDelEste || DEFAULT_IMAGES.costaDelEste,
     mapUrl: 'https://maps.app.goo.gl/5iX28mGH2mxUiJJ1A',
     mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1970.5!2d-79.46174!3d9.022731!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8facaa1a4be8b0d7%3A0xeea70492420826f4!2sMimosa%20Spa%20-%20Costa%20del%20Este!5e0!3m2!1ses!2spa!4v1700000000000!5m2!1ses!2spa',
   },
@@ -31,7 +44,7 @@ const locations = [
     id: 2,
     nameKey: 'sanFrancisco',
     phoneKey: 'phone_san_francisco' as const,
-    image: 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?q=80&w=800',
+    image: images?.sanFrancisco || DEFAULT_IMAGES.sanFrancisco,
     mapUrl: 'https://maps.app.goo.gl/sgT9VCx6DZBoy5wn6',
     mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1970.5!2d-79.5054466!3d8.9932791!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8faca91ce23320e9%3A0x15bbc21f0fa10701!2sMimosa%20Spa%20-%20San%20Francisco!5e0!3m2!1ses!2spa!4v1700000000000!5m2!1ses!2spa',
   },
@@ -57,7 +70,7 @@ function formatWhatsAppDisplay(number: string): string {
   return number
 }
 
-export function LocationsSection() {
+export function LocationsSection({ images }: LocationsSectionProps) {
   const t = useTranslations('home.locations')
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings)
 
@@ -84,6 +97,7 @@ export function LocationsSection() {
 
   const whatsappDisplay = formatWhatsAppDisplay(settings.whatsapp_number)
   const whatsappLink = `https://wa.me/${settings.whatsapp_number.replace(/\D/g, '')}`
+  const locations = getLocations(images)
 
   return (
     <div>

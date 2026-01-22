@@ -10,7 +10,7 @@ R.c("server/chunks/ssr/_claude-worktrees_mimosa-spa-website_vigilant-rubin_src_a
 R.c("server/chunks/ssr/_claude-worktrees_mimosa-spa-website_vigilant-rubin_f9110025._.js")
 R.c("server/chunks/ssr/98928_next_dist_client_components_0c677cb1._.js")
 R.c("server/chunks/ssr/98928_next_dist_client_components_builtin_unauthorized_52227dcb.js")
-R.c("server/chunks/ssr/[root-of-the-server]__8926e320._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__5ab3d192._.js")
 R.c("server/chunks/ssr/98928_09c5d75b._.js")
 R.c("server/chunks/ssr/98928_next_dist_8b741a44._.js")
 R.c("server/chunks/ssr/e08ce_mimosa-spa-website_vigilant-rubin_src_app_[locale]_portal_layout_tsx_49421b4c._.js")

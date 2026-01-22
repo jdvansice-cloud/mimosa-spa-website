@@ -5,28 +5,43 @@ import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
 import { motion } from 'framer-motion'
 
-const categories = [
-  {
-    id: 'body',
-    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
-    titleKey: 'body',
-  },
-  {
-    id: 'facial',
-    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
-    titleKey: 'facial',
-  },
-  {
-    id: 'packages',
-    image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
-    titleKey: 'packages',
-  },
-]
+// Default fallback images
+const DEFAULT_IMAGES = {
+  body: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
+  facial: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
+  packages: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
+}
 
-export function FeaturedCategories() {
+interface FeaturedCategoriesProps {
+  images?: {
+    body?: string
+    facial?: string
+    packages?: string
+  }
+}
+
+export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
   const t = useTranslations('home.featured')
   const tMenu = useTranslations('menu.categories')
   const locale = useLocale()
+
+  const categories = [
+    {
+      id: 'body',
+      image: images?.body || DEFAULT_IMAGES.body,
+      titleKey: 'body',
+    },
+    {
+      id: 'facial',
+      image: images?.facial || DEFAULT_IMAGES.facial,
+      titleKey: 'facial',
+    },
+    {
+      id: 'packages',
+      image: images?.packages || DEFAULT_IMAGES.packages,
+      titleKey: 'packages',
+    },
+  ]
 
   return (
     <div>

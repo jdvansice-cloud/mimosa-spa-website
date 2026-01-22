@@ -10,7 +10,11 @@ import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
 // Button styles for HomeBookingButton (matches Button component's lg primary variant)
 const bookingButtonStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gold text-dark hover:bg-gold-600 active:bg-gold-700 focus:ring-gold-500 shadow-sm hover:shadow-md px-8 py-4 text-lg gap-2.5 w-full sm:w-auto"
 
-export function HeroSection() {
+interface HeroSectionProps {
+  heroImage?: string
+}
+
+export function HeroSection({ heroImage }: HeroSectionProps) {
   const t = useTranslations('home.hero')
   const locale = useLocale()
 
@@ -21,6 +25,8 @@ export function HeroSection() {
     })
   }
 
+  const backgroundImage = heroImage || 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070'
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -28,7 +34,7 @@ export function HeroSection() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070')`,
+            backgroundImage: `url('${backgroundImage}')`,
           }}
         />
         {/* Stronger Overlay for better text visibility */}

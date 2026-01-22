@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { useTranslations } from 'next-intl'
 import { Sparkles, Award, Heart } from 'lucide-react'
 import { LocationsSection } from '@/components/home/LocationsSection'
+import { getSiteImages } from '@/lib/site-images'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -15,7 +16,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   await params // Ensure params are resolved
-  
+
+  // Fetch managed images
+  const images = await getSiteImages([
+    'about_image_1',
+    'about_image_2',
+    'location_costa_del_este',
+    'location_san_francisco',
+  ])
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero Section */}
@@ -28,7 +37,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                 <div className="space-y-4">
                   <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
                     <Image
-                      src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600"
+                      src={images.about_image_1}
                       alt="Mimosa Spa Interior"
                       fill
                       className="object-cover"
@@ -39,7 +48,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                 <div className="space-y-4 pt-8">
                   <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
                     <Image
-                      src="https://images.unsplash.com/photo-1560750588-73207b1ef5b8?q=80&w=600"
+                      src={images.about_image_2}
                       alt="Spa Treatment"
                       fill
                       className="object-cover"
@@ -48,7 +57,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                   </div>
                 </div>
               </div>
-              
+
               {/* Decorative Element */}
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-beige rounded-full -z-10" />
             </div>
@@ -75,7 +84,10 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       {/* Locations Section */}
       <section className="section bg-cream">
         <div className="container-spa">
-          <LocationsSection />
+          <LocationsSection images={{
+            costaDelEste: images.location_costa_del_este,
+            sanFrancisco: images.location_san_francisco,
+          }} />
         </div>
       </section>
     </div>

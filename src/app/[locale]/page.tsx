@@ -6,6 +6,7 @@ import { FeaturedCategories } from '@/components/home/FeaturedCategories'
 import { PromotionsPreview } from '@/components/home/PromotionsPreview'
 import { LocationsSection } from '@/components/home/LocationsSection'
 import { BookingCTA } from '@/components/home/BookingCTA'
+import { getSiteImages } from '@/lib/site-images'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -18,16 +19,30 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   await params // Just to consume the param
-  
+
+  // Fetch all managed images for home page
+  const images = await getSiteImages([
+    'hero_banner',
+    'category_body_treatments',
+    'category_facial_treatments',
+    'category_packages',
+    'location_costa_del_este',
+    'location_san_francisco',
+  ])
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <HeroSection />
+      <HeroSection heroImage={images.hero_banner} />
 
       {/* Featured Categories */}
       <section className="section bg-cream">
         <div className="container-spa">
-          <FeaturedCategories />
+          <FeaturedCategories images={{
+            body: images.category_body_treatments,
+            facial: images.category_facial_treatments,
+            packages: images.category_packages,
+          }} />
         </div>
       </section>
 
@@ -43,7 +58,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Locations */}
       <section className="section bg-cream">
         <div className="container-spa">
-          <LocationsSection />
+          <LocationsSection images={{
+            costaDelEste: images.location_costa_del_este,
+            sanFrancisco: images.location_san_francisco,
+          }} />
         </div>
       </section>
 
