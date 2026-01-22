@@ -84,7 +84,6 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${cormorant.variable} ${lato.variable}`}>
       <head>
-        <GoogleTagManager />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
@@ -96,6 +95,7 @@ export default async function LocaleLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="min-h-screen bg-cream font-body antialiased">
+        <GoogleTagManager />
         <GoogleTagManagerNoScript />
         <NextIntlClientProvider messages={messages}>
           <div className="flex flex-col min-h-screen">
