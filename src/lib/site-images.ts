@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { unstable_noStore as noStore } from 'next/cache'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -33,6 +34,9 @@ const DEFAULT_IMAGES: Record<string, string> = {
  * Falls back to default if not found in database
  */
 export async function getSiteImage(key: string): Promise<string> {
+  // Disable caching to always fetch fresh data
+  noStore()
+
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
@@ -58,6 +62,9 @@ export async function getSiteImage(key: string): Promise<string> {
  * Returns a map of key -> image_url
  */
 export async function getSiteImages(keys: string[]): Promise<Record<string, string>> {
+  // Disable caching to always fetch fresh data
+  noStore()
+
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 

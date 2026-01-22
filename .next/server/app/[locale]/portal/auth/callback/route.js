@@ -1,5 +1,5 @@
 var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/[locale]/portal/auth/callback/route.js")
-R.c("server/chunks/[root-of-the-server]__43af8e4a._.js")
+R.c("server/chunks/[root-of-the-server]__d8365f1f._.js")
 R.c("server/chunks/_claude-worktrees_mimosa-spa-website_vigilant-rubin_146530b4._.js")
 R.c("server/chunks/98928_@supabase_supabase-js_dist_index_mjs_66904d66._.js")
 R.c("server/chunks/[root-of-the-server]__ce83986f._.js")
