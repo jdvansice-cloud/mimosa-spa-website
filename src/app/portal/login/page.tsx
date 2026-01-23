@@ -386,10 +386,10 @@ function PortalLoginContent() {
               className="mx-auto mb-6"
             />
             <h1 className="text-2xl font-bold text-dark mb-2">
-              Crear Cuenta
+              Regístrate para Reservar
             </h1>
             <p className="text-warm-gray">
-              No encontramos una cuenta con ese correo. Completa tus datos para registrarte.
+              Crea tu cuenta para poder reservar citas y acceder a tu portal
             </p>
           </div>
 
@@ -531,10 +531,10 @@ function PortalLoginContent() {
             className="mx-auto mb-6"
           />
           <h1 className="text-2xl font-bold text-dark mb-2">
-            Mi Portal
+            Bienvenido
           </h1>
           <p className="text-warm-gray">
-            Accede a tu historial de citas y reservaciones
+            Inicia sesión para reservar una cita o acceder a tu portal
           </p>
         </div>
 
@@ -549,7 +549,7 @@ function PortalLoginContent() {
               Iniciar Sesión
             </h2>
             <p className="text-sm text-warm-gray mt-1">
-              Te enviaremos un enlace de acceso a tu correo
+              Ingresa tu correo para continuar
             </p>
           </div>
 
@@ -612,7 +612,7 @@ function PortalLoginContent() {
             }}
             className="block w-full text-gold hover:text-gold/80 font-medium transition-colors"
           >
-            ¿Primera vez? Regístrate aquí
+            ¿Cliente nuevo? Regístrate para reservar
           </button>
           <a
             href="/es"
