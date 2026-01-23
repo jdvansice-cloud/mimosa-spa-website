@@ -3,9 +3,9 @@
 import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { Mail, ArrowRight, Loader2, User, CheckCircle } from 'lucide-react'
+import { Mail, ArrowRight, Loader2, User, CheckCircle, UserPlus, Phone } from 'lucide-react'
 
-type LoginStep = 'email' | 'sending' | 'sent' | 'verifying'
+type LoginStep = 'email' | 'sending' | 'sent' | 'verifying' | 'register'
 
 interface ClientOption {
   Id: number
@@ -13,6 +13,13 @@ interface ClientOption {
   LastName: string
   Email: string | null
   MobilePhone: string | null
+}
+
+interface RegistrationData {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
 }
 
 function PortalLoginContent() {
@@ -35,6 +42,13 @@ function PortalLoginContent() {
   const [error, setError] = useState<string | null>(null)
   const [multipleClients, setMultipleClients] = useState<ClientOption[] | null>(null)
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null)
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [registrationData, setRegistrationData] = useState<RegistrationData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+  })
 
   // Check if user is already logged in
   useEffect(() => {
@@ -83,9 +97,9 @@ function PortalLoginContent() {
 
       if (!response.ok) {
         if (data.notFound) {
-          // Email not found - redirect to booking to register
-          setError('No encontramos una cuenta con este correo. Puedes crear una cuenta reservando tu primera cita.')
-          setStep('email')
+          // Email not found - show registration form
+          setRegistrationData(prev => ({ ...prev, email }))
+          setStep('register')
           return
         }
         throw new Error(data.error || 'Error al verificar correo')
@@ -169,6 +183,70 @@ function PortalLoginContent() {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleEmailSubmit()
+    }
+  }
+
+  const handleRegistration = async () => {
+    const { firstName, lastName, email: regEmail, phone } = registrationData
+
+    if (!firstName || !lastName || !regEmail || !phone) {
+      setError('Por favor completa todos los campos')
+      return
+    }
+
+    setIsRegistering(true)
+    setError(null)
+
+    try {
+      // Create client in Mindbody
+      const response = await fetch('/api/mindbody/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'register',
+          firstName,
+          lastName,
+          email: regEmail,
+          phone,
+          searchText: regEmail,
+          searchType: 'email'
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al registrar')
+      }
+
+      // Client created - now send magic link
+      const clientId = data.client.Id
+      setSelectedClientId(clientId)
+
+      const supabase = getSupabase()
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email: regEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/portal/auth/callback?clientId=${clientId}`,
+          data: {
+            mindbody_client_id: clientId,
+            first_name: firstName,
+            last_name: lastName
+          }
+        }
+      })
+
+      if (authError) {
+        throw new Error(authError.message)
+      }
+
+      setEmail(regEmail)
+      setStep('sent')
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión')
+    } finally {
+      setIsRegistering(false)
     }
   }
 
@@ -293,6 +371,152 @@ function PortalLoginContent() {
     )
   }
 
+  // Registration form
+  if (step === 'register') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <Image
+              src="/images/logo.png"
+              alt="Mimosa Spa Retreat"
+              width={180}
+              height={60}
+              className="mx-auto mb-6"
+            />
+            <h1 className="text-2xl font-bold text-dark mb-2">
+              Crear Cuenta
+            </h1>
+            <p className="text-warm-gray">
+              No encontramos una cuenta con ese correo. Completa tus datos para registrarte.
+            </p>
+          </div>
+
+          {/* Registration Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-beige-200">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                            flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <UserPlus className="w-8 h-8 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    value={registrationData.firstName}
+                    onChange={(e) => setRegistrationData(prev => ({ ...prev, firstName: e.target.value }))}
+                    className="w-full px-4 py-3 border-2 border-beige-200 rounded-xl
+                             focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                             transition-all"
+                    placeholder="Tu nombre"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">
+                    Apellido
+                  </label>
+                  <input
+                    type="text"
+                    value={registrationData.lastName}
+                    onChange={(e) => setRegistrationData(prev => ({ ...prev, lastName: e.target.value }))}
+                    className="w-full px-4 py-3 border-2 border-beige-200 rounded-xl
+                             focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                             transition-all"
+                    placeholder="Tu apellido"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1">
+                  Correo Electrónico
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
+                  <input
+                    type="email"
+                    value={registrationData.email}
+                    onChange={(e) => setRegistrationData(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-beige-200 rounded-xl
+                             focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                             transition-all"
+                    placeholder="correo@ejemplo.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1">
+                  Teléfono / WhatsApp
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
+                  <input
+                    type="tel"
+                    value={registrationData.phone}
+                    onChange={(e) => setRegistrationData(prev => ({ ...prev, phone: e.target.value }))}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-beige-200 rounded-xl
+                             focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                             transition-all"
+                    placeholder="50766124546"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              onClick={handleRegistration}
+              disabled={isRegistering}
+              className="w-full mt-6 py-4 bg-gradient-to-r from-gold to-gold/90 text-dark
+                       font-semibold rounded-xl hover:shadow-lg transition-all
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       flex items-center justify-center gap-2"
+            >
+              {isRegistering ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Creando cuenta...
+                </>
+              ) : (
+                <>
+                  Crear Cuenta y Continuar
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Back Button */}
+          <button
+            onClick={() => {
+              setStep('email')
+              setError(null)
+              setRegistrationData({ firstName: '', lastName: '', email: '', phone: '' })
+            }}
+            className="w-full mt-4 py-3 text-warm-gray hover:text-dark transition-colors"
+          >
+            ← Volver a iniciar sesión
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // Main login form
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
@@ -380,12 +604,16 @@ function PortalLoginContent() {
 
         {/* Footer Links */}
         <div className="mt-6 text-center space-y-2">
-          <a
-            href="/es/reservar"
-            className="block text-gold hover:text-gold/80 font-medium transition-colors"
+          <button
+            onClick={() => {
+              setRegistrationData({ firstName: '', lastName: '', email: email, phone: '' })
+              setStep('register')
+              setError(null)
+            }}
+            className="block w-full text-gold hover:text-gold/80 font-medium transition-colors"
           >
-            Reservar una cita nueva
-          </a>
+            ¿Primera vez? Regístrate aquí
+          </button>
           <a
             href="/es"
             className="block text-warm-gray hover:text-dark text-sm transition-colors"
