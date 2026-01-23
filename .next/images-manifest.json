@@ -43,7 +43,13 @@
     "remotePatterns": [
       {
         "protocol": "https",
-        "hostname": "^(?:(?!\\.)(?=.)[^/]*?\\.supabase\\.co\\/?)$",
+        "hostname": "^(?:(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\.supabase\\.co\\/?)$",
+        "port": "",
+        "pathname": "^(?:\\/storage\\/v1\\/object\\/public(?:\\/(?!\\.{1,2}(?:\\/|$))(?:(?:(?!(?:^|\\/)\\.{1,2}(?:\\/|$)).)*?)|$))$"
+      },
+      {
+        "protocol": "https",
+        "hostname": "^(?:^(?:aoqbaxfynmlcxwrnaeyo\\.supabase\\.co)$)$",
         "port": "",
         "pathname": "^(?:\\/storage\\/v1\\/object\\/public(?:\\/(?!\\.{1,2}(?:\\/|$))(?:(?:(?!(?:^|\\/)\\.{1,2}(?:\\/|$)).)*?)|$))$"
       },
