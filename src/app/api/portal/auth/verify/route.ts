@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     if (!clients || clients.length === 0) {
       return NextResponse.json(
-        { error: 'No encontramos una cuenta con este correo. Si eres nuevo, reserva una cita primero.' },
+        { error: 'No encontramos una cuenta con este correo.', notFound: true },
         { status: 404 }
       )
     }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (matchingClients.length === 0) {
       return NextResponse.json(
-        { error: 'No encontramos una cuenta con este correo exacto.' },
+        { error: 'No encontramos una cuenta con este correo exacto.', notFound: true },
         { status: 404 }
       )
     }
