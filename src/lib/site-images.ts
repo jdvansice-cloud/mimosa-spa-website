@@ -19,6 +19,9 @@ const DEFAULT_IMAGES: Record<string, string> = {
   category_body_treatments: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
   category_facial_treatments: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
   category_packages: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
+  category_giftcards: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=800',
+  category_membership: 'https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=800',
+  category_promotions: 'https://images.unsplash.com/photo-1607006344380-b6775a0824a7?q=80&w=800',
   // Location cards
   location_costa_del_este: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800',
   location_san_francisco: 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?q=80&w=800',

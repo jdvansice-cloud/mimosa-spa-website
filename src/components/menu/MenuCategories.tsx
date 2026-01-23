@@ -14,7 +14,6 @@ interface MenuCategoriesProps {
 const DEFAULT_IMAGES = {
   body: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
   facial: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
-  packages: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
   membership: 'https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=800',
   giftcards: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=800',
   promotions: 'https://images.unsplash.com/photo-1607006344380-b6775a0824a7?q=80&w=800',
@@ -36,27 +35,21 @@ export function MenuCategories({ locale, categoryImages }: MenuCategoriesProps) 
       href: '/menu/faciales',
     },
     {
-      id: 'packages',
-      titleKey: 'packages',
-      image: categoryImages.category_packages || DEFAULT_IMAGES.packages,
-      href: '/menu/paquetes',
-    },
-    {
       id: 'membership',
       titleKey: 'membership',
-      image: DEFAULT_IMAGES.membership,
+      image: categoryImages.category_membership || DEFAULT_IMAGES.membership,
       href: '/menu/membresia',
     },
     {
       id: 'giftcards',
       titleKey: 'giftcards',
-      image: DEFAULT_IMAGES.giftcards,
+      image: categoryImages.category_giftcards || DEFAULT_IMAGES.giftcards,
       href: '/menu/giftcards',
     },
     {
       id: 'promotions',
       titleKey: 'promotions',
-      image: DEFAULT_IMAGES.promotions,
+      image: categoryImages.category_promotions || DEFAULT_IMAGES.promotions,
       href: '/promociones',
       special: true,
     },

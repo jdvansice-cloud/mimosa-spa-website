@@ -20,7 +20,9 @@ export default async function MenuPage({ params }: { params: Promise<{ locale: s
   const categoryImages = await getSiteImages([
     'category_body_treatments',
     'category_facial_treatments',
-    'category_packages',
+    'category_giftcards',
+    'category_membership',
+    'category_promotions',
   ])
 
   return (
