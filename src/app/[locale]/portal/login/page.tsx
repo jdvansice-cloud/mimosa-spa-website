@@ -214,10 +214,10 @@ function PortalLoginContent() {
     setError(null)
 
     try {
-      // Combine country code with phone number (format: countrycode/number without + or spaces)
+      // Combine country code with phone number (format: only numbers, e.g. 50760000000)
       const cleanCountryCode = countryCode.replace('+', '')
       const cleanPhone = phone.replace(/\D/g, '')
-      const fullPhone = `${cleanCountryCode}/${cleanPhone}`
+      const fullPhone = `${cleanCountryCode}${cleanPhone}`
 
       // Create client in Mindbody
       const response = await fetch('/api/mindbody/auth', {
