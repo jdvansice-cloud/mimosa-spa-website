@@ -160,12 +160,6 @@ export default async function PaquetesPage({ params }: { params: Promise<{ local
               ))}
             </div>
 
-            {/* Footer Note */}
-            <div className="px-4 md:px-6 py-4 bg-beige-50 border-t border-beige-200">
-              <p className="text-xs md:text-sm text-warm-gray text-center">
-                JUNIO 2025 - PRECIO NO INCLUYE ITBM
-              </p>
-            </div>
           </div>
         </div>
       </section>
