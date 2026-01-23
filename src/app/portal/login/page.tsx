@@ -465,7 +465,7 @@ function PortalLoginContent() {
                     className="w-full pl-12 pr-4 py-3 border-2 border-beige-200 rounded-xl
                              focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
                              transition-all"
-                    placeholder="50766124546"
+                    placeholder="507 6000-0000"
                   />
                 </div>
               </div>
