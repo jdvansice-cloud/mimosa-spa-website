@@ -82,6 +82,12 @@ function PortalLoginContent() {
       const data = await response.json()
 
       if (!response.ok) {
+        if (data.notFound) {
+          // Email not found - redirect to booking to register
+          setError('No encontramos una cuenta con este correo. Puedes crear una cuenta reservando tu primera cita.')
+          setStep('email')
+          return
+        }
         throw new Error(data.error || 'Error al verificar correo')
       }
 
