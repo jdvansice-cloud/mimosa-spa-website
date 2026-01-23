@@ -46,6 +46,7 @@ function PortalLoginContent() {
   const [multipleClients, setMultipleClients] = useState<ClientOption[] | null>(null)
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
+  const [countryCode, setCountryCode] = useState('+507')
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
     firstName: '',
     lastName: '',
@@ -213,6 +214,9 @@ function PortalLoginContent() {
     setError(null)
 
     try {
+      // Combine country code with phone number
+      const fullPhone = `${countryCode}${phone.replace(/\D/g, '')}`
+
       // Create client in Mindbody
       const response = await fetch('/api/mindbody/auth', {
         method: 'POST',
@@ -222,7 +226,7 @@ function PortalLoginContent() {
           firstName,
           lastName,
           email: regEmail,
-          phone,
+          phone: fullPhone,
           searchText: regEmail,
           searchType: 'email'
         })
@@ -402,17 +406,36 @@ function PortalLoginContent() {
                 <label className="block text-sm font-medium text-dark mb-1">
                   Teléfono / WhatsApp
                 </label>
-                <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
-                  <input
-                    type="tel"
-                    value={registrationData.phone}
-                    onChange={(e) => setRegistrationData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full pl-12 pr-4 py-3 border-2 border-beige-200 rounded-xl
+                <div className="flex gap-2">
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="w-24 px-2 py-3 border-2 border-beige-200 rounded-xl
                              focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
-                             transition-all"
-                    placeholder="507 6000-0000"
-                  />
+                             transition-all bg-white text-sm"
+                  >
+                    <option value="+507">+507</option>
+                    <option value="+1">+1</option>
+                    <option value="+52">+52</option>
+                    <option value="+57">+57</option>
+                    <option value="+506">+506</option>
+                    <option value="+593">+593</option>
+                    <option value="+51">+51</option>
+                    <option value="+58">+58</option>
+                    <option value="+34">+34</option>
+                  </select>
+                  <div className="relative flex-1">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
+                    <input
+                      type="tel"
+                      value={registrationData.phone}
+                      onChange={(e) => setRegistrationData(prev => ({ ...prev, phone: e.target.value }))}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-beige-200 rounded-xl
+                               focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                               transition-all"
+                      placeholder="6000-0000"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -452,6 +475,7 @@ function PortalLoginContent() {
             onClick={() => {
               setStep('email')
               setError(null)
+              setCountryCode('+507')
               setRegistrationData({ firstName: '', lastName: '', email: '', phone: '' })
             }}
             className="w-full mt-4 py-3 text-warm-gray hover:text-dark transition-colors"
