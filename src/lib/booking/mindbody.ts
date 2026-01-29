@@ -204,6 +204,8 @@ export async function addClient(clientData: {
   MobilePhone: string
   BirthDate?: string
   Gender?: string
+  AddressLine1?: string
+  ReferredBy?: string
 }) {
   interface AddClientResponse {
     Client: {
@@ -219,12 +221,21 @@ export async function addClient(clientData: {
     }
   }
 
+  // Add required fields with defaults if not provided
+  // These fields are configured as required by the business in Mindbody
+  const requestData = {
+    ...clientData,
+    AddressLine1: clientData.AddressLine1 || 'Panamá', // Default address
+    ReferredBy: clientData.ReferredBy || 'Website', // Default referral source
+    Gender: clientData.Gender || 'Female', // Default gender (spa clientele)
+  }
+
   // Mindbody API expects the client fields directly at the root level
-  console.log('addClient - Sending to Mindbody:', JSON.stringify(clientData, null, 2))
+  console.log('addClient - Sending to Mindbody:', JSON.stringify(requestData, null, 2))
 
   const response = await mindbodyRequest<AddClientResponse>('/client/addclient', {
     method: 'POST',
-    body: clientData
+    body: requestData
   })
 
   console.log('addClient - Mindbody response:', JSON.stringify(response, null, 2))
