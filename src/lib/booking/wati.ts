@@ -222,21 +222,29 @@ export async function sendPhoneVerification(
 ): Promise<WatiResponse> {
   const formattedPhone = formatPhoneForWati(data.clientPhone)
 
-  // Template parameters for phone verification
+  // Template with CTA button for phone verification
   // Note: Template must be pre-approved in WATI dashboard
   // Template name: verificacion_telefono
+  // Body parameter: {{1}} = client name
+  // Button: URL button with dynamic suffix
   const parameters = [
-    { name: 'nombre_cliente', value: data.clientName },
-    { name: 'enlace_verificacion', value: data.verificationUrl },
+    { name: '1', value: data.clientName },
   ]
 
   console.log('Sending WhatsApp verification to:', formattedPhone)
   console.log('Verification URL:', data.verificationUrl)
 
+  // For button templates, WATI uses a different format
+  // The button URL is set in the template with a variable suffix
   return watiRequest('/api/v1/sendTemplateMessage', {
     whatsappNumber: formattedPhone,
     templateName: 'verificacion_telefono',
     parameters,
+    // Button parameters - the URL button uses the token as dynamic part
+    buttonParameters: {
+      // Button index 0 (first button)
+      '0': data.verificationUrl,
+    },
   })
 }
 
