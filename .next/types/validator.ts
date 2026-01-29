@@ -128,6 +128,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/[locale]/portal/auth/verify-phone/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/[locale]/portal/auth/verify-phone">> = Specific
+  const handler = {} as typeof import("../../src/app/[locale]/portal/auth/verify-phone/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/[locale]/portal/login/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/[locale]/portal/login">> = Specific
@@ -501,6 +510,24 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/verify">> = Specific
   const handler = {} as typeof import("../../src/app/api/portal/auth/verify/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/portal/auth/whatsapp/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/whatsapp">> = Specific
+  const handler = {} as typeof import("../../src/app/api/portal/auth/whatsapp/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/portal/auth/whatsapp/verify/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/whatsapp/verify">> = Specific
+  const handler = {} as typeof import("../../src/app/api/portal/auth/whatsapp/verify/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

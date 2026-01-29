@@ -208,6 +208,39 @@ export function isWatiConfigured(): boolean {
 }
 
 // ===========================================
+// PHONE VERIFICATION VIA WHATSAPP
+// ===========================================
+
+interface VerificationData {
+  clientName: string
+  clientPhone: string // Format: 507XXXXXXXX
+  verificationUrl: string // Full URL with token
+}
+
+export async function sendPhoneVerification(
+  data: VerificationData
+): Promise<WatiResponse> {
+  const formattedPhone = formatPhoneForWati(data.clientPhone)
+
+  // Template parameters for phone verification
+  // Note: Template must be pre-approved in WATI dashboard
+  // Template name: verificacion_telefono
+  const parameters = [
+    { name: 'nombre_cliente', value: data.clientName },
+    { name: 'enlace_verificacion', value: data.verificationUrl },
+  ]
+
+  console.log('Sending WhatsApp verification to:', formattedPhone)
+  console.log('Verification URL:', data.verificationUrl)
+
+  return watiRequest('/api/v1/sendTemplateMessage', {
+    whatsappNumber: formattedPhone,
+    templateName: 'verificacion_telefono',
+    parameters,
+  })
+}
+
+// ===========================================
 // GET CONTACT INFO
 // ===========================================
 

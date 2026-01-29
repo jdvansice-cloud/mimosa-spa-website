@@ -126,6 +126,14 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/portal/auth/callback(?:/)?$"
     },
     {
+      "page": "/[locale]/portal/auth/verify-phone",
+      "regex": "^/([^/]+?)/portal/auth/verify\\-phone(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/portal/auth/verify\\-phone(?:/)?$"
+    },
+    {
       "page": "/[locale]/portal/login",
       "regex": "^/([^/]+?)/portal/login(?:/)?$",
       "routeKeys": {
@@ -356,6 +364,18 @@
       "regex": "^/api/portal/auth/verify(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/portal/auth/verify(?:/)?$"
+    },
+    {
+      "page": "/api/portal/auth/whatsapp",
+      "regex": "^/api/portal/auth/whatsapp(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/portal/auth/whatsapp(?:/)?$"
+    },
+    {
+      "page": "/api/portal/auth/whatsapp/verify",
+      "regex": "^/api/portal/auth/whatsapp/verify(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/portal/auth/whatsapp/verify(?:/)?$"
     },
     {
       "page": "/api/portal/client-id",
