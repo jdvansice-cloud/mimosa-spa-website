@@ -219,16 +219,12 @@ export async function addClient(clientData: {
     }
   }
 
-  // Mindbody API expects the client data wrapped in a "Client" object
-  const requestBody = {
-    Client: clientData
-  }
-
-  console.log('addClient - Sending to Mindbody:', JSON.stringify(requestBody, null, 2))
+  // Mindbody API expects the client fields directly at the root level
+  console.log('addClient - Sending to Mindbody:', JSON.stringify(clientData, null, 2))
 
   const response = await mindbodyRequest<AddClientResponse>('/client/addclient', {
     method: 'POST',
-    body: requestBody
+    body: clientData
   })
 
   console.log('addClient - Mindbody response:', JSON.stringify(response, null, 2))
