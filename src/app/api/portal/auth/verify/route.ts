@@ -6,9 +6,10 @@ import { searchClients } from '@/lib/booking/mindbody'
  * Verify that an email exists in Mindbody before sending magic link
  */
 export async function POST(request: NextRequest) {
+  let email: string | undefined
   try {
     const body = await request.json()
-    const { email } = body
+    email = body.email
 
     if (!email) {
       return NextResponse.json(
@@ -28,8 +29,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Filter to only clients with matching email (case-insensitive)
+    const emailLower = email.toLowerCase()
     const matchingClients = clients.filter(
-      (c) => c.Email?.toLowerCase() === email.toLowerCase()
+      (c) => c.Email?.toLowerCase() === emailLower
     )
 
     if (matchingClients.length === 0) {
@@ -66,7 +68,7 @@ export async function POST(request: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error('Portal auth verify error:', {
       message: errorMessage,
-      email: body?.email,
+      email,
       stack: error instanceof Error ? error.stack : undefined
     })
 
