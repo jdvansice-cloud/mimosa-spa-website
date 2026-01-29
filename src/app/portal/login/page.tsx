@@ -247,27 +247,6 @@ function PortalLoginContent() {
         throw new Error(authError.message)
       }
 
-      // Also send WhatsApp verification link (non-blocking)
-      try {
-        console.log('Sending WhatsApp verification to:', fullPhone)
-        const whatsappResponse = await fetch('/api/portal/auth/whatsapp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phone: fullPhone,
-            clientName: `${firstName} ${lastName}`,
-            clientId,
-            email: regEmail,
-            redirectUrl: callbackUrl,
-          })
-        })
-        const whatsappResult = await whatsappResponse.json()
-        console.log('WhatsApp verification response:', whatsappResponse.status, whatsappResult)
-      } catch (whatsappError) {
-        // WhatsApp verification is optional, don't fail registration
-        console.warn('WhatsApp verification failed:', whatsappError)
-      }
-
       setEmail(regEmail)
       setStep('sent')
 
