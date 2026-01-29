@@ -63,9 +63,19 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Portal auth verify error:', error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('Portal auth verify error:', {
+      message: errorMessage,
+      email: body?.email,
+      stack: error instanceof Error ? error.stack : undefined
+    })
+
+    // Return more specific error for debugging
     return NextResponse.json(
-      { error: 'Error al verificar correo' },
+      {
+        error: 'Error al verificar correo',
+        details: errorMessage
+      },
       { status: 500 }
     )
   }

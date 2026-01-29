@@ -87,6 +87,15 @@ export async function POST(request: NextRequest) {
       }
 
       try {
+        console.log('Attempting to register client:', {
+          FirstName: firstName,
+          LastName: lastName,
+          Email: email,
+          MobilePhone: phone,
+          BirthDate: birthDate,
+          Gender: gender,
+        })
+
         const client = await addClient({
           FirstName: firstName,
           LastName: lastName,
@@ -95,6 +104,8 @@ export async function POST(request: NextRequest) {
           BirthDate: birthDate,
           Gender: gender,
         })
+
+        console.log('Client registered successfully:', client)
 
         return NextResponse.json({
           success: true,
@@ -107,9 +118,17 @@ export async function POST(request: NextRequest) {
           }
         })
       } catch (regError) {
-        console.error('Registration error:', regError)
+        const errorMessage = regError instanceof Error ? regError.message : String(regError)
+        console.error('Registration error details:', {
+          message: errorMessage,
+          firstName,
+          lastName,
+          email,
+          phone,
+          stack: regError instanceof Error ? regError.stack : undefined
+        })
         return NextResponse.json(
-          { error: ERROR_MESSAGES.REGISTRATION_FAILED },
+          { error: ERROR_MESSAGES.REGISTRATION_FAILED, details: errorMessage },
           { status: 500 }
         )
       }

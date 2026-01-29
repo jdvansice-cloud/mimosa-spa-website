@@ -158,7 +158,12 @@ export async function mindbodyRequest<T>(
 
   if (!response.ok) {
     const errorText = await response.text()
-    console.error(`Mindbody API error: ${response.status}`, errorText)
+    console.error(`Mindbody API error: ${response.status}`, {
+      endpoint,
+      method,
+      body: body ? JSON.stringify(body) : undefined,
+      errorText
+    })
     throw new Error(`Mindbody API error: ${response.status} - ${errorText}`)
   }
 
@@ -208,13 +213,37 @@ export async function addClient(clientData: {
       Email: string
       MobilePhone: string
     }
+    Error?: {
+      Message: string
+      Code: string
+    }
   }
-  
+
+  // Mindbody API expects the client data wrapped in a "Client" object
+  const requestBody = {
+    Client: clientData
+  }
+
+  console.log('addClient - Sending to Mindbody:', JSON.stringify(requestBody, null, 2))
+
   const response = await mindbodyRequest<AddClientResponse>('/client/addclient', {
     method: 'POST',
-    body: clientData
+    body: requestBody
   })
-  
+
+  console.log('addClient - Mindbody response:', JSON.stringify(response, null, 2))
+
+  // Check for error in response
+  if (response.Error) {
+    console.error('Mindbody addClient error:', response.Error)
+    throw new Error(`Mindbody API error: ${response.Error.Message || response.Error.Code || 'Unknown error'}`)
+  }
+
+  if (!response.Client) {
+    console.error('Mindbody addClient - No client in response:', response)
+    throw new Error('Mindbody API did not return a client')
+  }
+
   return response.Client
 }
 

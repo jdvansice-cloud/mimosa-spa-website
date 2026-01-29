@@ -237,7 +237,11 @@ function PortalLoginContent() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al registrar')
+        // Include error details for debugging
+        const errorMessage = data.details
+          ? `${data.error}: ${data.details}`
+          : data.error || 'Error al registrar'
+        throw new Error(errorMessage)
       }
 
       // Client created - now send magic link
