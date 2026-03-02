@@ -607,12 +607,18 @@ export default function AdminPromotionsPage() {
                     <span
                       className={cn(
                         'px-2 py-1 text-xs rounded-full',
-                        promotion.is_active
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
+                        !promotion.is_active
+                          ? promotion.valid_until && promotion.valid_until < new Date().toISOString().split('T')[0]
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-gray-100 text-gray-700'
+                          : 'bg-green-100 text-green-700'
                       )}
                     >
-                      {promotion.is_active ? 'Activa' : 'Inactiva'}
+                      {!promotion.is_active
+                        ? promotion.valid_until && promotion.valid_until < new Date().toISOString().split('T')[0]
+                          ? 'Expirada'
+                          : 'Inactiva'
+                        : 'Activa'}
                     </span>
                   </td>
                   <td className="p-4">

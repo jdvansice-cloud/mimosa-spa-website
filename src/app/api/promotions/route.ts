@@ -40,6 +40,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ data })
     }
 
+    // Auto-deactivate expired promotions
+    const today = new Date().toISOString().split('T')[0]
+    await supabase
+      .from('promotions')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq('is_active', true)
+      .lt('valid_until', today)
+
     // Fetch all promotions
     let query = supabase
       .from('promotions')
@@ -49,7 +57,7 @@ export async function GET(request: NextRequest) {
     if (activeOnly) {
       query = query
         .eq('is_active', true)
-        .gte('valid_until', new Date().toISOString().split('T')[0])
+        .gte('valid_until', today)
     }
 
     const { data, error } = await query
