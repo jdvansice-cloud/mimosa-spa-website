@@ -346,12 +346,9 @@ export const useBookingStore = create<BookingState & BookingActions>()(
           return state
         }
         const newServices = [...state.selectedServices, service]
-        // Only auto-open cart on desktop (>= 1024px), not on mobile
-        const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
         return {
           selectedServices: newServices,
           pricing: null, // Invalidate cache
-          isCartOpen: isDesktop ? true : state.isCartOpen // Only open on desktop
         }
       }, false, 'addService'),
       
@@ -375,12 +372,9 @@ export const useBookingStore = create<BookingState & BookingActions>()(
         if (state.selectedAddons.some(a => a.Id === addon.Id)) {
           return state
         }
-        // Only auto-open cart on desktop (>= 1024px), not on mobile
-        const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024
         return {
           selectedAddons: [...state.selectedAddons, addon],
           pricing: null,
-          isCartOpen: isDesktop ? true : state.isCartOpen // Only open on desktop
         }
       }, false, 'addAddon'),
       
