@@ -419,9 +419,9 @@ export async function GET(request: NextRequest) {
 
       console.log(`Current Panama time: ${panamaTime.toISOString()}, minimum booking time: ${minimumBookingTime.toISOString()}`)
 
-      // Round dayStart down to nearest 15 minutes
+      // Round dayStart down to nearest 30 minutes
       const slotStart = new Date(dayStart)
-      slotStart.setMinutes(Math.floor(slotStart.getMinutes() / 15) * 15, 0, 0)
+      slotStart.setMinutes(Math.floor(slotStart.getMinutes() / 30) * 30, 0, 0)
 
       const currentSlot = new Date(slotStart)
 
@@ -436,7 +436,7 @@ export async function GET(request: NextRequest) {
 
         if (slotDateStr === todayStr && currentSlot < minimumBookingTime) {
           // This slot is today and has already passed (or too soon)
-          currentSlot.setMinutes(currentSlot.getMinutes() + 15)
+          currentSlot.setMinutes(currentSlot.getMinutes() + 30)
           continue
         }
 
@@ -463,8 +463,8 @@ export async function GET(request: NextRequest) {
           })
         }
 
-        // Move to next 15-minute slot
-        currentSlot.setMinutes(currentSlot.getMinutes() + 15)
+        // Move to next 30-minute slot
+        currentSlot.setMinutes(currentSlot.getMinutes() + 30)
       }
 
       if (slots.length > 0) {
