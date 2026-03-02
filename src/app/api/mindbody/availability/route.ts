@@ -373,12 +373,11 @@ export async function GET(request: NextRequest) {
       }> = []
 
       // Get current time in Panama timezone (UTC-5)
-      // Add 30-minute buffer so users don't book slots that are about to start (keep 30 min buffer)
       const now = new Date()
       const panamaOffset = -5 * 60 // Panama is UTC-5
       const localOffset = now.getTimezoneOffset()
       const panamaTime = new Date(now.getTime() + (localOffset + panamaOffset) * 60 * 1000)
-      const minimumBookingTime = new Date(panamaTime.getTime() + 30 * 60 * 1000) // 30 min buffer
+      const minimumBookingTime = panamaTime // No buffer - show all future slots
 
       console.log(`Current Panama time: ${panamaTime.toISOString()}, minimum booking time: ${minimumBookingTime.toISOString()}`)
 
