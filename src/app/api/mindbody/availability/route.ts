@@ -3,7 +3,7 @@ import { getBookableItems, getStaffAppointmentAvailability, getScheduleItems, ge
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 
 // GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&startDate=2026-01-15&endDate=2026-01-29&duration=90
-// Returns available time slots in 30-min increments where at least one therapist
+// Returns available time slots in 15-min increments where at least one therapist
 // has continuous availability for the total treatment duration
 export async function GET(request: NextRequest) {
   try {
@@ -380,7 +380,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Process each date to generate 30-minute time slots
+    // Process each date to generate 15-minute time slots
     const availableDates: Array<{
       date: string
       displayDate: string
@@ -423,7 +423,7 @@ export async function GET(request: NextRequest) {
 
       if (!dayStart || !dayEnd) continue
 
-      // Generate 30-minute slots
+      // Generate 15-minute slots
       const slots: Array<{
         time: string
         displayTime: string
@@ -432,7 +432,7 @@ export async function GET(request: NextRequest) {
       }> = []
 
       // Get current time in Panama timezone (UTC-5)
-      // Add 30-minute buffer so users don't book slots that are about to start
+      // Add 30-minute buffer so users don't book slots that are about to start (keep 30 min buffer)
       const now = new Date()
       const panamaOffset = -5 * 60 // Panama is UTC-5
       const localOffset = now.getTimezoneOffset()
@@ -441,9 +441,9 @@ export async function GET(request: NextRequest) {
 
       console.log(`Current Panama time: ${panamaTime.toISOString()}, minimum booking time: ${minimumBookingTime.toISOString()}`)
 
-      // Round dayStart down to nearest 30 minutes
+      // Round dayStart down to nearest 15 minutes
       const slotStart = new Date(dayStart)
-      slotStart.setMinutes(Math.floor(slotStart.getMinutes() / 30) * 30, 0, 0)
+      slotStart.setMinutes(Math.floor(slotStart.getMinutes() / 15) * 15, 0, 0)
 
       const currentSlot = new Date(slotStart)
 
@@ -458,7 +458,7 @@ export async function GET(request: NextRequest) {
 
         if (slotDateStr === todayStr && currentSlot < minimumBookingTime) {
           // This slot is today and has already passed (or too soon)
-          currentSlot.setMinutes(currentSlot.getMinutes() + 30)
+          currentSlot.setMinutes(currentSlot.getMinutes() + 15)
           continue
         }
 
@@ -485,8 +485,8 @@ export async function GET(request: NextRequest) {
           })
         }
 
-        // Move to next 30-minute slot
-        currentSlot.setMinutes(currentSlot.getMinutes() + 30)
+        // Move to next 15-minute slot
+        currentSlot.setMinutes(currentSlot.getMinutes() + 15)
       }
 
       if (slots.length > 0) {
