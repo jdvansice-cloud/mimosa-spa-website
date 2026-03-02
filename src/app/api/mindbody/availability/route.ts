@@ -68,6 +68,15 @@ export async function GET(request: NextRequest) {
       SessionType: { Id: number; Name: string }
     }> = []
 
+    // Debug info collected during processing
+    let staffDebugInfo: Array<{
+      name: string
+      id: number
+      workingHours: string[]
+      appointments: string[]
+      freeBlocks: string[]
+    }> = []
+
     // First, get all staff for this location - we need this to fetch unavailability data
     const allStaff = await getStaff(parsedLocationId)
     const validStaffIds = allStaff
@@ -92,9 +101,19 @@ export async function GET(request: NextRequest) {
 
         console.log('Schedule items returned:', scheduleItems.length, 'staff members')
 
+        // Debug: collect per-staff info for response
+        const staffDebugInfoLocal: Array<{
+          name: string
+          id: number
+          workingHours: string[]
+          appointments: string[]
+          freeBlocks: string[]
+        }> = []
+
         // Build blocked periods AND availability from schedule items in one pass
         for (const staff of scheduleItems) {
           const blockedPeriods: { start: Date; end: Date }[] = []
+          const debugAppts: string[] = []
 
           // Get unavailable periods (like "Reparaciones")
           if (staff.UnavailableItems && staff.UnavailableItems.length > 0) {
@@ -104,6 +123,7 @@ export async function GET(request: NextRequest) {
                   start: new Date(unavail.StartDateTime),
                   end: new Date(unavail.EndDateTime)
                 })
+                debugAppts.push(`[BLOCKED] ${unavail.StartDateTime} - ${unavail.EndDateTime}`)
               }
             }
           }
@@ -116,6 +136,7 @@ export async function GET(request: NextRequest) {
                   start: new Date(appt.StartDateTime),
                   end: new Date(appt.EndDateTime)
                 })
+                debugAppts.push(`[APPT] ${appt.StartDateTime} - ${appt.EndDateTime}`)
               }
             }
           }
@@ -123,6 +144,9 @@ export async function GET(request: NextRequest) {
           if (blockedPeriods.length > 0) {
             staffBlockedPeriods.set(staff.Id, blockedPeriods)
           }
+
+          const debugWorkingHours: string[] = []
+          const debugFreeBlocks: string[] = []
 
           // Build availability: take working hours and subtract blocked periods
           if (staff.Availabilities && staff.Availabilities.length > 0) {
@@ -133,6 +157,7 @@ export async function GET(request: NextRequest) {
 
               const availStart = new Date(avail.StartDateTime)
               const availEnd = new Date(avail.EndDateTime)
+              debugWorkingHours.push(`${avail.StartDateTime} - ${avail.EndDateTime}`)
 
               // Subtract blocked periods from this availability block
               const effectiveBlocks = subtractBlockedPeriods(
@@ -141,6 +166,9 @@ export async function GET(request: NextRequest) {
               )
 
               for (const block of effectiveBlocks) {
+                const blockMinutes = Math.round((block.end.getTime() - block.start.getTime()) / 60000)
+                debugFreeBlocks.push(`${block.start.toISOString()} - ${block.end.toISOString()} (${blockMinutes} min)`)
+
                 availableItems.push({
                   Id: avail.Id || 0,
                   StartDateTime: block.start.toISOString(),
@@ -162,9 +190,19 @@ export async function GET(request: NextRequest) {
               }
             }
           }
+
+          staffDebugInfoLocal.push({
+            name: `${staff.FirstName} ${staff.LastName}`,
+            id: staff.Id,
+            workingHours: debugWorkingHours,
+            appointments: debugAppts,
+            freeBlocks: debugFreeBlocks,
+          })
         }
 
         console.log('Schedule-based availability:', availableItems.length, 'effective blocks')
+        // Store for response
+        staffDebugInfo = staffDebugInfo.concat(staffDebugInfoLocal)
       } catch (err) {
         console.error('Error fetching schedule items:', err)
       }
@@ -454,6 +492,7 @@ export async function GET(request: NextRequest) {
         requestedSessionTypeIds: serviceIdArray,
         locationId: parsedLocationId,
         rawItemsCount: availableItems.length,
+        staffAvailability: staffDebugInfo,
       }
     })
 
