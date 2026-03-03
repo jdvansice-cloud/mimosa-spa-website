@@ -43,7 +43,6 @@ export function PromotionsPreview() {
       {/* Section Header */}
       <div className="text-center mb-12">
         <h2 className="title-decorated">{t('title').toUpperCase()}</h2>
-        <p className="text-warm-gray mt-2">Enero 2026</p>
       </div>
 
       {/* Promotions Grid */}
