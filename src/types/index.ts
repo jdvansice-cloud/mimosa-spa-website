@@ -69,6 +69,36 @@ export interface SiteSetting {
   updated_at: string
 }
 
+export interface BookingServiceItem {
+  sessionTypeId: number
+  name: string
+  duration: number
+}
+
+export interface Booking {
+  id: string
+  confirmation_number: string
+  status: 'confirmed' | 'partial' | 'failed'
+  mindbody_client_id: number
+  client_name: string | null
+  client_phone: string | null
+  client_email: string | null
+  location_id: number
+  location_name: string | null
+  staff_id: number | null
+  therapist_name: string | null
+  appointment_start: string
+  services: BookingServiceItem[]
+  total_duration: number | null
+  mindbody_appointment_ids: number[]
+  promotion_name: string | null
+  total_requested: number
+  total_booked: number
+  whatsapp_sent: boolean
+  created_at: string
+  updated_at: string
+}
+
 // ===========================================
 // MINDBODY API TYPES
 // ===========================================

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { addMultipleAppointments, getClientWithCustomFields } from '@/lib/booking/mindbody'
 import { sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
 import {
@@ -15,6 +16,19 @@ import {
   createRateLimitHeaders,
   RATE_LIMIT_BOOKING
 } from '@/lib/booking/rate-limit'
+
+// Lazy-initialized Supabase client to avoid build-time errors
+let supabaseAdmin: SupabaseClient | null = null
+
+function getSupabaseAdmin() {
+  if (!supabaseAdmin) {
+    supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+  }
+  return supabaseAdmin
+}
 
 // Service type from request body
 interface BookingService {
@@ -301,6 +315,54 @@ export async function POST(request: NextRequest) {
         console.error('Error sending WhatsApp notification:', watiError)
         // Don't fail the booking if WhatsApp fails
       }
+    }
+
+    // Save booking to Supabase (never block the booking response)
+    try {
+      const supabase = getSupabaseAdmin()
+
+      const bookingStatus = failures.length > 0 ? 'partial' : 'confirmed'
+
+      const mindbodyAppointmentIds = successfulAppointments
+        .map(apt => apt?.Id)
+        .filter((id): id is number => typeof id === 'number')
+
+      const servicesData = (services as BookingService[]).map(s => ({
+        sessionTypeId: s.sessionTypeId,
+        name: s.name || 'Unknown Service',
+        duration: s.duration,
+      }))
+
+      const { error: insertError } = await supabase
+        .from('bookings')
+        .insert({
+          confirmation_number: confirmationNumber,
+          status: bookingStatus,
+          mindbody_client_id: clientId,
+          client_name: clientName || null,
+          client_phone: clientPhone || null,
+          client_email: mindbodyClient?.Email || null,
+          location_id: locationId,
+          location_name: locationName || null,
+          staff_id: staffId || null,
+          therapist_name: finalTherapistName || null,
+          appointment_start: startDateTime,
+          services: servicesData,
+          total_duration: totalDuration || null,
+          mindbody_appointment_ids: mindbodyAppointmentIds,
+          promotion_name: promotionName || null,
+          total_requested: (services as BookingService[]).length,
+          total_booked: successfulAppointments.length,
+          whatsapp_sent: whatsappSent,
+        })
+
+      if (insertError) {
+        console.error('Failed to save booking to Supabase:', insertError)
+      } else {
+        console.log('Booking saved to Supabase:', confirmationNumber)
+      }
+    } catch (supabaseError) {
+      console.error('Error saving booking to Supabase:', supabaseError)
     }
 
     return NextResponse.json({
