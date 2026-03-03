@@ -69,6 +69,10 @@ export async function POST(request: NextRequest) {
       locationName,
       therapistName,
       totalDuration,
+      // Pricing info for Supabase record
+      subtotalBeforeTax,
+      taxAmount,
+      totalWithTax,
     } = body
 
     // Validate required fields
@@ -353,6 +357,9 @@ export async function POST(request: NextRequest) {
           promotion_name: promotionName || null,
           total_requested: (services as BookingService[]).length,
           total_booked: successfulAppointments.length,
+          subtotal_before_tax: subtotalBeforeTax || null,
+          tax_amount: taxAmount || null,
+          total_with_tax: totalWithTax || null,
           whatsapp_sent: whatsappSent,
         })
 

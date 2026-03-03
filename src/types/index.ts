@@ -94,6 +94,9 @@ export interface Booking {
   promotion_name: string | null
   total_requested: number
   total_booked: number
+  subtotal_before_tax: number | null
+  tax_amount: number | null
+  total_with_tax: number | null
   whatsapp_sent: boolean
   created_at: string
   updated_at: string

@@ -229,6 +229,10 @@ export function ConfirmStep() {
             ? selectedStaff.DisplayName || `${selectedStaff.FirstName} ${selectedStaff.LastName}`
             : undefined,
           totalDuration,
+          // Pricing for Supabase record
+          subtotalBeforeTax: pricing.subtotalBeforeTax,
+          taxAmount: pricing.itbmAmount,
+          totalWithTax: pricing.totalWithTax,
         })
       })
 

@@ -44,6 +44,11 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   total_requested INTEGER NOT NULL DEFAULT 1,
   total_booked INTEGER NOT NULL DEFAULT 1,
 
+  -- Pricing
+  subtotal_before_tax DECIMAL(10,2),
+  tax_amount DECIMAL(10,2),
+  total_with_tax DECIMAL(10,2),
+
   -- WhatsApp confirmation sent?
   whatsapp_sent BOOLEAN DEFAULT FALSE,
 
