@@ -1,9 +1,16 @@
 'use client'
 
+import { useEffect } from 'react'
 import { CheckCircle, Calendar, MapPin, Clock, User, Home, Star, AlertTriangle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import Link from 'next/link'
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void
+  }
+}
 
 export function SuccessStep() {
   const {
@@ -18,7 +25,16 @@ export function SuccessStep() {
     pricing,
     reset
   } = useBookingStore()
-  
+
+  // Fire Google Ads conversion event on booking success
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-965602203/VT97CLbcvOgbEJvXt8wD'
+      })
+    }
+  }, [])
+
   // Format date for display
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + 'T12:00:00')
