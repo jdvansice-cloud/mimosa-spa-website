@@ -1070,6 +1070,7 @@ export async function addAppointment(appointmentData: {
   StartDateTime: string
   EndDateTime?: string
   Notes?: string
+  StaffRequested?: boolean
 }) {
   interface AppointmentResponse {
     Appointment: {
@@ -1113,6 +1114,7 @@ export async function addAppointment(appointmentData: {
     StartDateTime: appointmentData.StartDateTime,
     EndDateTime: appointmentData.EndDateTime,
     Notes: appointmentData.Notes,
+    StaffRequested: appointmentData.StaffRequested ?? false,
   }
 
   console.log('Final request body:', JSON.stringify(requestBody, null, 2))
@@ -1156,6 +1158,7 @@ export async function addMultipleAppointments(appointments: Array<{
   SessionTypeId: number
   StartDateTime: string
   Notes?: string
+  StaffRequested?: boolean
 }>) {
   const results = []
 

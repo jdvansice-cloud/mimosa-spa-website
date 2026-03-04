@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       locationName,
       therapistName,
       totalDuration,
+      staffRequested, // true when user chose a specific therapist
       // Pricing info for Supabase record
       subtotalBeforeTax,
       taxAmount,
@@ -183,6 +184,7 @@ export async function POST(request: NextRequest) {
       SessionTypeId: number
       StartDateTime: string
       Notes: string | undefined
+      StaffRequested: boolean
     }> = []
     let currentStartTime = new Date(startDateTime)
 
@@ -212,6 +214,7 @@ export async function POST(request: NextRequest) {
         SessionTypeId: service.sessionTypeId,
         StartDateTime: currentStartTime.toISOString(),
         Notes: noteParts.join(' | '),
+        StaffRequested: !!staffRequested,
       })
 
       // Move start time for next service
@@ -350,6 +353,7 @@ export async function POST(request: NextRequest) {
           location_name: locationName || null,
           staff_id: staffId || null,
           therapist_name: finalTherapistName || null,
+          staff_requested: !!staffRequested,
           appointment_start: startDateTime,
           services: servicesData,
           total_duration: totalDuration || null,

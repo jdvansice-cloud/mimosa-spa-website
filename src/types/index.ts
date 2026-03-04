@@ -87,6 +87,7 @@ export interface Booking {
   location_name: string | null
   staff_id: number | null
   therapist_name: string | null
+  staff_requested: boolean
   appointment_start: string
   services: BookingServiceItem[]
   total_duration: number | null

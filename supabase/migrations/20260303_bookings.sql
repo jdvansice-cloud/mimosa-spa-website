@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   -- Staff / Therapist
   staff_id INTEGER,
   therapist_name TEXT,
+  staff_requested BOOLEAN DEFAULT FALSE,
 
   -- Appointment date/time (start of the first service)
   appointment_start TIMESTAMPTZ NOT NULL,

@@ -229,6 +229,7 @@ export function ConfirmStep() {
             ? selectedStaff.DisplayName || `${selectedStaff.FirstName} ${selectedStaff.LastName}`
             : undefined,
           totalDuration,
+          staffRequested: selectedStaff !== null, // true when user chose a specific therapist
           // Pricing for Supabase record
           subtotalBeforeTax: pricing.subtotalBeforeTax,
           taxAmount: pricing.itbmAmount,
