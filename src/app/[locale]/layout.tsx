@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Cormorant_Garamond, Lato } from 'next/font/google'
 import { Header, Footer, MobileBottomNav } from '@/components/layout'
-import { GoogleTagManager, GoogleTagManagerNoScript, GoogleAdsTag } from '@/components/analytics'
+import { GoogleTagManager } from '@/components/analytics'
 import '@/app/globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -96,8 +96,6 @@ export default async function LocaleLayout({
       </head>
       <body className="min-h-screen bg-cream font-body antialiased">
         <GoogleTagManager />
-        <GoogleTagManagerNoScript />
-        <GoogleAdsTag />
         <NextIntlClientProvider messages={messages}>
           <div className="flex flex-col min-h-screen">
             <Header />

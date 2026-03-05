@@ -1,2 +1,1 @@
-export { GoogleTagManager, GoogleTagManagerNoScript } from './GoogleTagManager'
-export { GoogleAdsTag } from './GoogleAdsTag'
+export { GoogleTagManager } from './GoogleTagManager'
