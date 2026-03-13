@@ -30,7 +30,7 @@ export function SuccessStep() {
   useEffect(() => {
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'conversion', {
-        'send_to': 'AW-965602203/qoG7CLCUuoMcEJvXt8wD'
+        'send_to': 'AW-965602203/sZRACL3F-IccEJvXt8wD'
       })
     }
   }, [])
