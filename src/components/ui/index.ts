@@ -14,3 +14,4 @@ export {
 export { Spinner } from './Spinner'
 export { Modal } from './Modal'
 export { LanguageSwitcher } from './LanguageSwitcher'
+export { OtpInput } from './OtpInput'

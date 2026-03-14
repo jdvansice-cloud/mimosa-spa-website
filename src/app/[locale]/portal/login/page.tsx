@@ -3,9 +3,10 @@
 import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Image from 'next/image'
-import { Mail, ArrowRight, Loader2, User, CheckCircle, UserPlus, Phone } from 'lucide-react'
+import { Mail, ArrowRight, Loader2, User, UserPlus, Phone, RefreshCw } from 'lucide-react'
+import { OtpInput } from '@/components/ui'
 
-type LoginStep = 'email' | 'sending' | 'sent' | 'verifying' | 'register'
+type LoginStep = 'email' | 'sending' | 'otp' | 'verifying' | 'register'
 
 interface RegistrationData {
   firstName: string
@@ -47,6 +48,8 @@ function PortalLoginContent() {
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
   const [countryCode, setCountryCode] = useState('+507')
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [clientData, setClientData] = useState<{ clientId: number; firstName?: string; lastName?: string } | null>(null)
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
     firstName: '',
     lastName: '',
@@ -120,20 +123,16 @@ function PortalLoginContent() {
         return
       }
 
-      // Store client ID for linking after auth
+      // Store client data for use after OTP verification
       const clientId = data.clientId
       setSelectedClientId(clientId)
+      setClientData({ clientId, firstName: data.firstName, lastName: data.lastName })
 
-      // Send magic link via Supabase
-      // Include redirect URL in callback if provided (for booking flow)
+      // Send OTP code via Supabase
       const supabase = getSupabase()
-      const callbackUrl = redirectUrl
-        ? `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}&next=${encodeURIComponent(decodeURIComponent(redirectUrl))}`
-        : `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}`
       const { error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: callbackUrl,
           data: {
             mindbody_client_id: clientId,
             first_name: data.firstName,
@@ -146,7 +145,7 @@ function PortalLoginContent() {
         throw new Error(authError.message)
       }
 
-      setStep('sent')
+      setStep('otp')
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error de conexión')
@@ -162,20 +161,16 @@ function PortalLoginContent() {
 
     setEmail(client.Email)
     setSelectedClientId(client.Id)
+    setClientData({ clientId: client.Id, firstName: client.FirstName, lastName: client.LastName })
     setMultipleClients(null)
     setStep('sending')
 
     try {
-      // Send magic link via Supabase
-      // Include redirect URL in callback if provided (for booking flow)
+      // Send OTP code via Supabase
       const supabase = getSupabase()
-      const callbackUrl = redirectUrl
-        ? `${window.location.origin}/${locale}/portal/auth/callback?clientId=${client.Id}&next=${encodeURIComponent(decodeURIComponent(redirectUrl))}`
-        : `${window.location.origin}/${locale}/portal/auth/callback?clientId=${client.Id}`
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: client.Email,
         options: {
-          emailRedirectTo: callbackUrl,
           data: {
             mindbody_client_id: client.Id,
             first_name: client.FirstName,
@@ -188,7 +183,7 @@ function PortalLoginContent() {
         throw new Error(authError.message)
       }
 
-      setStep('sent')
+      setStep('otp')
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error de conexión')
@@ -244,18 +239,15 @@ function PortalLoginContent() {
         throw new Error(errorMessage)
       }
 
-      // Client created - now send magic link via email
+      // Client created - now send OTP code via email
       const clientId = data.client.Id
       setSelectedClientId(clientId)
+      setClientData({ clientId, firstName, lastName })
 
       const supabase = getSupabase()
-      const callbackUrl = redirectUrl
-        ? `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}&next=${encodeURIComponent(decodeURIComponent(redirectUrl))}`
-        : `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}`
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: regEmail,
         options: {
-          emailRedirectTo: callbackUrl,
           data: {
             mindbody_client_id: clientId,
             first_name: firstName,
@@ -269,7 +261,7 @@ function PortalLoginContent() {
       }
 
       setEmail(regEmail)
-      setStep('sent')
+      setStep('otp')
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error de conexión')
@@ -278,8 +270,72 @@ function PortalLoginContent() {
     }
   }
 
-  // Success state - magic link sent
-  if (step === 'sent') {
+  const handleVerifyOtp = async (code: string) => {
+    setIsVerifying(true)
+    setError(null)
+
+    try {
+      const supabase = getSupabase()
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: 'email',
+      })
+
+      if (verifyError) {
+        throw new Error(verifyError.message)
+      }
+
+      // Save profile with mindbody_client_id
+      if (clientData?.clientId) {
+        try {
+          await fetch('/api/portal/auth/save-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clientId: clientData.clientId }),
+          })
+        } catch (err) {
+          console.error('Error saving profile:', err)
+        }
+      }
+
+      // Redirect to intended destination or portal
+      const destination = redirectUrl ? decodeURIComponent(redirectUrl) : `/${locale}/portal`
+      router.push(destination)
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Código inválido')
+      setIsVerifying(false)
+    }
+  }
+
+  const handleResendOtp = async () => {
+    setError(null)
+    setIsVerifying(false)
+
+    try {
+      const supabase = getSupabase()
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          data: clientData ? {
+            mindbody_client_id: clientData.clientId,
+            first_name: clientData.firstName,
+            last_name: clientData.lastName
+          } : undefined
+        }
+      })
+
+      if (authError) {
+        throw new Error(authError.message)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al reenviar código')
+    }
+  }
+
+  // OTP verification step
+  if (step === 'otp') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
         <div className="w-full max-w-md text-center">
@@ -292,35 +348,63 @@ function PortalLoginContent() {
             className="mx-auto mb-8"
           />
 
-          {/* Success Card */}
+          {/* OTP Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-beige-200">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+            <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-10 h-10 text-gold" />
             </div>
 
             <h1 className="text-2xl font-bold text-dark mb-3">
-              Revisa tu correo
+              Ingresa tu código
             </h1>
 
             <p className="text-warm-gray mb-6">
-              Hemos enviado un enlace de acceso a<br />
+              Enviamos un código de 6 dígitos a<br />
               <span className="font-semibold text-dark">{email}</span>
             </p>
 
-            <div className="bg-gold/10 rounded-xl p-4 text-sm text-dark/80">
-              <p>Haz clic en el enlace del correo para acceder a tu portal.</p>
-              <p className="mt-2 text-warm-gray">El enlace expira en 1 hora.</p>
-            </div>
+            <OtpInput
+              onComplete={handleVerifyOtp}
+              disabled={isVerifying}
+              error={!!error}
+            />
 
-            <button
-              onClick={() => {
-                setStep('email')
-                setEmail('')
-              }}
-              className="mt-6 text-gold hover:text-gold/80 font-medium transition-colors"
-            >
-              ← Usar otro correo
-            </button>
+            {isVerifying && (
+              <div className="mt-4 flex items-center justify-center gap-2 text-warm-gray">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Verificando...</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="mt-6 space-y-3">
+              <button
+                onClick={handleResendOtp}
+                disabled={isVerifying}
+                className="flex items-center justify-center gap-1.5 mx-auto text-gold hover:text-gold/80 font-medium transition-colors text-sm disabled:opacity-50"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Reenviar código
+              </button>
+
+              <button
+                onClick={() => {
+                  setStep('email')
+                  setEmail('')
+                  setError(null)
+                  setIsVerifying(false)
+                  setClientData(null)
+                }}
+                className="text-warm-gray hover:text-dark transition-colors text-sm"
+              >
+                ← Usar otro correo
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -597,7 +681,7 @@ function PortalLoginContent() {
               Iniciar Sesión
             </h2>
             <p className="text-sm text-warm-gray mt-1">
-              Te enviaremos un enlace de acceso a tu correo
+              Te enviaremos un código de verificación a tu correo
             </p>
           </div>
 
@@ -643,7 +727,7 @@ function PortalLoginContent() {
               </>
             ) : (
               <>
-                Enviar enlace de acceso
+                Enviar código de acceso
                 <ArrowRight className="w-5 h-5" />
               </>
             )}

@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Mail, ArrowRight, Loader2, CheckCircle, User, UserPlus, Phone } from 'lucide-react'
+import { Mail, ArrowRight, Loader2, User, UserPlus, Phone, RefreshCw } from 'lucide-react'
+import { OtpInput } from '@/components/ui'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
 
-type AuthState = 'email' | 'sending' | 'sent' | 'verifying' | 'select-client' | 'register'
+type AuthState = 'email' | 'sending' | 'otp' | 'verifying' | 'select-client' | 'register'
 
 interface ClientOption {
   Id: number
@@ -38,6 +39,8 @@ function AuthStepContent() {
 
   const [email, setEmail] = useState('')
   const [authState, setAuthState] = useState<AuthState>('email')
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [clientData, setClientData] = useState<{ clientId: number; firstName?: string; lastName?: string } | null>(null)
   const [availableClients, setAvailableClients] = useState<ClientOption[]>([])
   const [registrationData, setRegistrationData] = useState({
     firstName: '',
@@ -210,8 +213,9 @@ function AuthStepContent() {
         return
       }
 
-      // Single client found - send magic link
-      await sendMagicLink(email, data.clientId, data.firstName, data.lastName)
+      // Single client found - send OTP code
+      setClientData({ clientId: data.clientId, firstName: data.firstName, lastName: data.lastName })
+      await sendOtp(email, data.clientId, data.firstName, data.lastName)
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error de conexión')
@@ -220,7 +224,7 @@ function AuthStepContent() {
     }
   }
 
-  const sendMagicLink = async (
+  const sendOtp = async (
     userEmail: string,
     clientId: number,
     firstName?: string,
@@ -229,21 +233,9 @@ function AuthStepContent() {
     try {
       const supabase = getSupabase()
 
-      // Build the redirect URL preserving serviceId or promotionId from current URL
-      const serviceId = searchParams.get('serviceId')
-      const promotionId = searchParams.get('promotionId')
-      let nextUrl = `/${locale}/reservar`
-      if (serviceId) {
-        nextUrl += `?serviceId=${serviceId}`
-      } else if (promotionId) {
-        nextUrl += `?promotionId=${promotionId}`
-      }
-
-      // Redirect to auth callback which saves clientId to profile, then redirects to /reservar
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: userEmail,
         options: {
-          emailRedirectTo: `${window.location.origin}/${locale}/portal/auth/callback?clientId=${clientId}&next=${encodeURIComponent(nextUrl)}`,
           data: {
             mindbody_client_id: clientId,
             first_name: firstName,
@@ -256,9 +248,9 @@ function AuthStepContent() {
         throw new Error(authError.message)
       }
 
-      setAuthState('sent')
+      setAuthState('otp')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al enviar enlace')
+      setError(err instanceof Error ? err.message : 'Error al enviar código')
       setAuthState('email')
     } finally {
       setLoading(false)
@@ -273,7 +265,8 @@ function AuthStepContent() {
 
     setLoading(true)
     setError(null)
-    await sendMagicLink(client.Email, client.Id, client.FirstName, client.LastName)
+    setClientData({ clientId: client.Id, firstName: client.FirstName, lastName: client.LastName })
+    await sendOtp(client.Email, client.Id, client.FirstName, client.LastName)
   }
 
   const handleRegistration = async () => {
@@ -309,8 +302,9 @@ function AuthStepContent() {
         throw new Error(data.error || 'Error al registrar')
       }
 
-      // Client created - now send magic link
-      await sendMagicLink(regEmail, data.client.Id, firstName, lastName)
+      // Client created - now send OTP code
+      setClientData({ clientId: data.client.Id, firstName, lastName })
+      await sendOtp(regEmail, data.client.Id, firstName, lastName)
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error de conexión')
@@ -324,39 +318,177 @@ function AuthStepContent() {
     }
   }
 
-  // Success state - magic link sent
-  if (authState === 'sent') {
+  const handleVerifyOtp = async (code: string) => {
+    setIsVerifying(true)
+    setError(null)
+
+    try {
+      const supabase = getSupabase()
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: 'email',
+      })
+
+      if (verifyError) {
+        throw new Error(verifyError.message)
+      }
+
+      // Save profile with mindbody_client_id (fire-and-forget)
+      if (clientData?.clientId) {
+        fetch('/api/portal/auth/save-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientId: clientData.clientId }),
+        }).catch(err => console.error('Error saving profile:', err))
+      }
+
+      // Fetch client info from Mindbody and proceed to next step
+      if (clientData?.clientId) {
+        const response = await fetch(`/api/portal/profile?clientId=${clientData.clientId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setClientInfo(data.client as MindbodyClient)
+
+          // Check for pre-selected promotion
+          const promotionId = searchParams.get('promotionId')
+          if (promotionId) {
+            try {
+              const promotionResponse = await fetch(`/api/promotions/${promotionId}/with-services`)
+              if (promotionResponse.ok) {
+                const promotionData = await promotionResponse.json()
+                const promotionWithServices = promotionData.data as PromotionWithServices
+                if (promotionWithServices && promotionWithServices.services && promotionWithServices.services.length > 0) {
+                  loadPromotion(promotionWithServices)
+                  setStep('location')
+                  return
+                }
+              }
+            } catch (err) {
+              console.error('Error fetching promotion:', err)
+            }
+          }
+
+          // Check for pre-selected service
+          const serviceId = searchParams.get('serviceId')
+          if (serviceId) {
+            try {
+              const servicesResponse = await fetch('/api/mindbody/services?type=all&includeOffline=true')
+              const servicesData = await servicesResponse.json()
+              if (servicesData.services) {
+                const parsedServiceId = parseInt(serviceId, 10)
+                const service = servicesData.services.find((s: { Id: number }) => s.Id === parsedServiceId)
+                if (service) {
+                  addService(service)
+                  setStep('location')
+                  return
+                }
+              }
+            } catch (err) {
+              console.error('Error fetching service:', err)
+            }
+          }
+
+          nextStep()
+          return
+        }
+      }
+
+      // Fallback - proceed to next step
+      nextStep()
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Código inválido')
+      setIsVerifying(false)
+    }
+  }
+
+  const handleResendOtp = async () => {
+    setError(null)
+    setIsVerifying(false)
+
+    try {
+      const supabase = getSupabase()
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          data: clientData ? {
+            mindbody_client_id: clientData.clientId,
+            first_name: clientData.firstName,
+            last_name: clientData.lastName
+          } : undefined
+        }
+      })
+
+      if (authError) {
+        throw new Error(authError.message)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al reenviar código')
+    }
+  }
+
+  // OTP verification step
+  if (authState === 'otp') {
     return (
       <div className="auth-step flex flex-col h-full">
         <div className="flex-1 overflow-y-auto pb-4">
           <div className="max-w-md mx-auto text-center">
-            <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-7 h-7 text-green-600" />
+            <div className="w-14 h-14 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-7 h-7 text-gold" />
             </div>
 
             <h2 className="text-lg font-bold text-dark mb-2">
-              Revisa tu correo
+              Ingresa tu código
             </h2>
 
             <p className="text-sm text-warm-gray mb-4">
-              Hemos enviado un enlace de acceso a<br />
+              Enviamos un código de 6 dígitos a<br />
               <span className="font-semibold text-dark">{email}</span>
             </p>
 
-            <div className="bg-gold/10 rounded-xl p-4 text-sm text-dark/80">
-              <p>Haz clic en el enlace del correo para continuar con tu reserva.</p>
-              <p className="mt-2 text-warm-gray">El enlace expira en 1 hora.</p>
-            </div>
+            <OtpInput
+              onComplete={handleVerifyOtp}
+              disabled={isVerifying}
+              error={!!error}
+            />
 
-            <button
-              onClick={() => {
-                setAuthState('email')
-                setEmail('')
-              }}
-              className="mt-4 text-gold hover:text-gold/80 font-medium transition-colors"
-            >
-              Usar otro correo
-            </button>
+            {isVerifying && (
+              <div className="mt-4 flex items-center justify-center gap-2 text-warm-gray">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Verificando...</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="mt-4 space-y-2">
+              <button
+                onClick={handleResendOtp}
+                disabled={isVerifying}
+                className="flex items-center justify-center gap-1.5 mx-auto text-gold hover:text-gold/80 font-medium transition-colors text-sm disabled:opacity-50"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Reenviar código
+              </button>
+
+              <button
+                onClick={() => {
+                  setAuthState('email')
+                  setEmail('')
+                  setError(null)
+                  setIsVerifying(false)
+                  setClientData(null)
+                }}
+                className="text-warm-gray hover:text-dark transition-colors text-sm"
+              >
+                ← Usar otro correo
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -642,7 +774,7 @@ function AuthStepContent() {
 
           {/* Info text */}
           <p className="mt-3 text-center text-xs text-warm-gray">
-            Te enviaremos un enlace seguro a tu correo para verificar tu identidad
+            Te enviaremos un código de verificación a tu correo
           </p>
         </div>
       </div>
