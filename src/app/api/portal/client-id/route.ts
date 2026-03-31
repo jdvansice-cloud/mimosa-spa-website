@@ -48,11 +48,7 @@ export async function GET() {
 
     const mindbodyClientId = profile?.mindbody_client_id as number | null
 
-    console.log('Portal client-id - User:', user.id)
-    console.log('Portal client-id - Profile mindbody_client_id:', mindbodyClientId, '(type:', typeof mindbodyClientId, ')')
-
     if (!profile || !mindbodyClientId) {
-      console.warn('Portal client-id - No Mindbody client ID found for user:', user.id)
       return NextResponse.json(
         { error: 'No se encontró ID de cliente Mindbody vinculado' },
         { status: 404 }

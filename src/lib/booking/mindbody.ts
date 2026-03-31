@@ -1126,13 +1126,6 @@ export async function addAppointment(appointmentData: {
 
   console.log('Mindbody addAppointment response:', JSON.stringify(response, null, 2))
 
-  // Log client info from response
-  if (response.Appointment?.Client) {
-    console.log('Client info from Mindbody response:', JSON.stringify(response.Appointment.Client, null, 2))
-  } else {
-    console.warn('No Client object in Mindbody appointment response - client name may be missing in Mindbody')
-  }
-
   // Check for error in response
   if (response.Error) {
     console.error('Mindbody API returned error:', response.Error)

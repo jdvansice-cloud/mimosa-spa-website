@@ -119,13 +119,39 @@ export async function POST(request: NextRequest) {
         })
       } catch (regError) {
         const errorMessage = regError instanceof Error ? regError.message : String(regError)
+
+        // If client already exists in Mindbody, look them up instead of erroring
+        if (errorMessage.includes('duplicate client') || errorMessage.includes('InvalidClientCreation')) {
+          console.log('Client already exists in Mindbody, looking up by email:', email)
+          try {
+            const existingClients = await searchClients(email)
+            const match = existingClients.find(c =>
+              c.Email?.toLowerCase() === email.toLowerCase()
+            )
+            if (match) {
+              return NextResponse.json({
+                success: true,
+                client: {
+                  Id: match.Id,
+                  FirstName: match.FirstName,
+                  LastName: match.LastName,
+                  Email: match.Email,
+                  MobilePhone: match.MobilePhone,
+                },
+                existingClient: true,
+              })
+            }
+          } catch (lookupError) {
+            console.error('Failed to look up existing client:', lookupError)
+          }
+        }
+
         console.error('Registration error details:', {
           message: errorMessage,
           firstName,
           lastName,
           email,
           phone,
-          stack: regError instanceof Error ? regError.stack : undefined
         })
         return NextResponse.json(
           { error: ERROR_MESSAGES.REGISTRATION_FAILED, details: errorMessage },

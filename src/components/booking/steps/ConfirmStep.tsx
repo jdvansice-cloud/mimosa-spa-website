@@ -127,6 +127,9 @@ export function ConfirmStep() {
   }
 
   const handleConfirmBooking = async () => {
+    // Prevent double-clicks
+    if (isSubmitting) return
+
     if (!clientInfo || !selectedLocation || !selectedDate || !selectedTime) {
       setError('Información incompleta. Por favor vuelve a intentar.')
       return
