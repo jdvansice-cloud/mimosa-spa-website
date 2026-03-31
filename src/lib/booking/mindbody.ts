@@ -1150,7 +1150,27 @@ export async function addAppointment(appointmentData: {
   return response.Appointment
 }
 
+// Cancel/remove an appointment from Mindbody
+export async function removeAppointment(appointmentId: number): Promise<boolean> {
+  try {
+    console.log(`Cancelling appointment ${appointmentId}...`)
+    await mindbodyRequest('/appointment/updateappointment', {
+      method: 'POST',
+      body: {
+        AppointmentId: appointmentId,
+        Execute: 'Cancel',
+      }
+    })
+    console.log(`Successfully cancelled appointment ${appointmentId}`)
+    return true
+  } catch (error) {
+    console.error(`Failed to cancel appointment ${appointmentId}:`, error)
+    return false
+  }
+}
+
 // Add multiple appointments (for multi-service bookings)
+// All-or-nothing: if any appointment fails, previously created ones are cancelled
 export async function addMultipleAppointments(appointments: Array<{
   ClientId: number
   LocationId: number
@@ -1160,7 +1180,7 @@ export async function addMultipleAppointments(appointments: Array<{
   Notes?: string
   StaffRequested?: boolean
 }>) {
-  const results = []
+  const createdAppointments: Array<{ id: number; appointment: ReturnType<typeof addAppointment> extends Promise<infer T> ? T : never }> = []
 
   for (let i = 0; i < appointments.length; i++) {
     const appointment = appointments[i]
@@ -1169,21 +1189,34 @@ export async function addMultipleAppointments(appointments: Array<{
       console.log('SessionTypeId:', appointment.SessionTypeId)
       console.log('StartDateTime:', appointment.StartDateTime)
       const result = await addAppointment(appointment)
-      results.push({ success: true, appointment: result })
+      createdAppointments.push({ id: result.Id, appointment: result })
     } catch (error) {
       console.error(`=== Appointment ${i + 1} FAILED ===`)
       console.error('SessionTypeId:', appointment.SessionTypeId)
       console.error('Error:', error)
-      results.push({
-        success: false,
+
+      // Roll back all previously created appointments
+      if (createdAppointments.length > 0) {
+        console.log(`Rolling back ${createdAppointments.length} previously created appointment(s)...`)
+        for (const created of createdAppointments) {
+          await removeAppointment(created.id)
+        }
+      }
+
+      // Return failure with the error from the appointment that failed
+      return {
+        success: false as const,
         error: String(error),
+        failedIndex: i,
         sessionTypeId: appointment.SessionTypeId,
-        startDateTime: appointment.StartDateTime
-      })
+      }
     }
   }
 
-  return results
+  return {
+    success: true as const,
+    appointments: createdAppointments.map(c => c.appointment),
+  }
 }
 
 // CLIENT HISTORY & PORTAL FUNCTIONS

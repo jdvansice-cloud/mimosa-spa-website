@@ -20,6 +20,7 @@ export function ConfirmStep() {
     availableSlots,
     setBookingConfirmation,
     setClientInfo,
+    setStep,
     setLoading,
     setError,
     isLoading,
@@ -28,6 +29,7 @@ export function ConfirmStep() {
 
   const totalDuration = useBookingStore(selectTotalDuration)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [timeUnavailable, setTimeUnavailable] = useState(false)
   const [displayClientName, setDisplayClientName] = useState<string>('')
 
   // Fetch client name on mount if missing from store
@@ -240,7 +242,13 @@ export function ConfirmStep() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al crear la reserva')
+        if (data.timeUnavailable) {
+          setTimeUnavailable(true)
+          setError(data.error || 'El horario seleccionado no está disponible.')
+        } else {
+          throw new Error(data.error || 'Error al crear la reserva')
+        }
+        return
       }
 
       setBookingConfirmation({
@@ -250,10 +258,8 @@ export function ConfirmStep() {
         location: selectedLocation,
         client: clientInfo,
         pricing: pricing!,
-        // Include partial booking info
         totalBooked: data.totalBooked,
         totalRequested: data.totalRequested,
-        partialBookingWarning: data.partialBookingWarning
       })
 
     } catch (err) {
@@ -288,9 +294,25 @@ export function ConfirmStep() {
 
         {/* Error State */}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 mb-4 flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <p className="text-sm">{error}</p>
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl mb-4">
+            <div className="flex items-start gap-2 text-red-600">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <p className="text-sm">{error}</p>
+            </div>
+            {timeUnavailable && (
+              <button
+                onClick={() => {
+                  setError(null)
+                  setTimeUnavailable(false)
+                  setStep('datetime')
+                }}
+                className="mt-3 w-full py-2.5 bg-gold/90 text-dark font-semibold rounded-lg
+                         hover:bg-gold transition-colors text-sm flex items-center justify-center gap-1.5"
+              >
+                <Calendar className="w-4 h-4" />
+                Elegir otro horario
+              </button>
+            )}
           </div>
         )}
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { CheckCircle, Calendar, MapPin, Clock, User, Home, Star, AlertTriangle } from 'lucide-react'
+import { CheckCircle, Calendar, MapPin, Clock, User, Home, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import Link from 'next/link'
@@ -105,27 +105,6 @@ export function SuccessStep() {
             )}
           </motion.div>
         </div>
-
-        {/* Partial Booking Warning */}
-        {bookingConfirmation?.partialBookingWarning && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="bg-amber-50 border border-amber-300 rounded-xl p-3 mb-4"
-          >
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="text-left">
-                <p className="font-semibold text-amber-800 text-sm mb-0.5">Reserva parcial</p>
-                <p className="text-xs text-amber-700">
-                  Se reservaron {bookingConfirmation.totalBooked} de {bookingConfirmation.totalRequested} servicios.
-                  Contáctanos para completar tu reserva.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {/* Booking Details Card */}
         <motion.div

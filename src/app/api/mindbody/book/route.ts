@@ -225,29 +225,27 @@ export async function POST(request: NextRequest) {
 
     console.log('Appointments to create:', JSON.stringify(appointments, null, 2))
 
-    // Submit all appointments
-    const results = await addMultipleAppointments(appointments)
+    // Submit all appointments (all-or-nothing: rolls back on failure)
+    const result = await addMultipleAppointments(appointments)
 
-    console.log('Booking results:', JSON.stringify(results, null, 2))
+    console.log('Booking result:', JSON.stringify(result, null, 2))
 
-    // Check for any failures
-    const failures = results.filter(r => !r.success)
-    const successes = results.filter(r => r.success)
-
-    // If all failed, return error
-    if (failures.length === results.length) {
-      console.error('All appointments failed:', failures)
+    // If booking failed (any appointment couldn't be created), return error
+    if (!result.success) {
+      console.error('Booking failed:', result.error)
       return NextResponse.json(
-        { error: ERROR_MESSAGES.BOOKING_FAILED },
-        { status: 500 }
+        {
+          error: 'El horario seleccionado no está disponible para todos los servicios. Por favor elige otro horario.',
+          timeUnavailable: true,
+        },
+        { status: 409 }
       )
     }
 
+    const successfulAppointments = result.appointments
+
     // Generate confirmation number
     const confirmationNumber = `MIM-${Date.now().toString(36).toUpperCase()}`
-
-    // Get successful appointments
-    const successfulAppointments = successes.map(r => r.appointment)
 
     // Get therapist name - either from request or from Mindbody response
     let finalTherapistName = therapistName
@@ -257,36 +255,6 @@ export async function POST(request: NextRequest) {
         finalTherapistName = firstAppointment.Staff.DisplayName ||
           `${firstAppointment.Staff.FirstName} ${firstAppointment.Staff.LastName}`
       }
-    }
-
-    // Handle partial booking failures
-    let partialBookingWarning: string | null = null
-    if (failures.length > 0 && successes.length > 0) {
-      // Map failures to service names for better logging
-      const failedServiceDetails = failures.map((f, i) => {
-        const failedResult = f as { error: string; sessionTypeId?: number; startDateTime?: string }
-        const matchingService = (services as BookingService[]).find(s =>
-          appointments.findIndex(a =>
-            a.SessionTypeId === s.sessionTypeId &&
-            failedResult.sessionTypeId === s.sessionTypeId
-          ) >= 0
-        )
-        return {
-          index: i,
-          serviceName: matchingService?.name || 'Unknown',
-          sessionTypeId: failedResult.sessionTypeId,
-          startDateTime: failedResult.startDateTime,
-          error: failedResult.error
-        }
-      })
-
-      console.warn('Partial booking failure:', {
-        totalRequested: services.length,
-        successful: successes.length,
-        failed: failures.length,
-        failedServices: failedServiceDetails
-      })
-      partialBookingWarning = ERROR_MESSAGES.PARTIAL_BOOKING
     }
 
     // Send WhatsApp confirmation if WATI is configured and client phone is provided
@@ -328,8 +296,6 @@ export async function POST(request: NextRequest) {
     try {
       const supabase = getSupabaseAdmin()
 
-      const bookingStatus = failures.length > 0 ? 'partial' : 'confirmed'
-
       const mindbodyAppointmentIds = successfulAppointments
         .map(apt => apt?.Id)
         .filter((id): id is number => typeof id === 'number')
@@ -344,7 +310,7 @@ export async function POST(request: NextRequest) {
         .from('bookings')
         .insert({
           confirmation_number: confirmationNumber,
-          status: bookingStatus,
+          status: 'confirmed',
           mindbody_client_id: clientId,
           client_name: clientName || null,
           client_phone: clientPhone || null,
@@ -383,10 +349,7 @@ export async function POST(request: NextRequest) {
       totalBooked: successfulAppointments.length,
       totalRequested: services.length,
       whatsappSent,
-      partialBookingWarning,
-      message: failures.length > 0
-        ? `${successfulAppointments.length} de ${services.length} servicios reservados`
-        : 'Todos los servicios reservados exitosamente'
+      message: 'Todos los servicios reservados exitosamente'
     })
 
   } catch (error) {
