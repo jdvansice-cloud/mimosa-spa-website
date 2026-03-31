@@ -230,9 +230,48 @@ export async function POST(request: NextRequest) {
 
     console.log('Booking result:', JSON.stringify(result, null, 2))
 
-    // If booking failed (any appointment couldn't be created), return error
+    // If booking failed (any appointment couldn't be created), save to Supabase and return error
     if (!result.success) {
       console.error('Booking failed:', result.error)
+
+      // Save failed attempt to Supabase for troubleshooting
+      try {
+        const supabase = getSupabaseAdmin()
+        const servicesData = (services as BookingService[]).map(s => ({
+          sessionTypeId: s.sessionTypeId,
+          name: s.name || 'Unknown Service',
+          duration: s.duration,
+        }))
+
+        await supabase.from('bookings').insert({
+          confirmation_number: `FAIL-${Date.now().toString(36).toUpperCase()}`,
+          status: 'failed',
+          mindbody_client_id: clientId,
+          client_name: clientName || null,
+          client_phone: clientPhone || null,
+          client_email: mindbodyClient?.Email || null,
+          location_id: locationId,
+          location_name: locationName || null,
+          staff_id: staffId || null,
+          therapist_name: therapistName || null,
+          staff_requested: !!staffRequested,
+          appointment_start: startDateTime,
+          services: servicesData,
+          total_duration: totalDuration || null,
+          mindbody_appointment_ids: [],
+          promotion_name: promotionName || null,
+          total_requested: (services as BookingService[]).length,
+          total_booked: 0,
+          subtotal_before_tax: subtotalBeforeTax || null,
+          tax_amount: taxAmount || null,
+          total_with_tax: totalWithTax || null,
+          whatsapp_sent: false,
+          failure_reason: result.error,
+        })
+      } catch (supabaseError) {
+        console.error('Error saving failed booking to Supabase:', supabaseError)
+      }
+
       return NextResponse.json(
         {
           error: 'El horario seleccionado no está disponible para todos los servicios. Por favor elige otro horario.',
