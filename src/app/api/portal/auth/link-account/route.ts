@@ -66,13 +66,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Error al vincular cuenta' }, { status: 500 })
     }
 
-    // Keep profile in sync with latest Mindbody client ID
+    // Keep auth metadata and profile in sync
+    await serviceClient.auth.admin.updateUserById(user.id, {
+      user_metadata: {
+        full_name: String(clientName),
+        mindbody_client_id: Number(clientId),
+      },
+    })
+
     await serviceClient
       .from('profiles')
       .upsert({
         id: user.id,
         email: user.email,
         mindbody_client_id: Number(clientId),
+        full_name: String(clientName),
         updated_at: new Date().toISOString(),
       }, { onConflict: 'id' })
 

@@ -112,6 +112,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // --- Update auth user metadata (display name + mindbody ID) ---
+    await serviceClient.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        full_name: clientNameStr,
+        mindbody_client_id: mbClientId,
+      },
+    })
+
     // --- Update profile (upsert handles both new and existing) ---
     await serviceClient
       .from('profiles')
@@ -119,6 +127,7 @@ export async function POST(request: NextRequest) {
         id: userId,
         email: sessionEmail,
         mindbody_client_id: mbClientId,
+        full_name: clientNameStr,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'id' })
 
