@@ -52,8 +52,7 @@ function formatPhoneForWati(phone: string): string {
     cleaned = '507' + cleaned
   }
 
-  // WATI v3 requires + prefix
-  return '+' + cleaned
+  return cleaned
 }
 
 // ===========================================
@@ -103,7 +102,7 @@ function buildRequest(
   return {
     template_name: templateName,
     broadcast_name: templateName,
-    recipients: [{ whatsappNumber: formatPhoneForWati(phone), customParams: parameters }],
+    recipients: [{ phone_number: formatPhoneForWati(phone), customParams: parameters }],
   }
 }
 
