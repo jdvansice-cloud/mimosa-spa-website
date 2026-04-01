@@ -63,11 +63,18 @@ export async function POST(request: NextRequest) {
 
     if (upsertError) {
       console.error('Failed to save linked account:', upsertError)
-      return NextResponse.json(
-        { error: 'Error al vincular cuenta' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Error al vincular cuenta' }, { status: 500 })
     }
+
+    // Keep profile in sync with latest Mindbody client ID
+    await serviceClient
+      .from('profiles')
+      .upsert({
+        id: user.id,
+        email: user.email,
+        mindbody_client_id: Number(clientId),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' })
 
     return NextResponse.json({ success: true })
 

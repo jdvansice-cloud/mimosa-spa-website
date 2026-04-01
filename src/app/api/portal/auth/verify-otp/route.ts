@@ -10,11 +10,15 @@ function getServiceClient() {
 
 /**
  * POST /api/portal/auth/verify-otp
- * Verifies a WhatsApp OTP code and creates a Supabase session.
- * Returns a token_hash the client uses to establish the session via verifyOtp({ token_hash, type: 'magiclink' }).
+ * Verifies a WhatsApp OTP code and creates/updates a Supabase session.
  *
- * Body: { phone: string, otp_code: string, email?: string, clientId: number, clientName: string }
- * Returns: { success: true, token_hash: string, session_email: string }
+ * Handles three cases:
+ * - New user (not in Supabase): creates account + profile + linked_account
+ * - Existing user (already in Supabase): updates profile + linked_account, no re-creation
+ * - Mindbody-only user: same as new user
+ *
+ * Body: { phone, otp_code, email?, clientId, clientName }
+ * Returns: { success: true, token_hash, session_email }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -22,15 +26,12 @@ export async function POST(request: NextRequest) {
     const { phone, otp_code, email, clientId, clientName } = body
 
     if (!phone || !otp_code || !clientId || !clientName) {
-      return NextResponse.json(
-        { error: 'Parámetros incompletos' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Parámetros incompletos' }, { status: 400 })
     }
 
     const normalizedPhone = String(phone).replace(/\D/g, '')
 
-    if (!otp_code || otp_code.length !== 6 || !/^\d{6}$/.test(otp_code)) {
+    if (otp_code.length !== 6 || !/^\d{6}$/.test(otp_code)) {
       return NextResponse.json(
         { error: 'Código inválido. Debe tener 6 dígitos.' },
         { status: 400 }
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     const serviceClient = getServiceClient()
 
-    // Look up the OTP record
+    // Verify OTP
     const { data: record, error: lookupError } = await serviceClient
       .from('phone_verifications')
       .select('id, expires_at, used, otp_code')
@@ -52,78 +53,88 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (lookupError || !record) {
-      return NextResponse.json(
-        { error: 'Código incorrecto o expirado' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Código incorrecto o expirado' }, { status: 401 })
     }
 
-    // Mark as used
+    // Mark OTP as used
     await serviceClient
       .from('phone_verifications')
       .update({ used: true, verified_at: new Date().toISOString() })
       .eq('id', record.id)
 
-    // Save to linked_accounts
+    const mbClientId = Number(clientId)
     const clientNameStr = String(clientName)
-    await serviceClient
-      .from('linked_accounts')
-      .upsert({
-        credential: normalizedPhone,
-        credential_type: 'phone',
-        mindbody_client_id: Number(clientId),
-        client_name: clientNameStr,
-        verified_at: new Date().toISOString(),
-      }, { onConflict: 'credential,credential_type,mindbody_client_id' })
-
-    // Determine the email to use for the Supabase user
-    // If client has a real email, use it. Otherwise derive one from the phone.
     const sessionEmail = email
       ? String(email).toLowerCase().trim()
       : `phone.${normalizedPhone}@auth.mimosaspa.app`
 
-    // Get or create a Supabase user for this email
-    const { data: existingUsers } = await serviceClient.auth.admin.listUsers()
-    const existingUser = existingUsers?.users?.find(
-      u => u.email?.toLowerCase() === sessionEmail
-    )
+    // --- Find or create Supabase user ---
+    // 1. Check profiles table first (fast lookup by email)
+    const { data: existingProfile } = await serviceClient
+      .from('profiles')
+      .select('id')
+      .eq('email', sessionEmail)
+      .maybeSingle()
 
     let userId: string
 
-    if (existingUser) {
-      userId = existingUser.id
+    if (existingProfile?.id) {
+      // Existing user — just use their ID
+      userId = existingProfile.id
     } else {
-      // Create the user with email confirmed
+      // Create new Supabase user
       const { data: newUser, error: createError } = await serviceClient.auth.admin.createUser({
         email: sessionEmail,
         email_confirm: true,
-        user_metadata: {
-          mindbody_client_id: Number(clientId),
-        },
+        user_metadata: { mindbody_client_id: mbClientId },
       })
 
-      if (createError || !newUser?.user) {
-        console.error('Failed to create Supabase user:', createError)
-        return NextResponse.json(
-          { error: 'Error al crear cuenta' },
-          { status: 500 }
-        )
+      if (createError) {
+        if (createError.code === 'email_exists') {
+          // Auth user exists but no profile yet — find via listUsers
+          const { data: usersPage } = await serviceClient.auth.admin.listUsers({ perPage: 1000 })
+          const found = usersPage?.users?.find(
+            u => u.email?.toLowerCase() === sessionEmail.toLowerCase()
+          )
+          if (!found) {
+            console.error('Could not locate existing auth user:', sessionEmail)
+            return NextResponse.json({ error: 'Error al acceder a la cuenta' }, { status: 500 })
+          }
+          userId = found.id
+        } else {
+          console.error('Failed to create Supabase user:', createError)
+          return NextResponse.json({ error: 'Error al crear cuenta' }, { status: 500 })
+        }
+      } else if (!newUser?.user) {
+        return NextResponse.json({ error: 'Error al crear cuenta' }, { status: 500 })
+      } else {
+        userId = newUser.user.id
       }
-
-      userId = newUser.user.id
     }
 
-    // Save/update the profile
+    // --- Update profile (upsert handles both new and existing) ---
     await serviceClient
       .from('profiles')
       .upsert({
         id: userId,
         email: sessionEmail,
-        mindbody_client_id: Number(clientId),
+        mindbody_client_id: mbClientId,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'id' })
 
-    // Generate a magic link to produce a token_hash the client can use
+    // --- Update linked_accounts (upsert refreshes verified_at on re-login) ---
+    // credential_type 'phone' indicates WhatsApp as preferred channel
+    await serviceClient
+      .from('linked_accounts')
+      .upsert({
+        credential: normalizedPhone,
+        credential_type: 'phone',
+        mindbody_client_id: mbClientId,
+        client_name: clientNameStr,
+        verified_at: new Date().toISOString(),
+      }, { onConflict: 'credential,credential_type,mindbody_client_id' })
+
+    // --- Generate magic link token for client-side session ---
     const { data: linkData, error: linkError } = await serviceClient.auth.admin.generateLink({
       type: 'magiclink',
       email: sessionEmail,
@@ -131,10 +142,7 @@ export async function POST(request: NextRequest) {
 
     if (linkError || !linkData?.properties?.hashed_token) {
       console.error('Failed to generate session link:', linkError)
-      return NextResponse.json(
-        { error: 'Error al crear sesión' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Error al crear sesión' }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -145,9 +153,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Verify OTP error:', error)
-    return NextResponse.json(
-      { error: 'Error interno al verificar código' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Error interno al verificar código' }, { status: 500 })
   }
 }
