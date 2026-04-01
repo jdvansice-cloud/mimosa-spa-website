@@ -112,37 +112,47 @@ export async function sendTemplateMessage(
   return sendTemplate(phone, templateName, parameters)
 }
 
+// Template: "Mimosa {{2}}" — strip the "Mimosa " prefix from location names
+function stripMimosaPrefix(locationName: string): string {
+  return locationName.replace(/^Mimosa\s+/i, '').trim() || locationName
+}
+
 // ===========================================
 // BOOKING CONFIRMATION NOTIFICATION
+// Template: confirmacion_cita
+// {{1}} nombre, {{2}} ubicacion, {{3}} fecha, {{4}} hora,
+// {{5}} duracion, {{6}} terapeuta, {{7}} servicios
 // ===========================================
 
 export async function sendBookingConfirmation(
   data: BookingConfirmationData
 ): Promise<WatiResponse> {
-  return sendTemplate(data.clientPhone, 'confirmacion_reserva', [
-    { name: 'nombre_cliente', value: data.clientName },
-    { name: 'ubicacion', value: data.locationName },
-    { name: 'fecha', value: data.date },
-    { name: 'hora', value: data.time },
-    { name: 'duracion', value: `${data.totalDuration} minutos` },
-    { name: 'terapeuta', value: data.therapistName },
-    { name: 'servicios', value: data.services.join(', ') },
+  return sendTemplate(data.clientPhone, 'confirmacion_cita', [
+    { name: '1', value: data.clientName },
+    { name: '2', value: stripMimosaPrefix(data.locationName) },
+    { name: '3', value: data.date },
+    { name: '4', value: data.time },
+    { name: '5', value: `${data.totalDuration} min` },
+    { name: '6', value: data.therapistName },
+    { name: '7', value: data.services.join(', ') },
   ])
 }
 
 // ===========================================
 // BOOKING REMINDER NOTIFICATION (24h before)
+// Template: recordatorio_cita
+// {{1}} nombre, {{2}} ubicacion, {{3}} fecha, {{4}} hora
+// URL buttons use appointmentId
 // ===========================================
 
 export async function sendBookingReminder(
   data: ReminderData
 ): Promise<WatiResponse> {
   return sendTemplate(data.clientPhone, 'recordatorio_cita', [
-    { name: 'nombre_cliente', value: data.clientName },
-    { name: 'ubicacion', value: data.locationName },
-    { name: 'fecha', value: data.date },
-    { name: 'hora', value: data.time },
-    { name: 'id_cita', value: data.appointmentId },
+    { name: '1', value: data.clientName },
+    { name: '2', value: stripMimosaPrefix(data.locationName) },
+    { name: '3', value: data.date },
+    { name: '4', value: data.time },
   ])
 }
 
