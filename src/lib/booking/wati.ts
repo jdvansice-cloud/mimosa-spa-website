@@ -70,7 +70,10 @@ async function watiRequest(
   }
 
   try {
-    const response = await fetch(`${WATI_API_URL}${endpoint}`, {
+    const fullUrl = `${WATI_API_URL}${endpoint}`
+    console.log('WATI request URL:', fullUrl)
+
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${WATI_ACCESS_TOKEN}`,
@@ -81,7 +84,7 @@ async function watiRequest(
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`WATI API error: ${response.status}`, errorText)
+      console.error(`WATI API error: ${response.status}`, errorText, 'URL:', fullUrl)
       return { result: false, error: `HTTP ${response.status}: ${errorText}` }
     }
 
