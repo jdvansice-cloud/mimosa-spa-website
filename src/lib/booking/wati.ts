@@ -62,15 +62,22 @@ function formatPhoneForWati(phone: string): string {
 
 async function watiRequest(
   endpoint: string,
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
+  queryParams?: Record<string, string>
 ): Promise<WatiResponse> {
   if (!WATI_ACCESS_TOKEN) {
     console.warn('WATI_ACCESS_TOKEN not configured')
     return { result: false, error: 'WATI not configured' }
   }
-  
+
   try {
-    const response = await fetch(`${WATI_API_URL}${endpoint}`, {
+    let url = `${WATI_API_URL}${endpoint}`
+    if (queryParams) {
+      const qs = new URLSearchParams(queryParams).toString()
+      url = `${url}?${qs}`
+    }
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${WATI_ACCESS_TOKEN}`,
@@ -78,13 +85,13 @@ async function watiRequest(
       },
       body: JSON.stringify(body),
     })
-    
+
     if (!response.ok) {
       const errorText = await response.text()
       console.error(`WATI API error: ${response.status}`, errorText)
-      return { result: false, error: `HTTP ${response.status}` }
+      return { result: false, error: `HTTP ${response.status}: ${errorText}` }
     }
-    
+
     return await response.json()
   } catch (error) {
     console.error('WATI API request failed:', error)
@@ -102,12 +109,17 @@ export async function sendTemplateMessage(
   parameters: Array<{ name: string; value: string }>
 ): Promise<WatiResponse> {
   const formattedPhone = formatPhoneForWati(phone)
-  
-  return watiRequest('/api/v1/sendTemplateMessage', {
-    whatsappNumber: formattedPhone,
-    templateName,
-    parameters,
-  })
+
+  // whatsappNumber is a query param; body uses snake_case field names
+  return watiRequest(
+    '/api/v1/sendTemplateMessage',
+    {
+      template_name: templateName,
+      broadcast_name: templateName,
+      parameters,
+    },
+    { whatsappNumber: formattedPhone }
+  )
 }
 
 // ===========================================
@@ -150,11 +162,11 @@ export async function sendBookingConfirmation(
     { name: 'servicios', value: servicesList },
   ]
   
-  return watiRequest('/api/v1/sendTemplateMessage', {
-    whatsappNumber: formattedPhone,
-    templateName: 'confirmacion_reserva',
-    parameters,
-  })
+  return watiRequest(
+    '/api/v1/sendTemplateMessage',
+    { template_name: 'confirmacion_reserva', broadcast_name: 'confirmacion_reserva', parameters },
+    { whatsappNumber: formattedPhone }
+  )
 }
 
 // ===========================================
@@ -175,11 +187,11 @@ export async function sendBookingReminder(
     { name: 'id_cita', value: data.appointmentId }, // Used in URL buttons
   ]
   
-  return watiRequest('/api/v1/sendTemplateMessage', {
-    whatsappNumber: formattedPhone,
-    templateName: 'recordatorio_cita',
-    parameters,
-  })
+  return watiRequest(
+    '/api/v1/sendTemplateMessage',
+    { template_name: 'recordatorio_cita', broadcast_name: 'recordatorio_cita', parameters },
+    { whatsappNumber: formattedPhone }
+  )
 }
 
 // ===========================================
@@ -225,13 +237,17 @@ export async function sendOtpCode(
 ): Promise<WatiResponse> {
   const formattedPhone = formatPhoneForWati(phone)
 
-  return watiRequest('/api/v1/sendTemplateMessage', {
-    whatsappNumber: formattedPhone,
-    templateName: 'codigo_verificacion',
-    parameters: [
-      { name: '1', value: otpCode },
-    ],
-  })
+  return watiRequest(
+    '/api/v1/sendTemplateMessage',
+    {
+      template_name: 'codigo_verificacion',
+      broadcast_name: 'codigo_verificacion',
+      parameters: [
+        { name: '1', value: otpCode },
+      ],
+    },
+    { whatsappNumber: formattedPhone }
+  )
 }
 
 // ===========================================
@@ -263,16 +279,16 @@ export async function sendPhoneVerification(
 
   // For button templates, WATI uses a different format
   // The button URL is set in the template with a variable suffix
-  return watiRequest('/api/v1/sendTemplateMessage', {
-    whatsappNumber: formattedPhone,
-    templateName: 'verificacion_telefono',
-    parameters,
-    // Button parameters - the URL button uses the token as dynamic part
-    buttonParameters: {
-      // Button index 0 (first button)
-      '0': data.verificationUrl,
+  return watiRequest(
+    '/api/v1/sendTemplateMessage',
+    {
+      template_name: 'verificacion_telefono',
+      broadcast_name: 'verificacion_telefono',
+      parameters,
+      buttonParameters: { '0': data.verificationUrl },
     },
-  })
+    { whatsappNumber: formattedPhone }
+  )
 }
 
 // ===========================================
