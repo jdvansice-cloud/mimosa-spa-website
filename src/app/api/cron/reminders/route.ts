@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
   const { data: bookings, error } = await supabase
     .from('bookings')
-    .select('id, client_name, client_phone, location_name, appointment_start, reminder_sent')
+    .select('id, client_name, client_phone, location_name, appointment_start, reminder_sent, mindbody_appointment_ids')
     .eq('status', 'confirmed')
     .eq('reminder_sent', false)
     .gte('appointment_start', windowStart.toISOString())
@@ -62,13 +62,17 @@ export async function GET(request: NextRequest) {
       hour: 'numeric', minute: '2-digit', hour12: true,
     })
 
+    // Use first Mindbody appointment ID for confirm/cancel button URLs
+    const mindbodyIds = booking.mindbody_appointment_ids as number[] | null
+    const appointmentId = mindbodyIds?.[0] ? String(mindbodyIds[0]) : String(booking.id)
+
     const result = await sendBookingReminder({
       clientName: booking.client_name || 'Cliente',
       clientPhone: booking.client_phone,
       locationName: booking.location_name || 'Mimosa Spa Retreat',
       date: dateStr,
       time: timeStr,
-      appointmentId: String(booking.id),
+      appointmentId,
     })
 
     if (result.result) {

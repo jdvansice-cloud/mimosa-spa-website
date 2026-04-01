@@ -153,6 +153,9 @@ export async function sendBookingReminder(
     { name: '2', value: stripMimosaPrefix(data.locationName) },
     { name: '3', value: data.date },
     { name: '4', value: data.time },
+    // Button URL dynamic params: both Confirmar and Cancelar buttons use {{1}} = appointmentId
+    { name: 'button_url_0', value: data.appointmentId },
+    { name: 'button_url_1', value: data.appointmentId },
   ])
 }
 
