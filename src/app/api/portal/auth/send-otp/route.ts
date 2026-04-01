@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       .eq('used', false)
 
     const otpCode = generateOtpCode()
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString()
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
     // Store the OTP code
     const { error: insertError } = await serviceClient
@@ -93,8 +93,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send via WhatsApp
-    const watiResult = await sendOtpCode(normalizedPhone, clientName, otpCode)
+    // Send via WhatsApp (Authentication template only takes the code — no client name)
+    const watiResult = await sendOtpCode(normalizedPhone, otpCode)
 
     if (!watiResult.result) {
       console.error('Failed to send WhatsApp OTP:', watiResult.error)

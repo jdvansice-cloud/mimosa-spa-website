@@ -214,15 +214,13 @@ export function isWatiConfigured(): boolean {
 /**
  * Sends a 6-digit OTP code via WhatsApp using the codigo_verificacion template.
  *
- * Template setup (must be created and approved in WATI before use):
- *   Template name: codigo_verificacion
- *   Category: Authentication
- *   Body: Hola {{1}}, tu código de verificación para Mimosa Spa es: *{{2}}*. Expira en 15 minutos.
- *   Parameters: {{1}} = clientName, {{2}} = otpCode
+ * Template: codigo_verificacion (Authentication category, Spanish)
+ * Body (fixed by Meta): "Tu código de verificación es {{1}} Por tu seguridad, no lo compartas."
+ * Footer (fixed): "Este código caduca en 10 minutos."
+ * Parameters: {{1}} = otpCode only (Authentication templates have a fixed body — cannot add client name)
  */
 export async function sendOtpCode(
   phone: string,
-  clientName: string,
   otpCode: string
 ): Promise<WatiResponse> {
   const formattedPhone = formatPhoneForWati(phone)
@@ -231,8 +229,7 @@ export async function sendOtpCode(
     whatsappNumber: formattedPhone,
     templateName: 'codigo_verificacion',
     parameters: [
-      { name: '1', value: clientName },
-      { name: '2', value: otpCode },
+      { name: '1', value: otpCode },
     ],
   })
 }
