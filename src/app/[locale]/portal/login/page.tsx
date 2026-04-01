@@ -66,6 +66,7 @@ function PortalLoginContent() {
   const [availableClients, setAvailableClients] = useState<ClientOption[]>([])
   const [selectedClient, setSelectedClient] = useState<SelectedClient | null>(null)
   const [otpChannel, setOtpChannel] = useState<OtpChannel | null>(null)
+  const [emailAlsoSent, setEmailAlsoSent] = useState(false)
   const [countryCode, setCountryCode] = useState('+507')
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
     firstName: '',
@@ -218,6 +219,22 @@ function PortalLoginContent() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Error al enviar código')
 
+      // Also send email OTP as backup if client has an email
+      let emailSent = false
+      if (selectedClient.email) {
+        try {
+          const supabase = getSupabase()
+          await supabase.auth.signInWithOtp({
+            email: selectedClient.email,
+            options: { data: { mindbody_client_id: selectedClient.clientId } },
+          })
+          emailSent = true
+        } catch {
+          // Email send failure is non-fatal — WhatsApp is the primary channel
+        }
+      }
+
+      setEmailAlsoSent(emailSent)
       setOtpChannel('whatsapp')
       setStep('otp')
     } catch (err) {
@@ -262,7 +279,7 @@ function PortalLoginContent() {
         ])
 
       } else {
-        // WhatsApp OTP: server-side verify, get token_hash, establish session
+        // WhatsApp OTP: try our server-side code first
         const response = await fetch('/api/portal/auth/verify-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -276,15 +293,39 @@ function PortalLoginContent() {
         })
 
         const data = await response.json()
-        if (!response.ok) throw new Error(data.error || 'Código incorrecto')
 
-        // Establish client-side session
-        const supabase = getSupabase()
-        const { error: sessionError } = await supabase.auth.verifyOtp({
-          token_hash: data.token_hash,
-          type: 'magiclink',
-        })
-        if (sessionError) throw new Error(sessionError.message)
+        if (response.ok) {
+          // WhatsApp code matched — establish session
+          const supabase = getSupabase()
+          const { error: sessionError } = await supabase.auth.verifyOtp({
+            token_hash: data.token_hash,
+            type: 'magiclink',
+          })
+          if (sessionError) throw new Error(sessionError.message)
+        } else if (emailAlsoSent && selectedClient.email) {
+          // WhatsApp code failed — try the email OTP code as fallback
+          const supabase = getSupabase()
+          const { error: emailVerifyError } = await supabase.auth.verifyOtp({
+            email: selectedClient.email,
+            token: code,
+            type: 'email',
+          })
+          if (emailVerifyError) throw new Error('Código incorrecto')
+
+          // Save link for this client
+          await fetch('/api/portal/auth/link-account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              credential: selectedClient.email,
+              credentialType: 'email',
+              clientId: selectedClient.clientId,
+              clientName: selectedClient.clientName,
+            }),
+          })
+        } else {
+          throw new Error(data.error || 'Código incorrecto')
+        }
       }
 
       const destination = redirectUrl ? decodeURIComponent(redirectUrl) : `/${locale}/portal`
@@ -405,8 +446,12 @@ function PortalLoginContent() {
             <h1 className="text-2xl font-bold text-dark mb-3">Ingresa tu código</h1>
 
             <p className="text-warm-gray mb-6">
-              {otpChannel === 'email' ? 'Enviamos un código de 6 dígitos a' : 'Enviamos un código por WhatsApp a'}<br />
-              <span className="font-semibold text-dark">{channelLabel}</span>
+              {otpChannel === 'email'
+                ? <>Enviamos un código de 6 dígitos a<br /><span className="font-semibold text-dark">{channelLabel}</span></>
+                : emailAlsoSent
+                  ? <>Enviamos un código por WhatsApp a <span className="font-semibold text-dark">{channelLabel}</span><br /><span className="text-sm">También enviamos un código a {selectedClient?.email}</span></>
+                  : <>Enviamos un código por WhatsApp a<br /><span className="font-semibold text-dark">{channelLabel}</span></>
+              }
             </p>
 
             <OtpInput onComplete={handleVerifyOtp} disabled={isVerifying} error={!!error} />
@@ -437,6 +482,7 @@ function PortalLoginContent() {
                 onClick={() => {
                   setStep('channel-choice')
                   setOtpChannel(null)
+                  setEmailAlsoSent(false)
                   setError(null)
                   setIsVerifying(false)
                 }}
