@@ -18,6 +18,7 @@ export function ConfirmStep() {
     selectedTime,
     activePromotion,
     availableSlots,
+    replaceAppointmentId,
     setBookingConfirmation,
     setClientInfo,
     setStep,
@@ -239,6 +240,8 @@ export function ConfirmStep() {
           subtotalBeforeTax: pricing.subtotalBeforeTax,
           taxAmount: pricing.itbmAmount,
           totalWithTax: pricing.totalWithTax,
+          // Appointment replacement: cancel old appointment after booking
+          replaceAppointmentId: replaceAppointmentId || undefined,
         })
       })
 
@@ -409,6 +412,15 @@ export function ConfirmStep() {
         <div className="text-xs text-warm-gray text-center">
           Reserva a nombre de <span className="font-medium text-dark">{displayClientName || 'Cargando...'}</span>
         </div>
+
+        {/* Replacement notice */}
+        {replaceAppointmentId && (
+          <div className="mt-3 p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800 text-xs text-center">
+              Al confirmar, tu cita anterior será cancelada automáticamente
+            </p>
+          </div>
+        )}
 
         {/* Payment Notice - Compact */}
         <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">

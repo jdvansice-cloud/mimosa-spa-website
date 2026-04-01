@@ -23,8 +23,11 @@ export function SuccessStep() {
     selectedTime,
     activePromotion,
     pricing,
+    replaceAppointmentId,
     reset
   } = useBookingStore()
+
+  const isReplacement = !!replaceAppointmentId
 
   // Fire Google Ads conversion event on booking success
   useEffect(() => {
@@ -90,10 +93,12 @@ export function SuccessStep() {
             transition={{ delay: 0.4 }}
           >
             <h2 className="text-xl font-bold text-dark mb-1">
-              ¡Reserva Confirmada!
+              {isReplacement ? '¡Cita Actualizada!' : '¡Reserva Confirmada!'}
             </h2>
             <p className="text-xs text-warm-gray mb-2">
-              Tu cita ha sido registrada exitosamente
+              {isReplacement
+                ? 'Tu nueva cita fue confirmada y la anterior fue cancelada'
+                : 'Tu cita ha sido registrada exitosamente'}
             </p>
 
             {/* Confirmation Number */}

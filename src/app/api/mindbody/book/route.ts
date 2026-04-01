@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { addMultipleAppointments, getClientWithCustomFields } from '@/lib/booking/mindbody'
+import { addMultipleAppointments, getClientWithCustomFields, removeAppointment } from '@/lib/booking/mindbody'
 import { sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
 import {
   validateRequired,
@@ -74,6 +74,8 @@ export async function POST(request: NextRequest) {
       subtotalBeforeTax,
       taxAmount,
       totalWithTax,
+      // Appointment replacement: cancel this Mindbody appointment ID after success
+      replaceAppointmentId,
     } = body
 
     // Validate required fields
@@ -389,6 +391,23 @@ export async function POST(request: NextRequest) {
       console.error('Error saving booking to Supabase:', supabaseError)
     }
 
+    // Cancel old appointment if this is a replacement
+    let replacedOldAppointment = false
+    if (replaceAppointmentId) {
+      const oldId = parseInt(replaceAppointmentId, 10)
+      if (!isNaN(oldId)) {
+        try {
+          replacedOldAppointment = await removeAppointment(oldId)
+          if (!replacedOldAppointment) {
+            console.warn('Could not cancel old appointment', oldId, '— new booking still confirmed')
+          }
+        } catch (cancelErr) {
+          console.error('Error cancelling old appointment:', cancelErr)
+          // Don't fail the response — new booking is already created
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       confirmationNumber,
@@ -396,6 +415,7 @@ export async function POST(request: NextRequest) {
       totalBooked: successfulAppointments.length,
       totalRequested: services.length,
       whatsappSent,
+      replaced: replacedOldAppointment,
       message: 'Todos los servicios reservados exitosamente'
     })
 

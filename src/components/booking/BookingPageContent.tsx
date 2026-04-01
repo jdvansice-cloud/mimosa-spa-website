@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { useBookingStore } from '@/lib/booking/store'
 import { BookingWidget } from './BookingWidget'
 import { AnimatePresence, motion } from 'framer-motion'
+import { RefreshCw } from 'lucide-react'
 import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
 
 function BookingPageInner() {
@@ -16,6 +17,8 @@ function BookingPageInner() {
   const setStep = useBookingStore(state => state.setStep)
   const loadPromotion = useBookingStore(state => state.loadPromotion)
   const addService = useBookingStore(state => state.addService)
+  const setReplaceAppointmentId = useBookingStore(state => state.setReplaceAppointmentId)
+  const replaceAppointmentId = useBookingStore(state => state.replaceAppointmentId)
 
   const [isInitializing, setIsInitializing] = useState(true)
   const initRef = useRef(false)
@@ -27,6 +30,12 @@ function BookingPageInner() {
     initRef.current = true
 
     const checkAuthAndInitialize = async () => {
+      // Capture ?replace=APPOINTMENT_ID for appointment replacement flow
+      const replaceId = searchParams.get('replace')
+      if (replaceId) {
+        setReplaceAppointmentId(replaceId)
+      }
+
       // If we already have client info in the store, user is authenticated
       if (clientInfo) {
         // Handle URL params for pre-selected items
@@ -218,6 +227,18 @@ function BookingPageInner() {
           </motion.section>
         )}
       </AnimatePresence>
+
+      {/* Replacement banner */}
+      {replaceAppointmentId && currentStep !== 'success' && (
+        <div className="bg-blue-50 border-b border-blue-200 py-2.5 px-4">
+          <div className="container-spa max-w-4xl flex items-center gap-2 text-sm text-blue-800">
+            <RefreshCw className="w-4 h-4 flex-shrink-0" />
+            <span>
+              Estás modificando una cita existente. Selecciona nueva fecha y hora — la cita anterior se cancelará automáticamente al confirmar.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Booking Widget */}
       <section className="py-4 md:py-6">

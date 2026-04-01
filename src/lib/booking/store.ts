@@ -67,6 +67,9 @@ interface BookingState {
   
   // Booking Result
   bookingConfirmation: BookingConfirmation | null
+
+  // Appointment replacement (from ?replace=APPOINTMENT_ID)
+  replaceAppointmentId: string | null
   
   // Computed pricing (cached)
   pricing: CartPricing | null
@@ -131,6 +134,7 @@ interface BookingActions {
   
   // Booking
   setBookingConfirmation: (confirmation: BookingConfirmation) => void
+  setReplaceAppointmentId: (id: string | null) => void
   
   // Pricing
   calculatePricing: () => CartPricing
@@ -192,6 +196,7 @@ const initialState: BookingState = {
   
   // Result
   bookingConfirmation: null,
+  replaceAppointmentId: null,
   
   // Pricing
   pricing: null,
@@ -477,6 +482,8 @@ export const useBookingStore = create<BookingState & BookingActions>()(
         bookingConfirmation: confirmation,
         currentStep: 'success'
       }, false, 'setBookingConfirmation'),
+
+      setReplaceAppointmentId: (id) => set({ replaceAppointmentId: id }, false, 'setReplaceAppointmentId'),
       
       // ===========================================
       // PRICING CALCULATION
