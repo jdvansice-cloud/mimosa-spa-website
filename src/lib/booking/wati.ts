@@ -4,7 +4,7 @@
 // ===========================================
 
 const WATI_API_URL = process.env.WATI_API_URL || 'https://live-mt-server.wati.io'
-const WATI_ACCESS_TOKEN = process.env.WATI_ACCESS_TOKEN
+const WATI_ACCESS_TOKEN = process.env.WATI_ACCESS_TOKEN || process.env.WATI_API_KEY
 
 // ===========================================
 // TYPES
