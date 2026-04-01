@@ -94,7 +94,7 @@ async function watiRequest(
 
 // ===========================================
 // SEND TEMPLATE MESSAGE (v3)
-// POST /api/ext/v3/messageTemplates
+// POST /api/ext/v3/messageTemplates/send
 // ===========================================
 
 export async function sendTemplateMessage(
@@ -104,7 +104,7 @@ export async function sendTemplateMessage(
 ): Promise<WatiResponse> {
   const formattedPhone = formatPhoneForWati(phone)
 
-  return watiRequest('/api/ext/v3/messageTemplates', {
+  return watiRequest('/api/ext/v3/messageTemplates/send', {
     template_name: templateName,
     broadcast_name: templateName,
     recipients: [
@@ -156,7 +156,7 @@ export async function sendBookingConfirmation(
     { name: 'servicios', value: servicesList },
   ]
   
-  return watiRequest('/api/ext/v3/messageTemplates', {
+  return watiRequest('/api/ext/v3/messageTemplates/send', {
     template_name: 'confirmacion_reserva',
     broadcast_name: 'confirmacion_reserva',
     recipients: [{ whatsappNumber: formattedPhone, customParams: parameters }],
@@ -181,7 +181,7 @@ export async function sendBookingReminder(
     { name: 'id_cita', value: data.appointmentId }, // Used in URL buttons
   ]
   
-  return watiRequest('/api/ext/v3/messageTemplates', {
+  return watiRequest('/api/ext/v3/messageTemplates/send', {
     template_name: 'recordatorio_cita',
     broadcast_name: 'recordatorio_cita',
     recipients: [{ whatsappNumber: formattedPhone, customParams: parameters }],
@@ -231,7 +231,7 @@ export async function sendOtpCode(
 ): Promise<WatiResponse> {
   const formattedPhone = formatPhoneForWati(phone)
 
-  return watiRequest('/api/ext/v3/messageTemplates', {
+  return watiRequest('/api/ext/v3/messageTemplates/send', {
     template_name: 'codigo_verificacion',
     broadcast_name: 'codigo_verificacion',
     recipients: [
@@ -272,7 +272,7 @@ export async function sendPhoneVerification(
 
   // For button templates, WATI uses a different format
   // The button URL is set in the template with a variable suffix
-  return watiRequest('/api/ext/v3/messageTemplates', {
+  return watiRequest('/api/ext/v3/messageTemplates/send', {
     template_name: 'verificacion_telefono',
     broadcast_name: 'verificacion_telefono',
     recipients: [{ whatsappNumber: formattedPhone, customParams: parameters }],
