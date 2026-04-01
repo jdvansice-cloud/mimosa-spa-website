@@ -158,6 +158,7 @@ export async function sendBookingReminder(
 
 // ===========================================
 // WHATSAPP OTP CODE (6-digit code verification)
+// Uses /sendTemplateMessage with phone as query param (per WATI OTP guide)
 // ===========================================
 
 /**
@@ -172,7 +173,40 @@ export async function sendOtpCode(
   phone: string,
   otpCode: string
 ): Promise<WatiResponse> {
-  return watiRequest(buildRequest('codigo_verificacion', phone, [{ name: '1', value: otpCode }]))
+  if (!WATI_ACCESS_TOKEN) {
+    return { result: false, error: 'WATI not configured' }
+  }
+
+  const formattedPhone = formatPhoneForWati(phone)
+  const url = `${WATI_BASE_URL}/api/v1/sendTemplateMessage?whatsappNumber=${formattedPhone}`
+  const body = {
+    template_name: 'codigo_verificacion',
+    broadcast_name: 'codigo_verificacion',
+    parameters: [{ name: '1', value: otpCode }],
+  }
+
+  try {
+    console.log('WATI OTP request:', url, JSON.stringify(body))
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${WATI_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`WATI OTP error: ${response.status}`, errorText)
+      return { result: false, error: `HTTP ${response.status}: ${errorText}` }
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error('WATI OTP request failed:', error)
+    return { result: false, error: String(error) }
+  }
 }
 
 // ===========================================
