@@ -97,9 +97,19 @@ export async function POST(request: NextRequest) {
     const watiResult = await sendOtpCode(normalizedPhone, otpCode)
 
     if (!watiResult.result) {
-      console.error('Failed to send WhatsApp OTP:', watiResult.error)
+      const watiError = watiResult.error || 'unknown'
+      console.error('Failed to send WhatsApp OTP:', { phone: normalizedPhone, error: watiError })
+
+      // Surface config issues clearly
+      if (watiError === 'WATI not configured') {
+        return NextResponse.json(
+          { error: 'WhatsApp no está configurado en el servidor. Contacta al administrador.' },
+          { status: 500 }
+        )
+      }
+
       return NextResponse.json(
-        { error: 'Error al enviar código por WhatsApp. Verifica el número e intenta de nuevo.' },
+        { error: `Error al enviar código por WhatsApp: ${watiError}` },
         { status: 500 }
       )
     }
