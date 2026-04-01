@@ -300,8 +300,10 @@ export async function POST(request: NextRequest) {
     let whatsappSent = false
     if (isWatiConfigured() && clientPhone && clientName && finalTherapistName) {
       try {
-        // Format date for WhatsApp template (dd/mm/yyyy and h:mma)
-        const bookingDate = new Date(startDateTime)
+        // Format date for WhatsApp template (dd/mm/yyyy and h:mm a.m./p.m.)
+        // startDateTime has no timezone offset — treat it as Panama local time (-05:00)
+        const hasOffset = /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
+        const bookingDate = new Date(hasOffset ? startDateTime : `${startDateTime}-05:00`)
         const dateStr = bookingDate.toLocaleDateString('es-PA', {
           timeZone: 'America/Panama',
           day: '2-digit', month: '2-digit', year: 'numeric',

@@ -50,7 +50,9 @@ export async function GET(request: NextRequest) {
       continue
     }
 
-    const appointmentDate = new Date(booking.appointment_start)
+    const raw = booking.appointment_start as string
+    const hasOffset = /[Z]$/.test(raw) || /[+-]\d{2}:\d{2}$/.test(raw)
+    const appointmentDate = new Date(hasOffset ? raw : `${raw}-05:00`)
     const dateStr = appointmentDate.toLocaleDateString('es-PA', {
       timeZone: 'America/Panama',
       day: '2-digit', month: '2-digit', year: 'numeric',
