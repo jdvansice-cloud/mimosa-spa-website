@@ -209,18 +209,24 @@ function PortalLoginContent() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Error al enviar código')
 
-      // Also send email OTP as backup if client has an email
+      // Check if dual-channel is enabled in settings, then send email OTP as backup
       let emailSent = false
       if (selectedClient.email) {
         try {
-          const supabase = getSupabase()
-          await supabase.auth.signInWithOtp({
-            email: selectedClient.email,
-            options: { data: { mindbody_client_id: selectedClient.clientId } },
-          })
-          emailSent = true
+          const settingsRes = await fetch('/api/admin/settings')
+          const settingsData = settingsRes.ok ? await settingsRes.json() : {}
+          const dualEnabled = settingsData?.data?.whatsapp_dual_channel !== false
+
+          if (dualEnabled) {
+            const supabase = getSupabase()
+            await supabase.auth.signInWithOtp({
+              email: selectedClient.email,
+              options: { data: { mindbody_client_id: selectedClient.clientId } },
+            })
+            emailSent = true
+          }
         } catch {
-          // Email send failure is non-fatal — WhatsApp is the primary channel
+          // Non-fatal — WhatsApp is the primary channel
         }
       }
 

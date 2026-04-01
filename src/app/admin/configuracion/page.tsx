@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Globe, Phone, Clock, MessageCircle, Loader2 } from 'lucide-react'
+import { Save, Globe, Phone, Clock, MessageCircle, Mail, Bell, Check, Loader2 } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 
 interface SiteSettings {
@@ -16,6 +16,7 @@ interface SiteSettings {
   weekend_close: string
   instagram_url: string
   facebook_url: string
+  whatsapp_dual_channel: boolean
 }
 
 const defaultSettings: SiteSettings = {
@@ -30,6 +31,7 @@ const defaultSettings: SiteSettings = {
   weekend_close: '18:00',
   instagram_url: 'https://instagram.com/mimosasparetreat',
   facebook_url: 'https://facebook.com/mimosasparetreat',
+  whatsapp_dual_channel: true,
 }
 
 export default function AdminConfigPage() {
@@ -265,6 +267,137 @@ export default function AdminConfigPage() {
                 value={settings.facebook_url}
                 onChange={(e) => handleChange('facebook_url', e.target.value)}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Communication Channels */}
+        <Card variant="default" padding="md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-gold" />
+              Canales de Comunicación
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-warm-gray mb-6">
+              Configura cómo se envían los códigos de verificación y notificaciones a los clientes.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Email Channel */}
+              <div className="border-2 border-beige-200 rounded-xl p-5 bg-white">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-gold" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-dark">Correo Electrónico</h3>
+                    <span className="text-xs text-warm-gray">Siempre activo</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+                    <span>Código de verificación por correo (6 dígitos)</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+                    <span>Solo se usa cuando el cliente elige este canal</span>
+                  </div>
+                </div>
+
+                <div className="rounded-lg bg-gold/5 border border-gold/20 p-3">
+                  <p className="text-xs text-warm-gray">
+                    Sin opciones adicionales. El cliente recibe únicamente el código por correo.
+                  </p>
+                </div>
+              </div>
+
+              {/* WhatsApp Channel */}
+              <div className={`border-2 rounded-xl p-5 bg-white transition-colors ${
+                settings.whatsapp_dual_channel ? 'border-green-400' : 'border-beige-200'
+              }`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
+                    <MessageCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-dark">WhatsApp</h3>
+                    <span className="text-xs text-warm-gray">Canal principal</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                    <span>Código de verificación por WhatsApp (6 dígitos)</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                    <span>Confirmación de cita al reservar</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                    <span>Recordatorio 24 horas antes</span>
+                  </div>
+                </div>
+
+                {/* Dual channel toggle */}
+                <div className={`rounded-lg border p-3 transition-colors ${
+                  settings.whatsapp_dual_channel
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-dark">También enviar por correo</p>
+                      <p className="text-xs text-warm-gray mt-0.5">
+                        {settings.whatsapp_dual_channel
+                          ? 'El código llega por WhatsApp y por correo como respaldo'
+                          : 'El código llega únicamente por WhatsApp'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSettings(prev => ({ ...prev, whatsapp_dual_channel: !prev.whatsapp_dual_channel }))
+                        setSaveStatus('idle')
+                      }}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent
+                        transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                        settings.whatsapp_dual_channel ? 'bg-green-500' : 'bg-gray-300'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow
+                          transform transition duration-200 ${
+                          settings.whatsapp_dual_channel ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="mt-4 p-4 bg-beige-50 rounded-xl border border-beige-200">
+              <p className="text-xs font-medium text-dark mb-2">Comportamiento actual:</p>
+              <div className="space-y-1">
+                <p className="text-xs text-warm-gray">
+                  <span className="font-medium text-dark">Cliente elige correo →</span>{' '}
+                  Recibe solo el código por correo electrónico
+                </p>
+                <p className="text-xs text-warm-gray">
+                  <span className="font-medium text-dark">Cliente elige WhatsApp →</span>{' '}
+                  {settings.whatsapp_dual_channel
+                    ? 'Recibe el código por WhatsApp y también por correo como respaldo'
+                    : 'Recibe el código únicamente por WhatsApp'}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

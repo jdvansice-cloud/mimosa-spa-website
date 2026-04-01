@@ -17,6 +17,7 @@ export interface SiteSettings {
   weekend_close: string
   instagram_url: string
   facebook_url: string
+  whatsapp_dual_channel: boolean
   updated_at?: string
 }
 
@@ -51,6 +52,7 @@ export async function GET() {
           weekend_close: '18:00',
           instagram_url: 'https://instagram.com/mimosasparetreat',
           facebook_url: 'https://facebook.com/mimosasparetreat',
+          whatsapp_dual_channel: true,
         }
       })
     }
@@ -98,6 +100,7 @@ export async function PUT(request: NextRequest) {
       weekend_close: body.weekend_close,
       instagram_url: body.instagram_url,
       facebook_url: body.facebook_url,
+      whatsapp_dual_channel: body.whatsapp_dual_channel ?? true,
       updated_at: new Date().toISOString(),
     }
 
