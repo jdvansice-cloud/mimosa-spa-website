@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import createIntlMiddleware from 'next-intl/middleware'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { routing } from './i18n/routing'
 import { updateSession } from './lib/supabase/middleware'
 
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
       {
         cookies: {
           getAll: () => request.cookies.getAll(),
-          setAll: (cookiesToSet) => {
+          setAll: (cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) => {
             cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
             response = NextResponse.next({ request })
             cookiesToSet.forEach(({ name, value, options }) =>
@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
+      .single() as { data: { role: string } | null; error: unknown }
 
     if (!profile || profile.role !== 'admin') {
       return NextResponse.redirect(new URL('/admin/login', request.url))
