@@ -1143,7 +1143,25 @@ export async function addAppointment(appointmentData: {
   return response.Appointment
 }
 
-// Cancel/remove an appointment from Mindbody
+// Confirm an appointment in Mindbody
+export async function confirmAppointment(appointmentId: number): Promise<boolean> {
+  try {
+    console.log(`Confirming appointment ${appointmentId}...`)
+    await mindbodyRequest('/appointment/updateappointment', {
+      method: 'POST',
+      body: {
+        AppointmentId: appointmentId,
+        Execute: 'Confirm',
+      }
+    })
+    console.log(`Successfully confirmed appointment ${appointmentId}`)
+    return true
+  } catch (error) {
+    console.error(`Failed to confirm appointment ${appointmentId}:`, error)
+    return false
+  }
+}
+
 export async function removeAppointment(appointmentId: number): Promise<boolean> {
   try {
     console.log(`Cancelling appointment ${appointmentId}...`)
