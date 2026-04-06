@@ -9,10 +9,12 @@ interface AuthState {
   isLoading: boolean
   isInitialized: boolean
   error: string | null
+  otpEmail: string | null // email waiting for OTP verification
 
   // Actions
   initialize: () => Promise<void>
-  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  sendOtp: (email: string) => Promise<{ success: boolean; error?: string }>
+  verifyOtp: (email: string, token: string) => Promise<{ success: boolean; error?: string }>
   signOut: () => Promise<void>
   clearError: () => void
 }
@@ -35,6 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   isInitialized: false,
   error: null,
+  otpEmail: null,
 
   initialize: async () => {
     if (get().isInitialized) return
@@ -72,32 +75,56 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  signIn: async (email: string, password: string) => {
+  sendOtp: async (email: string) => {
     set({ isLoading: true, error: null })
-
     try {
       const supabase = getSupabase()
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
+        options: { shouldCreateUser: false }, // only allow existing users
+      })
+      if (error) {
+        set({ error: 'No se pudo enviar el código. Verifica que el correo esté registrado.', isLoading: false })
+        return { success: false, error: error.message }
+      }
+      set({ otpEmail: email, isLoading: false })
+      return { success: true }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error desconocido'
+      set({ error: message, isLoading: false })
+      return { success: false, error: message }
+    }
+  },
+
+  verifyOtp: async (email: string, token: string) => {
+    set({ isLoading: true, error: null })
+    try {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
       })
 
       if (error) {
-        set({
-          error: error.message === 'Invalid login credentials'
-            ? 'Credenciales inválidas. Verifica tu correo y contraseña.'
-            : error.message,
-          isLoading: false
-        })
+        set({ error: 'Código incorrecto o expirado.', isLoading: false })
         return { success: false, error: error.message }
       }
 
-      set({
-        user: data.user,
-        session: data.session,
-        isLoading: false,
-      })
+      // Check admin role in profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user!.id)
+        .single()
 
+      if (!profile || profile.role !== 'admin') {
+        await supabase.auth.signOut()
+        set({ error: 'No tienes permisos de administrador.', isLoading: false, user: null, session: null })
+        return { success: false, error: 'Not admin' }
+      }
+
+      set({ user: data.user, session: data.session, isLoading: false, otpEmail: null })
       return { success: true }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error desconocido'

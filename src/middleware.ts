@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import createIntlMiddleware from 'next-intl/middleware'
+import { createServerClient } from '@supabase/ssr'
 import { routing } from './i18n/routing'
 import { updateSession } from './lib/supabase/middleware'
 
@@ -9,19 +10,57 @@ const intlMiddleware = createIntlMiddleware(routing)
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip middleware for API routes, static files, and admin routes
+  // Skip middleware for API routes and static files
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/_vercel') ||
-    pathname.startsWith('/admin') ||
     pathname.includes('.')
   ) {
-    // Still refresh Supabase session for API routes that need auth
     if (pathname.startsWith('/api/portal')) {
       return await updateSession(request)
     }
     return NextResponse.next()
+  }
+
+  // Protect admin routes: require a valid session with role=admin
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+    let response = NextResponse.next({ request })
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => request.cookies.getAll(),
+          setAll: (cookiesToSet) => {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+            response = NextResponse.next({ request })
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
+
+    return response
   }
 
   // First, refresh Supabase session (this is critical for keeping users logged in)
