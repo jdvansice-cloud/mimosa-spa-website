@@ -23,8 +23,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Admin login page: pass through without locale prefix or role check
+  if (pathname === '/admin/login') {
+    return NextResponse.next()
+  }
+
   // Protect admin routes: require a valid session with role=admin
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+  if (pathname.startsWith('/admin')) {
     let response = NextResponse.next({ request })
 
     const supabase = createServerClient(
