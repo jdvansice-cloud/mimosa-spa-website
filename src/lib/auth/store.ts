@@ -116,7 +116,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .from('profiles')
         .select('role')
         .eq('id', data.user!.id)
-        .single()
+        .single() as { data: { role: string } | null; error: unknown }
 
       if (!profile || profile.role !== 'admin') {
         await supabase.auth.signOut()
