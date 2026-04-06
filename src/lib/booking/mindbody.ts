@@ -1201,6 +1201,19 @@ export async function addMultipleAppointments(appointments: Array<{
       console.log('StartDateTime:', appointment.StartDateTime)
       const result = await addAppointment(appointment)
       createdAppointments.push({ id: result.Id, appointment: result })
+
+      // Use Mindbody's actual EndDateTime for the next appointment's start time.
+      // This prevents overlap when Mindbody's stored duration differs from the
+      // frontend value (e.g. service shows 35 min but Mindbody books it as 40 min).
+      if (i + 1 < appointments.length && result.EndDateTime) {
+        const actualEnd = new Date(
+          /[Z]$/.test(result.EndDateTime) || /[+-]\d{2}:\d{2}$/.test(result.EndDateTime)
+            ? result.EndDateTime
+            : `${result.EndDateTime}-05:00`
+        )
+        console.log(`Mindbody EndDateTime for appt ${i + 1}: ${result.EndDateTime} → next start: ${actualEnd.toISOString()}`)
+        appointments[i + 1] = { ...appointments[i + 1], StartDateTime: actualEnd.toISOString() }
+      }
     } catch (error) {
       console.error(`=== Appointment ${i + 1} FAILED ===`)
       console.error('SessionTypeId:', appointment.SessionTypeId)
