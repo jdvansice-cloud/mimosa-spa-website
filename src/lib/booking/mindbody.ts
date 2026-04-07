@@ -1226,14 +1226,11 @@ export async function addMultipleAppointments(appointments: Array<{
       // Use Mindbody's actual EndDateTime for the next appointment's start time.
       // This prevents overlap when Mindbody's stored duration differs from the
       // frontend value (e.g. service shows 35 min but Mindbody books it as 40 min).
+      // Mindbody returns EndDateTime without a timezone offset and expects StartDateTime
+      // in the same local-time format — pass it through as-is, no UTC conversion.
       if (i + 1 < appointments.length && result.EndDateTime) {
-        const actualEnd = new Date(
-          /[Z]$/.test(result.EndDateTime) || /[+-]\d{2}:\d{2}$/.test(result.EndDateTime)
-            ? result.EndDateTime
-            : `${result.EndDateTime}-05:00`
-        )
-        console.log(`Mindbody EndDateTime for appt ${i + 1}: ${result.EndDateTime} → next start: ${actualEnd.toISOString()}`)
-        appointments[i + 1] = { ...appointments[i + 1], StartDateTime: actualEnd.toISOString() }
+        console.log(`Mindbody EndDateTime for appt ${i + 1}: ${result.EndDateTime} → using as next start`)
+        appointments[i + 1] = { ...appointments[i + 1], StartDateTime: result.EndDateTime }
       }
     } catch (error) {
       console.error(`=== Appointment ${i + 1} FAILED ===`)
