@@ -34,45 +34,66 @@ let tokenExpiry: number | null = null
 async function getAccessToken(): Promise<string> {
   // Validate config first
   validateConfig()
-  
+
   // Check if we have a valid cached token
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken
   }
-  
-  // Request new token
-  const response = await fetch(`${MINDBODY_API_URL}/usertoken/issue`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Api-Key': MINDBODY_API_KEY!,
-      'SiteId': MINDBODY_SITE_ID!,
-    },
-    body: JSON.stringify({
-      Username: MINDBODY_USERNAME,
-      Password: MINDBODY_PASSWORD,
-    }),
-  })
-  
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('Mindbody token error:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-      apiKeyPrefix: MINDBODY_API_KEY?.substring(0, 8),
-      siteId: MINDBODY_SITE_ID,
-    })
-    throw new Error(`Failed to get Mindbody token: ${response.status} - ${errorText}`)
+
+  // Request new token with up to 3 attempts for transient 5xx/timeout errors
+  const maxAttempts = 3
+  let lastError: Error | null = null
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = await fetch(`${MINDBODY_API_URL}/usertoken/issue`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': MINDBODY_API_KEY!,
+          'SiteId': MINDBODY_SITE_ID!,
+        },
+        body: JSON.stringify({
+          Username: MINDBODY_USERNAME,
+          Password: MINDBODY_PASSWORD,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        // Only retry on server-side errors (5xx); fail immediately on 4xx
+        if (response.status >= 500 && attempt < maxAttempts) {
+          console.warn(`Mindbody token attempt ${attempt} failed (${response.status}), retrying...`)
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000))
+          continue
+        }
+        console.error('Mindbody token error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+          apiKeyPrefix: MINDBODY_API_KEY?.substring(0, 8),
+          siteId: MINDBODY_SITE_ID,
+        })
+        throw new Error(`Failed to get Mindbody token: ${response.status} - ${errorText}`)
+      }
+
+      const data: MindbodyTokenResponse = await response.json()
+
+      // Cache token (expires in 1 hour, refresh at 50 minutes)
+      cachedToken = data.AccessToken
+      tokenExpiry = Date.now() + (50 * 60 * 1000)
+
+      return cachedToken
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      if (attempt < maxAttempts) {
+        console.warn(`Mindbody token attempt ${attempt} threw, retrying...`, lastError.message)
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000))
+      }
+    }
   }
-  
-  const data: MindbodyTokenResponse = await response.json()
-  
-  // Cache token (expires in 1 hour, refresh at 50 minutes)
-  cachedToken = data.AccessToken
-  tokenExpiry = Date.now() + (50 * 60 * 1000) // 50 minutes
-  
-  return cachedToken
+
+  throw lastError ?? new Error('Failed to get Mindbody token after retries')
 }
 
 // Export token getter for test/debug endpoints
