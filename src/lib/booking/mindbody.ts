@@ -1261,6 +1261,25 @@ export async function addMultipleAppointments(appointments: Array<{
   }
 }
 
+// Fetch appointment statuses from Mindbody by appointment IDs
+// Used by the sync cron to update Supabase with completed/cancelled/noshow statuses
+export async function getAppointmentStatuses(
+  appointmentIds: number[]
+): Promise<Array<{ id: number; status: string }>> {
+  if (appointmentIds.length === 0) return []
+
+  interface AppointmentsResponse {
+    Appointments: Array<{ Id: number; Status: string }>
+  }
+
+  const params = appointmentIds.map(id => `AppointmentIds=${id}`).join('&')
+  const response = await mindbodyRequest<AppointmentsResponse>(
+    `/appointment/appointments?${params}&limit=200`
+  )
+
+  return (response.Appointments || []).map(a => ({ id: a.Id, status: a.Status }))
+}
+
 // CLIENT HISTORY & PORTAL FUNCTIONS
 // ============================================
 
