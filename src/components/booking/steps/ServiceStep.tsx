@@ -10,11 +10,18 @@ import type { Promotion } from '@/types'
 // Description Modal Component
 function DescriptionModal({
   service,
-  onClose
+  onClose,
+  discountPercent = 0,
+  showDiscount = false,
 }: {
   service: MindbodyService
   onClose: () => void
+  discountPercent?: number
+  showDiscount?: boolean
 }) {
+  const discountedPrice = showDiscount && discountPercent > 0
+    ? Math.round(service.Price * (1 - discountPercent / 100) * 100) / 100
+    : null
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
@@ -40,9 +47,18 @@ function DescriptionModal({
                 {service.Name}
               </h3>
               <div className="flex items-center gap-3 mt-1">
-                <span className="text-gold-600 font-bold">
-                  {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
-                </span>
+                {service.Price > 0 ? (
+                  discountedPrice !== null ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-sm line-through text-warm-gray">${service.Price.toFixed(0)}</span>
+                      <span className="font-bold text-green-600">${discountedPrice.toFixed(0)}</span>
+                    </span>
+                  ) : (
+                    <span className="text-gold-600 font-bold">${service.Price.toFixed(0)}</span>
+                  )
+                ) : (
+                  <span className="text-gold-600 font-bold">Consultar</span>
+                )}
                 {service.Duration > 0 && (
                   <span className="flex items-center gap-1 text-xs text-warm-gray bg-white/80 px-2 py-0.5 rounded-full">
                     <Clock className="w-3 h-3" />
@@ -241,13 +257,21 @@ function ServiceTile({
   service,
   isSelected,
   onToggle,
-  onShowDescription
+  onShowDescription,
+  discountPercent = 0,
+  showDiscount = false,
 }: {
   service: MindbodyService
   isSelected: boolean
   onToggle: () => void
   onShowDescription: () => void
+  discountPercent?: number
+  showDiscount?: boolean
 }) {
+  const discountedPrice = showDiscount && discountPercent > 0
+    ? Math.round(service.Price * (1 - discountPercent / 100) * 100) / 100
+    : null
+
   return (
     <div
       className={`
@@ -283,12 +307,22 @@ function ServiceTile({
 
         {/* Price & Duration Row */}
         <div className="flex items-center gap-2">
-          <span className={`
-            text-lg font-bold
-            ${isSelected ? 'text-gold-600' : 'text-dark'}
-          `}>
-            {service.Price > 0 ? `$${service.Price.toFixed(0)}` : 'Consultar'}
-          </span>
+          {service.Price > 0 ? (
+            discountedPrice !== null ? (
+              <span className="flex items-center gap-1.5">
+                <span className="text-sm line-through text-warm-gray">${service.Price.toFixed(0)}</span>
+                <span className="text-lg font-bold text-green-600">${discountedPrice.toFixed(0)}</span>
+              </span>
+            ) : (
+              <span className={`text-lg font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`}>
+                ${service.Price.toFixed(0)}
+              </span>
+            )
+          ) : (
+            <span className={`text-lg font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`}>
+              Consultar
+            </span>
+          )}
           {service.Duration > 0 && (
             <span className="flex items-center gap-1 text-xs text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full">
               <Clock className="w-3 h-3" />
@@ -326,7 +360,12 @@ export function ServiceStep() {
     loadPromotion,
     clearPromotion,
     setStep,
+    globalDiscountPercent,
+    globalDiscountActive,
   } = useBookingStore()
+
+  // Global discount applies only when no promotion is active
+  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0 && !activePromotion
 
   const hasServices = useBookingStore(selectHasServices)
   const [groupedServices, setGroupedServices] = useState<Record<string, MindbodyService[]>>({})
@@ -513,6 +552,17 @@ export function ServiceStep() {
           Explora las categorías y agrega servicios a tu carrito
         </p>
       </div>
+
+      {/* Global Discount Banner */}
+      {showGlobalDiscount && (
+        <div className="mb-4 flex items-center gap-2.5 px-3 py-2.5 bg-green-50 border border-green-200 rounded-xl">
+          <Tag className="w-4 h-4 text-green-600 flex-shrink-0" />
+          <p className="text-sm text-green-700">
+            <span className="font-semibold">{globalDiscountPercent}% de descuento</span>
+            {' '}en todas las reservas online
+          </p>
+        </div>
+      )}
       
       {/* Loading State */}
       {isLoadingServices && (
@@ -643,6 +693,8 @@ export function ServiceStep() {
                         isSelected={isServiceSelected(service.Id)}
                         onToggle={() => handleToggleService(service)}
                         onShowDescription={() => setDescriptionService(service)}
+                        discountPercent={globalDiscountPercent}
+                        showDiscount={showGlobalDiscount}
                       />
                     ))}
                   </div>
@@ -732,6 +784,8 @@ export function ServiceStep() {
                               isSelected={isServiceSelected(service.Id)}
                               onToggle={() => handleToggleService(service)}
                               onShowDescription={() => setDescriptionService(service)}
+                              discountPercent={globalDiscountPercent}
+                              showDiscount={showGlobalDiscount}
                             />
                           ))}
                         </div>
@@ -760,6 +814,8 @@ export function ServiceStep() {
           <DescriptionModal
             service={descriptionService}
             onClose={() => setDescriptionService(null)}
+            discountPercent={globalDiscountPercent}
+            showDiscount={showGlobalDiscount}
           />
         )}
       </AnimatePresence>

@@ -23,7 +23,12 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
     removeService,
     removeAddon,
     closeCart,
+    globalDiscountPercent,
+    globalDiscountActive,
   } = useBookingStore()
+
+  // Global discount applies only when no promotion is active
+  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0 && !activePromotion
 
   // Separate promotion services from extra regular services
   const { promotionServices, regularServices } = useMemo(() => {
@@ -236,9 +241,16 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-dark">
-                      ${service.Price.toFixed(2)}
-                    </span>
+                    {showGlobalDiscount && service.Price > 0 ? (
+                      <span className="flex flex-col items-end">
+                        <span className="text-xs line-through text-warm-gray leading-tight">${service.Price.toFixed(2)}</span>
+                        <span className="text-sm font-medium text-green-600 leading-tight">${(Math.round(service.Price * (1 - globalDiscountPercent / 100) * 100) / 100).toFixed(2)}</span>
+                      </span>
+                    ) : (
+                      <span className="text-sm font-medium text-dark">
+                        ${service.Price.toFixed(2)}
+                      </span>
+                    )}
                     {showRemoveButtons && (
                       <button
                         onClick={() => removeService(service.Id)}
@@ -273,9 +285,16 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-dark">
-                      ${addon.Price.toFixed(2)}
-                    </span>
+                    {showGlobalDiscount && addon.Price > 0 ? (
+                      <span className="flex flex-col items-end">
+                        <span className="text-xs line-through text-warm-gray leading-tight">${addon.Price.toFixed(2)}</span>
+                        <span className="text-sm font-medium text-green-600 leading-tight">${(Math.round(addon.Price * (1 - globalDiscountPercent / 100) * 100) / 100).toFixed(2)}</span>
+                      </span>
+                    ) : (
+                      <span className="text-sm font-medium text-dark">
+                        ${addon.Price.toFixed(2)}
+                      </span>
+                    )}
                     {showRemoveButtons && (
                       <button
                         onClick={() => removeAddon(addon.Id)}

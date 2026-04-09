@@ -17,7 +17,12 @@ export function FloatingCart() {
     activePromotion,
     isCartOpen,
     closeCart,
+    globalDiscountPercent,
+    globalDiscountActive,
   } = useBookingStore()
+
+  // Global discount applies only when no promotion is active
+  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0 && !activePromotion
 
   // Collapsible section states
   const [isPromoExpanded, setIsPromoExpanded] = useState(false)
@@ -270,9 +275,16 @@ export function FloatingCart() {
                                     )}
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-sm font-semibold text-dark whitespace-nowrap">
-                                      ${service.Price.toFixed(0)}
-                                    </span>
+                                    {showGlobalDiscount && service.Price > 0 ? (
+                                      <span className="flex flex-col items-end">
+                                        <span className="text-xs line-through text-warm-gray leading-tight">${service.Price.toFixed(0)}</span>
+                                        <span className="text-sm font-semibold text-green-600 leading-tight">${(Math.round(service.Price * (1 - globalDiscountPercent / 100) * 100) / 100).toFixed(0)}</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm font-semibold text-dark whitespace-nowrap">
+                                        ${service.Price.toFixed(0)}
+                                      </span>
+                                    )}
                                     <button
                                       onClick={() => removeService(service.Id)}
                                       className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50
@@ -310,9 +322,16 @@ export function FloatingCart() {
                                     </p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-sm font-semibold text-dark whitespace-nowrap">
-                                      ${addon.Price.toFixed(0)}
-                                    </span>
+                                    {showGlobalDiscount && addon.Price > 0 ? (
+                                      <span className="flex flex-col items-end">
+                                        <span className="text-xs line-through text-warm-gray leading-tight">${addon.Price.toFixed(0)}</span>
+                                        <span className="text-sm font-semibold text-green-600 leading-tight">${(Math.round(addon.Price * (1 - globalDiscountPercent / 100) * 100) / 100).toFixed(0)}</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm font-semibold text-dark whitespace-nowrap">
+                                        ${addon.Price.toFixed(0)}
+                                      </span>
+                                    )}
                                     <button
                                       onClick={() => removeAddon(addon.Id)}
                                       className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50

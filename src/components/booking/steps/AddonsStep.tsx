@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Loader2, Clock, Check, Sparkles } from 'lucide-react'
+import { Plus, Loader2, Clock, Check, Sparkles, Tag } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
@@ -10,12 +10,20 @@ import type { MindbodyService } from '@/types/booking'
 function AddonTile({
   addon,
   isSelected,
-  onToggle
+  onToggle,
+  discountPercent = 0,
+  showDiscount = false,
 }: {
   addon: MindbodyService
   isSelected: boolean
   onToggle: () => void
+  discountPercent?: number
+  showDiscount?: boolean
 }) {
+  const discountedPrice = showDiscount && discountPercent > 0
+    ? Math.round(addon.Price * (1 - discountPercent / 100) * 100) / 100
+    : null
+
   return (
     <motion.button
       type="button"
@@ -47,12 +55,22 @@ function AddonTile({
 
         {/* Price & Duration Row */}
         <div className="flex items-center gap-2">
-          <span className={`
-            text-lg font-bold
-            ${isSelected ? 'text-gold-600' : 'text-dark'}
-          `}>
-            {addon.Price > 0 ? `+$${addon.Price.toFixed(0)}` : 'Consultar'}
-          </span>
+          {addon.Price > 0 ? (
+            discountedPrice !== null ? (
+              <span className="flex items-center gap-1.5">
+                <span className="text-sm line-through text-warm-gray">+${addon.Price.toFixed(0)}</span>
+                <span className="text-lg font-bold text-green-600">+${discountedPrice.toFixed(0)}</span>
+              </span>
+            ) : (
+              <span className={`text-lg font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`}>
+                +${addon.Price.toFixed(0)}
+              </span>
+            )
+          ) : (
+            <span className={`text-lg font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`}>
+              Consultar
+            </span>
+          )}
           {addon.Duration > 0 && (
             <span className="flex items-center gap-1 text-xs text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full">
               <Clock className="w-3 h-3" />
@@ -74,7 +92,13 @@ export function AddonsStep() {
     addAddon,
     removeAddon,
     nextStep,
+    activePromotion,
+    globalDiscountPercent,
+    globalDiscountActive,
   } = useBookingStore()
+
+  // Global discount applies only when no promotion is active
+  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0 && !activePromotion
 
   const [localAddons, setLocalAddons] = useState<MindbodyService[]>([])
   const [isLoadingAddons, setIsLoadingAddons] = useState(false)
@@ -145,6 +169,17 @@ export function AddonsStep() {
           Mejora tu experiencia con servicios adicionales
         </p>
       </div>
+
+      {/* Global Discount Banner */}
+      {showGlobalDiscount && (
+        <div className="mb-4 flex items-center gap-2.5 px-3 py-2.5 bg-green-50 border border-green-200 rounded-xl">
+          <Tag className="w-4 h-4 text-green-600 flex-shrink-0" />
+          <p className="text-sm text-green-700">
+            <span className="font-semibold">{globalDiscountPercent}% de descuento</span>
+            {' '}en todas las reservas online
+          </p>
+        </div>
+      )}
       
       {/* Loading State */}
       {isLoadingAddons && (
@@ -184,6 +219,8 @@ export function AddonsStep() {
               addon={addon}
               isSelected={isAddonSelected(addon.Id)}
               onToggle={() => handleToggleAddon(addon)}
+              discountPercent={globalDiscountPercent}
+              showDiscount={showGlobalDiscount}
             />
           ))}
         </div>
