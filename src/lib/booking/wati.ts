@@ -3,8 +3,9 @@
 // Server-side only - handles WhatsApp notifications
 // ===========================================
 
+// v1 API uses the full URL including account ID (e.g. https://live-mt-server.wati.io/1036696)
 const WATI_API_URL = process.env.WATI_API_URL || 'https://live-mt-server.wati.io'
-const WATI_ACCESS_TOKEN = process.env.WATI_ACCESS_TOKEN
+const WATI_ACCESS_TOKEN = process.env.WATI_ACCESS_TOKEN || process.env.WATI_API_KEY
 
 // ===========================================
 // TYPES
@@ -18,13 +19,13 @@ interface WatiResponse {
 
 interface BookingConfirmationData {
   clientName: string
-  clientPhone: string // Format: 507XXXXXXXX (no + sign)
+  clientPhone: string
   locationName: string
   date: string // "Lunes, 15 de Enero 2026"
   time: string // "10:00 AM"
   services: string[] // Array of service names
   totalDuration: number // minutes
-  therapistName: string // Always required
+  therapistName: string
 }
 
 interface ReminderData {
@@ -33,7 +34,7 @@ interface ReminderData {
   locationName: string
   date: string
   time: string
-  appointmentId: string // Mindbody appointment ID for confirm/cancel URLs
+  appointmentId: string
 }
 
 // ===========================================
@@ -41,36 +42,43 @@ interface ReminderData {
 // ===========================================
 
 function formatPhoneForWati(phone: string): string {
-  // Remove all non-numeric characters
   let cleaned = phone.replace(/\D/g, '')
-  
-  // Remove leading + if present in original
-  // WATI expects format without + sign
-  
-  // If starts with 507 (Panama), keep as is
-  // If doesn't start with country code, add 507
+
+  // Add Panama country code if missing
   if (!cleaned.startsWith('507') && cleaned.length === 8) {
     cleaned = '507' + cleaned
   }
-  
+
   return cleaned
 }
 
 // ===========================================
 // API REQUEST HELPER
+// POST /api/v1/sendTemplateMessage?whatsappNumber=PHONE
 // ===========================================
 
-async function watiRequest(
-  endpoint: string,
-  body: Record<string, unknown>
+async function sendTemplate(
+  phone: string,
+  templateName: string,
+  parameters: Array<{ name: string; value: string }>
 ): Promise<WatiResponse> {
   if (!WATI_ACCESS_TOKEN) {
     console.warn('WATI_ACCESS_TOKEN not configured')
     return { result: false, error: 'WATI not configured' }
   }
-  
+
+  const formattedPhone = formatPhoneForWati(phone)
+  const url = `${WATI_API_URL}/api/v1/sendTemplateMessage?whatsappNumber=${formattedPhone}`
+  const body = {
+    template_name: templateName,
+    broadcast_name: templateName,
+    parameters,
+  }
+
   try {
-    const response = await fetch(`${WATI_API_URL}${endpoint}`, {
+    console.log('WATI request:', url, JSON.stringify(body))
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${WATI_ACCESS_TOKEN}`,
@@ -78,13 +86,13 @@ async function watiRequest(
       },
       body: JSON.stringify(body),
     })
-    
+
     if (!response.ok) {
       const errorText = await response.text()
       console.error(`WATI API error: ${response.status}`, errorText)
-      return { result: false, error: `HTTP ${response.status}` }
+      return { result: false, error: `HTTP ${response.status}: ${errorText}` }
     }
-    
+
     return await response.json()
   } catch (error) {
     console.error('WATI API request failed:', error)
@@ -93,7 +101,7 @@ async function watiRequest(
 }
 
 // ===========================================
-// SEND TEMPLATE MESSAGE
+// SEND TEMPLATE MESSAGE (generic)
 // ===========================================
 
 export async function sendTemplateMessage(
@@ -101,102 +109,88 @@ export async function sendTemplateMessage(
   templateName: string,
   parameters: Array<{ name: string; value: string }>
 ): Promise<WatiResponse> {
-  const formattedPhone = formatPhoneForWati(phone)
-  
-  return watiRequest('/api/v1/sendTemplateMessage', {
-    whatsappNumber: formattedPhone,
-    templateName,
-    parameters,
-  })
+  return sendTemplate(phone, templateName, parameters)
 }
 
-// ===========================================
-// SEND SESSION MESSAGE (for active conversations)
-// ===========================================
-
-export async function sendSessionMessage(
-  phone: string,
-  message: string
-): Promise<WatiResponse> {
-  const formattedPhone = formatPhoneForWati(phone)
-  
-  return watiRequest('/api/v1/sendSessionMessage/' + formattedPhone, {
-    messageText: message,
-  })
+// Template: "Mimosa {{2}}" — strip the "Mimosa " prefix from location names
+function stripMimosaPrefix(locationName: string): string {
+  return locationName.replace(/^Mimosa\s+/i, '').trim() || locationName
 }
 
 // ===========================================
 // BOOKING CONFIRMATION NOTIFICATION
+// Template: confirmacion_cita
+// {{1}} nombre, {{2}} ubicacion, {{3}} fecha, {{4}} hora,
+// {{5}} duracion, {{6}} terapeuta, {{7}} servicios
 // ===========================================
 
 export async function sendBookingConfirmation(
   data: BookingConfirmationData
 ): Promise<WatiResponse> {
-  const formattedPhone = formatPhoneForWati(data.clientPhone)
-  
-  // Build services list as comma-separated single line
-  const servicesList = data.services.join(', ')
-  
-  // Template parameters for booking confirmation
-  // Note: Template must be pre-approved in WATI dashboard
-  // Template name: confirmacion_reserva
-  const parameters = [
-    { name: 'nombre_cliente', value: data.clientName },
-    { name: 'ubicacion', value: data.locationName },
-    { name: 'fecha', value: data.date },
-    { name: 'hora', value: data.time },
-    { name: 'duracion', value: `${data.totalDuration} minutos` },
-    { name: 'terapeuta', value: data.therapistName },
-    { name: 'servicios', value: servicesList },
-  ]
-  
-  return watiRequest('/api/v1/sendTemplateMessage', {
-    whatsappNumber: formattedPhone,
-    templateName: 'confirmacion_reserva',
-    parameters,
-  })
+  return sendTemplate(data.clientPhone, 'confirmacion_cita', [
+    { name: '1', value: data.clientName },
+    { name: '2', value: stripMimosaPrefix(data.locationName) },
+    { name: '3', value: data.date },
+    { name: '4', value: data.time },
+    { name: '5', value: `${data.totalDuration} min` },
+    { name: '6', value: data.therapistName },
+    { name: '7', value: data.services.join(', ') },
+  ])
 }
 
 // ===========================================
 // BOOKING REMINDER NOTIFICATION (24h before)
+// Template: recordatorio_cita
+// {{1}} nombre, {{2}} ubicacion, {{3}} fecha, {{4}} hora
+// URL buttons use appointmentId
 // ===========================================
 
 export async function sendBookingReminder(
   data: ReminderData
 ): Promise<WatiResponse> {
-  const formattedPhone = formatPhoneForWati(data.clientPhone)
-  
-  // Parameters for the template body
-  const parameters = [
-    { name: 'nombre_cliente', value: data.clientName },
-    { name: 'ubicacion', value: data.locationName },
-    { name: 'fecha', value: data.date },
-    { name: 'hora', value: data.time },
-    { name: 'id_cita', value: data.appointmentId }, // Used in URL buttons
-  ]
-  
-  return watiRequest('/api/v1/sendTemplateMessage', {
-    whatsappNumber: formattedPhone,
-    templateName: 'recordatorio_cita',
-    parameters,
-  })
+  return sendTemplate(data.clientPhone, 'recordatorio_cita', [
+    { name: '1', value: data.clientName },
+    { name: '2', value: stripMimosaPrefix(data.locationName) },
+    { name: '3', value: data.date },
+    { name: '4', value: data.time },
+    // Button URL dynamic params: both Confirmar and Cancelar buttons use {{1}} = appointmentId
+    { name: 'button_url_0', value: data.appointmentId },
+    { name: 'button_url_1', value: data.appointmentId },
+  ])
 }
 
 // ===========================================
-// SIMPLE TEXT MESSAGE (for testing)
+// WHATSAPP OTP CODE (6-digit code verification)
 // ===========================================
 
-export async function sendTextMessage(
+/**
+ * Sends a 6-digit OTP code via WhatsApp using the codigo_verificacion template.
+ *
+ * Template: codigo_verificacion (Authentication category, Spanish)
+ * Body (fixed by Meta): "Tu código de verificación es {{1}} Por tu seguridad, no lo compartas."
+ * Footer (fixed): "Este código caduca en 10 minutos."
+ */
+export async function sendOtpCode(
   phone: string,
-  message: string
+  otpCode: string
 ): Promise<WatiResponse> {
-  const formattedPhone = formatPhoneForWati(phone)
-  
-  // Try session message first (if within 24h window)
-  // Falls back to template if session expired
-  return watiRequest('/api/v1/sendSessionMessage/' + formattedPhone, {
-    messageText: message,
-  })
+  return sendTemplate(phone, 'codigo_verificacion', [{ name: '1', value: otpCode }])
+}
+
+// ===========================================
+// PHONE VERIFICATION VIA WHATSAPP (link-based)
+// ===========================================
+
+interface VerificationData {
+  clientName: string
+  clientPhone: string
+  verificationUrl: string
+}
+
+export async function sendPhoneVerification(
+  data: VerificationData
+): Promise<WatiResponse> {
+  return sendTemplate(data.clientPhone, 'verificacion_telefono', [{ name: '1', value: data.clientName }])
 }
 
 // ===========================================
@@ -204,37 +198,5 @@ export async function sendTextMessage(
 // ===========================================
 
 export function isWatiConfigured(): boolean {
-  return Boolean(WATI_ACCESS_TOKEN && WATI_API_URL)
-}
-
-// ===========================================
-// GET CONTACT INFO
-// ===========================================
-
-export async function getContactInfo(phone: string): Promise<WatiResponse & { contact?: unknown }> {
-  const formattedPhone = formatPhoneForWati(phone)
-  
-  if (!WATI_ACCESS_TOKEN) {
-    return { result: false, error: 'WATI not configured' }
-  }
-  
-  try {
-    const response = await fetch(
-      `${WATI_API_URL}/api/v1/getContacts?pageSize=1&pageNumber=1&whatsappNumber=${formattedPhone}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${WATI_ACCESS_TOKEN}`,
-        },
-      }
-    )
-    
-    if (!response.ok) {
-      return { result: false, error: `HTTP ${response.status}` }
-    }
-    
-    const data = await response.json()
-    return { result: true, contact: data }
-  } catch (error) {
-    return { result: false, error: String(error) }
-  }
+  return Boolean(WATI_ACCESS_TOKEN)
 }

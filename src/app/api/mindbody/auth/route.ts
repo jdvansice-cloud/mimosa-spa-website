@@ -87,6 +87,15 @@ export async function POST(request: NextRequest) {
       }
 
       try {
+        console.log('Attempting to register client:', {
+          FirstName: firstName,
+          LastName: lastName,
+          Email: email,
+          MobilePhone: phone,
+          BirthDate: birthDate,
+          Gender: gender,
+        })
+
         const client = await addClient({
           FirstName: firstName,
           LastName: lastName,
@@ -95,6 +104,8 @@ export async function POST(request: NextRequest) {
           BirthDate: birthDate,
           Gender: gender,
         })
+
+        console.log('Client registered successfully:', client)
 
         return NextResponse.json({
           success: true,
@@ -107,9 +118,43 @@ export async function POST(request: NextRequest) {
           }
         })
       } catch (regError) {
-        console.error('Registration error:', regError)
+        const errorMessage = regError instanceof Error ? regError.message : String(regError)
+
+        // If client already exists in Mindbody, look them up instead of erroring
+        if (errorMessage.includes('duplicate client') || errorMessage.includes('InvalidClientCreation')) {
+          console.log('Client already exists in Mindbody, looking up by email:', email)
+          try {
+            const existingClients = await searchClients(email)
+            const match = existingClients.find(c =>
+              c.Email?.toLowerCase() === email.toLowerCase()
+            )
+            if (match) {
+              return NextResponse.json({
+                success: true,
+                client: {
+                  Id: match.Id,
+                  FirstName: match.FirstName,
+                  LastName: match.LastName,
+                  Email: match.Email,
+                  MobilePhone: match.MobilePhone,
+                },
+                existingClient: true,
+              })
+            }
+          } catch (lookupError) {
+            console.error('Failed to look up existing client:', lookupError)
+          }
+        }
+
+        console.error('Registration error details:', {
+          message: errorMessage,
+          firstName,
+          lastName,
+          email,
+          phone,
+        })
         return NextResponse.json(
-          { error: ERROR_MESSAGES.REGISTRATION_FAILED },
+          { error: ERROR_MESSAGES.REGISTRATION_FAILED, details: errorMessage },
           { status: 500 }
         )
       }

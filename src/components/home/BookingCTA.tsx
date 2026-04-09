@@ -1,10 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import { useTranslations, useLocale } from 'next-intl'
 import { Calendar, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Button } from '@/components/ui'
+import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
+
+// Button styles for HomeBookingButton (matches Button component's lg primary variant)
+const bookingButtonStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gold text-dark hover:bg-gold-600 active:bg-gold-700 focus:ring-gold-500 shadow-sm hover:shadow-md px-8 py-4 text-lg gap-2.5"
 
 export function BookingCTA() {
   const t = useTranslations('home.cta')
@@ -46,15 +48,13 @@ export function BookingCTA() {
           <p className="text-lg md:text-xl text-white/80 mb-10">
             {t('subtitle')}
           </p>
-          <Link href={`/${locale}/reservar`}>
-            <Button
-              size="lg"
-              leftIcon={<Calendar className="h-5 w-5" />}
-              className="shadow-lg"
-            >
-              {t('button')}
-            </Button>
-          </Link>
+          <HomeBookingButton
+            locale={locale}
+            className={`${bookingButtonStyles} shadow-lg`}
+          >
+            <Calendar className="h-5 w-5 flex-shrink-0" />
+            {t('button')}
+          </HomeBookingButton>
         </motion.div>
       </div>
     </section>

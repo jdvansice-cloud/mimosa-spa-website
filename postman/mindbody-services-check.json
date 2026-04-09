@@ -1,0 +1,385 @@
+{
+  "info": {
+    "name": "Mindbody Services & Session Types Check",
+    "description": "Check all bookable services and their session types to verify which can be booked via the API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.mindbodyonline.com/public/v6",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "YOUR_API_KEY",
+      "type": "string"
+    },
+    {
+      "key": "siteId",
+      "value": "YOUR_SITE_ID",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "_mindbody_api",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "_mindbody_api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Get Access Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.AccessToken) {",
+              "    pm.collectionVariables.set('accessToken', jsonData.AccessToken);",
+              "    console.log('Token saved successfully');",
+              "}",
+              "",
+              "pm.test('Token retrieved', function () {",
+              "    pm.expect(jsonData.AccessToken).to.not.be.undefined;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Api-Key",
+            "value": "{{apiKey}}"
+          },
+          {
+            "key": "SiteId",
+            "value": "{{siteId}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"Username\": \"{{username}}\",\n    \"Password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/usertoken/issue",
+          "host": ["{{baseUrl}}"],
+          "path": ["usertoken", "issue"]
+        }
+      }
+    },
+    {
+      "name": "2. Get All Session Types (Online)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "var sessionTypes = jsonData.SessionTypes || [];",
+              "",
+              "console.log('=== SESSION TYPES (Online Bookable) ===');",
+              "console.log('Total:', sessionTypes.length);",
+              "",
+              "// Store for comparison",
+              "pm.collectionVariables.set('sessionTypes', JSON.stringify(sessionTypes));",
+              "",
+              "// Group by ProgramId",
+              "var byProgram = {};",
+              "sessionTypes.forEach(function(st) {",
+              "    var pid = st.ProgramId || 'unknown';",
+              "    if (!byProgram[pid]) byProgram[pid] = [];",
+              "    byProgram[pid].push({",
+              "        Id: st.Id,",
+              "        Name: st.Name,",
+              "        Duration: st.DefaultTimeLength",
+              "    });",
+              "});",
+              "",
+              "console.log('\\nBy ProgramId:');",
+              "Object.keys(byProgram).forEach(function(pid) {",
+              "    console.log('  ProgramId ' + pid + ': ' + byProgram[pid].length + ' session types');",
+              "});",
+              "",
+              "// Log all session types",
+              "console.log('\\nAll Session Types:');",
+              "sessionTypes.forEach(function(st) {",
+              "    console.log('  [' + st.Id + '] ' + st.Name + ' (' + st.DefaultTimeLength + ' min) - ProgramId: ' + st.ProgramId);",
+              "});",
+              "",
+              "pm.test('Session types retrieved', function () {",
+              "    pm.expect(sessionTypes.length).to.be.above(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Api-Key",
+            "value": "{{apiKey}}"
+          },
+          {
+            "key": "SiteId",
+            "value": "{{siteId}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/site/sessiontypes?limit=200&onlineOnly=true",
+          "host": ["{{baseUrl}}"],
+          "path": ["site", "sessiontypes"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "200"
+            },
+            {
+              "key": "onlineOnly",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Get All Sale Services (Online)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "var services = jsonData.Services || [];",
+              "",
+              "console.log('=== SALE SERVICES (Online Bookable) ===');",
+              "console.log('Total:', services.length);",
+              "",
+              "// Get session types from previous request",
+              "var sessionTypesStr = pm.collectionVariables.get('sessionTypes');",
+              "var sessionTypes = sessionTypesStr ? JSON.parse(sessionTypesStr) : [];",
+              "",
+              "// Create map of session types by normalized name",
+              "var sessionTypeMap = {};",
+              "sessionTypes.forEach(function(st) {",
+              "    var normalizedName = st.Name.toLowerCase().trim().replace(/\\s+/g, ' ');",
+              "    sessionTypeMap[normalizedName] = {",
+              "        Id: st.Id,",
+              "        Name: st.Name,",
+              "        Duration: st.DefaultTimeLength,",
+              "        ProgramId: st.ProgramId",
+              "    };",
+              "});",
+              "",
+              "// Filter for bookable services",
+              "var bookableServices = services.filter(function(s) {",
+              "    return s.SellOnline === true && s.Count === 1 && s.Price > 0;",
+              "});",
+              "",
+              "console.log('Bookable services (SellOnline, Count=1, Price>0):', bookableServices.length);",
+              "",
+              "// Analyze each service",
+              "var withMatch = [];",
+              "var withoutMatch = [];",
+              "",
+              "bookableServices.forEach(function(s) {",
+              "    var normalizedName = s.Name.toLowerCase().trim().replace(/\\s+/g, ' ');",
+              "    var match = sessionTypeMap[normalizedName];",
+              "    ",
+              "    // Try partial match if no exact match",
+              "    if (!match) {",
+              "        Object.keys(sessionTypeMap).forEach(function(stName) {",
+              "            if (normalizedName.includes(stName) || stName.includes(normalizedName)) {",
+              "                match = sessionTypeMap[stName];",
+              "            }",
+              "        });",
+              "    }",
+              "    ",
+              "    var serviceInfo = {",
+              "        ProductId: s.ProductId,",
+              "        Name: s.Name,",
+              "        ProgramId: s.ProgramId,",
+              "        Program: s.Program,",
+              "        Price: s.Price,",
+              "        SessionTypeMatch: match ? match.Id : null,",
+              "        SessionTypeName: match ? match.Name : null",
+              "    };",
+              "    ",
+              "    if (match) {",
+              "        withMatch.push(serviceInfo);",
+              "    } else {",
+              "        withoutMatch.push(serviceInfo);",
+              "    }",
+              "});",
+              "",
+              "console.log('\\n=== SERVICES WITH SESSION TYPE MATCH ===');",
+              "console.log('Count:', withMatch.length);",
+              "withMatch.forEach(function(s) {",
+              "    console.log('  [ProductId:' + s.ProductId + ' -> SessionTypeId:' + s.SessionTypeMatch + '] ' + s.Name + ' (ProgramId:' + s.ProgramId + ')');",
+              "});",
+              "",
+              "console.log('\\n=== SERVICES WITHOUT SESSION TYPE MATCH (CANNOT BE BOOKED) ===');",
+              "console.log('Count:', withoutMatch.length);",
+              "withoutMatch.forEach(function(s) {",
+              "    console.log('  [ProductId:' + s.ProductId + '] ' + s.Name + ' (ProgramId:' + s.ProgramId + ' - ' + s.Program + ')');",
+              "});",
+              "",
+              "// Group by ProgramId",
+              "console.log('\\n=== SUMMARY BY PROGRAM ===');",
+              "var programNames = {",
+              "    2: 'Masajes',",
+              "    4: 'Faciales',",
+              "    5: 'Corporales',",
+              "    6: 'Manos y Pies',",
+              "    7: 'Depilación',",
+              "    8: 'Adicionales'",
+              "};",
+              "",
+              "[2, 4, 5, 6, 7, 8].forEach(function(pid) {",
+              "    var total = bookableServices.filter(function(s) { return s.ProgramId === pid; }).length;",
+              "    var matched = withMatch.filter(function(s) { return s.ProgramId === pid; }).length;",
+              "    var unmatched = withoutMatch.filter(function(s) { return s.ProgramId === pid; }).length;",
+              "    var name = programNames[pid] || 'Unknown';",
+              "    console.log('  ProgramId ' + pid + ' (' + name + '): ' + total + ' total, ' + matched + ' bookable, ' + unmatched + ' NOT bookable');",
+              "});",
+              "",
+              "pm.test('Services analyzed', function () {",
+              "    pm.expect(bookableServices.length).to.be.above(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Api-Key",
+            "value": "{{apiKey}}"
+          },
+          {
+            "key": "SiteId",
+            "value": "{{siteId}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/sale/services?limit=200&sellOnline=true",
+          "host": ["{{baseUrl}}"],
+          "path": ["sale", "services"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "200"
+            },
+            {
+              "key": "sellOnline",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Get All Session Types (Including Offline)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "var sessionTypes = jsonData.SessionTypes || [];",
+              "",
+              "console.log('=== ALL SESSION TYPES (Including Offline) ===');",
+              "console.log('Total:', sessionTypes.length);",
+              "",
+              "// Get online-only session types for comparison",
+              "var onlineTypesStr = pm.collectionVariables.get('sessionTypes');",
+              "var onlineTypes = onlineTypesStr ? JSON.parse(onlineTypesStr) : [];",
+              "var onlineIds = onlineTypes.map(function(st) { return st.Id; });",
+              "",
+              "// Find offline-only session types",
+              "var offlineOnly = sessionTypes.filter(function(st) {",
+              "    return !onlineIds.includes(st.Id);",
+              "});",
+              "",
+              "console.log('Online session types:', onlineTypes.length);",
+              "console.log('Offline-only session types:', offlineOnly.length);",
+              "",
+              "if (offlineOnly.length > 0) {",
+              "    console.log('\\n=== OFFLINE-ONLY SESSION TYPES ===');",
+              "    offlineOnly.forEach(function(st) {",
+              "        console.log('  [' + st.Id + '] ' + st.Name + ' (' + st.DefaultTimeLength + ' min) - ProgramId: ' + st.ProgramId);",
+              "    });",
+              "}",
+              "",
+              "pm.test('All session types retrieved', function () {",
+              "    pm.expect(sessionTypes.length).to.be.above(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Api-Key",
+            "value": "{{apiKey}}"
+          },
+          {
+            "key": "SiteId",
+            "value": "{{siteId}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/site/sessiontypes?limit=200&onlineOnly=false",
+          "host": ["{{baseUrl}}"],
+          "path": ["site", "sessiontypes"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "200"
+            },
+            {
+              "key": "onlineOnly",
+              "value": "false"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -69,17 +69,19 @@ export function LocationStep() {
   }
   
   return (
-    <div className="location-step">
+    <div className="location-step flex flex-col h-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto pb-4">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-gold to-gold/60 rounded-full 
-                      flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <MapPin className="w-8 h-8 text-white" />
+      <div className="text-center mb-4">
+        <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                      flex items-center justify-center mx-auto mb-2 shadow-md">
+          <MapPin className="w-5 h-5 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-dark mb-2">
+        <h2 className="text-lg font-bold text-dark mb-0.5">
           Selecciona tu Ubicación
         </h2>
-        <p className="text-warm-gray">
+        <p className="text-xs text-warm-gray">
           Elige el spa donde deseas recibir tu tratamiento
         </p>
       </div>
@@ -168,8 +170,8 @@ export function LocationStep() {
         </div>
       )}
       
-      {/* Back Button */}
-      <div className="mt-6 pt-2 border-t border-beige-200">
+      {/* Back Button - Hidden on mobile (using MobileBookingNav), shown on desktop */}
+      <div className="hidden md:block mt-6 pt-2 border-t border-beige-200">
         <button
           onClick={prevStep}
           className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
@@ -177,6 +179,7 @@ export function LocationStep() {
           <ArrowLeft className="w-4 h-4" />
           Volver
         </button>
+      </div>
       </div>
     </div>
   )

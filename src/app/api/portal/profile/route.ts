@@ -22,10 +22,23 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    console.log('Portal profile - Fetching client with ID:', clientId, '(type:', typeof clientId, ')')
+
     // Get client with custom fields
     const client = await getClientWithCustomFields(clientId)
 
+    console.log('Portal profile - Raw client response:', client ? {
+      Id: client.Id,
+      UniqueId: client.UniqueId,
+      FirstName: client.FirstName,
+      LastName: client.LastName,
+      Email: client.Email,
+      MobilePhone: client.MobilePhone,
+      AddressLine1: client.AddressLine1
+    } : null)
+
     if (!client) {
+      console.warn('Portal profile - No client found for ID:', clientId)
       return NextResponse.json(
         { error: 'Cliente no encontrado' },
         { status: 404 }
@@ -38,8 +51,23 @@ export async function GET(request: NextRequest) {
       customFieldDefinitions = await getCustomClientFields()
     }
 
+    // Ensure Id is a number for consistency with MindbodyClient type
+    // Mindbody API returns Id as string, but our types expect number
+    const normalizedClient = {
+      ...client,
+      Id: typeof client.Id === 'string' ? parseInt(client.Id, 10) : client.Id
+    }
+
+    console.log('Portal profile returning client:', {
+      Id: normalizedClient.Id,
+      FirstName: normalizedClient.FirstName,
+      LastName: normalizedClient.LastName,
+      Email: normalizedClient.Email,
+      MobilePhone: normalizedClient.MobilePhone
+    })
+
     return NextResponse.json({
-      client,
+      client: normalizedClient,
       customFieldDefinitions
     })
 

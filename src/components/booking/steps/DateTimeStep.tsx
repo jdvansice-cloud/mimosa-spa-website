@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Calendar, ArrowLeft, ArrowRight, Loader2, Clock, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar, Loader2, Clock, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
 
@@ -31,8 +31,6 @@ export function DateTimeStep() {
     setTime,
     setAvailableDates,
     setAvailableSlots,
-    nextStep,
-    prevStep,
   } = useBookingStore()
 
   const totalDuration = useBookingStore(selectTotalDuration)
@@ -360,28 +358,6 @@ export function DateTimeStep() {
         )}
       </div>
 
-      {/* Navigation - Sticky at bottom */}
-      <div className="sticky bottom-0 bg-white border-t border-beige-200 py-2 -mx-6 px-6 mt-auto">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={prevStep}
-            className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
-          </button>
-
-          <button
-            onClick={nextStep}
-            disabled={!selectedDate || !selectedTime}
-            className="flex items-center gap-1 px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
-                     hover:bg-gold/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Continuar
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
     </div>
   )
 }

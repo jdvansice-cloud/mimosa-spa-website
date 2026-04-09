@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { User, ArrowLeft, ArrowRight, Loader2, Users } from 'lucide-react'
+import { User, Loader2, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyStaff } from '@/types/booking'
@@ -98,17 +98,19 @@ export function StaffStep() {
   }, [selectedDate])
 
   return (
-    <div className="staff-step">
+    <div className="staff-step flex flex-col h-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto pb-4">
       {/* Header */}
-      <div className="text-center mb-6">
-        <div className="w-14 h-14 bg-gradient-to-br from-gold to-gold/60 rounded-full
-                      flex items-center justify-center mx-auto mb-3 shadow-lg">
-          <User className="w-7 h-7 text-white" />
+      <div className="text-center mb-4">
+        <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/60 rounded-full
+                      flex items-center justify-center mx-auto mb-2 shadow-md">
+          <User className="w-5 h-5 text-white" />
         </div>
-        <h2 className="text-xl font-bold text-dark mb-1">
+        <h2 className="text-lg font-bold text-dark mb-0.5">
           Selecciona tu Terapeuta
         </h2>
-        <p className="text-sm text-warm-gray">
+        <p className="text-xs text-warm-gray">
           {selectedDate && selectedTime && (
             <span className="block text-xs text-gold-600 font-medium mb-1">
               {formattedDate} a las {selectedSlot?.displayTime || selectedTime}
@@ -274,28 +276,6 @@ export function StaffStep() {
           </div>
         </div>
       )}
-
-      {/* Navigation */}
-      <div className="mt-6 pt-2 border-t border-beige-200 flex items-center justify-between">
-        <button
-          onClick={prevStep}
-          className="flex items-center gap-1 text-sm text-warm-gray hover:text-dark transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver
-        </button>
-
-        {/* Continue button only if staff not yet selected (auto-advances on selection) */}
-        {selectedStaff !== undefined && (
-          <button
-            onClick={nextStep}
-            className="flex items-center gap-1 px-4 py-2 bg-gold text-dark text-sm font-semibold rounded-lg
-                     hover:bg-gold/90 transition-all"
-          >
-            Continuar
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        )}
       </div>
     </div>
   )

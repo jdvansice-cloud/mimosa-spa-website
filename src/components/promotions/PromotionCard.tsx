@@ -1,10 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
-import { Card, Button } from '@/components/ui'
+import { Card } from '@/components/ui'
 import { formatPrice, formatDate, getLocalizedContent } from '@/lib/utils'
+import { PromotionBookingButton } from './PromotionBookingButton'
 import type { Promotion } from '@/types'
 
 interface PromotionCardProps {
@@ -25,30 +25,30 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
       className="group overflow-hidden bg-beige-100"
     >
       <div className="flex flex-col h-full">
-        {/* Header with Title and Image */}
-        <div className="flex">
+        {/* Header with Title and Image - Fixed height */}
+        <div className="flex h-32">
           {/* Title Side */}
           <div className="flex-1 p-6 flex flex-col justify-center">
-            <h3 className="text-xl md:text-2xl font-display font-semibold text-spa-brown uppercase tracking-wide">
+            <h3 className="text-xl md:text-2xl font-display font-semibold text-spa-brown uppercase tracking-wide line-clamp-2">
               {title}
             </h3>
             <div className="w-12 h-0.5 bg-gold mt-3" />
           </div>
-          
-          {/* Image Side */}
-          <div className="w-1/3 relative aspect-square">
+
+          {/* Image Side - Fixed size */}
+          <div className="w-32 h-32 relative flex-shrink-0">
             <Image
               src={promotion.image_url || 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=400'}
               alt={title}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 33vw, 150px"
+              sizes="128px"
             />
           </div>
         </div>
 
         {/* Content Box */}
-        <div className="mx-4 -mt-4 relative z-10">
+        <div className="mx-4 mt-2">
           <div className="bg-warm-gray-500 text-cream p-5 rounded-lg">
             {/* Services List */}
             <div className="space-y-1 text-center">
@@ -84,11 +84,12 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
           </p>
 
           {/* Book Button */}
-          <Link href={`/${locale}/reservar`} className="block">
-            <Button className="w-full" size="sm">
-              {t('bookNow')}
-            </Button>
-          </Link>
+          <PromotionBookingButton
+            promotion={promotion}
+            locale={locale}
+            label={t('bookNow')}
+            className="w-full"
+          />
         </div>
       </div>
     </Card>

@@ -67,6 +67,13 @@ interface BookingState {
   
   // Booking Result
   bookingConfirmation: BookingConfirmation | null
+
+  // Appointment replacement (from ?replace=APPOINTMENT_ID)
+  replaceAppointmentId: string | null
+
+  // Global online discount (loaded from site settings)
+  globalDiscountPercent: number
+  globalDiscountActive: boolean
   
   // Computed pricing (cached)
   pricing: CartPricing | null
@@ -131,6 +138,8 @@ interface BookingActions {
   
   // Booking
   setBookingConfirmation: (confirmation: BookingConfirmation) => void
+  setReplaceAppointmentId: (id: string | null) => void
+  setGlobalDiscount: (percent: number, active: boolean) => void
   
   // Pricing
   calculatePricing: () => CartPricing
@@ -192,6 +201,9 @@ const initialState: BookingState = {
   
   // Result
   bookingConfirmation: null,
+  replaceAppointmentId: null,
+  globalDiscountPercent: 0,
+  globalDiscountActive: false,
   
   // Pricing
   pricing: null,
@@ -346,10 +358,9 @@ export const useBookingStore = create<BookingState & BookingActions>()(
           return state
         }
         const newServices = [...state.selectedServices, service]
-        return { 
+        return {
           selectedServices: newServices,
           pricing: null, // Invalidate cache
-          isCartOpen: true // Auto-open cart when adding
         }
       }, false, 'addService'),
       
@@ -373,10 +384,9 @@ export const useBookingStore = create<BookingState & BookingActions>()(
         if (state.selectedAddons.some(a => a.Id === addon.Id)) {
           return state
         }
-        return { 
+        return {
           selectedAddons: [...state.selectedAddons, addon],
           pricing: null,
-          isCartOpen: true // Auto-open cart when adding
         }
       }, false, 'addAddon'),
       
@@ -479,6 +489,10 @@ export const useBookingStore = create<BookingState & BookingActions>()(
         bookingConfirmation: confirmation,
         currentStep: 'success'
       }, false, 'setBookingConfirmation'),
+
+      setReplaceAppointmentId: (id) => set({ replaceAppointmentId: id }, false, 'setReplaceAppointmentId'),
+
+      setGlobalDiscount: (percent, active) => set({ globalDiscountPercent: percent, globalDiscountActive: active }, false, 'setGlobalDiscount'),
       
       // ===========================================
       // PRICING CALCULATION
@@ -501,21 +515,30 @@ export const useBookingStore = create<BookingState & BookingActions>()(
         const hasPromotion = state.activePromotion !== null
         let promotionDiscount = 0
         let finalServicesPrice = servicesSubtotal
-        
+
         if (hasPromotion && state.activePromotion) {
           finalServicesPrice = state.activePromotion.price
           promotionDiscount = servicesSubtotal - finalServicesPrice
         }
-        
+
+        // Apply global online discount when no promotion is active
+        const hasGlobalDiscount = !hasPromotion && state.globalDiscountActive && state.globalDiscountPercent > 0
+        let globalDiscountAmount = 0
+
+        if (hasGlobalDiscount) {
+          globalDiscountAmount = Math.round(finalServicesPrice * (state.globalDiscountPercent / 100) * 100) / 100
+          finalServicesPrice = Math.round((finalServicesPrice - globalDiscountAmount) * 100) / 100
+        }
+
         // Calculate subtotal before tax
         const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
-        
+
         // Calculate ITBM (7%)
         const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
-        
+
         // Calculate total with tax
         const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
-        
+
         const pricing: CartPricing = {
           services: state.selectedServices,
           addons: state.selectedAddons,
@@ -525,6 +548,9 @@ export const useBookingStore = create<BookingState & BookingActions>()(
           promotionName: state.activePromotion?.title_es || null,
           promotionPrice: hasPromotion ? state.activePromotion!.price : null,
           promotionDiscount,
+          hasGlobalDiscount,
+          globalDiscountPercent: state.globalDiscountPercent,
+          globalDiscountAmount,
           subtotalBeforeTax,
           itbmRate: ITBM_RATE,
           itbmAmount,

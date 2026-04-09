@@ -45,8 +45,16 @@ export function formatDuration(minutes: number, locale: string = 'es'): string {
  * Format date for display
  */
 export function formatDate(date: string | Date, locale: string = 'es'): string {
-  const d = typeof date === 'string' ? new Date(date) : date
-  
+  // Parse date strings as local dates (not UTC) to avoid timezone shift
+  // e.g. "2026-04-01" should display as April 1, not March 31
+  let d: Date
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const [year, month, day] = date.split('-').map(Number)
+    d = new Date(year, month - 1, day)
+  } else {
+    d = typeof date === 'string' ? new Date(date) : date
+  }
+
   return new Intl.DateTimeFormat(locale === 'es' ? 'es-PA' : 'en-US', {
     day: 'numeric',
     month: 'long',

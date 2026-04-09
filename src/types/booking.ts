@@ -21,6 +21,7 @@ export interface MindbodyLocation {
 
 export interface MindbodyService {
   Id: number
+  ProductId?: number // Original Mindbody product ID (different from SessionTypeId)
   Name: string
   Description: string | null
   Duration: number // in minutes
@@ -149,7 +150,12 @@ export interface CartPricing {
   promotionName: string | null
   promotionPrice: number | null
   promotionDiscount: number
-  
+
+  // Global online discount (applies when no promotion is active)
+  hasGlobalDiscount: boolean
+  globalDiscountPercent: number
+  globalDiscountAmount: number
+
   // Tax calculation
   subtotalBeforeTax: number
   itbmRate: number
@@ -216,6 +222,10 @@ export interface BookingConfirmation {
   location: MindbodyLocation
   client: MindbodyClient
   pricing: CartPricing
+  // Partial booking info
+  totalBooked?: number
+  totalRequested?: number
+  partialBookingWarning?: string | null
 }
 
 // ===========================================

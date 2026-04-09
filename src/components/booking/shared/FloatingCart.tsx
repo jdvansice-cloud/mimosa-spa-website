@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useCallback } from 'react'
-import { ShoppingBag, X, Trash2, Clock, Tag } from 'lucide-react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { ShoppingBag, X, Trash2, Clock, Tag, Star, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 
@@ -17,43 +17,76 @@ export function FloatingCart() {
     activePromotion,
     isCartOpen,
     closeCart,
+    globalDiscountPercent,
+    globalDiscountActive,
   } = useBookingStore()
-  
+
+  // Global discount applies only when no promotion is active
+  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0 && !activePromotion
+
+  // Collapsible section states
+  const [isPromoExpanded, setIsPromoExpanded] = useState(false)
+  const [isPricingExpanded, setIsPricingExpanded] = useState(false)
+
   const itemCount = selectedServices.length + selectedAddons.length
-  
-  // Calculate pricing with useMemo - no state updates during render
-  const pricing = useMemo(() => {
-    const servicesSubtotal = selectedServices.reduce((sum, s) => sum + s.Price, 0)
-    const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
-    
-    const hasPromotion = activePromotion !== null
-    let finalServicesPrice = servicesSubtotal
-    let promotionDiscount = 0
-    
-    if (hasPromotion && activePromotion) {
-      finalServicesPrice = activePromotion.price
-      promotionDiscount = servicesSubtotal - activePromotion.price
+
+  // Separate promotion services from regular services
+  const { promotionServices, regularServices } = useMemo(() => {
+    if (!activePromotion || !activePromotion.services) {
+      return { promotionServices: [], regularServices: selectedServices }
     }
-    
-    const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
+
+    // Get IDs of services included in the promotion
+    const promotionServiceIds = new Set(activePromotion.services.map(s => s.Id))
+
+    // Separate services
+    const promoServices = selectedServices.filter(s => promotionServiceIds.has(s.Id))
+    const extraServices = selectedServices.filter(s => !promotionServiceIds.has(s.Id))
+
+    return { promotionServices: promoServices, regularServices: extraServices }
+  }, [selectedServices, activePromotion])
+
+  // Calculate pricing with useMemo - now handling separate sections
+  const pricing = useMemo(() => {
+    const hasPromotion = activePromotion !== null && promotionServices.length > 0
+
+    // Promotion pricing
+    const promotionServicesSubtotal = promotionServices.reduce((sum, s) => sum + s.Price, 0)
+    const promotionPrice = hasPromotion ? activePromotion!.price : 0
+    const promotionDiscount = hasPromotion ? promotionServicesSubtotal - promotionPrice : 0
+
+    // Regular items pricing (extra services + addons)
+    const regularServicesSubtotal = regularServices.reduce((sum, s) => sum + s.Price, 0)
+    const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
+    const regularItemsTotal = regularServicesSubtotal + addonsSubtotal
+
+    // Combined subtotal before tax
+    const subtotalBeforeTax = promotionPrice + regularItemsTotal
+
     const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
     const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
-    
+
     const totalDuration = selectedServices.reduce((sum, s) => sum + (s.Duration || 0), 0) +
                           selectedAddons.reduce((sum, a) => sum + (a.Duration || 0), 0)
-    
+
     return {
-      servicesSubtotal,
-      addonsSubtotal,
+      hasPromotion,
+      promotionName: activePromotion?.title_es || null,
+      promotionServicesSubtotal,
+      promotionPrice,
       promotionDiscount,
+      regularServicesSubtotal,
+      addonsSubtotal,
+      regularItemsTotal,
       subtotalBeforeTax,
       itbmRate: ITBM_RATE,
       itbmAmount,
       totalWithTax,
       totalDuration,
-      hasPromotion,
     }
-  }, [selectedServices, selectedAddons, activePromotion])
+  }, [selectedServices, selectedAddons, activePromotion, promotionServices, regularServices])
+
+  const hasRegularItems = regularServices.length > 0 || selectedAddons.length > 0
   
   // Close sidebar handler - use store action
   const closeSidebar = useCallback(() => {
@@ -72,10 +105,9 @@ export function FloatingCart() {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isCartOpen, closeSidebar])
   
-  // Prevent body scroll when sidebar is open - only on mobile (lg breakpoint is 1024px)
+  // Prevent body scroll when sidebar is open
   useEffect(() => {
-    const isMobile = window.innerWidth < 1024
-    if (isCartOpen && isMobile) {
+    if (isCartOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
@@ -109,11 +141,11 @@ export function FloatingCart() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-full sm:w-96 
-                       bg-white shadow-2xl z-50 flex flex-col"
+              className="fixed inset-y-0 right-0 w-full sm:w-96
+                       bg-white shadow-2xl z-50 flex flex-col max-h-[100dvh]"
             >
-              {/* Sidebar Header */}
-              <div className="flex items-center justify-between px-5 py-4 
+              {/* Sidebar Header (Fixed at top) */}
+              <div className="flex-shrink-0 flex items-center justify-between px-5 py-4
                             bg-gradient-to-r from-beige-50 to-white border-b border-beige-200">
                 <h2 className="text-lg font-semibold text-dark flex items-center gap-2">
                   <ShoppingBag className="w-5 h-5 text-gold" />
@@ -134,7 +166,10 @@ export function FloatingCart() {
               </div>
               
               {/* Sidebar Content - Scrollable */}
-              <div className="flex-1 overflow-y-auto">
+              <div
+                className="flex-1 overflow-y-scroll overflow-x-hidden min-h-0 overscroll-contain"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
                 {itemCount === 0 ? (
                   <div className="py-16 px-6 text-center">
                     <div className="w-20 h-20 bg-beige-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -146,151 +181,258 @@ export function FloatingCart() {
                     </p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-beige-100">
-                    {/* Services Section */}
-                    {selectedServices.length > 0 && (
-                      <div className="p-4">
-                        <p className="text-xs text-warm-gray uppercase tracking-wider mb-3 font-medium">
-                          Tratamientos
-                        </p>
-                        <div className="space-y-3">
-                          {selectedServices.map((service) => (
+                  <div>
+                    {/* ============================================ */}
+                    {/* PROMOTION SECTION - Collapsible, Gold themed */}
+                    {/* ============================================ */}
+                    {pricing.hasPromotion && promotionServices.length > 0 && (
+                      <div className="border-b-2 border-gold bg-gradient-to-b from-gold/10 to-gold/5">
+                        {/* Promotion Header - Clickable to expand/collapse */}
+                        <button
+                          onClick={() => setIsPromoExpanded(!isPromoExpanded)}
+                          className="w-full bg-gradient-to-r from-gold to-gold/80 text-dark px-4 py-2.5 flex items-center justify-between"
+                        >
+                          <span className="flex items-center gap-2 font-semibold text-sm">
+                            <Star className="h-4 w-4" />
+                            PROMOCIÓN: {pricing.promotionName}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold">${pricing.promotionPrice.toFixed(2)}</span>
+                            {isPromoExpanded ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            )}
+                          </div>
+                        </button>
+
+                        {/* Collapsible Promotion Details - Services only, no prices */}
+                        <AnimatePresence>
+                          {isPromoExpanded && (
                             <motion.div
-                              key={service.Id}
-                              initial={{ opacity: 0, x: 20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: -20 }}
-                              className="flex items-start justify-between gap-3 p-3 
-                                       bg-beige-50 rounded-xl group"
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
                             >
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-dark leading-tight">
-                                  {service.Name}
+                              <div className="p-4 space-y-2">
+                                <p className="text-xs font-semibold text-gold-700 uppercase tracking-wider mb-2">
+                                  Servicios Incluidos
                                 </p>
-                                {service.Duration > 0 && (
-                                  <p className="text-xs text-warm-gray flex items-center gap-1 mt-1">
-                                    <Clock className="w-3 h-3" />
-                                    {service.Duration} min
-                                  </p>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-dark whitespace-nowrap">
-                                  ${service.Price.toFixed(0)}
-                                </span>
-                                <button
-                                  onClick={() => removeService(service.Id)}
-                                  className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 
-                                           rounded-full transition-all opacity-60 group-hover:opacity-100"
-                                  aria-label="Eliminar"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+
+                                {promotionServices.map((service) => (
+                                  <div
+                                    key={service.Id}
+                                    className="flex items-start gap-2 py-1.5"
+                                  >
+                                    <span className="text-gold-600">✓</span>
+                                    <div>
+                                      <p className="text-sm font-medium text-dark">{service.Name}</p>
+                                      {service.Duration > 0 && (
+                                        <p className="text-xs text-warm-gray">{service.Duration} min</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </motion.div>
-                          ))}
-                        </div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     )}
-                    
-                    {/* Addons Section */}
-                    {selectedAddons.length > 0 && (
-                      <div className="p-4">
-                        <p className="text-xs text-warm-gray uppercase tracking-wider mb-3 font-medium">
-                          Adicionales
-                        </p>
-                        <div className="space-y-3">
-                          {selectedAddons.map((addon) => (
-                            <motion.div
-                              key={addon.Id}
-                              initial={{ opacity: 0, x: 20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: -20 }}
-                              className="flex items-start justify-between gap-3 p-3 
-                                       bg-gold/5 border border-gold/20 rounded-xl group"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-dark leading-tight">
-                                  {addon.Name}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-dark whitespace-nowrap">
-                                  ${addon.Price.toFixed(0)}
-                                </span>
-                                <button
-                                  onClick={() => removeAddon(addon.Id)}
-                                  className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 
-                                           rounded-full transition-all opacity-60 group-hover:opacity-100"
-                                  aria-label="Eliminar"
+
+                    {/* ============================================ */}
+                    {/* REGULAR ITEMS SECTION - Normal theme */}
+                    {/* ============================================ */}
+                    {hasRegularItems && (
+                      <div className="divide-y divide-beige-100">
+                        {/* Extra Services (beyond promotion) */}
+                        {regularServices.length > 0 && (
+                          <div className="p-4">
+                            <p className="text-xs text-warm-gray uppercase tracking-wider mb-3 font-medium">
+                              {pricing.hasPromotion ? 'Servicios Adicionales' : 'Tratamientos'}
+                            </p>
+                            <div className="space-y-3">
+                              {regularServices.map((service) => (
+                                <motion.div
+                                  key={service.Id}
+                                  initial={{ opacity: 0, x: 20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  exit={{ opacity: 0, x: -20 }}
+                                  className="flex items-start justify-between gap-3 p-3
+                                           bg-beige-50 rounded-xl group"
                                 >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-dark leading-tight">
+                                      {service.Name}
+                                    </p>
+                                    {service.Duration > 0 && (
+                                      <p className="text-xs text-warm-gray flex items-center gap-1 mt-1">
+                                        <Clock className="w-3 h-3" />
+                                        {service.Duration} min
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {showGlobalDiscount && service.Price > 0 ? (
+                                      <span className="flex flex-col items-end">
+                                        <span className="text-xs line-through text-warm-gray leading-tight">${service.Price.toFixed(0)}</span>
+                                        <span className="text-sm font-semibold text-green-600 leading-tight">${(Math.round(service.Price * (1 - globalDiscountPercent / 100) * 100) / 100).toFixed(0)}</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm font-semibold text-dark whitespace-nowrap">
+                                        ${service.Price.toFixed(0)}
+                                      </span>
+                                    )}
+                                    <button
+                                      onClick={() => removeService(service.Id)}
+                                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50
+                                               rounded-full transition-all opacity-60 group-hover:opacity-100"
+                                      aria-label="Eliminar"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Addons Section */}
+                        {selectedAddons.length > 0 && (
+                          <div className="p-4">
+                            <p className="text-xs text-warm-gray uppercase tracking-wider mb-3 font-medium">
+                              Adicionales
+                            </p>
+                            <div className="space-y-3">
+                              {selectedAddons.map((addon) => (
+                                <motion.div
+                                  key={addon.Id}
+                                  initial={{ opacity: 0, x: 20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  exit={{ opacity: 0, x: -20 }}
+                                  className="flex items-start justify-between gap-3 p-3
+                                           bg-gold/5 border border-gold/20 rounded-xl group"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-dark leading-tight">
+                                      {addon.Name}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {showGlobalDiscount && addon.Price > 0 ? (
+                                      <span className="flex flex-col items-end">
+                                        <span className="text-xs line-through text-warm-gray leading-tight">${addon.Price.toFixed(0)}</span>
+                                        <span className="text-sm font-semibold text-green-600 leading-tight">${(Math.round(addon.Price * (1 - globalDiscountPercent / 100) * 100) / 100).toFixed(0)}</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm font-semibold text-dark whitespace-nowrap">
+                                        ${addon.Price.toFixed(0)}
+                                      </span>
+                                    )}
+                                    <button
+                                      onClick={() => removeAddon(addon.Id)}
+                                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50
+                                               rounded-full transition-all opacity-60 group-hover:opacity-100"
+                                      aria-label="Eliminar"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 )}
               </div>
               
-              {/* Sidebar Footer - Pricing Summary */}
+              {/* Sidebar Footer - Pricing Summary (Fixed at bottom) */}
+              {/* Added extra bottom padding (pb-24) to ensure TOTAL is visible above BookingNav */}
               {itemCount > 0 && pricing && (
-                <div className="border-t-2 border-beige-200 bg-gradient-to-b from-beige-50 to-white p-5">
+                <div className="flex-shrink-0 border-t-2 border-beige-200 bg-gradient-to-b from-beige-50 to-white p-4 pb-24">
                   <div className="space-y-2">
-                    {/* Services subtotal */}
-                    <div className="flex justify-between text-sm text-warm-gray">
-                      <span>Tratamientos</span>
-                      <span>${pricing.servicesSubtotal.toFixed(2)}</span>
-                    </div>
-                    
-                    {/* Addons subtotal (if any) */}
-                    {pricing.addonsSubtotal > 0 && (
-                      <div className="flex justify-between text-sm text-warm-gray">
-                        <span>Adicionales</span>
-                        <span>${pricing.addonsSubtotal.toFixed(2)}</span>
-                      </div>
-                    )}
-                    
-                    {/* Promotion discount (if any) */}
-                    {pricing.hasPromotion && pricing.promotionDiscount > 0 && (
-                      <div className="flex justify-between text-sm text-green-600">
-                        <span className="flex items-center gap-1">
-                          <Tag className="w-3 h-3" />
-                          Promoción
-                        </span>
-                        <span>-${pricing.promotionDiscount.toFixed(2)}</span>
-                      </div>
-                    )}
-                    
-                    {/* Subtotal */}
-                    <div className="flex justify-between text-sm text-dark pt-2 border-t border-beige-200">
-                      <span>Subtotal</span>
-                      <span>${pricing.subtotalBeforeTax.toFixed(2)}</span>
-                    </div>
-                    
-                    {/* ITBM Tax */}
-                    <div className="flex justify-between text-sm text-warm-gray">
-                      <span>ITBM ({(pricing.itbmRate * 100).toFixed(0)}%)</span>
-                      <span>${pricing.itbmAmount.toFixed(2)}</span>
-                    </div>
-                    
-                    {/* Total */}
-                    <div className="flex justify-between font-bold text-lg text-dark pt-3 
-                                  border-t-2 border-gold/30">
-                      <span>Total</span>
-                      <span className="text-gold-600">${pricing.totalWithTax.toFixed(2)}</span>
-                    </div>
-                    
-                    {/* Duration estimate */}
+                    {/* Duration - Always visible */}
                     {pricing.totalDuration > 0 && (
-                      <p className="text-xs text-warm-gray text-center pt-2 flex items-center justify-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        Duración estimada: {pricing.totalDuration} min
-                      </p>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-warm-gray flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          Duración total:
+                        </span>
+                        <span className="font-medium text-dark">{pricing.totalDuration} min</span>
+                      </div>
                     )}
+
+                    {/* Collapsible Price Details */}
+                    <button
+                      onClick={() => setIsPricingExpanded(!isPricingExpanded)}
+                      className="w-full flex items-center justify-between text-sm text-warm-gray hover:text-dark transition-colors py-1"
+                    >
+                      <span className="flex items-center gap-1">
+                        Ver detalles de precio
+                        {isPricingExpanded ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </span>
+                      <span className="text-xs">
+                        Subtotal: ${pricing.subtotalBeforeTax.toFixed(2)}
+                      </span>
+                    </button>
+
+                    {/* Expandable Price Breakdown */}
+                    <AnimatePresence>
+                      {isPricingExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-beige-200 pt-2 space-y-1.5">
+                            {/* Show breakdown when there's a promotion */}
+                            {pricing.hasPromotion && (
+                              <>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-warm-gray">Promoción:</span>
+                                  <span className="text-gold-600 font-medium">${pricing.promotionPrice.toFixed(2)}</span>
+                                </div>
+                                {pricing.regularItemsTotal > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-warm-gray">Adicionales:</span>
+                                    <span className="text-dark">${pricing.regularItemsTotal.toFixed(2)}</span>
+                                  </div>
+                                )}
+                              </>
+                            )}
+
+                            <div className="flex justify-between text-sm">
+                              <span className="text-warm-gray">Subtotal:</span>
+                              <span className="text-dark">${pricing.subtotalBeforeTax.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-warm-gray">ITBM ({(pricing.itbmRate * 100).toFixed(0)}%):</span>
+                              <span className="text-dark">${pricing.itbmAmount.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* TOTAL - Always visible */}
+                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-beige-300">
+                      <span className="text-dark">TOTAL:</span>
+                      <span className={pricing.hasPromotion ? 'text-gold-600' : 'text-dark'}>
+                        ${pricing.totalWithTax.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}

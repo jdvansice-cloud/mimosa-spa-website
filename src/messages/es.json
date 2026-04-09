@@ -49,6 +49,7 @@
     "subtitle": "Nuestros Tratamientos",
     "categories": {
       "body": "Tratamientos Corporales",
+      "bodyDeluxe": "Tratamientos Corporales Deluxe",
       "facial": "Tratamientos Faciales",
       "packages": "Tratamientos en Paquetes",
       "membership": "Membresía Privilege",
@@ -56,9 +57,47 @@
     },
     "duration": "min",
     "bookNow": "Reservar",
+    "bookViaWhatsApp": "Reservar por WhatsApp",
     "view": "Ver",
     "loading": "Cargando tratamientos...",
-    "noServices": "No hay servicios disponibles en este momento."
+    "noServices": "No hay servicios disponibles en este momento.",
+    "topPicks": "Nuestras Recomendaciones",
+    "allServices": "Todos los Servicios",
+    "seeMore": "ver más",
+    "seeLess": "ver menos"
+  },
+  "menuPages": {
+    "corporales": {
+      "title": "Tratamientos Corporales",
+      "intro": "Sumérgete en una experiencia de renovación total para tu cuerpo. Nuestros masajes terapéuticos y relajantes están diseñados para liberar tensiones, mejorar la circulación y restaurar tu energía vital. Cada tratamiento es personalizado por nuestros expertos terapeutas para brindarte el bienestar que mereces."
+    },
+    "corporalesDeluxe": {
+      "title": "Tratamientos Corporales Deluxe",
+      "intro": "Descubre el máximo nivel de indulgencia con nuestros tratamientos premium. Experiencias exclusivas que combinan técnicas avanzadas de masaje con productos de alta gama para una transformación completa. Déjate consentir con rituales únicos que elevan el arte del bienestar a una experiencia extraordinaria."
+    },
+    "faciales": {
+      "title": "Tratamientos Faciales",
+      "intro": "Revela la mejor versión de tu piel con nuestros tratamientos faciales especializados. Utilizamos tecnología de vanguardia y productos premium para hidratar, rejuvenecer y dar luminosidad a tu rostro. Cada sesión es un momento de cuidado profundo donde tu piel recibe la atención personalizada que necesita."
+    },
+    "paquetes": {
+      "title": "Tratamientos en Paquetes",
+      "intro": "Maximiza tu experiencia de spa con nuestros paquetes especialmente diseñados. Combinaciones perfectas de tratamientos que te permiten disfrutar de múltiples beneficios en una sola visita. Ideal para quienes buscan una experiencia completa de relajación y rejuvenecimiento a un valor excepcional."
+    },
+    "giftcards": {
+      "title": "Gift Cards",
+      "purchaseConditions": "Condiciones de Compra"
+    },
+    "membresia": {
+      "title": "Membresía Privilege",
+      "tableHeaders": {
+        "card": "Tarjeta",
+        "validity": "Valida por",
+        "guests": "# de huespedes por visita",
+        "value": "Valor de consumo",
+        "benefit": "Beneficio"
+      },
+      "months": "meses"
+    }
   },
   "promotions": {
     "title": "Promociones",

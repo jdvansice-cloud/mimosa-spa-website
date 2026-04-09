@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Cormorant_Garamond, Lato } from 'next/font/google'
 import { Header, Footer, MobileBottomNav } from '@/components/layout'
+import { GoogleTagManager } from '@/components/analytics'
 import '@/app/globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -43,7 +44,7 @@ export async function generateMetadata({
     keywords: meta?.keywords || 'spa, masajes, bienestar, Panamá',
     icons: {
       icon: '/favicon.png',
-      apple: '/apple-touch-icon.png',
+      apple: '/favicon.png',
     },
     openGraph: {
       title: meta?.title || 'Mimosa Spa Retreat',
@@ -86,7 +87,7 @@ export default async function LocaleLayout({
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#FCCF08" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -94,6 +95,7 @@ export default async function LocaleLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="min-h-screen bg-cream font-body antialiased">
+        <GoogleTagManager />
         <NextIntlClientProvider messages={messages}>
           <div className="flex flex-col min-h-screen">
             <Header />

@@ -4,6 +4,7 @@ export { BookingWidget } from './BookingWidget'
 // Shared Components
 export { StepProgress } from './shared/StepProgress'
 export { CartSummary } from './shared/CartSummary'
+export { FloatingCart } from './shared/FloatingCart'
 export { ClientSelector } from './shared/ClientSelector'
 
 // Step Components

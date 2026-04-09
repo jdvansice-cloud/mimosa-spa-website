@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { addMultipleAppointments } from '@/lib/booking/mindbody'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { addMultipleAppointments, getClientWithCustomFields, removeAppointment } from '@/lib/booking/mindbody'
 import { sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
 import {
   validateRequired,
@@ -15,6 +16,19 @@ import {
   createRateLimitHeaders,
   RATE_LIMIT_BOOKING
 } from '@/lib/booking/rate-limit'
+
+// Lazy-initialized Supabase client to avoid build-time errors
+let supabaseAdmin: SupabaseClient | null = null
+
+function getSupabaseAdmin() {
+  if (!supabaseAdmin) {
+    supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+  }
+  return supabaseAdmin
+}
 
 // Service type from request body
 interface BookingService {
@@ -55,6 +69,13 @@ export async function POST(request: NextRequest) {
       locationName,
       therapistName,
       totalDuration,
+      staffRequested, // true when user chose a specific therapist
+      // Pricing info for Supabase record
+      subtotalBeforeTax,
+      taxAmount,
+      totalWithTax,
+      // Appointment replacement: cancel this Mindbody appointment ID after success
+      replaceAppointmentId,
     } = body
 
     // Validate required fields
@@ -71,6 +92,49 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       )
+    }
+
+    // CRITICAL: Validate Mindbody client ID is a valid number
+    // This prevents bookings without a proper Mindbody client record
+    if (!clientId || typeof clientId !== 'number' || clientId <= 0 || !Number.isInteger(clientId)) {
+      console.error('Invalid Mindbody client ID:', clientId, typeof clientId)
+      return NextResponse.json(
+        {
+          error: 'ID de cliente Mindbody inválido',
+          details: 'Se requiere un ID de cliente válido de Mindbody para crear la reserva. Por favor inicia sesión nuevamente.'
+        },
+        { status: 400 }
+      )
+    }
+
+    // CRITICAL: Verify the client exists in Mindbody and has a name
+    // This prevents bookings for non-existent or incomplete client records
+    const mindbodyClient = await getClientWithCustomFields(String(clientId))
+    if (!mindbodyClient) {
+      console.error('Client not found in Mindbody:', clientId)
+      return NextResponse.json(
+        {
+          error: 'Cliente no encontrado en Mindbody',
+          details: 'No pudimos encontrar tu cuenta en nuestro sistema. Por favor contacta al spa.'
+        },
+        { status: 404 }
+      )
+    }
+
+    // Warn if client has no name (but don't block - Mindbody might still work)
+    if (!mindbodyClient.FirstName && !mindbodyClient.LastName) {
+      console.warn('BOOKING WARNING: Mindbody client has no name:', {
+        Id: mindbodyClient.Id,
+        UniqueId: mindbodyClient.UniqueId,
+        Email: mindbodyClient.Email
+      })
+    } else {
+      console.log('Mindbody client verified:', {
+        Id: mindbodyClient.Id,
+        FirstName: mindbodyClient.FirstName,
+        LastName: mindbodyClient.LastName,
+        Email: mindbodyClient.Email
+      })
     }
 
     // Validate services array
@@ -115,19 +179,44 @@ export async function POST(request: NextRequest) {
     }
 
     // Build appointments array with consecutive start times
-    const appointments = []
+    const appointments: Array<{
+      ClientId: number
+      LocationId: number
+      StaffId: number | undefined
+      SessionTypeId: number
+      StartDateTime: string
+      Notes: string | undefined
+      StaffRequested: boolean
+    }> = []
     let currentStartTime = new Date(startDateTime)
 
+    console.log('=== BOOKING API ===')
+    console.log('Client ID:', clientId, '(type:', typeof clientId, ')')
+    console.log('Client Name from request:', clientName)
+    console.log('Client Phone from request:', clientPhone)
+    console.log('Location ID:', locationId)
+    console.log('Staff ID:', staffId)
+    console.log('Start DateTime:', startDateTime)
+    console.log('Services:', JSON.stringify(services, null, 2))
+
     for (const service of services as BookingService[]) {
+      // Build notes: always include "Reservado en línea" + optional promotion + optional custom notes
+      const noteParts: string[] = ['Reservado en línea']
+      if (promotionName) {
+        noteParts.push(`Promoción: ${promotionName}`)
+      }
+      if (notes) {
+        noteParts.push(notes)
+      }
+
       appointments.push({
         ClientId: clientId,
         LocationId: locationId,
         StaffId: staffId || undefined,
         SessionTypeId: service.sessionTypeId,
         StartDateTime: currentStartTime.toISOString(),
-        Notes: promotionName
-          ? `Promoción: ${promotionName}${notes ? ` | ${notes}` : ''}`
-          : notes,
+        Notes: noteParts.join(' | '),
+        StaffRequested: !!staffRequested,
       })
 
       // Move start time for next service
@@ -136,27 +225,68 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Submit all appointments
-    const results = await addMultipleAppointments(appointments)
+    console.log('Appointments to create:', JSON.stringify(appointments, null, 2))
 
-    // Check for any failures
-    const failures = results.filter(r => !r.success)
-    const successes = results.filter(r => r.success)
+    // Submit all appointments (all-or-nothing: rolls back on failure)
+    const result = await addMultipleAppointments(appointments)
 
-    // If all failed, return error
-    if (failures.length === results.length) {
-      console.error('All appointments failed:', failures)
+    console.log('Booking result:', JSON.stringify(result, null, 2))
+
+    // If booking failed (any appointment couldn't be created), save to Supabase and return error
+    if (!result.success) {
+      console.error('Booking failed:', result.error)
+
+      // Save failed attempt to Supabase for troubleshooting
+      try {
+        const supabase = getSupabaseAdmin()
+        const servicesData = (services as BookingService[]).map(s => ({
+          sessionTypeId: s.sessionTypeId,
+          name: s.name || 'Unknown Service',
+          duration: s.duration,
+        }))
+
+        await supabase.from('bookings').insert({
+          confirmation_number: `FAIL-${Date.now().toString(36).toUpperCase()}`,
+          status: 'failed',
+          mindbody_client_id: clientId,
+          client_name: clientName || null,
+          client_phone: clientPhone || null,
+          client_email: mindbodyClient?.Email || null,
+          location_id: locationId,
+          location_name: locationName || null,
+          staff_id: staffId || null,
+          therapist_name: therapistName || null,
+          staff_requested: !!staffRequested,
+          appointment_start: startDateTime,
+          services: servicesData,
+          total_duration: totalDuration || null,
+          mindbody_appointment_ids: [],
+          promotion_name: promotionName || null,
+          total_requested: (services as BookingService[]).length,
+          total_booked: 0,
+          subtotal_before_tax: subtotalBeforeTax || null,
+          tax_amount: taxAmount || null,
+          total_with_tax: totalWithTax || null,
+          whatsapp_sent: false,
+          failure_reason: result.error,
+        })
+      } catch (supabaseError) {
+        console.error('Error saving failed booking to Supabase:', supabaseError)
+      }
+
       return NextResponse.json(
-        { error: ERROR_MESSAGES.BOOKING_FAILED },
-        { status: 500 }
+        {
+          error: 'El horario seleccionado no está disponible para todos los servicios. Por favor elige otro horario.',
+          timeUnavailable: true,
+        },
+        { status: 409 }
       )
     }
 
+    const successfulAppointments = result.appointments
+
     // Generate confirmation number
     const confirmationNumber = `MIM-${Date.now().toString(36).toUpperCase()}`
-
-    // Get successful appointments
-    const successfulAppointments = successes.map(r => r.appointment)
 
     // Get therapist name - either from request or from Mindbody response
     let finalTherapistName = therapistName
@@ -168,29 +298,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Handle partial booking failures
-    let partialBookingWarning: string | null = null
-    if (failures.length > 0 && successes.length > 0) {
-      console.warn('Partial booking failure:', {
-        totalRequested: services.length,
-        successful: successes.length,
-        failed: failures.length,
-        failedServices: failures.map((f, i) => ({
-          index: i,
-          error: f.error
-        }))
-      })
-      partialBookingWarning = ERROR_MESSAGES.PARTIAL_BOOKING
-    }
-
     // Send WhatsApp confirmation if WATI is configured and client phone is provided
     let whatsappSent = false
     if (isWatiConfigured() && clientPhone && clientName && finalTherapistName) {
       try {
-        // Format date for display using Panama timezone
-        const bookingDate = new Date(startDateTime)
-        const dateStr = formatDateForPanama(bookingDate)
-        const timeStr = formatTimeForPanama(bookingDate)
+        // Format date for WhatsApp template (dd/mm/yyyy and h:mm a.m./p.m.)
+        // startDateTime has no timezone offset — treat it as Panama local time (-05:00)
+        const hasOffset = /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
+        const bookingDate = new Date(hasOffset ? startDateTime : `${startDateTime}-05:00`)
+        const dateStr = bookingDate.toLocaleDateString('es-PA', {
+          timeZone: 'America/Panama',
+          day: '2-digit', month: '2-digit', year: 'numeric',
+        })
+        const timeStr = bookingDate.toLocaleTimeString('es-PA', {
+          timeZone: 'America/Panama',
+          hour: 'numeric', minute: '2-digit', hour12: true,
+        })
 
         // Get service names
         const serviceNames = (services as BookingService[])
@@ -218,6 +341,73 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Save booking to Supabase (never block the booking response)
+    try {
+      const supabase = getSupabaseAdmin()
+
+      const mindbodyAppointmentIds = successfulAppointments
+        .map(apt => apt?.Id)
+        .filter((id): id is number => typeof id === 'number')
+
+      const servicesData = (services as BookingService[]).map(s => ({
+        sessionTypeId: s.sessionTypeId,
+        name: s.name || 'Unknown Service',
+        duration: s.duration,
+      }))
+
+      const { error: insertError } = await supabase
+        .from('bookings')
+        .insert({
+          confirmation_number: confirmationNumber,
+          status: 'confirmed',
+          mindbody_client_id: clientId,
+          client_name: clientName || null,
+          client_phone: clientPhone || null,
+          client_email: mindbodyClient?.Email || null,
+          location_id: locationId,
+          location_name: locationName || null,
+          staff_id: staffId || null,
+          therapist_name: finalTherapistName || null,
+          staff_requested: !!staffRequested,
+          appointment_start: startDateTime,
+          services: servicesData,
+          total_duration: totalDuration || null,
+          mindbody_appointment_ids: mindbodyAppointmentIds,
+          promotion_name: promotionName || null,
+          total_requested: (services as BookingService[]).length,
+          total_booked: successfulAppointments.length,
+          subtotal_before_tax: subtotalBeforeTax || null,
+          tax_amount: taxAmount || null,
+          total_with_tax: totalWithTax || null,
+          whatsapp_sent: whatsappSent,
+        })
+
+      if (insertError) {
+        console.error('Failed to save booking to Supabase:', insertError)
+      } else {
+        console.log('Booking saved to Supabase:', confirmationNumber)
+      }
+    } catch (supabaseError) {
+      console.error('Error saving booking to Supabase:', supabaseError)
+    }
+
+    // Cancel old appointment if this is a replacement
+    let replacedOldAppointment = false
+    if (replaceAppointmentId) {
+      const oldId = parseInt(replaceAppointmentId, 10)
+      if (!isNaN(oldId)) {
+        try {
+          replacedOldAppointment = await removeAppointment(oldId)
+          if (!replacedOldAppointment) {
+            console.warn('Could not cancel old appointment', oldId, '— new booking still confirmed')
+          }
+        } catch (cancelErr) {
+          console.error('Error cancelling old appointment:', cancelErr)
+          // Don't fail the response — new booking is already created
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       confirmationNumber,
@@ -225,10 +415,8 @@ export async function POST(request: NextRequest) {
       totalBooked: successfulAppointments.length,
       totalRequested: services.length,
       whatsappSent,
-      partialBookingWarning,
-      message: failures.length > 0
-        ? `${successfulAppointments.length} de ${services.length} servicios reservados`
-        : 'Todos los servicios reservados exitosamente'
+      replaced: replacedOldAppointment,
+      message: 'Todos los servicios reservados exitosamente'
     })
 
   } catch (error) {

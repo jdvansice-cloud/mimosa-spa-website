@@ -5,9 +5,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
-import { Menu, X, Calendar } from 'lucide-react'
+import { Menu, X, Calendar, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button, LanguageSwitcher } from '@/components/ui'
+import { LanguageSwitcher } from '@/components/ui'
+import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
+
+// Button styles for sm and md sizes (matches Button component)
+const smButtonStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gold text-dark hover:bg-gold-600 active:bg-gold-700 focus:ring-gold-500 shadow-sm hover:shadow-md px-4 py-2 text-sm gap-1.5"
+const mdButtonStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gold text-dark hover:bg-gold-600 active:bg-gold-700 focus:ring-gold-500 shadow-sm hover:shadow-md px-6 py-3 text-base gap-2"
 
 export function Header() {
   const t = useTranslations('navigation')
@@ -54,7 +59,7 @@ export function Header() {
           <Link href={`/${locale}`} className="flex-shrink-0">
             <div className="relative h-12 w-40">
               <Image
-                src="/logo.png"
+                src="/Logo_mimosa.png"
                 alt="Mimosa Spa Retreat"
                 fill
                 className="object-contain object-left"
@@ -79,11 +84,17 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-4">
             <LanguageSwitcher variant="dark" />
-            <Link href={`/${locale}/reservar`}>
-              <Button size="sm" leftIcon={<Calendar className="h-4 w-4" />}>
-                {t('book')}
-              </Button>
+            <Link
+              href={`/${locale}/portal`}
+              className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
+              title="Mi Portal"
+            >
+              <User className="h-5 w-5" />
             </Link>
+            <HomeBookingButton locale={locale} className={smButtonStyles}>
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              {t('book')}
+            </HomeBookingButton>
           </div>
 
           {/* Mobile Menu Button */}
@@ -102,10 +113,10 @@ export function Header() {
         </nav>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - z-[60] to appear above BookingNav which has z-50 */}
       <div
         className={cn(
-          'lg:hidden fixed inset-x-0 top-20 bg-dark/98 backdrop-blur-md',
+          'lg:hidden fixed inset-x-0 top-20 z-[60] bg-dark/98 backdrop-blur-md',
           'border-b border-cream/10 shadow-lg',
           'transition-all duration-300 ease-in-out',
           isMobileMenuOpen
@@ -124,14 +135,25 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          
+
+          <Link
+            href={`/${locale}/portal`}
+            className="block py-3 text-lg font-medium text-cream/90 hover:text-gold transition-colors border-b border-cream/10"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Mi Portal
+          </Link>
+
           <div className="pt-4 flex items-center justify-between">
             <LanguageSwitcher variant="dark" />
-            <Link href={`/${locale}/reservar`} onClick={() => setIsMobileMenuOpen(false)}>
-              <Button size="md" leftIcon={<Calendar className="h-4 w-4" />}>
-                {t('book')}
-              </Button>
-            </Link>
+            <HomeBookingButton
+              locale={locale}
+              className={mdButtonStyles}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              {t('book')}
+            </HomeBookingButton>
           </div>
         </div>
       </div>

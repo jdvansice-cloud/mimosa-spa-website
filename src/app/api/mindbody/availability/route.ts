@@ -3,7 +3,7 @@ import { getBookableItems, getStaffAppointmentAvailability, getScheduleItems, ge
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 
 // GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&startDate=2026-01-15&endDate=2026-01-29&duration=90
-// Returns available time slots in 30-min increments where at least one therapist
+// Returns available time slots in 15-min increments where at least one therapist
 // has continuous availability for the total treatment duration
 export async function GET(request: NextRequest) {
   try {
@@ -68,6 +68,15 @@ export async function GET(request: NextRequest) {
       SessionType: { Id: number; Name: string }
     }> = []
 
+    // Debug info collected during processing
+    let staffDebugInfo: Array<{
+      name: string
+      id: number
+      workingHours: string[]
+      appointments: string[]
+      freeBlocks: string[]
+    }> = []
+
     // First, get all staff for this location - we need this to fetch unavailability data
     const allStaff = await getStaff(parsedLocationId)
     const validStaffIds = allStaff
@@ -76,8 +85,9 @@ export async function GET(request: NextRequest) {
 
     console.log('Found', validStaffIds.length, 'valid staff members at location')
 
-    // Fetch schedule items to get unavailability and appointment data
-    // We need this regardless of which availability source we use
+    // Primary approach: Build availability from schedule items
+    // This gives us full availability windows (staff working hours minus appointments/blocks)
+    // which is more comprehensive than getBookableItems (which returns limited pre-computed slots)
     let staffBlockedPeriods = new Map<number, { start: Date; end: Date }[]>()
 
     if (validStaffIds.length > 0) {
@@ -91,32 +101,42 @@ export async function GET(request: NextRequest) {
 
         console.log('Schedule items returned:', scheduleItems.length, 'staff members')
 
-        // Build blocked periods map for each staff member
+        // Debug: collect per-staff info for response
+        const staffDebugInfoLocal: Array<{
+          name: string
+          id: number
+          workingHours: string[]
+          appointments: string[]
+          freeBlocks: string[]
+        }> = []
+
+        // Build blocked periods AND availability from schedule items in one pass
         for (const staff of scheduleItems) {
           const blockedPeriods: { start: Date; end: Date }[] = []
+          const debugAppts: string[] = []
 
           // Get unavailable periods (like "Reparaciones")
           if (staff.UnavailableItems && staff.UnavailableItems.length > 0) {
-            console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.UnavailableItems.length} unavailable periods`)
             for (const unavail of staff.UnavailableItems) {
               if (unavail.StartDateTime && unavail.EndDateTime) {
                 blockedPeriods.push({
                   start: new Date(unavail.StartDateTime),
                   end: new Date(unavail.EndDateTime)
                 })
+                debugAppts.push(`[BLOCKED] ${unavail.StartDateTime} - ${unavail.EndDateTime}`)
               }
             }
           }
 
           // Get existing appointments
           if (staff.Appointments && staff.Appointments.length > 0) {
-            console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Appointments.length} existing appointments`)
             for (const appt of staff.Appointments) {
               if (appt.StartDateTime && appt.EndDateTime && appt.Status !== 'Cancelled') {
                 blockedPeriods.push({
                   start: new Date(appt.StartDateTime),
                   end: new Date(appt.EndDateTime)
                 })
+                debugAppts.push(`[APPT] ${appt.StartDateTime} - ${appt.EndDateTime}`)
               }
             }
           }
@@ -124,93 +144,20 @@ export async function GET(request: NextRequest) {
           if (blockedPeriods.length > 0) {
             staffBlockedPeriods.set(staff.Id, blockedPeriods)
           }
-        }
 
-        console.log('Built blocked periods for', staffBlockedPeriods.size, 'staff members')
-      } catch (err) {
-        console.error('Error fetching schedule items for blocked periods:', err)
-      }
-    }
+          const debugWorkingHours: string[] = []
+          const debugFreeBlocks: string[] = []
 
-    // Only try bookableitems if we have session type IDs
-    if (serviceIdArray.length > 0) {
-      try {
-        console.log('Fetching bookable items with session types:', serviceIdArray)
-        const rawBookableItems = await getBookableItems({
-          locationIds: parsedLocationId,
-          sessionTypeIds: serviceIdArray,
-          startDate,
-          endDate,
-        })
-        console.log('Bookable items returned:', rawBookableItems.length)
-
-        // Filter bookable items against blocked periods
-        for (const item of rawBookableItems) {
-          if (!item.Staff?.Id || !item.StartDateTime || !item.EndDateTime) {
-            continue
-          }
-
-          const itemStart = new Date(item.StartDateTime)
-          const itemEnd = new Date(item.EndDateTime)
-          const staffId = item.Staff.Id
-          const blockedPeriods = staffBlockedPeriods.get(staffId) || []
-
-          // Check if this time slot overlaps with any blocked period
-          let isBlocked = false
-          for (const blocked of blockedPeriods) {
-            // Overlap check: NOT (itemEnd <= blocked.start OR itemStart >= blocked.end)
-            if (!(itemEnd <= blocked.start || itemStart >= blocked.end)) {
-              isBlocked = true
-              console.log(`Filtering out slot for staff ${staffId} at ${item.StartDateTime} - overlaps with blocked period`)
-              break
-            }
-          }
-
-          if (!isBlocked) {
-            availableItems.push(item)
-          }
-        }
-
-        console.log('After filtering blocked periods:', availableItems.length, 'items remain')
-      } catch (error) {
-        console.error('Error fetching bookable items:', error)
-      }
-    } else {
-      console.log('No session type IDs provided - skipping bookableitems endpoint')
-    }
-
-    // If bookable items returns empty, try building availability from schedule items
-    // We already have the schedule data from above, so we can reuse it
-    if (availableItems.length === 0 && validStaffIds.length > 0) {
-      console.log('=== BOOKABLE ITEMS EMPTY - BUILDING FROM SCHEDULE ITEMS ===')
-
-      try {
-        // Fetch schedule items again to get the availability blocks
-        // (we only stored blocked periods above, not the full availability)
-        const scheduleItems = await getScheduleItems({
-          locationIds: [parsedLocationId],
-          staffIds: validStaffIds,
-          startDate,
-          endDate,
-        })
-
-        console.log('Schedule items returned:', scheduleItems.length, 'staff members')
-
-        // Convert schedule availabilities to the same format as bookable items
-        for (const staff of scheduleItems) {
+          // Build availability: take working hours and subtract blocked periods
           if (staff.Availabilities && staff.Availabilities.length > 0) {
-            console.log(`Staff ${staff.FirstName} ${staff.LastName} has ${staff.Availabilities.length} availability blocks`)
-
-            // Get blocked periods from our pre-built map
-            const blockedPeriods = staffBlockedPeriods.get(staff.Id) || []
+            console.log(`Staff ${staff.FirstName} ${staff.LastName}: ${staff.Availabilities.length} availability blocks, ${blockedPeriods.length} blocked periods`)
 
             for (const avail of staff.Availabilities) {
-              const endDateTime = avail.EndDateTime
-
-              if (!avail.StartDateTime || !endDateTime) continue
+              if (!avail.StartDateTime || !avail.EndDateTime) continue
 
               const availStart = new Date(avail.StartDateTime)
-              const availEnd = new Date(endDateTime)
+              const availEnd = new Date(avail.EndDateTime)
+              debugWorkingHours.push(`${avail.StartDateTime} - ${avail.EndDateTime}`)
 
               // Subtract blocked periods from this availability block
               const effectiveBlocks = subtractBlockedPeriods(
@@ -218,8 +165,10 @@ export async function GET(request: NextRequest) {
                 blockedPeriods
               )
 
-              // Add each effective block as an available item
               for (const block of effectiveBlocks) {
+                const blockMinutes = Math.round((block.end.getTime() - block.start.getTime()) / 60000)
+                debugFreeBlocks.push(`${block.start.toISOString()} - ${block.end.toISOString()} (${blockMinutes} min)`)
+
                 availableItems.push({
                   Id: avail.Id || 0,
                   StartDateTime: block.start.toISOString(),
@@ -241,18 +190,65 @@ export async function GET(request: NextRequest) {
               }
             }
           }
+
+          staffDebugInfoLocal.push({
+            name: `${staff.FirstName} ${staff.LastName}`,
+            id: staff.Id,
+            workingHours: debugWorkingHours,
+            appointments: debugAppts,
+            freeBlocks: debugFreeBlocks,
+          })
         }
 
-        console.log('Converted schedule items to', availableItems.length, 'availability items')
+        console.log('Schedule-based availability:', availableItems.length, 'effective blocks')
+        // Store for response
+        staffDebugInfo = staffDebugInfo.concat(staffDebugInfoLocal)
       } catch (err) {
         console.error('Error fetching schedule items:', err)
       }
     }
 
-    // If still empty, try staff appointment availability as second fallback
-    if (availableItems.length === 0) {
-      console.log('=== SCHEDULE ITEMS EMPTY - TRYING STAFF APPOINTMENT AVAILABILITY ===')
+    // Fallback: try getBookableItems if schedule items gave no results
+    if (availableItems.length === 0 && serviceIdArray.length > 0) {
+      console.log('=== SCHEDULE ITEMS EMPTY - TRYING BOOKABLE ITEMS ===')
+      try {
+        const rawBookableItems = await getBookableItems({
+          locationIds: parsedLocationId,
+          sessionTypeIds: serviceIdArray,
+          startDate,
+          endDate,
+        })
+        console.log('Bookable items returned:', rawBookableItems.length)
 
+        for (const item of rawBookableItems) {
+          if (!item.Staff?.Id || !item.StartDateTime || !item.EndDateTime) continue
+
+          const itemStart = new Date(item.StartDateTime)
+          const itemEnd = new Date(item.EndDateTime)
+          const blockedPeriods = staffBlockedPeriods.get(item.Staff.Id) || []
+
+          let isBlocked = false
+          for (const blocked of blockedPeriods) {
+            if (!(itemEnd <= blocked.start || itemStart >= blocked.end)) {
+              isBlocked = true
+              break
+            }
+          }
+
+          if (!isBlocked) {
+            availableItems.push(item)
+          }
+        }
+
+        console.log('After filtering:', availableItems.length, 'bookable items')
+      } catch (error) {
+        console.error('Error fetching bookable items:', error)
+      }
+    }
+
+    // Last fallback: try staff appointment availability
+    if (availableItems.length === 0) {
+      console.log('=== TRYING STAFF APPOINTMENT AVAILABILITY ===')
       try {
         const staffAvailability = await getStaffAppointmentAvailability({
           locationId: parsedLocationId,
@@ -261,10 +257,6 @@ export async function GET(request: NextRequest) {
           endDateTime: `${endDate}T23:59:59`,
         })
 
-        console.log('Staff availability returned:', staffAvailability.length, 'staff members')
-
-        // Convert staff availability to the same format as bookable items
-        // Also filter against blocked periods
         for (const staff of staffAvailability) {
           if (staff.Availabilities && staff.Availabilities.length > 0) {
             const blockedPeriods = staffBlockedPeriods.get(staff.Id) || []
@@ -273,7 +265,6 @@ export async function GET(request: NextRequest) {
               const availStart = new Date(avail.StartDateTime)
               const availEnd = new Date(avail.BookableEndDateTime || avail.EndDateTime)
 
-              // Subtract blocked periods
               const effectiveBlocks = subtractBlockedPeriods(
                 { start: availStart, end: availEnd },
                 blockedPeriods
@@ -303,28 +294,16 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        console.log('Converted staff availability to', availableItems.length, 'items')
+        console.log('Staff appointment availability:', availableItems.length, 'items')
       } catch (err) {
         console.error('Error fetching staff availability:', err)
       }
     }
 
-    // If still no items found, log helpful debug info
     if (availableItems.length === 0) {
       console.log('=== NO AVAILABILITY FOUND ===')
-      console.log('This could mean:')
-      console.log('1. No staff scheduled for these session types')
-      console.log('2. Session type IDs do not exist or are not bookable online')
-      console.log('3. Location ID is incorrect')
-      console.log('4. Staff schedules not configured in Mindbody')
-      console.log('Requested session type IDs:', serviceIdArray)
     } else {
-      // Log sample of what was found
-      console.log('=== AVAILABILITY FOUND ===')
-      console.log('Total items:', availableItems.length)
-      if (availableItems[0]) {
-        console.log('Sample item:', JSON.stringify(availableItems[0], null, 2))
-      }
+      console.log('=== AVAILABILITY FOUND:', availableItems.length, 'effective blocks ===')
     }
 
     // Validate API response
@@ -380,7 +359,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Process each date to generate 30-minute time slots
+    // Process each date to generate 15-minute time slots
     const availableDates: Array<{
       date: string
       displayDate: string
@@ -423,7 +402,7 @@ export async function GET(request: NextRequest) {
 
       if (!dayStart || !dayEnd) continue
 
-      // Generate 30-minute slots
+      // Generate 15-minute slots
       const slots: Array<{
         time: string
         displayTime: string
@@ -432,12 +411,11 @@ export async function GET(request: NextRequest) {
       }> = []
 
       // Get current time in Panama timezone (UTC-5)
-      // Add 30-minute buffer so users don't book slots that are about to start
       const now = new Date()
       const panamaOffset = -5 * 60 // Panama is UTC-5
       const localOffset = now.getTimezoneOffset()
       const panamaTime = new Date(now.getTime() + (localOffset + panamaOffset) * 60 * 1000)
-      const minimumBookingTime = new Date(panamaTime.getTime() + 30 * 60 * 1000) // 30 min buffer
+      const minimumBookingTime = panamaTime // No buffer - show all future slots
 
       console.log(`Current Panama time: ${panamaTime.toISOString()}, minimum booking time: ${minimumBookingTime.toISOString()}`)
 
@@ -514,6 +492,7 @@ export async function GET(request: NextRequest) {
         requestedSessionTypeIds: serviceIdArray,
         locationId: parsedLocationId,
         rawItemsCount: availableItems.length,
+        staffAvailability: staffDebugInfo,
       }
     })
 

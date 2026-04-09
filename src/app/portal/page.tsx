@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense, useRef } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import {
   Calendar,
@@ -15,10 +15,82 @@ import {
   Loader2,
   MapPin,
   RefreshCw,
-  Settings
+  Settings,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react'
 import { usePortalStore, usePortalData } from '@/lib/portal/store'
 import { PANAMA_TIMEZONE } from '@/lib/booking/constants'
+
+// Type for appointments
+interface Appointment {
+  AppointmentId: number
+  Name: string
+  StartDateTime: string
+  EndDateTime: string
+  SignedIn?: boolean
+  LateCancelled?: boolean
+  Staff?: {
+    FirstName: string
+    LastName: string
+    DisplayName?: string
+  }
+  Location?: {
+    Name: string
+  }
+}
+
+// Get date key for grouping (YYYY-MM-DD in Panama timezone)
+function getDateKey(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-CA', {
+    timeZone: PANAMA_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+}
+
+// Format date for group header (more readable)
+function formatDateHeader(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('es-PA', {
+    timeZone: PANAMA_TIMEZONE,
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
+// Group appointments by date
+function groupAppointmentsByDate(appointments: Appointment[]): Map<string, Appointment[]> {
+  const groups = new Map<string, Appointment[]>()
+
+  for (const apt of appointments) {
+    const dateKey = getDateKey(apt.StartDateTime)
+    if (!groups.has(dateKey)) {
+      groups.set(dateKey, [])
+    }
+    groups.get(dateKey)!.push(apt)
+  }
+
+  // Sort each group by time
+  for (const [, apts] of groups) {
+    apts.sort((a, b) => new Date(a.StartDateTime).getTime() - new Date(b.StartDateTime).getTime())
+  }
+
+  return groups
+}
+
+// Sort date keys (ascending for upcoming, descending for history)
+function sortDateKeys(keys: string[], ascending: boolean): string[] {
+  return [...keys].sort((a, b) => {
+    const dateA = new Date(a).getTime()
+    const dateB = new Date(b).getTime()
+    return ascending ? dateA - dateB : dateB - dateA
+  })
+}
 
 // Format date for display
 function formatDate(dateStr: string) {
@@ -42,11 +114,81 @@ function formatTime(dateStr: string) {
   })
 }
 
-export default function PortalPage() {
+function PortalContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  type SupabaseClient = ReturnType<typeof import('@/lib/supabase/client').getClient>
+  const supabaseRef = useRef<SupabaseClient | null>(null)
+  const [isInitializing, setIsInitializing] = useState(true)
+
+  // State for expanded date sections (keys are date strings like "2024-01-15")
+  const [expandedUpcoming, setExpandedUpcoming] = useState<Set<string>>(new Set())
+  const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set())
+  const [expandedDashboardUpcoming, setExpandedDashboardUpcoming] = useState<Set<string>>(new Set())
+  const [expandedDashboardHistory, setExpandedDashboardHistory] = useState<Set<string>>(new Set())
+
+  // Toggle a date section's expanded state
+  const toggleUpcomingDate = (dateKey: string) => {
+    setExpandedUpcoming(prev => {
+      const next = new Set(prev)
+      if (next.has(dateKey)) {
+        next.delete(dateKey)
+      } else {
+        next.add(dateKey)
+      }
+      return next
+    })
+  }
+
+  const toggleHistoryDate = (dateKey: string) => {
+    setExpandedHistory(prev => {
+      const next = new Set(prev)
+      if (next.has(dateKey)) {
+        next.delete(dateKey)
+      } else {
+        next.add(dateKey)
+      }
+      return next
+    })
+  }
+
+  const toggleDashboardUpcomingDate = (dateKey: string) => {
+    setExpandedDashboardUpcoming(prev => {
+      const next = new Set(prev)
+      if (next.has(dateKey)) {
+        next.delete(dateKey)
+      } else {
+        next.add(dateKey)
+      }
+      return next
+    })
+  }
+
+  const toggleDashboardHistoryDate = (dateKey: string) => {
+    setExpandedDashboardHistory(prev => {
+      const next = new Set(prev)
+      if (next.has(dateKey)) {
+        next.delete(dateKey)
+      } else {
+        next.add(dateKey)
+      }
+      return next
+    })
+  }
+
+  // Lazy load Supabase client
+  const getSupabase = (): SupabaseClient => {
+    if (!supabaseRef.current) {
+      const { getClient } = require('@/lib/supabase/client')
+      supabaseRef.current = getClient()
+    }
+    return supabaseRef.current as SupabaseClient
+  }
+
   const {
-    isAuthenticated,
+    session,
     client,
+    mindbodyClientId,
     visits,
     purchases,
     upcomingAppointments,
@@ -54,39 +196,167 @@ export default function PortalPage() {
     error,
     activeTab,
     setActiveTab,
+    setAuth,
+    setMindbodyClient,
     logout
   } = usePortalStore()
   const { fetchAllData } = usePortalData()
 
-  // Redirect if not authenticated
+  // Initialize auth state and fetch client data
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/portal/login')
-    }
-  }, [isAuthenticated, router])
+    const supabase = getSupabase()
 
-  // Fetch data on mount
+    const initializeAuth = async () => {
+      try {
+        // Get session from Supabase
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+
+        if (!currentSession) {
+          // Not authenticated - redirect to login
+          router.push('/portal/login')
+          return
+        }
+
+        // Set auth state
+        setAuth(currentSession.user, currentSession)
+
+        // Check for clientId from URL (passed from magic link callback)
+        const urlClientId = searchParams.get('clientId')
+        if (urlClientId) {
+          const clientIdNum = parseInt(urlClientId, 10)
+          if (!isNaN(clientIdNum)) {
+            // Fetch client details from Mindbody
+            const response = await fetch(`/api/portal/profile?clientId=${clientIdNum}`)
+            if (response.ok) {
+              const data = await response.json()
+              setMindbodyClient(data.client, clientIdNum)
+            }
+          }
+        } else if (mindbodyClientId && !client) {
+          // Have clientId from storage but no client data - fetch it
+          const response = await fetch(`/api/portal/profile?clientId=${mindbodyClientId}`)
+          if (response.ok) {
+            const data = await response.json()
+            setMindbodyClient(data.client, mindbodyClientId)
+          }
+        }
+
+        // Also get client ID from user metadata if available
+        if (!mindbodyClientId && currentSession.user.user_metadata?.mindbody_client_id) {
+          const metaClientId = currentSession.user.user_metadata.mindbody_client_id
+          const response = await fetch(`/api/portal/profile?clientId=${metaClientId}`)
+          if (response.ok) {
+            const data = await response.json()
+            setMindbodyClient(data.client, metaClientId)
+          }
+        }
+
+      } catch (err) {
+        console.error('Error initializing auth:', err)
+      } finally {
+        setIsInitializing(false)
+      }
+    }
+
+    initializeAuth()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        if (event === 'SIGNED_OUT') {
+          logout()
+          router.push('/portal/login')
+        } else if (currentSession) {
+          setAuth(currentSession.user, currentSession)
+        }
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [router, searchParams, setAuth, setMindbodyClient, mindbodyClientId, client, logout])
+
+  // Fetch data when client is available
   useEffect(() => {
-    if (isAuthenticated && client) {
+    if (session && mindbodyClientId) {
       fetchAllData()
     }
-  }, [isAuthenticated, client])
+  }, [session, mindbodyClientId])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const supabase = getSupabase()
+    await supabase.auth.signOut()
     logout()
     router.push('/portal/login')
   }
 
-  if (!isAuthenticated || !client) {
+  // Loading state
+  if (isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gold" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-white">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
+          <p className="text-warm-gray">Cargando tu portal...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Not authenticated
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-white">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
+          <p className="text-warm-gray">Redirigiendo...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Authenticated but no Mindbody client linked
+  if (!client && !mindbodyClientId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-cream to-white">
+        <div className="w-full max-w-md text-center">
+          <Image
+            src="/images/logo.png"
+            alt="Mimosa Spa Retreat"
+            width={180}
+            height={60}
+            className="mx-auto mb-8"
+          />
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-beige-200">
+            <User className="w-16 h-16 text-gold mx-auto mb-4" />
+            <h1 className="text-xl font-bold text-dark mb-2">
+              Bienvenido
+            </h1>
+            <p className="text-warm-gray mb-6">
+              Tu sesión está activa, pero no encontramos una cuenta de cliente asociada.
+            </p>
+            <a
+              href="/es/reservar"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-dark
+                       font-semibold rounded-xl hover:bg-gold/90 transition-colors"
+            >
+              <Calendar className="w-5 h-5" />
+              Reservar tu primera cita
+            </a>
+            <button
+              onClick={handleLogout}
+              className="block w-full mt-4 text-warm-gray hover:text-dark transition-colors"
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-white">
       {/* Header */}
       <header className="bg-white border-b border-beige-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -105,10 +375,10 @@ export default function PortalPage() {
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-dark">
-                {client.FirstName} {client.LastName}
+                {client?.FirstName} {client?.LastName}
               </p>
               <p className="text-xs text-warm-gray">
-                {client.Email || client.MobilePhone}
+                {client?.Email || client?.MobilePhone}
               </p>
             </div>
             <button
@@ -134,7 +404,7 @@ export default function PortalPage() {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-dark mb-2">
-            Hola, {client.FirstName}
+            Hola, {client?.FirstName || 'Cliente'}
           </h1>
           <p className="text-warm-gray">
             Bienvenido a tu portal personal de Mimosa Spa Retreat
@@ -266,41 +536,82 @@ export default function PortalPage() {
                       Ver todas <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="p-4">
+                  <div>
                     {upcomingAppointments.length === 0 ? (
                       <p className="text-warm-gray text-center py-4">
                         No tienes citas programadas
                       </p>
                     ) : (
-                      <div className="space-y-3">
-                        {upcomingAppointments.slice(0, 3).map((apt) => (
-                          <div
-                            key={apt.AppointmentId}
-                            className="flex items-center justify-between p-3 bg-beige-50 rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium text-dark">{apt.Name}</p>
-                              <p className="text-sm text-warm-gray flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {formatDate(apt.StartDateTime)} - {formatTime(apt.StartDateTime)}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              {apt.Staff && (
-                                <p className="text-sm text-dark">
-                                  {apt.Staff.DisplayName || `${apt.Staff.FirstName} ${apt.Staff.LastName}`}
-                                </p>
+                      (() => {
+                        const grouped = groupAppointmentsByDate(upcomingAppointments as Appointment[])
+                        const sortedDates = sortDateKeys(Array.from(grouped.keys()), true)
+                        // Limit to first 3 dates for dashboard preview
+                        return sortedDates.slice(0, 3).map((dateKey) => {
+                          const appointments = grouped.get(dateKey)!
+                          const isExpanded = expandedDashboardUpcoming.has(dateKey)
+                          const firstTime = formatTime(appointments[0].StartDateTime)
+                          return (
+                            <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
+                              <button
+                                onClick={() => toggleDashboardUpcomingDate(dateKey)}
+                                className="w-full p-3 flex items-center justify-between hover:bg-beige-50 transition-colors"
+                              >
+                                <div className="flex items-center gap-2">
+                                  {isExpanded ? (
+                                    <ChevronDown className="w-4 h-4 text-gold" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4 text-gold" />
+                                  )}
+                                  <div className="text-left">
+                                    <p className="font-medium text-dark capitalize text-sm">
+                                      {formatDateHeader(dateKey)}
+                                    </p>
+                                    <p className="text-xs text-warm-gray">
+                                      {appointments.length} cita{appointments.length !== 1 ? 's' : ''} · Primera a las {firstTime}
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                  Confirmada{appointments.length !== 1 ? 's' : ''}
+                                </span>
+                              </button>
+                              {isExpanded && (
+                                <div className="px-3 pb-3 space-y-2">
+                                  {appointments.map((apt) => (
+                                    <div
+                                      key={apt.AppointmentId}
+                                      className="p-3 bg-beige-50 rounded-lg ml-6"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <p className="font-medium text-dark text-sm">{apt.Name}</p>
+                                          <p className="text-xs text-warm-gray flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            {formatTime(apt.StartDateTime)} - {formatTime(apt.EndDateTime)}
+                                          </p>
+                                        </div>
+                                        <div className="text-right">
+                                          {apt.Staff && (
+                                            <p className="text-xs text-dark">
+                                              {apt.Staff.DisplayName || `${apt.Staff.FirstName} ${apt.Staff.LastName}`}
+                                            </p>
+                                          )}
+                                          {apt.Location && (
+                                            <p className="text-xs text-warm-gray flex items-center gap-1 justify-end">
+                                              <MapPin className="w-3 h-3" />
+                                              {apt.Location.Name}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               )}
-                              {apt.Location && (
-                                <p className="text-xs text-warm-gray flex items-center gap-1 justify-end">
-                                  <MapPin className="w-3 h-3" />
-                                  {apt.Location.Name}
-                                </p>
-                              )}
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          )
+                        })
+                      })()
                     )}
                   </div>
                 </div>
@@ -319,31 +630,87 @@ export default function PortalPage() {
                       Ver todas <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="p-4">
+                  <div>
                     {visits.length === 0 ? (
                       <p className="text-warm-gray text-center py-4">
                         No hay visitas registradas
                       </p>
                     ) : (
-                      <div className="space-y-3">
-                        {visits.slice(0, 3).map((visit) => (
-                          <div
-                            key={visit.AppointmentId}
-                            className="flex items-center justify-between p-3 bg-beige-50 rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium text-dark">{visit.Name}</p>
-                              <p className="text-sm text-warm-gray">
-                                {formatDate(visit.StartDateTime)}
-                              </p>
+                      (() => {
+                        const grouped = groupAppointmentsByDate(visits as Appointment[])
+                        const sortedDates = sortDateKeys(Array.from(grouped.keys()), true)
+                        // Limit to first 3 dates for dashboard preview
+                        return sortedDates.slice(0, 3).map((dateKey) => {
+                          const appointments = grouped.get(dateKey)!
+                          const isExpanded = expandedDashboardHistory.has(dateKey)
+                          const firstTime = formatTime(appointments[0].StartDateTime)
+                          const completedCount = appointments.filter(a => a.SignedIn).length
+                          const cancelledCount = appointments.filter(a => a.LateCancelled).length
+                          return (
+                            <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
+                              <button
+                                onClick={() => toggleDashboardHistoryDate(dateKey)}
+                                className="w-full p-3 flex items-center justify-between hover:bg-beige-50 transition-colors"
+                              >
+                                <div className="flex items-center gap-2">
+                                  {isExpanded ? (
+                                    <ChevronDown className="w-4 h-4 text-gold" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4 text-gold" />
+                                  )}
+                                  <div className="text-left">
+                                    <p className="font-medium text-dark capitalize text-sm">
+                                      {formatDateHeader(dateKey)}
+                                    </p>
+                                    <p className="text-xs text-warm-gray">
+                                      {appointments.length} visita{appointments.length !== 1 ? 's' : ''} · Primera a las {firstTime}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex gap-1">
+                                  {completedCount > 0 && (
+                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                      {completedCount}
+                                    </span>
+                                  )}
+                                  {cancelledCount > 0 && (
+                                    <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                                      {cancelledCount}
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                              {isExpanded && (
+                                <div className="px-3 pb-3 space-y-2">
+                                  {appointments.map((visit) => (
+                                    <div
+                                      key={visit.AppointmentId}
+                                      className="p-3 bg-beige-50 rounded-lg ml-6"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <p className="font-medium text-dark text-sm">{visit.Name}</p>
+                                          <p className="text-xs text-warm-gray flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            {formatTime(visit.StartDateTime)}
+                                          </p>
+                                        </div>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium
+                                          ${visit.SignedIn ? 'bg-green-100 text-green-700' :
+                                            visit.LateCancelled ? 'bg-red-100 text-red-700' :
+                                            'bg-gray-100 text-gray-600'}`}>
+                                          {visit.SignedIn ? 'Completada' :
+                                           visit.LateCancelled ? 'Cancelada' : 'Pendiente'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium
-                              ${visit.SignedIn ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                              {visit.SignedIn ? 'Completada' : 'Pendiente'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                          )
+                        })
+                      })()
                     )}
                   </div>
                 </div>
@@ -356,7 +723,7 @@ export default function PortalPage() {
                 <div className="p-4 border-b border-beige-200">
                   <h2 className="font-semibold text-dark">Próximas Citas</h2>
                 </div>
-                <div className="divide-y divide-beige-200">
+                <div>
                   {upcomingAppointments.length === 0 ? (
                     <div className="p-8 text-center">
                       <CalendarCheck className="w-12 h-12 text-beige-300 mx-auto mb-4" />
@@ -371,40 +738,76 @@ export default function PortalPage() {
                       </a>
                     </div>
                   ) : (
-                    upcomingAppointments.map((apt) => (
-                      <div key={apt.AppointmentId} className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-semibold text-dark text-lg">{apt.Name}</p>
-                            <div className="mt-2 space-y-1">
-                              <p className="text-warm-gray flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-gold" />
-                                {formatDate(apt.StartDateTime)}
-                              </p>
-                              <p className="text-warm-gray flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-gold" />
-                                {formatTime(apt.StartDateTime)} - {formatTime(apt.EndDateTime)}
-                              </p>
-                              {apt.Staff && (
-                                <p className="text-warm-gray flex items-center gap-2">
-                                  <User className="w-4 h-4 text-gold" />
-                                  {apt.Staff.DisplayName || `${apt.Staff.FirstName} ${apt.Staff.LastName}`}
-                                </p>
-                              )}
-                              {apt.Location && (
-                                <p className="text-warm-gray flex items-center gap-2">
-                                  <MapPin className="w-4 h-4 text-gold" />
-                                  {apt.Location.Name}
-                                </p>
-                              )}
-                            </div>
+                    (() => {
+                      const grouped = groupAppointmentsByDate(upcomingAppointments as Appointment[])
+                      const sortedDates = sortDateKeys(Array.from(grouped.keys()), true) // ascending for upcoming
+                      return sortedDates.map((dateKey) => {
+                        const appointments = grouped.get(dateKey)!
+                        const isExpanded = expandedUpcoming.has(dateKey)
+                        const firstTime = formatTime(appointments[0].StartDateTime)
+                        return (
+                          <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
+                            <button
+                              onClick={() => toggleUpcomingDate(dateKey)}
+                              className="w-full p-4 flex items-center justify-between hover:bg-beige-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                {isExpanded ? (
+                                  <ChevronDown className="w-5 h-5 text-gold" />
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 text-gold" />
+                                )}
+                                <div className="text-left">
+                                  <p className="font-semibold text-dark capitalize">
+                                    {formatDateHeader(dateKey)}
+                                  </p>
+                                  <p className="text-sm text-warm-gray">
+                                    {appointments.length} cita{appointments.length !== 1 ? 's' : ''} · Primera a las {firstTime}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                                Confirmada{appointments.length !== 1 ? 's' : ''}
+                              </span>
+                            </button>
+                            {isExpanded && (
+                              <div className="px-4 pb-4 space-y-3">
+                                {appointments.map((apt) => (
+                                  <div
+                                    key={apt.AppointmentId}
+                                    className="p-4 bg-beige-50 rounded-xl ml-8"
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <p className="font-semibold text-dark text-lg">{apt.Name}</p>
+                                        <div className="mt-2 space-y-1">
+                                          <p className="text-warm-gray flex items-center gap-2">
+                                            <Clock className="w-4 h-4 text-gold" />
+                                            {formatTime(apt.StartDateTime)} - {formatTime(apt.EndDateTime)}
+                                          </p>
+                                          {apt.Staff && (
+                                            <p className="text-warm-gray flex items-center gap-2">
+                                              <User className="w-4 h-4 text-gold" />
+                                              {apt.Staff.DisplayName || `${apt.Staff.FirstName} ${apt.Staff.LastName}`}
+                                            </p>
+                                          )}
+                                          {apt.Location && (
+                                            <p className="text-warm-gray flex items-center gap-2">
+                                              <MapPin className="w-4 h-4 text-gold" />
+                                              {apt.Location.Name}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                            Confirmada
-                          </span>
-                        </div>
-                      </div>
-                    ))
+                        )
+                      })
+                    })()
                   )}
                 </div>
               </div>
@@ -416,44 +819,101 @@ export default function PortalPage() {
                 <div className="p-4 border-b border-beige-200">
                   <h2 className="font-semibold text-dark">Historial de Visitas</h2>
                 </div>
-                <div className="divide-y divide-beige-200">
+                <div>
                   {visits.length === 0 ? (
                     <div className="p-8 text-center">
                       <History className="w-12 h-12 text-beige-300 mx-auto mb-4" />
                       <p className="text-warm-gray">No hay visitas registradas</p>
                     </div>
                   ) : (
-                    visits.map((visit) => (
-                      <div key={visit.AppointmentId} className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-semibold text-dark">{visit.Name}</p>
-                            <div className="mt-1 space-y-1">
-                              <p className="text-sm text-warm-gray">
-                                {formatDate(visit.StartDateTime)} - {formatTime(visit.StartDateTime)}
-                              </p>
-                              {visit.Staff && (
-                                <p className="text-sm text-warm-gray">
-                                  Terapeuta: {visit.Staff.DisplayName || `${visit.Staff.FirstName} ${visit.Staff.LastName}`}
-                                </p>
-                              )}
-                              {visit.Location && (
-                                <p className="text-sm text-warm-gray">
-                                  {visit.Location.Name}
-                                </p>
-                              )}
-                            </div>
+                    (() => {
+                      const grouped = groupAppointmentsByDate(visits as Appointment[])
+                      const sortedDates = sortDateKeys(Array.from(grouped.keys()), true) // ascending - earliest at top
+                      return sortedDates.map((dateKey) => {
+                        const appointments = grouped.get(dateKey)!
+                        const isExpanded = expandedHistory.has(dateKey)
+                        const firstTime = formatTime(appointments[0].StartDateTime)
+                        const completedCount = appointments.filter(a => a.SignedIn).length
+                        const cancelledCount = appointments.filter(a => a.LateCancelled).length
+                        return (
+                          <div key={dateKey} className="border-b border-beige-200 last:border-b-0">
+                            <button
+                              onClick={() => toggleHistoryDate(dateKey)}
+                              className="w-full p-4 flex items-center justify-between hover:bg-beige-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                {isExpanded ? (
+                                  <ChevronDown className="w-5 h-5 text-gold" />
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 text-gold" />
+                                )}
+                                <div className="text-left">
+                                  <p className="font-semibold text-dark capitalize">
+                                    {formatDateHeader(dateKey)}
+                                  </p>
+                                  <p className="text-sm text-warm-gray">
+                                    {appointments.length} visita{appointments.length !== 1 ? 's' : ''} · Primera a las {firstTime}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                {completedCount > 0 && (
+                                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                    {completedCount} completada{completedCount !== 1 ? 's' : ''}
+                                  </span>
+                                )}
+                                {cancelledCount > 0 && (
+                                  <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                                    {cancelledCount} cancelada{cancelledCount !== 1 ? 's' : ''}
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                            {isExpanded && (
+                              <div className="px-4 pb-4 space-y-3">
+                                {appointments.map((visit) => (
+                                  <div
+                                    key={visit.AppointmentId}
+                                    className="p-4 bg-beige-50 rounded-xl ml-8"
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <p className="font-semibold text-dark">{visit.Name}</p>
+                                        <div className="mt-1 space-y-1">
+                                          <p className="text-sm text-warm-gray flex items-center gap-2">
+                                            <Clock className="w-4 h-4 text-gold" />
+                                            {formatTime(visit.StartDateTime)}
+                                          </p>
+                                          {visit.Staff && (
+                                            <p className="text-sm text-warm-gray flex items-center gap-2">
+                                              <User className="w-4 h-4 text-gold" />
+                                              {visit.Staff.DisplayName || `${visit.Staff.FirstName} ${visit.Staff.LastName}`}
+                                            </p>
+                                          )}
+                                          {visit.Location && (
+                                            <p className="text-sm text-warm-gray flex items-center gap-2">
+                                              <MapPin className="w-4 h-4 text-gold" />
+                                              {visit.Location.Name}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <span className={`px-2 py-1 rounded-full text-xs font-medium
+                                        ${visit.SignedIn ? 'bg-green-100 text-green-700' :
+                                          visit.LateCancelled ? 'bg-red-100 text-red-700' :
+                                          'bg-gray-100 text-gray-600'}`}>
+                                        {visit.SignedIn ? 'Completada' :
+                                         visit.LateCancelled ? 'Cancelada' : 'Pendiente'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium
-                            ${visit.SignedIn ? 'bg-green-100 text-green-700' :
-                              visit.LateCancelled ? 'bg-red-100 text-red-700' :
-                              'bg-gray-100 text-gray-600'}`}>
-                            {visit.SignedIn ? 'Completada' :
-                             visit.LateCancelled ? 'Cancelada' : 'Pendiente'}
-                          </span>
-                        </div>
-                      </div>
-                    ))
+                        )
+                      })
+                    })()
                   )}
                 </div>
               </div>
@@ -523,5 +983,26 @@ export default function PortalPage() {
         </div>
       </footer>
     </div>
+  )
+}
+
+// Loading component for Suspense fallback
+function PortalLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-white">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
+        <p className="text-warm-gray">Cargando tu portal...</p>
+      </div>
+    </div>
+  )
+}
+
+// Export with Suspense wrapper for useSearchParams
+export default function PortalPage() {
+  return (
+    <Suspense fallback={<PortalLoading />}>
+      <PortalContent />
+    </Suspense>
   )
 }

@@ -34,45 +34,66 @@ let tokenExpiry: number | null = null
 async function getAccessToken(): Promise<string> {
   // Validate config first
   validateConfig()
-  
+
   // Check if we have a valid cached token
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken
   }
-  
-  // Request new token
-  const response = await fetch(`${MINDBODY_API_URL}/usertoken/issue`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Api-Key': MINDBODY_API_KEY!,
-      'SiteId': MINDBODY_SITE_ID!,
-    },
-    body: JSON.stringify({
-      Username: MINDBODY_USERNAME,
-      Password: MINDBODY_PASSWORD,
-    }),
-  })
-  
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('Mindbody token error:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-      apiKeyPrefix: MINDBODY_API_KEY?.substring(0, 8),
-      siteId: MINDBODY_SITE_ID,
-    })
-    throw new Error(`Failed to get Mindbody token: ${response.status} - ${errorText}`)
+
+  // Request new token with up to 3 attempts for transient 5xx/timeout errors
+  const maxAttempts = 3
+  let lastError: Error | null = null
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = await fetch(`${MINDBODY_API_URL}/usertoken/issue`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': MINDBODY_API_KEY!,
+          'SiteId': MINDBODY_SITE_ID!,
+        },
+        body: JSON.stringify({
+          Username: MINDBODY_USERNAME,
+          Password: MINDBODY_PASSWORD,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        // Only retry on server-side errors (5xx); fail immediately on 4xx
+        if (response.status >= 500 && attempt < maxAttempts) {
+          console.warn(`Mindbody token attempt ${attempt} failed (${response.status}), retrying...`)
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000))
+          continue
+        }
+        console.error('Mindbody token error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+          apiKeyPrefix: MINDBODY_API_KEY?.substring(0, 8),
+          siteId: MINDBODY_SITE_ID,
+        })
+        throw new Error(`Failed to get Mindbody token: ${response.status} - ${errorText}`)
+      }
+
+      const data: MindbodyTokenResponse = await response.json()
+
+      // Cache token (expires in 1 hour, refresh at 50 minutes)
+      cachedToken = data.AccessToken
+      tokenExpiry = Date.now() + (50 * 60 * 1000)
+
+      return cachedToken
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      if (attempt < maxAttempts) {
+        console.warn(`Mindbody token attempt ${attempt} threw, retrying...`, lastError.message)
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000))
+      }
+    }
   }
-  
-  const data: MindbodyTokenResponse = await response.json()
-  
-  // Cache token (expires in 1 hour, refresh at 50 minutes)
-  cachedToken = data.AccessToken
-  tokenExpiry = Date.now() + (50 * 60 * 1000) // 50 minutes
-  
-  return cachedToken
+
+  throw lastError ?? new Error('Failed to get Mindbody token after retries')
 }
 
 // Export token getter for test/debug endpoints
@@ -158,7 +179,12 @@ export async function mindbodyRequest<T>(
 
   if (!response.ok) {
     const errorText = await response.text()
-    console.error(`Mindbody API error: ${response.status}`, errorText)
+    console.error(`Mindbody API error: ${response.status}`, {
+      endpoint,
+      method,
+      body: body ? JSON.stringify(body) : undefined,
+      errorText
+    })
     throw new Error(`Mindbody API error: ${response.status} - ${errorText}`)
   }
 
@@ -199,6 +225,8 @@ export async function addClient(clientData: {
   MobilePhone: string
   BirthDate?: string
   Gender?: string
+  AddressLine1?: string
+  ReferredBy?: string
 }) {
   interface AddClientResponse {
     Client: {
@@ -208,13 +236,42 @@ export async function addClient(clientData: {
       Email: string
       MobilePhone: string
     }
+    Error?: {
+      Message: string
+      Code: string
+    }
   }
-  
+
+  // Add required fields with defaults if not provided
+  // These fields are configured as required by the business in Mindbody
+  const requestData = {
+    ...clientData,
+    AddressLine1: clientData.AddressLine1 || 'Panamá', // Default address
+    ReferredBy: clientData.ReferredBy || 'Website', // Default referral source
+    Gender: clientData.Gender || 'Female', // Default gender (spa clientele)
+  }
+
+  // Mindbody API expects the client fields directly at the root level
+  console.log('addClient - Sending to Mindbody:', JSON.stringify(requestData, null, 2))
+
   const response = await mindbodyRequest<AddClientResponse>('/client/addclient', {
     method: 'POST',
-    body: clientData
+    body: requestData
   })
-  
+
+  console.log('addClient - Mindbody response:', JSON.stringify(response, null, 2))
+
+  // Check for error in response
+  if (response.Error) {
+    console.error('Mindbody addClient error:', response.Error)
+    throw new Error(`Mindbody API error: ${response.Error.Message || response.Error.Code || 'Unknown error'}`)
+  }
+
+  if (!response.Client) {
+    console.error('Mindbody addClient - No client in response:', response)
+    throw new Error('Mindbody API did not return a client')
+  }
+
   return response.Client
 }
 
@@ -339,7 +396,7 @@ export async function getSessionTypes(onlineOnly: boolean = true) {
   return sessionTypes
 }
 
-// Normalize name for flexible matching between sale/services and sessiontypes
+// Normalize name for matching between sale/services and sessiontypes
 function normalizeServiceName(name: string): string {
   return name
     .toLowerCase()
@@ -349,32 +406,24 @@ function normalizeServiceName(name: string): string {
     .replace(/[–—]/g, '-') // Different dash types
 }
 
-// Find matching session type with flexible matching
+// Find matching session type - exact match only
 function findSessionTypeMatch(
   name: string,
-  sessionTypeMap: Map<string, { Id: number; Duration: number; ProgramId: number }>
-): { Id: number; Duration: number; ProgramId: number } | undefined {
+  sessionTypeMap: Map<string, { Id: number; Duration: number; ProgramId: number; Description?: string }>
+): { Id: number; Duration: number; ProgramId: number; Description?: string } | undefined {
   const normalizedName = normalizeServiceName(name)
 
-  // Try exact match first
+  // Exact match only
   if (sessionTypeMap.has(normalizedName)) {
     return sessionTypeMap.get(normalizedName)
-  }
-
-  // Try partial match - service name contains session type name or vice versa
-  for (const [stName, stData] of sessionTypeMap.entries()) {
-    if (normalizedName.includes(stName) || stName.includes(normalizedName)) {
-      return stData
-    }
   }
 
   return undefined
 }
 
-// Get services by combining session types (for appointments) with sale services (for pricing)
-// This ensures we have the correct SessionTypeId for booking appointments
-// Filter: Online bookable, single session, has price, NOT Adicionales
-export async function getServices(locationId?: number) {
+// Shared function to fetch all online bookable services from Mindbody
+// Returns all services with session type matching applied
+async function fetchAllOnlineBookableServices(locationId?: number) {
   // Fetch both session types and sale services in parallel
   const [sessionTypes, saleServicesResponse] = await Promise.all([
     getSessionTypes(true), // Only online bookable session types
@@ -392,22 +441,22 @@ export async function getServices(locationId?: number) {
   console.log('Total online session types:', sessionTypes.length)
 
   // Create a map of session types by normalized name for matching
-  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
+  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number; Description: string }>()
   for (const st of sessionTypes) {
     const normalizedName = normalizeServiceName(st.Name)
     sessionTypeMap.set(normalizedName, {
       Id: st.Id,
       Duration: st.DefaultTimeLength || 0,
       ProgramId: st.ProgramId,
+      Description: st.OnlineDescription || st.Description || '',
     })
   }
 
-  // Filter sale services and match with session types
+  // Filter all sale services (online bookable, single session, has price)
   const filteredServices = allSaleServices.filter(s =>
     s.SellOnline === true &&
     s.Count === 1 &&
-    s.Price > 0 &&
-    s.ProgramId !== 8 // Exclude Adicionales
+    s.Price > 0
   )
   console.log('Filtered sale services (SellOnline, single session, has price):', filteredServices.length)
 
@@ -420,117 +469,157 @@ export async function getServices(locationId?: number) {
     const duration = sessionType?.Duration || parseDurationFromName(s.Name)
 
     if (!sessionType) {
-      console.log(`Warning: No session type match for service: ${s.Name}`)
+      console.log(`Warning: No session type match for service: ${s.Name} (ProgramId=${s.ProgramId})`)
     }
 
     return {
       Id: serviceId, // SessionTypeId for appointments
       ProductId: s.ProductId,
       Name: s.Name,
-      Description: '',
+      Description: sessionType?.Description || '',
       Duration: duration,
       Price: removeTaxFromPrice(s.Price || s.OnlinePrice || 0),
       OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
       TaxIncluded: s.TaxIncluded,
       OnlineBooking: s.SellOnline,
-      // Always use Spanish category from PROGRAM_NAMES based on ProgramId
       Category: getSpanishCategory(s.ProgramId),
       ProgramId: s.ProgramId,
       IsAddOn: false,
+      HasSessionTypeMatch: sessionType !== undefined,
     }
   })
 
-  // Only include services that have a matching session type (truly online bookable)
-  const onlineBookableServices = services.filter(s => {
-    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
-  })
+  return { services, sessionTypeMap }
+}
 
-  console.log('Online bookable services with session type match:', onlineBookableServices.length)
+// Get services (treatments) - excludes Adicionales (ProgramId 8)
+// Filter: Online bookable, single session, has price, NOT Adicionales
+export async function getServices(locationId?: number) {
+  const { services, sessionTypeMap } = await fetchAllOnlineBookableServices(locationId)
+
+  // Filter out Adicionales (ProgramId 8) and only include services with session type match
+  const onlineBookableServices = services.filter(s =>
+    s.ProgramId !== 8 && // Exclude Adicionales
+    findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
+  )
+
+  console.log('Online bookable services (excluding Adicionales):', onlineBookableServices.length)
   console.log('Services with prices (tax removed):', onlineBookableServices.filter(s => s.Price > 0).length)
 
   return onlineBookableServices
 }
 
-// Get add-ons by combining session types with sale services
-// Filter: ProgramId=8 (Adicionales), online bookable, single session, has price
+// Get ALL online bookable services for promotions (including those without session type match)
+// Used to display promotion services in the booking widget
+// These services are online bookable in Mindbody but may not have exact session type name matches
+export async function getOnlineBookableServicesForPromotions(locationId?: number) {
+  const { services } = await fetchAllOnlineBookableServices(locationId)
+
+  // Return ALL online bookable services including add-ons (Adicionales)
+  // Promotions can include any service type
+  console.log('All online bookable services for promotions (no filters):', services.length)
+
+  return services
+}
+
+// Get add-ons (Adicionales) - only ProgramId 8
+// Filter: Online bookable, single session, has price, ONLY Adicionales, with session type match
 export async function getAddons(locationId?: number) {
-  // Fetch both session types and sale services in parallel
-  const [sessionTypes, saleServicesResponse] = await Promise.all([
-    getSessionTypes(true), // Only online bookable session types
+  const { services, sessionTypeMap } = await fetchAllOnlineBookableServices(locationId)
+
+  // Filter for Adicionales only (ProgramId 8) and require session type match for booking
+  const onlineBookableAddons = services.filter(s =>
+    s.ProgramId === 8 && // Only Adicionales
+    findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
+  )
+
+  console.log('Online bookable addons (Adicionales only):', onlineBookableAddons.length)
+  console.log('Addons with prices (tax removed):', onlineBookableAddons.filter(s => s.Price > 0).length)
+
+  return onlineBookableAddons
+}
+
+// ===========================================
+// GET ALL SERVICES (for admin menu management)
+// Returns ALL services from Mindbody, including non-online-bookable ones
+// Used by admin to manage which services appear on menu pages
+// ===========================================
+export async function getAllServices(locationId?: number) {
+  // Fetch ALL session types, ONLINE-ONLY session types, and sale services in parallel
+  const [allSessionTypes, onlineSessionTypes, saleServicesResponse] = await Promise.all([
+    getSessionTypes(false), // Include ALL session types
+    getSessionTypes(true),  // Only online bookable session types
     mindbodyRequest<SaleServicesResponse>('/sale/services', {
       params: {
         limit: 200,
-        sellOnline: true,
+        // Don't filter by sellOnline - get all services
         ...(locationId ? { locationId: locationId } : {})
       }
     })
   ])
 
   const allSaleServices = saleServicesResponse.Services || []
-  console.log('Total sale/services for add-ons:', allSaleServices.length)
+  console.log('Total sale/services from Mindbody (all):', allSaleServices.length)
+  console.log('Total session types (all):', allSessionTypes.length)
+  console.log('Total ONLINE session types:', onlineSessionTypes.length)
 
-  // Create a map of session types by normalized name
-  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number }>()
-  for (const st of sessionTypes) {
+  // Create a set of online bookable session type IDs for quick lookup
+  const onlineSessionTypeIds = new Set(onlineSessionTypes.map(st => st.Id))
+  console.log('Online bookable session type IDs:', Array.from(onlineSessionTypeIds))
+
+  // Create a map of session types by normalized name for matching
+  const sessionTypeMap = new Map<string, { Id: number; Duration: number; ProgramId: number; Description: string }>()
+  for (const st of allSessionTypes) {
     const normalizedName = normalizeServiceName(st.Name)
     sessionTypeMap.set(normalizedName, {
       Id: st.Id,
       Duration: st.DefaultTimeLength || 0,
       ProgramId: st.ProgramId,
+      Description: st.OnlineDescription || st.Description || '',
     })
   }
 
-  // Filter for Adicionales only (ProgramId 8)
-  const filteredAddons = allSaleServices.filter(s =>
-    s.ProgramId === 8 && // Adicionales category
-    s.SellOnline === true &&
-    s.Count === 1 &&
-    s.Price > 0
+  // Filter for single session services with price (but don't require SellOnline)
+  const filteredServices = allSaleServices.filter(s =>
+    s.Count === 1 && // Single session only
+    s.Price > 0 // Has price
   )
-  console.log('Filtered addons from sale/services (ProgramId=8, SellOnline):', filteredAddons.length)
+  console.log('Filtered sale services (single session, has price):', filteredServices.length)
 
-  // Transform and match with session types using flexible matching
-  const addons = filteredAddons.map(s => {
+  // Transform services - include both online and offline bookable
+  const services = filteredServices.map(s => {
     const sessionType = findSessionTypeMatch(s.Name, sessionTypeMap)
 
+    // Use SessionTypeId from session types if found, otherwise use ProductId
     const serviceId = sessionType?.Id || s.ProductId
     const duration = sessionType?.Duration || parseDurationFromName(s.Name)
 
-    if (!sessionType) {
-      console.log(`Warning: No session type match for addon: ${s.Name}`)
-    }
+    // Determine online bookability from session type, NOT from sale/services SellOnline
+    // A service is online bookable only if its session type ID is in the online session types list
+    const isOnlineBookable = sessionType ? onlineSessionTypeIds.has(sessionType.Id) : false
 
     return {
-      Id: serviceId, // SessionTypeId for appointments
+      Id: serviceId,
       ProductId: s.ProductId,
       Name: s.Name,
-      Description: '',
+      Description: sessionType?.Description || '',
       Duration: duration,
       Price: removeTaxFromPrice(s.Price || s.OnlinePrice || 0),
       OnlinePrice: removeTaxFromPrice(s.OnlinePrice),
       TaxIncluded: s.TaxIncluded,
-      OnlineBooking: s.SellOnline,
-      Category: 'Adicionales',
+      OnlineBooking: isOnlineBookable, // True only if session type is in online bookable list
+      Category: getSpanishCategory(s.ProgramId),
       ProgramId: s.ProgramId,
-      IsAddOn: true,
+      IsAddOn: s.ProgramId === 8,
+      HasSessionTypeMatch: sessionType !== undefined,
     }
   })
 
-  // Only include addons that have a matching session type (truly online bookable)
-  const onlineBookableAddons = addons.filter(s => {
-    return findSessionTypeMatch(s.Name, sessionTypeMap) !== undefined
-  })
+  console.log('All services for admin:', services.length)
+  console.log('Online bookable services:', services.filter(s => s.OnlineBooking).length)
+  console.log('Offline only services:', services.filter(s => !s.OnlineBooking).length)
 
-  console.log('Online bookable add-ons with session type match:', onlineBookableAddons.length)
-
-  // If no addons match session types, return all filtered addons
-  // This handles cases where addons might not have separate session types
-  if (onlineBookableAddons.length === 0 && filteredAddons.length > 0) {
-    console.log('No session type matches - returning all SellOnline addons:', filteredAddons.length)
-    return addons
-  }
-
-  return onlineBookableAddons
+  return services
 }
 
 // Get staff - basic endpoint without service filtering
@@ -1002,11 +1091,12 @@ export async function addAppointment(appointmentData: {
   StartDateTime: string
   EndDateTime?: string
   Notes?: string
+  StaffRequested?: boolean
 }) {
   interface AppointmentResponse {
     Appointment: {
       Id: number
-      ClientId: number
+      ClientId: number | string
       LocationId: number
       StaffId: number
       StartDateTime: string
@@ -1018,20 +1108,101 @@ export async function addAppointment(appointmentData: {
         LastName: string
         DisplayName?: string
       }
+      Client?: {
+        Id: string | number
+        FirstName: string
+        LastName: string
+        Email?: string
+        MobilePhone?: string
+      }
+    }
+    Error?: {
+      Message: string
+      Code: string
     }
   }
-  
+
+  console.log('=== addAppointment called ===')
+  console.log('Request data:', JSON.stringify(appointmentData, null, 2))
+
+  // Mindbody API expects specific field names - ensure proper casing
+  // The API is case-sensitive and expects these exact field names
+  const requestBody = {
+    ClientId: String(appointmentData.ClientId), // Mindbody expects string for ClientId
+    LocationId: appointmentData.LocationId,
+    StaffId: appointmentData.StaffId,
+    SessionTypeId: appointmentData.SessionTypeId,
+    StartDateTime: appointmentData.StartDateTime,
+    EndDateTime: appointmentData.EndDateTime,
+    Notes: appointmentData.Notes,
+    StaffRequested: appointmentData.StaffRequested ?? false,
+  }
+
+  console.log('Final request body:', JSON.stringify(requestBody, null, 2))
+
   const response = await mindbodyRequest<AppointmentResponse>('/appointment/addappointment', {
     method: 'POST',
-    body: appointmentData
+    body: requestBody
   })
-  
+
+  console.log('Mindbody addAppointment response:', JSON.stringify(response, null, 2))
+
+  // Check for error in response
+  if (response.Error) {
+    console.error('Mindbody API returned error:', response.Error)
+    throw new Error(`Mindbody API error: ${response.Error.Message || response.Error.Code || 'Unknown error'}`)
+  }
+
+  // Validate that we got an appointment back
+  if (!response.Appointment || !response.Appointment.Id) {
+    console.error('Mindbody API did not return a valid appointment:', response)
+    throw new Error('Mindbody API did not return a valid appointment')
+  }
+
+  console.log('Successfully created appointment:', response.Appointment.Id)
+
   return response.Appointment
 }
 
+// Confirm an appointment in Mindbody
+export async function confirmAppointment(appointmentId: number): Promise<boolean> {
+  try {
+    console.log(`Confirming appointment ${appointmentId}...`)
+    await mindbodyRequest('/appointment/updateappointment', {
+      method: 'POST',
+      body: {
+        AppointmentId: appointmentId,
+        Execute: 'Confirm',
+      }
+    })
+    console.log(`Successfully confirmed appointment ${appointmentId}`)
+    return true
+  } catch (error) {
+    console.error(`Failed to confirm appointment ${appointmentId}:`, error)
+    return false
+  }
+}
+
+export async function removeAppointment(appointmentId: number): Promise<boolean> {
+  try {
+    console.log(`Cancelling appointment ${appointmentId}...`)
+    await mindbodyRequest('/appointment/updateappointment', {
+      method: 'POST',
+      body: {
+        AppointmentId: appointmentId,
+        Execute: 'Cancel',
+      }
+    })
+    console.log(`Successfully cancelled appointment ${appointmentId}`)
+    return true
+  } catch (error) {
+    console.error(`Failed to cancel appointment ${appointmentId}:`, error)
+    return false
+  }
+}
+
 // Add multiple appointments (for multi-service bookings)
-// Books each appointment sequentially, one at a time
-// Each appointment is processed individually - if one fails, others may still succeed
+// All-or-nothing: if any appointment fails, previously created ones are cancelled
 export async function addMultipleAppointments(appointments: Array<{
   ClientId: number
   LocationId: number
@@ -1039,59 +1210,76 @@ export async function addMultipleAppointments(appointments: Array<{
   SessionTypeId: number
   StartDateTime: string
   Notes?: string
+  StaffRequested?: boolean
 }>) {
-  console.log('Booking', appointments.length, 'appointments sequentially')
-  console.log('Appointments to book:', JSON.stringify(appointments, null, 2))
-
-  const results: Array<{
-    success: boolean
-    appointment?: {
-      Id: number
-      ClientId: number
-      LocationId: number
-      StaffId: number
-      StartDateTime: string
-      EndDateTime: string
-      Status: string
-      Staff?: {
-        Id: number
-        FirstName: string
-        LastName: string
-        DisplayName?: string
-      }
-    }
-    error?: string
-  }> = []
+  const createdAppointments: Array<{ id: number; appointment: ReturnType<typeof addAppointment> extends Promise<infer T> ? T : never }> = []
 
   for (let i = 0; i < appointments.length; i++) {
     const appointment = appointments[i]
-    console.log(`Booking appointment ${i + 1}/${appointments.length}:`, {
-      SessionTypeId: appointment.SessionTypeId,
-      StartDateTime: appointment.StartDateTime,
-      StaffId: appointment.StaffId,
-    })
-
     try {
+      console.log(`=== Creating appointment ${i + 1}/${appointments.length} ===`)
+      console.log('SessionTypeId:', appointment.SessionTypeId)
+      console.log('StartDateTime:', appointment.StartDateTime)
       const result = await addAppointment(appointment)
-      console.log(`Appointment ${i + 1} booked successfully:`, result.Id)
-      results.push({ success: true, appointment: result })
+      createdAppointments.push({ id: result.Id, appointment: result })
+
+      // Use Mindbody's actual EndDateTime for the next appointment's start time.
+      // This prevents overlap when Mindbody's stored duration differs from the
+      // frontend value (e.g. service shows 35 min but Mindbody books it as 40 min).
+      // Mindbody returns EndDateTime without a timezone offset and expects StartDateTime
+      // in the same local-time format — pass it through as-is, no UTC conversion.
+      if (i + 1 < appointments.length && result.EndDateTime) {
+        console.log(`Mindbody EndDateTime for appt ${i + 1}: ${result.EndDateTime} → using as next start`)
+        appointments[i + 1] = { ...appointments[i + 1], StartDateTime: result.EndDateTime }
+      }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      console.error(`Appointment ${i + 1} failed:`, errorMessage)
-      results.push({ success: false, error: errorMessage })
+      console.error(`=== Appointment ${i + 1} FAILED ===`)
+      console.error('SessionTypeId:', appointment.SessionTypeId)
+      console.error('Error:', error)
+
+      // Roll back all previously created appointments
+      if (createdAppointments.length > 0) {
+        console.log(`Rolling back ${createdAppointments.length} previously created appointment(s)...`)
+        for (const created of createdAppointments) {
+          await removeAppointment(created.id)
+        }
+      }
+
+      // Return failure with the error from the appointment that failed
+      return {
+        success: false as const,
+        error: String(error),
+        failedIndex: i,
+        sessionTypeId: appointment.SessionTypeId,
+      }
     }
   }
 
-  console.log('Booking results:', results.map(r => ({
-    success: r.success,
-    appointmentId: r.appointment?.Id,
-    error: r.error
-  })))
-
-  return results
+  return {
+    success: true as const,
+    appointments: createdAppointments.map(c => c.appointment),
+  }
 }
 
-// ============================================
+// Fetch appointment statuses from Mindbody by appointment IDs
+// Used by the sync cron to update Supabase with completed/cancelled/noshow statuses
+export async function getAppointmentStatuses(
+  appointmentIds: number[]
+): Promise<Array<{ id: number; status: string }>> {
+  if (appointmentIds.length === 0) return []
+
+  interface AppointmentsResponse {
+    Appointments: Array<{ Id: number; Status: string }>
+  }
+
+  const params = appointmentIds.map(id => `AppointmentIds=${id}`).join('&')
+  const response = await mindbodyRequest<AppointmentsResponse>(
+    `/appointment/appointments?${params}&limit=200`
+  )
+
+  return (response.Appointments || []).map(a => ({ id: a.Id, status: a.Status }))
+}
+
 // CLIENT HISTORY & PORTAL FUNCTIONS
 // ============================================
 
@@ -1356,12 +1544,12 @@ export async function getClientCompleteInfo(clientId: string) {
     }
   }
 
-  const queryParams = new URLSearchParams()
-  queryParams.set('request.clientId', clientId)
-
-  const response = await mindbodyRequest<ClientInfoResponse>(
-    `/client/clients?${queryParams.toString()}`
-  )
+  // Use the mindbodyRequest helper with ClientIds parameter (Mindbody API v6 format)
+  const response = await mindbodyRequest<ClientInfoResponse>('/client/clients', {
+    params: {
+      ClientIds: clientId
+    }
+  })
 
   // The API returns a Clients array, get the first one
   const clients = (response as unknown as { Clients: ClientInfoResponse['Client'][] }).Clients
@@ -1447,7 +1635,8 @@ export async function updateClient(clientData: UpdateClientData) {
   const response = await mindbodyRequest<UpdateClientResponse>('/client/updateclient', {
     method: 'POST',
     body: {
-      Client: clientData
+      Client: clientData,
+      CrossRegionalUpdate: false  // Required for single-site updates
     }
   })
 
@@ -1484,12 +1673,120 @@ export async function getClientWithCustomFields(clientId: string) {
     }>
   }
 
-  const queryParams = new URLSearchParams()
-  queryParams.set('request.clientId', clientId)
+  console.log('getClientWithCustomFields - Fetching client ID:', clientId)
 
-  const response = await mindbodyRequest<ClientWithFieldsResponse>(
-    `/client/clients?${queryParams.toString()}`
+  // Use the mindbodyRequest helper with ClientIds parameter (Mindbody API v6 format)
+  const response = await mindbodyRequest<ClientWithFieldsResponse>('/client/clients', {
+    params: {
+      ClientIds: clientId
+    }
+  })
+
+  const client = response.Clients?.[0] || null
+
+  if (client) {
+    console.log('getClientWithCustomFields - Found client:', {
+      Id: client.Id,
+      UniqueId: client.UniqueId,
+      FirstName: client.FirstName,
+      LastName: client.LastName,
+      Email: client.Email
+    })
+  } else {
+    console.warn('getClientWithCustomFields - No client found for ID:', clientId)
+  }
+
+  return client
+}
+
+// ===========================================
+// PROMO CODES
+// ===========================================
+
+export interface MindbodyPromoCode {
+  Id: number
+  Code: string
+  Name: string
+  DiscountType: 'Percent' | 'Amount'
+  DiscountAmount: number
+  IsActive: boolean
+  ActivationDate: string
+  ExpirationDate: string
+  MaxUses: number | null // null means unlimited
+  TimesUsed: number
+  AllowOnlineRedemption: boolean
+  ApplicableItems: Array<{
+    Id: number
+    Name: string
+    Type: string // 'Service', 'Product', etc.
+  }>
+}
+
+interface PromoCodesResponse {
+  PromoCodes: MindbodyPromoCode[]
+  PaginationResponse?: {
+    RequestedLimit: number
+    RequestedOffset: number
+    PageSize: number
+    TotalResults: number
+  }
+}
+
+// Get all promo codes from Mindbody
+// Note: This endpoint requires staff user authorization
+// Per API docs: GET /public/v6/site/promocodes (not /sale/promocodes)
+export async function getPromoCodes(options?: {
+  searchText?: string
+  activeOnly?: boolean
+}): Promise<MindbodyPromoCode[]> {
+  const params: Record<string, ParamValue> = {
+    'request.limit': 100,
+    'request.offset': 0,
+  }
+
+  // Active only filter - defaults to true per API docs
+  if (options?.activeOnly !== undefined) {
+    params['request.activeOnly'] = options.activeOnly
+  }
+
+  // Note: The API doesn't have a native search parameter,
+  // so we fetch all and filter client-side for partial text matching
+  console.log('Fetching promo codes from Mindbody with params:', params)
+
+  try {
+    const response = await mindbodyRequest<PromoCodesResponse>('/site/promocodes', {
+      params
+    })
+
+    let promoCodes = response.PromoCodes || []
+    console.log('Received', promoCodes.length, 'promo codes from Mindbody')
+
+    // If searchText provided, filter client-side by name, code, or applicable item names
+    if (options?.searchText) {
+      const searchLower = options.searchText.toLowerCase()
+      promoCodes = promoCodes.filter(pc =>
+        pc.Name?.toLowerCase().includes(searchLower) ||
+        pc.Code?.toLowerCase().includes(searchLower) ||
+        pc.ApplicableItems?.some(item => item.Name?.toLowerCase().includes(searchLower))
+      )
+      console.log('Filtered to', promoCodes.length, 'promo codes matching:', options.searchText)
+    }
+
+    return promoCodes
+  } catch (error) {
+    console.error('Error fetching promo codes:', error)
+    throw error
+  }
+}
+
+// Get a single promo code by code string
+export async function getPromoCodeByCode(code: string): Promise<MindbodyPromoCode | null> {
+  const promoCodes = await getPromoCodes({ searchText: code })
+
+  // Find exact match
+  const exactMatch = promoCodes.find(
+    pc => pc.Code.toLowerCase() === code.toLowerCase()
   )
 
-  return response.Clients?.[0] || null
+  return exactMatch || null
 }

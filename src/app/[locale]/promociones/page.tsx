@@ -21,7 +21,6 @@ export default async function PromotionsPage({ params }: { params: Promise<{ loc
       <section className="py-16 bg-beige text-center">
         <div className="container-spa">
           <h1 className="title-decorated">PROMOCIONES</h1>
-          <p className="text-warm-gray mt-4 text-lg">Enero 2026</p>
         </div>
       </section>
 

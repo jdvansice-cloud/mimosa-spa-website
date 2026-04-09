@@ -2,6 +2,9 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types'
 
+// Cookie max age: 24 hours in seconds
+const COOKIE_MAX_AGE = 60 * 60 * 24
+
 export async function createClient() {
   const cookieStore = await cookies()
 
@@ -15,7 +18,16 @@ export async function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value, ...options })
+            // Extend cookie lifetime to 24 hours
+            cookieStore.set({
+              name,
+              value,
+              ...options,
+              maxAge: options.maxAge ?? COOKIE_MAX_AGE,
+              // Ensure cookies persist across browser sessions
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+            })
           } catch {
             // The `set` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing

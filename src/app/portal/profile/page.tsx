@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
@@ -52,7 +52,18 @@ interface CustomFieldDefinition {
 
 export default function ProfileEditPage() {
   const router = useRouter()
-  const { isAuthenticated, client, logout } = usePortalStore()
+  type SupabaseClient = ReturnType<typeof import('@/lib/supabase/client').getClient>
+  const supabaseRef = useRef<SupabaseClient | null>(null)
+  const { session, client, mindbodyClientId, logout } = usePortalStore()
+
+  // Lazy load Supabase client
+  const getSupabase = (): SupabaseClient => {
+    if (!supabaseRef.current) {
+      const { getClient } = require('@/lib/supabase/client')
+      supabaseRef.current = getClient()
+    }
+    return supabaseRef.current as SupabaseClient
+  }
 
   const [profile, setProfile] = useState<ClientProfile | null>(null)
   const [customFields, setCustomFields] = useState<CustomFieldDefinition[]>([])
@@ -79,29 +90,34 @@ export default function ProfileEditPage() {
     DV: ''
   })
 
-  // Redirect if not authenticated
+  // Check auth and redirect if needed
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/portal/login')
+    const checkAuth = async () => {
+      const supabase = getSupabase()
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      if (!currentSession) {
+        router.push('/portal/login')
+      }
     }
-  }, [isAuthenticated, router])
+    checkAuth()
+  }, [router])
 
   // Fetch profile data
   useEffect(() => {
-    if (isAuthenticated && client) {
+    if (session && mindbodyClientId) {
       fetchProfile()
     }
-  }, [isAuthenticated, client])
+  }, [session, mindbodyClientId])
 
   const fetchProfile = async () => {
-    if (!client) return
+    if (!mindbodyClientId) return
 
     setIsLoading(true)
     setError(null)
 
     try {
       const response = await fetch(
-        `/api/portal/profile?clientId=${client.Id}&includeCustomFields=true`
+        `/api/portal/profile?clientId=${mindbodyClientId}&includeCustomFields=true`
       )
       const data = await response.json()
 
@@ -148,7 +164,7 @@ export default function ProfileEditPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!client || !profile) return
+    if (!mindbodyClientId || !profile) return
 
     setIsSaving(true)
     setError(null)
@@ -164,13 +180,14 @@ export default function ProfileEditPage() {
       )
 
       // Build custom fields array for update
+      // Always include the field if it exists, even with empty value (to allow clearing)
       const customClientFields: Array<{ Id: number; Value: string }> = []
 
-      if (rucFieldDef && formData.RUC) {
-        customClientFields.push({ Id: rucFieldDef.Id, Value: formData.RUC })
+      if (rucFieldDef) {
+        customClientFields.push({ Id: rucFieldDef.Id, Value: formData.RUC || '' })
       }
-      if (dvFieldDef && formData.DV) {
-        customClientFields.push({ Id: dvFieldDef.Id, Value: formData.DV })
+      if (dvFieldDef) {
+        customClientFields.push({ Id: dvFieldDef.Id, Value: formData.DV || '' })
       }
 
       const updates = {
@@ -192,7 +209,7 @@ export default function ProfileEditPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clientId: client.Id,
+          clientId: mindbodyClientId,
           updates
         })
       })
@@ -222,9 +239,10 @@ export default function ProfileEditPage() {
     setSuccess(null)
   }
 
-  if (!isAuthenticated || !client) {
+  // Loading state while checking auth
+  if (!session || !mindbodyClientId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-white">
         <Loader2 className="w-8 h-8 animate-spin text-gold" />
       </div>
     )

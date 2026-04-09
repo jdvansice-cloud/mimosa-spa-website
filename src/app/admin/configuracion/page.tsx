@@ -1,21 +1,108 @@
 'use client'
 
-import { useState } from 'react'
-import { Save, Globe, Phone, Clock, MessageCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Save, Globe, Phone, Clock, MessageCircle, Mail, Bell, Check, Loader2, Tag } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 
+interface SiteSettings {
+  phone_costa_del_este: string
+  phone_san_francisco: string
+  email: string
+  whatsapp_number: string
+  whatsapp_message: string
+  weekday_open: string
+  weekday_close: string
+  weekend_open: string
+  weekend_close: string
+  instagram_url: string
+  facebook_url: string
+  whatsapp_dual_channel: boolean
+  online_discount_active: boolean
+  online_discount_percent: number
+}
+
+const defaultSettings: SiteSettings = {
+  phone_costa_del_este: '+507 6000-0001',
+  phone_san_francisco: '+507 6000-0002',
+  email: 'info@mimosaretreat.com',
+  whatsapp_number: '50764049464',
+  whatsapp_message: 'Hola, me gustaría obtener información sobre sus servicios.',
+  weekday_open: '09:00',
+  weekday_close: '20:00',
+  weekend_open: '09:00',
+  weekend_close: '18:00',
+  instagram_url: 'https://instagram.com/mimosasparetreat',
+  facebook_url: 'https://facebook.com/mimosasparetreat',
+  whatsapp_dual_channel: true,
+  online_discount_active: false,
+  online_discount_percent: 0,
+}
+
 export default function AdminConfigPage() {
+  const [settings, setSettings] = useState<SiteSettings>(defaultSettings)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  // Fetch settings on mount
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const response = await fetch('/api/admin/settings')
+        if (response.ok) {
+          const { data } = await response.json()
+          if (data) {
+            setSettings(data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchSettings()
+  }, [])
+
+  const handleChange = (field: keyof SiteSettings, value: string) => {
+    setSettings(prev => ({ ...prev, [field]: value }))
+    setSaveStatus('idle')
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
-    
-    // Simulate save
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    
-    setIsSaving(false)
-    alert('Configuración guardada correctamente')
+    setSaveStatus('idle')
+
+    try {
+      const response = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      })
+
+      if (response.ok) {
+        setSaveStatus('success')
+        setTimeout(() => setSaveStatus('idle'), 3000)
+      } else {
+        setSaveStatus('error')
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      setSaveStatus('error')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-gold" />
+      </div>
+    )
   }
 
   return (
@@ -43,7 +130,8 @@ export default function AdminConfigPage() {
                   type="tel"
                   className="input"
                   placeholder="+507 6000-0001"
-                  defaultValue="+507 6000-0001"
+                  value={settings.phone_costa_del_este}
+                  onChange={(e) => handleChange('phone_costa_del_este', e.target.value)}
                 />
               </div>
               <div>
@@ -52,7 +140,8 @@ export default function AdminConfigPage() {
                   type="tel"
                   className="input"
                   placeholder="+507 6000-0002"
-                  defaultValue="+507 6000-0002"
+                  value={settings.phone_san_francisco}
+                  onChange={(e) => handleChange('phone_san_francisco', e.target.value)}
                 />
               </div>
             </div>
@@ -62,7 +151,8 @@ export default function AdminConfigPage() {
                 type="email"
                 className="input"
                 placeholder="info@mimosaretreat.com"
-                defaultValue="info@mimosaretreat.com"
+                value={settings.email}
+                onChange={(e) => handleChange('email', e.target.value)}
               />
             </div>
           </CardContent>
@@ -82,8 +172,9 @@ export default function AdminConfigPage() {
               <input
                 type="tel"
                 className="input"
-                placeholder="507XXXXXXXX"
-                defaultValue="507XXXXXXXX"
+                placeholder="50764049464"
+                value={settings.whatsapp_number}
+                onChange={(e) => handleChange('whatsapp_number', e.target.value)}
               />
               <p className="text-xs text-warm-gray mt-1">
                 Formato: código de país + número (sin + ni espacios)
@@ -95,7 +186,8 @@ export default function AdminConfigPage() {
                 className="input"
                 rows={2}
                 placeholder="Hola, me gustaría obtener información..."
-                defaultValue="Hola, me gustaría obtener información sobre sus servicios."
+                value={settings.whatsapp_message}
+                onChange={(e) => handleChange('whatsapp_message', e.target.value)}
               />
             </div>
           </CardContent>
@@ -114,17 +206,37 @@ export default function AdminConfigPage() {
               <div>
                 <label className="label">Lunes a Viernes</label>
                 <div className="flex items-center gap-2">
-                  <input type="time" className="input" defaultValue="09:00" />
+                  <input
+                    type="time"
+                    className="input"
+                    value={settings.weekday_open}
+                    onChange={(e) => handleChange('weekday_open', e.target.value)}
+                  />
                   <span className="text-warm-gray">a</span>
-                  <input type="time" className="input" defaultValue="20:00" />
+                  <input
+                    type="time"
+                    className="input"
+                    value={settings.weekday_close}
+                    onChange={(e) => handleChange('weekday_close', e.target.value)}
+                  />
                 </div>
               </div>
               <div>
                 <label className="label">Sábados y Domingos</label>
                 <div className="flex items-center gap-2">
-                  <input type="time" className="input" defaultValue="09:00" />
+                  <input
+                    type="time"
+                    className="input"
+                    value={settings.weekend_open}
+                    onChange={(e) => handleChange('weekend_open', e.target.value)}
+                  />
                   <span className="text-warm-gray">a</span>
-                  <input type="time" className="input" defaultValue="18:00" />
+                  <input
+                    type="time"
+                    className="input"
+                    value={settings.weekend_close}
+                    onChange={(e) => handleChange('weekend_close', e.target.value)}
+                  />
                 </div>
               </div>
             </div>
@@ -146,7 +258,8 @@ export default function AdminConfigPage() {
                 type="url"
                 className="input"
                 placeholder="https://instagram.com/mimosasparetreat"
-                defaultValue="https://instagram.com/mimosasparetreat"
+                value={settings.instagram_url}
+                onChange={(e) => handleChange('instagram_url', e.target.value)}
               />
             </div>
             <div>
@@ -155,14 +268,219 @@ export default function AdminConfigPage() {
                 type="url"
                 className="input"
                 placeholder="https://facebook.com/mimosasparetreat"
-                defaultValue="https://facebook.com/mimosasparetreat"
+                value={settings.facebook_url}
+                onChange={(e) => handleChange('facebook_url', e.target.value)}
               />
             </div>
           </CardContent>
         </Card>
 
+        {/* Communication Channels */}
+        <Card variant="default" padding="md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-gold" />
+              Canales de Comunicación
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-warm-gray mb-6">
+              Configura cómo se envían los códigos de verificación y notificaciones a los clientes.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Email Channel */}
+              <div className="border-2 border-beige-200 rounded-xl p-5 bg-white">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-gold" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-dark">Correo Electrónico</h3>
+                    <span className="text-xs text-warm-gray">Siempre activo</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+                    <span>Código de verificación por correo (6 dígitos)</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-gold mt-0.5 shrink-0" />
+                    <span>Solo se usa cuando el cliente elige este canal</span>
+                  </div>
+                </div>
+
+                <div className="rounded-lg bg-gold/5 border border-gold/20 p-3">
+                  <p className="text-xs text-warm-gray">
+                    Sin opciones adicionales. El cliente recibe únicamente el código por correo.
+                  </p>
+                </div>
+              </div>
+
+              {/* WhatsApp Channel */}
+              <div className={`border-2 rounded-xl p-5 bg-white transition-colors ${
+                settings.whatsapp_dual_channel ? 'border-green-400' : 'border-beige-200'
+              }`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
+                    <MessageCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-dark">WhatsApp</h3>
+                    <span className="text-xs text-warm-gray">Canal principal</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                    <span>Código de verificación por WhatsApp (6 dígitos)</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                    <span>Confirmación de cita al reservar</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-dark">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                    <span>Recordatorio 24 horas antes</span>
+                  </div>
+                </div>
+
+                {/* Dual channel toggle */}
+                <div className={`rounded-lg border p-3 transition-colors ${
+                  settings.whatsapp_dual_channel
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-dark">También enviar por correo</p>
+                      <p className="text-xs text-warm-gray mt-0.5">
+                        {settings.whatsapp_dual_channel
+                          ? 'El código llega por WhatsApp y por correo como respaldo'
+                          : 'El código llega únicamente por WhatsApp'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSettings(prev => ({ ...prev, whatsapp_dual_channel: !prev.whatsapp_dual_channel }))
+                        setSaveStatus('idle')
+                      }}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent
+                        transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                        settings.whatsapp_dual_channel ? 'bg-green-500' : 'bg-gray-300'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow
+                          transform transition duration-200 ${
+                          settings.whatsapp_dual_channel ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="mt-4 p-4 bg-beige-50 rounded-xl border border-beige-200">
+              <p className="text-xs font-medium text-dark mb-2">Comportamiento actual:</p>
+              <div className="space-y-1">
+                <p className="text-xs text-warm-gray">
+                  <span className="font-medium text-dark">Cliente elige correo →</span>{' '}
+                  Recibe solo el código por correo electrónico
+                </p>
+                <p className="text-xs text-warm-gray">
+                  <span className="font-medium text-dark">Cliente elige WhatsApp →</span>{' '}
+                  {settings.whatsapp_dual_channel
+                    ? 'Recibe el código por WhatsApp y también por correo como respaldo'
+                    : 'Recibe el código únicamente por WhatsApp'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Online Discount */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="h-5 w-5 text-gold" />
+              Descuento Online
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <p className="text-sm text-dark font-medium mb-1">
+                  Descuento para reservas en línea
+                </p>
+                <p className="text-xs text-warm-gray mb-4">
+                  Se aplica automáticamente a todos los servicios que no estén dentro de una promoción activa.
+                </p>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-warm-gray">Porcentaje:</label>
+                  <div className="relative w-28">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={settings.online_discount_percent}
+                      onChange={e => setSettings(prev => ({
+                        ...prev,
+                        online_discount_percent: Math.min(100, Math.max(0, Number(e.target.value)))
+                      }))}
+                      disabled={!settings.online_discount_active}
+                      className="input pr-8 text-center disabled:opacity-40"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-warm-gray text-sm">%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Toggle */}
+              <div className="flex flex-col items-center gap-2 pt-1">
+                <span className="text-xs text-warm-gray">
+                  {settings.online_discount_active ? 'Activo' : 'Inactivo'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSettings(prev => ({ ...prev, online_discount_active: !prev.online_discount_active }))}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.online_discount_active ? 'bg-green-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                    settings.online_discount_active ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Preview */}
+            {settings.online_discount_active && settings.online_discount_percent > 0 && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-green-800">
+                Los clientes verán un <strong>{settings.online_discount_percent}% de descuento</strong> aplicado
+                automáticamente al confirmar una reserva sin promoción activa.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Save Button */}
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-4">
+          {saveStatus === 'success' && (
+            <span className="text-green-600 text-sm">Configuración guardada correctamente</span>
+          )}
+          {saveStatus === 'error' && (
+            <span className="text-red-600 text-sm">Error al guardar. Intente de nuevo.</span>
+          )}
           <Button type="submit" isLoading={isSaving} leftIcon={<Save className="h-4 w-4" />}>
             Guardar Cambios
           </Button>
