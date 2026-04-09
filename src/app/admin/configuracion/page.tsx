@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Globe, Phone, Clock, MessageCircle, Mail, Bell, Check, Loader2 } from 'lucide-react'
+import { Save, Globe, Phone, Clock, MessageCircle, Mail, Bell, Check, Loader2, Tag } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 
 interface SiteSettings {
@@ -17,6 +17,8 @@ interface SiteSettings {
   instagram_url: string
   facebook_url: string
   whatsapp_dual_channel: boolean
+  online_discount_active: boolean
+  online_discount_percent: number
 }
 
 const defaultSettings: SiteSettings = {
@@ -32,6 +34,8 @@ const defaultSettings: SiteSettings = {
   instagram_url: 'https://instagram.com/mimosasparetreat',
   facebook_url: 'https://facebook.com/mimosasparetreat',
   whatsapp_dual_channel: true,
+  online_discount_active: false,
+  online_discount_percent: 0,
 }
 
 export default function AdminConfigPage() {
@@ -399,6 +403,73 @@ export default function AdminConfigPage() {
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Online Discount */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="h-5 w-5 text-gold" />
+              Descuento Online
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <p className="text-sm text-dark font-medium mb-1">
+                  Descuento para reservas en línea
+                </p>
+                <p className="text-xs text-warm-gray mb-4">
+                  Se aplica automáticamente a todos los servicios que no estén dentro de una promoción activa.
+                </p>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-warm-gray">Porcentaje:</label>
+                  <div className="relative w-28">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={settings.online_discount_percent}
+                      onChange={e => setSettings(prev => ({
+                        ...prev,
+                        online_discount_percent: Math.min(100, Math.max(0, Number(e.target.value)))
+                      }))}
+                      disabled={!settings.online_discount_active}
+                      className="input pr-8 text-center disabled:opacity-40"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-warm-gray text-sm">%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Toggle */}
+              <div className="flex flex-col items-center gap-2 pt-1">
+                <span className="text-xs text-warm-gray">
+                  {settings.online_discount_active ? 'Activo' : 'Inactivo'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSettings(prev => ({ ...prev, online_discount_active: !prev.online_discount_active }))}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.online_discount_active ? 'bg-green-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                    settings.online_discount_active ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Preview */}
+            {settings.online_discount_active && settings.online_discount_percent > 0 && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-green-800">
+                Los clientes verán un <strong>{settings.online_discount_percent}% de descuento</strong> aplicado
+                automáticamente al confirmar una reserva sin promoción activa.
+              </div>
+            )}
           </CardContent>
         </Card>
 

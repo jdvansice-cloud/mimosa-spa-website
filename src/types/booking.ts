@@ -150,7 +150,12 @@ export interface CartPricing {
   promotionName: string | null
   promotionPrice: number | null
   promotionDiscount: number
-  
+
+  // Global online discount (applies when no promotion is active)
+  hasGlobalDiscount: boolean
+  globalDiscountPercent: number
+  globalDiscountAmount: number
+
   // Tax calculation
   subtotalBeforeTax: number
   itbmRate: number

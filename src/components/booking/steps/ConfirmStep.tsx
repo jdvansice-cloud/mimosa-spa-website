@@ -19,6 +19,8 @@ export function ConfirmStep() {
     activePromotion,
     availableSlots,
     replaceAppointmentId,
+    globalDiscountPercent,
+    globalDiscountActive,
     setBookingConfirmation,
     setClientInfo,
     setStep,
@@ -90,6 +92,13 @@ export function ConfirmStep() {
       promotionDiscount = servicesSubtotal - activePromotion.price
     }
 
+    const hasGlobalDiscount = !hasPromotion && globalDiscountActive && globalDiscountPercent > 0
+    let globalDiscountAmount = 0
+    if (hasGlobalDiscount) {
+      globalDiscountAmount = Math.round(finalServicesPrice * (globalDiscountPercent / 100) * 100) / 100
+      finalServicesPrice = Math.round((finalServicesPrice - globalDiscountAmount) * 100) / 100
+    }
+
     const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
     const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
     const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
@@ -103,13 +112,16 @@ export function ConfirmStep() {
       promotionName: activePromotion?.title_es || null,
       promotionPrice: activePromotion?.price || null,
       promotionDiscount,
+      hasGlobalDiscount,
+      globalDiscountPercent,
+      globalDiscountAmount,
       subtotalBeforeTax,
       itbmRate: ITBM_RATE,
       itbmAmount,
       totalWithTax,
       totalDuration,
     }
-  }, [selectedServices, selectedAddons, activePromotion, totalDuration])
+  }, [selectedServices, selectedAddons, activePromotion, totalDuration, globalDiscountPercent, globalDiscountActive])
 
   // Format date for display (shorter format)
   const formatDateShort = (dateStr: string) => {
@@ -391,12 +403,30 @@ export function ConfirmStep() {
             ))}
           </div>
 
-          {/* Pricing Summary - Simple: Subtotal + ITBM + Total */}
+          {/* Pricing Summary */}
           <div className="mt-3 pt-3 border-t border-beige-200 space-y-1.5">
             <div className="flex justify-between text-sm">
-              <span className="text-warm-gray">Subtotal</span>
-              <span className="text-dark">${pricing.subtotalBeforeTax.toFixed(2)}</span>
+              <span className="text-warm-gray">Servicios</span>
+              <span className="text-dark">${pricing.servicesSubtotal.toFixed(2)}</span>
             </div>
+            {pricing.hasGlobalDiscount && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Descuento online ({pricing.globalDiscountPercent}%)</span>
+                <span>-${pricing.globalDiscountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            {pricing.hasPromotion && pricing.promotionDiscount > 0 && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Descuento promoción</span>
+                <span>-${pricing.promotionDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            {pricing.addonsSubtotal > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-warm-gray">Servicios adicionales</span>
+                <span className="text-dark">${pricing.addonsSubtotal.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm">
               <span className="text-warm-gray">ITBM (7%)</span>
               <span className="text-dark">${pricing.itbmAmount.toFixed(2)}</span>

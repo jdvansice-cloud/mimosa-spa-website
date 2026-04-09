@@ -19,6 +19,7 @@ function BookingPageInner() {
   const addService = useBookingStore(state => state.addService)
   const setReplaceAppointmentId = useBookingStore(state => state.setReplaceAppointmentId)
   const replaceAppointmentId = useBookingStore(state => state.replaceAppointmentId)
+  const setGlobalDiscount = useBookingStore(state => state.setGlobalDiscount)
 
   const [isInitializing, setIsInitializing] = useState(true)
   const initRef = useRef(false)
@@ -34,6 +35,19 @@ function BookingPageInner() {
       const replaceId = searchParams.get('replace')
       if (replaceId) {
         setReplaceAppointmentId(replaceId)
+      }
+
+      // Load global online discount from site settings
+      try {
+        const settingsRes = await fetch('/api/admin/settings')
+        if (settingsRes.ok) {
+          const { data } = await settingsRes.json()
+          if (data) {
+            setGlobalDiscount(data.online_discount_percent ?? 0, data.online_discount_active ?? false)
+          }
+        }
+      } catch {
+        // Non-critical — booking still works without the discount
       }
 
       // If we already have client info in the store, user is authenticated

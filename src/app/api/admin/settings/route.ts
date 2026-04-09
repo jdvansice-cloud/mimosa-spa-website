@@ -18,6 +18,8 @@ export interface SiteSettings {
   instagram_url: string
   facebook_url: string
   whatsapp_dual_channel: boolean
+  online_discount_active: boolean
+  online_discount_percent: number
   updated_at?: string
 }
 
@@ -53,6 +55,8 @@ export async function GET() {
           instagram_url: 'https://instagram.com/mimosasparetreat',
           facebook_url: 'https://facebook.com/mimosasparetreat',
           whatsapp_dual_channel: true,
+          online_discount_active: false,
+          online_discount_percent: 0,
         }
       })
     }
@@ -101,6 +105,8 @@ export async function PUT(request: NextRequest) {
       instagram_url: body.instagram_url,
       facebook_url: body.facebook_url,
       whatsapp_dual_channel: body.whatsapp_dual_channel ?? true,
+      online_discount_active: body.online_discount_active ?? false,
+      online_discount_percent: body.online_discount_percent ?? 0,
       updated_at: new Date().toISOString(),
     }
 
