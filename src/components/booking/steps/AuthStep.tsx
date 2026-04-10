@@ -196,8 +196,11 @@ function AuthStepContent() {
       }
 
       if (data.notFound || data.clients.length === 0) {
-        setError('Número no encontrado. Escribe el número completo con código de país sin el + (ej: Panamá 50766124546 · EE.UU. 12125551234)')
-        setAuthState('credential')
+        setRegistrationData(prev => ({
+          ...prev,
+          phone: trimmed,
+        }))
+        setAuthState('register')
         return
       }
 
@@ -614,7 +617,7 @@ function AuthStepContent() {
                 <UserPlus className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-lg font-bold text-dark mb-0.5">Crear Cuenta</h2>
-              <p className="text-xs text-warm-gray">No encontramos una cuenta con ese dato. Completa tus datos.</p>
+              <p className="text-xs text-warm-gray">Número no registrado. Completa tus datos para crear una cuenta.</p>
             </div>
 
             <div className="space-y-3">
