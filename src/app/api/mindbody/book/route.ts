@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
       // Build notes: always include "Reservado en línea" + optional promotion or global discount + optional custom notes
       const noteParts: string[] = ['Reservado en línea']
       if (promotionName) {
-        noteParts.push(`Promoción: ${promotionName}`)
+        noteParts.push(`Promo: ${promotionName}`)
       } else if (globalDiscountPercent && globalDiscountPercent > 0) {
         noteParts.push(`Promo Online ${globalDiscountPercent}%`)
       }
