@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     if (normalizedPhone.length < 10) {
       return NextResponse.json(
-        { error: 'Escribe el número completo con código de país sin el + (ej: 50766124546)' },
+        { error: 'Escribe el número completo con código de país sin el + (ej: Panamá 50766124546 · EE.UU. 12125551234)' },
         { status: 400 }
       )
     }

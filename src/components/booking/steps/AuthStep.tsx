@@ -174,7 +174,7 @@ function AuthStepContent() {
       return
     }
     if (trimmed.length < 10) {
-      setError('Escribe el número completo con código de país sin el + (ej: 50766124546)')
+      setError('Escribe el número completo con código de país sin el + (ej: Panamá 50766124546 · EE.UU. 12125551234)')
       return
     }
 
@@ -196,7 +196,7 @@ function AuthStepContent() {
       }
 
       if (data.notFound || data.clients.length === 0) {
-        setError('Número no encontrado. Asegúrate de escribir el número completo con código de país sin el + (ej: 50766124546)')
+        setError('Número no encontrado. Escribe el número completo con código de país sin el + (ej: Panamá 50766124546 · EE.UU. 12125551234)')
         setAuthState('credential')
         return
       }
@@ -753,7 +753,7 @@ function AuthStepContent() {
                 autoFocus
               />
             </div>
-            <p className="mt-1 text-xs text-warm-gray">Sin el signo +, incluye el código de país (ej: 507 para Panamá)</p>
+            <p className="mt-1 text-xs text-warm-gray">Sin el signo + · Panamá: 50766124546 · EE.UU.: 12125551234</p>
           </div>
 
           {error && (
