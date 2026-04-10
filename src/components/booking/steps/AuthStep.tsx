@@ -168,19 +168,13 @@ function AuthStepContent() {
   }, [setClientInfo, nextStep, setStep, addService, loadPromotion, searchParams])
 
   const handleCredentialSubmit = async () => {
-    const trimmed = credential.trim()
+    const trimmed = credential.trim().replace(/\D/g, '')
     if (!trimmed) {
-      setError('Ingresa tu correo o número de teléfono')
+      setError('Ingresa tu número de teléfono')
       return
     }
-
-    const isEmail = trimmed.includes('@')
-    if (isEmail && !trimmed.includes('.')) {
-      setError('Correo electrónico inválido')
-      return
-    }
-    if (!isEmail && trimmed.replace(/\D/g, '').length < 8) {
-      setError('Número de teléfono inválido (mínimo 8 dígitos)')
+    if (trimmed.length < 10) {
+      setError('Escribe el número completo con código de país sin el + (ej: 50766124546)')
       return
     }
 
@@ -202,12 +196,8 @@ function AuthStepContent() {
       }
 
       if (data.notFound || data.clients.length === 0) {
-        setRegistrationData(prev => ({
-          ...prev,
-          email: isEmail ? trimmed : '',
-          phone: isEmail ? '' : trimmed.replace(/\D/g, ''),
-        }))
-        setAuthState('register')
+        setError('Número no encontrado. Asegúrate de escribir el número completo con código de país sin el + (ej: 50766124546)')
+        setAuthState('credential')
         return
       }
 
@@ -730,7 +720,7 @@ function AuthStepContent() {
             </div>
             <h2 className="text-lg font-bold text-dark mb-0.5">¡Bienvenido!</h2>
             <p className="text-xs text-warm-gray">
-              Ingresa tu correo o teléfono para comenzar tu reserva
+              Ingresa tu número de teléfono para comenzar tu reserva
             </p>
           </div>
 
@@ -744,22 +734,26 @@ function AuthStepContent() {
             </ul>
           </div>
 
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray">
-              {credential.includes('@') ? <Mail className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
+          <div>
+            <label className="block text-xs font-medium text-dark mb-1.5">
+              Número de teléfono con código de país
+            </label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray" />
+              <input
+                type="tel"
+                value={credential}
+                onChange={(e) => setCredential(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={authState === 'sending'}
+                className="w-full pl-10 pr-3 py-3 border-2 border-beige-200 rounded-xl
+                         text-sm focus:outline-none focus:ring-2 focus:ring-gold/50
+                         focus:border-gold transition-all disabled:opacity-50"
+                placeholder="50766124546"
+                autoFocus
+              />
             </div>
-            <input
-              type="text"
-              value={credential}
-              onChange={(e) => setCredential(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={authState === 'sending'}
-              className="w-full pl-10 pr-3 py-3 border-2 border-beige-200 rounded-xl
-                       text-sm focus:outline-none focus:ring-2 focus:ring-gold/50
-                       focus:border-gold transition-all disabled:opacity-50"
-              placeholder="correo@ejemplo.com  o  60001234"
-              autoFocus
-            />
+            <p className="mt-1 text-xs text-warm-gray">Sin el signo +, incluye el código de país (ej: 507 para Panamá)</p>
           </div>
 
           {error && (
