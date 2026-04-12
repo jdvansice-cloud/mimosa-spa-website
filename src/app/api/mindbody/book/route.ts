@@ -302,8 +302,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Send WhatsApp confirmation if WATI is configured and client phone is provided
+    // finalTherapistName may be empty when "Any Therapist" was selected — fall back to a default
+    if (!finalTherapistName) {
+      finalTherapistName = 'Nuestro equipo'
+    }
+
     let whatsappSent = false
-    if (isWatiConfigured() && clientPhone && clientName && finalTherapistName) {
+    console.log('WhatsApp pre-check:', { watiConfigured: isWatiConfigured(), clientPhone: !!clientPhone, clientName: !!clientName, finalTherapistName })
+    if (isWatiConfigured() && clientPhone && clientName) {
       try {
         // Format date for WhatsApp template (dd/mm/yyyy and h:mm a.m./p.m.)
         // startDateTime has no timezone offset — treat it as Panama local time (-05:00)
