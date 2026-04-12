@@ -260,7 +260,9 @@ export async function POST(request: NextRequest) {
           staff_id: staffId || null,
           therapist_name: therapistName || null,
           staff_requested: !!staffRequested,
-          appointment_start: startDateTime,
+          appointment_start: /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
+            ? startDateTime
+            : `${startDateTime}-05:00`,
           services: servicesData,
           total_duration: totalDuration || null,
           mindbody_appointment_ids: [],
@@ -378,7 +380,11 @@ export async function POST(request: NextRequest) {
           staff_id: staffId || null,
           therapist_name: finalTherapistName || null,
           staff_requested: !!staffRequested,
-          appointment_start: startDateTime,
+          // Store with Panama offset (-05:00) so Supabase saves the correct UTC value.
+          // Without it, Supabase treats the bare datetime as UTC, causing a 5-hour shift.
+          appointment_start: /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
+            ? startDateTime
+            : `${startDateTime}-05:00`,
           services: servicesData,
           total_duration: totalDuration || null,
           mindbody_appointment_ids: mindbodyAppointmentIds,
