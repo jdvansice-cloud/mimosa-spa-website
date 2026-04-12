@@ -184,20 +184,20 @@ export function ConfirmStep() {
         MobilePhone: clientInfo.MobilePhone
       })
 
-      // If client name is missing, fetch it from Mindbody
+      // If client name or phone is missing, fetch it from Mindbody
       let finalClientName = `${clientInfo.FirstName || ''} ${clientInfo.LastName || ''}`.trim()
       let finalClientPhone = clientInfo.MobilePhone
 
-      if (!finalClientName || finalClientName.length < 2) {
-        console.log('Client name missing, fetching from Mindbody...')
+      if (!finalClientName || finalClientName.length < 2 || !finalClientPhone) {
+        console.log('Client name or phone missing, fetching from Mindbody...')
         try {
           const profileResponse = await fetch(`/api/portal/profile?clientId=${authorizedClientId}`)
           if (profileResponse.ok) {
             const profileData = await profileResponse.json()
             if (profileData.client) {
-              finalClientName = `${profileData.client.FirstName || ''} ${profileData.client.LastName || ''}`.trim()
+              finalClientName = `${profileData.client.FirstName || ''} ${profileData.client.LastName || ''}`.trim() || finalClientName
               finalClientPhone = profileData.client.MobilePhone || finalClientPhone
-              console.log('Fetched client name from Mindbody:', finalClientName)
+              console.log('Fetched client profile from Mindbody:', { finalClientName, finalClientPhone })
             }
           }
         } catch (profileErr) {
