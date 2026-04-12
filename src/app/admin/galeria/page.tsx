@@ -28,10 +28,9 @@ interface FilePreview {
 
 const categories = [
   { value: 'all', label: 'Todas' },
-  { value: 'spa', label: 'Spa' },
+  { value: 'spa', label: 'Ubicación' },
   { value: 'treatments', label: 'Tratamientos' },
   { value: 'facilities', label: 'Instalaciones' },
-  { value: 'ambiance', label: 'Ambiente' },
 ]
 
 const uploadCategories = categories.filter(c => c.value !== 'all')

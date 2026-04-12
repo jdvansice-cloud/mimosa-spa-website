@@ -20,7 +20,7 @@ interface GalleryGridProps {
   locale: string
 }
 
-const categories = ['all', 'spa', 'treatments', 'facilities', 'ambiance']
+const categories = ['all', 'spa', 'treatments', 'facilities']
 
 export function GalleryGrid({ locale }: GalleryGridProps) {
   const t = useTranslations('gallery.categories')
