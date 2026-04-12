@@ -82,7 +82,6 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
               programIds={[PROGRAM_IDS.PAQUETES_DELUXE]}
               locale={locale}
               showTopPicks={false}
-              hideTopPicksFromList={true}
             />
           </Suspense>
         </div>
@@ -104,7 +103,6 @@ export default async function CorporalesPage({ params }: { params: Promise<{ loc
               programIds={[PROGRAM_IDS.TRATAMIENTOS_CORPORALES]}
               locale={locale}
               showTopPicks={false}
-              hideTopPicksFromList={true}
             />
           </Suspense>
         </div>
