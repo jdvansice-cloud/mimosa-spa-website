@@ -95,8 +95,8 @@ export function ServicesList({ programIds, locale, showTopPicks = true, hideTopP
           return acc
         }, [])
 
-        // Sort by price ascending
-        uniqueServices.sort((a: MindbodyService, b: MindbodyService) => a.Price - b.Price)
+        // Sort by name ascending
+        uniqueServices.sort((a: MindbodyService, b: MindbodyService) => a.Name.localeCompare(b.Name, 'es'))
 
         setServices(uniqueServices)
       } catch (err) {
