@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
-import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react'
+import { MapPin, Phone, Mail, Clock, Instagram, Facebook, MessageCircle } from 'lucide-react'
 import { Logo } from './Logo'
 
 interface SiteSettings {
@@ -12,6 +12,7 @@ interface SiteSettings {
   email: string
   instagram_url: string
   facebook_url: string
+  whatsapp_number: string
 }
 
 const defaultSettings: SiteSettings = {
@@ -19,6 +20,7 @@ const defaultSettings: SiteSettings = {
   email: 'info@mimosaretreat.com',
   instagram_url: 'https://instagram.com/mimosasparetreat',
   facebook_url: 'https://facebook.com/mimosasparetreat',
+  whatsapp_number: '50764049464',
 }
 
 // Format phone number for display
@@ -54,6 +56,7 @@ export function Footer() {
               email: data.email || defaultSettings.email,
               instagram_url: data.instagram_url || defaultSettings.instagram_url,
               facebook_url: data.facebook_url || defaultSettings.facebook_url,
+              whatsapp_number: data.whatsapp_number || defaultSettings.whatsapp_number,
             })
           }
         }
@@ -170,6 +173,17 @@ export function Footer() {
                   className="text-cream/70 hover:text-gold transition-colors"
                 >
                   {phoneDisplay}
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <MessageCircle className="h-5 w-5 text-gold" />
+                <a
+                  href={`https://wa.me/${settings.whatsapp_number.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cream/70 hover:text-gold transition-colors"
+                >
+                  +{settings.whatsapp_number.replace(/\D/g, '')}
                 </a>
               </li>
               <li className="flex items-center gap-3">

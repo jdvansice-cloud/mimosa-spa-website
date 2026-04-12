@@ -240,6 +240,7 @@ export function ConfirmStep() {
           staffId: staffIdToUse,
           startDateTime,
           promotionName: activePromotion?.title_es,
+          globalDiscountPercent: pricing.hasGlobalDiscount ? pricing.globalDiscountPercent : 0,
           clientName: finalClientName, // Use fetched name if store had empty name
           clientPhone: finalClientPhone, // Use fetched phone if store had empty phone
           locationName: selectedLocation.Name,
