@@ -128,11 +128,10 @@
     "subtitle": "Discover our spaces",
     "categories": {
       "all": "All",
-      "spa": "Spa",
+      "spa": "Location",
       "treatments": "Treatments",
       "facilities": "Facilities",
-      "team": "Team",
-      "ambiance": "Ambiance"
+      "team": "Team"
     },
     "loading": "Loading gallery...",
     "noImages": "No images available."
