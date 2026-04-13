@@ -93,7 +93,9 @@ async function sendTemplate(
       return { result: false, error: `HTTP ${response.status}: ${errorText}` }
     }
 
-    return await response.json()
+    const responseData = await response.json()
+    console.log('WATI response:', JSON.stringify(responseData))
+    return responseData
   } catch (error) {
     console.error('WATI API request failed:', error)
     return { result: false, error: String(error) }

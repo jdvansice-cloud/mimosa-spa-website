@@ -7,7 +7,7 @@ R.c("server/chunks/ssr/98928_next_dist_compiled_@opentelemetry_api_index_f81660f
 R.c("server/chunks/ssr/98928_next_dist_esm_aa88116d._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__8f07f982._.js")
 R.c("server/chunks/ssr/_claude-worktrees_mimosa-spa-website_vigilant-rubin_src_app_layout_tsx_2f2681d2._.js")
-R.c("server/chunks/ssr/_claude-worktrees_mimosa-spa-website_vigilant-rubin_f9110025._.js")
+R.c("server/chunks/ssr/_claude-worktrees_mimosa-spa-website_vigilant-rubin_08d28521._.js")
 R.c("server/chunks/ssr/98928_next_dist_client_components_0c677cb1._.js")
 R.c("server/chunks/ssr/74243_vigilant-rubin__next-internal_server_app__not-found_page_actions_10f213be.js")
 R.m(19234)

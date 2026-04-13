@@ -360,10 +360,40 @@
       "namedRegex": "^/api/mindbody/test(?:/)?$"
     },
     {
+      "page": "/api/portal/auth/link-account",
+      "regex": "^/api/portal/auth/link\\-account(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/portal/auth/link\\-account(?:/)?$"
+    },
+    {
+      "page": "/api/portal/auth/lookup",
+      "regex": "^/api/portal/auth/lookup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/portal/auth/lookup(?:/)?$"
+    },
+    {
+      "page": "/api/portal/auth/save-profile",
+      "regex": "^/api/portal/auth/save\\-profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/portal/auth/save\\-profile(?:/)?$"
+    },
+    {
+      "page": "/api/portal/auth/send-otp",
+      "regex": "^/api/portal/auth/send\\-otp(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/portal/auth/send\\-otp(?:/)?$"
+    },
+    {
       "page": "/api/portal/auth/verify",
       "regex": "^/api/portal/auth/verify(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/portal/auth/verify(?:/)?$"
+    },
+    {
+      "page": "/api/portal/auth/verify-otp",
+      "regex": "^/api/portal/auth/verify\\-otp(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/portal/auth/verify\\-otp(?:/)?$"
     },
     {
       "page": "/api/portal/auth/whatsapp",
