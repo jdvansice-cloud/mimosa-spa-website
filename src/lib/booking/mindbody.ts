@@ -1272,16 +1272,16 @@ export async function getAppointmentStatuses(
     Appointments: Array<{ Id: number; Status: string }>
   }
 
-  // Mindbody's URL length limit requires batching — send max 25 IDs per request
-  const BATCH_SIZE = 25
+  // Use comma-separated IDs in a single param, batched to avoid URL length limits
+  const BATCH_SIZE = 50
   const results: Array<{ id: number; status: string }> = []
 
   for (let i = 0; i < appointmentIds.length; i += BATCH_SIZE) {
     const batch = appointmentIds.slice(i, i + BATCH_SIZE)
-    const params = batch.map(id => `AppointmentIds=${id}`).join('&')
+    const params = `AppointmentIds=${batch.join(',')}&limit=200`
     try {
       const response = await mindbodyRequest<AppointmentsResponse>(
-        `/appointment/appointments?${params}&limit=200`
+        `/appointment/appointments?${params}`
       )
       results.push(...(response.Appointments || []).map(a => ({ id: a.Id, status: a.Status })))
     } catch (err) {
