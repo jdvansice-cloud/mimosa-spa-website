@@ -506,6 +506,51 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/api/portal/auth/link-account/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/link-account">> = Specific
+  const handler = {} as typeof import("../../src/app/api/portal/auth/link-account/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/portal/auth/lookup/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/lookup">> = Specific
+  const handler = {} as typeof import("../../src/app/api/portal/auth/lookup/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/portal/auth/save-profile/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/save-profile">> = Specific
+  const handler = {} as typeof import("../../src/app/api/portal/auth/save-profile/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/portal/auth/send-otp/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/send-otp">> = Specific
+  const handler = {} as typeof import("../../src/app/api/portal/auth/send-otp/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/api/portal/auth/verify-otp/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/verify-otp">> = Specific
+  const handler = {} as typeof import("../../src/app/api/portal/auth/verify-otp/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/api/portal/auth/verify/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/portal/auth/verify">> = Specific

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { CheckCircle, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star } from 'lucide-react'
+import { CheckCircle, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star, ArrowDown } from 'lucide-react'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
 
 // Tax rate constant
@@ -19,6 +19,7 @@ export function ConfirmStep() {
     activePromotion,
     availableSlots,
     replaceAppointmentId,
+    replaceBookingDetails,
     globalDiscountPercent,
     globalDiscountActive,
     setBookingConfirmation,
@@ -444,11 +445,71 @@ export function ConfirmStep() {
           Reserva a nombre de <span className="font-medium text-dark">{displayClientName || 'Cargando...'}</span>
         </div>
 
-        {/* Replacement notice */}
+        {/* Appointment change comparison */}
         {replaceAppointmentId && (
-          <div className="mt-3 p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 text-xs text-center">
-              Al confirmar, tu cita anterior será cancelada automáticamente
+          <div className="mt-3">
+            <h3 className="text-xs font-semibold text-warm-gray uppercase tracking-wider mb-2 text-center">
+              Cambio de cita
+            </h3>
+
+            {/* Old appointment — will be cancelled */}
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-1">
+              <p className="text-xs font-semibold text-red-600 uppercase tracking-wider mb-2">
+                Cita actual · será cancelada
+              </p>
+              {replaceBookingDetails ? (
+                <div className="space-y-1 text-sm text-red-800">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{replaceBookingDetails.date} · {replaceBookingDetails.time}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{replaceBookingDetails.locationName}</span>
+                  </div>
+                  {replaceBookingDetails.services.length > 0 && (
+                    <p className="text-red-700 text-xs pl-5">
+                      {replaceBookingDetails.services.join(', ')}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-red-600 italic">Cargando detalles...</p>
+              )}
+            </div>
+
+            {/* Arrow */}
+            <div className="flex justify-center my-1">
+              <ArrowDown className="w-4 h-4 text-warm-gray" />
+            </div>
+
+            {/* New appointment — already shown in the card above */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-3">
+              <p className="text-xs font-semibold text-green-700 uppercase tracking-wider mb-2">
+                Nueva cita · confirmada arriba
+              </p>
+              <div className="space-y-1 text-sm text-green-800">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>
+                    {selectedDate && formatDateShort(selectedDate)}
+                    {selectedTime && ` · ${formatTime(selectedTime)}`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{selectedLocation?.Name}</span>
+                </div>
+                {selectedServices.length > 0 && (
+                  <p className="text-green-700 text-xs pl-5">
+                    {selectedServices.map(s => s.Name).join(', ')}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <p className="text-xs text-warm-gray text-center mt-2">
+              Al confirmar, recibirás un mensaje de cancelación para la cita anterior y una confirmación para la nueva.
             </p>
           </div>
         )}

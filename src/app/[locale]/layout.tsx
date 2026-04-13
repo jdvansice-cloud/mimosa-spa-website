@@ -63,6 +63,9 @@ export async function generateMetadata({
       index: true,
       follow: true,
     },
+    other: {
+      'facebook-domain-verification': 'i0s519t7a95tmw8xwd5n4zfv1gvkbo',
+    },
   }
 }
 

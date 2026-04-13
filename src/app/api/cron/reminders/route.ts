@@ -81,9 +81,10 @@ export async function GET(request: NextRequest) {
         .from('bookings')
         .update({ reminder_sent: true, reminder_sent_at: new Date().toISOString() })
         .eq('id', booking.id)
+      console.log(`Reminder sent for booking ${booking.id} (phone: ${booking.client_phone}, apptId: ${appointmentId})`)
       sent++
     } else {
-      console.error('Reminder failed for booking', booking.id, result.error)
+      console.error('Reminder failed for booking', booking.id, JSON.stringify(result))
       failed++
     }
   }

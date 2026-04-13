@@ -70,6 +70,13 @@ interface BookingState {
 
   // Appointment replacement (from ?replace=APPOINTMENT_ID)
   replaceAppointmentId: string | null
+  replaceBookingDetails: {
+    date: string
+    time: string
+    locationName: string
+    services: string[]
+    therapistName: string
+  } | null
 
   // Global online discount (loaded from site settings)
   globalDiscountPercent: number
@@ -139,6 +146,7 @@ interface BookingActions {
   // Booking
   setBookingConfirmation: (confirmation: BookingConfirmation) => void
   setReplaceAppointmentId: (id: string | null) => void
+  setReplaceBookingDetails: (details: { date: string; time: string; locationName: string; services: string[]; therapistName: string } | null) => void
   setGlobalDiscount: (percent: number, active: boolean) => void
   
   // Pricing
@@ -202,6 +210,7 @@ const initialState: BookingState = {
   // Result
   bookingConfirmation: null,
   replaceAppointmentId: null,
+  replaceBookingDetails: null,
   globalDiscountPercent: 0,
   globalDiscountActive: false,
   
@@ -491,6 +500,7 @@ export const useBookingStore = create<BookingState & BookingActions>()(
       }, false, 'setBookingConfirmation'),
 
       setReplaceAppointmentId: (id) => set({ replaceAppointmentId: id }, false, 'setReplaceAppointmentId'),
+      setReplaceBookingDetails: (details) => set({ replaceBookingDetails: details }, false, 'setReplaceBookingDetails'),
 
       setGlobalDiscount: (percent, active) => set({ globalDiscountPercent: percent, globalDiscountActive: active }, false, 'setGlobalDiscount'),
       
