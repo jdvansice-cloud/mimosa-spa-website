@@ -303,12 +303,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // finalTherapistName may be empty when "Any Therapist" was selected — fall back to a default
-    if (!finalTherapistName) {
-      finalTherapistName = 'Nuestro equipo'
-    }
-
     // Pre-compute WhatsApp notification data (used for both confirmation and change messages)
+    // Use 'Nuestro equipo' only for the WhatsApp message — keep null in Supabase when no therapist selected
     let whatsappSent = false
     let watiNotificationData: {
       clientName: string; clientPhone: string; locationName: string
@@ -326,6 +322,7 @@ export async function POST(request: NextRequest) {
         timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true,
       })
       const serviceNames = (services as BookingService[]).map(s => s.name || 'Servicio').filter(Boolean)
+      const whatsappTherapistName = finalTherapistName || 'Nuestro equipo'
 
       watiNotificationData = {
         clientName, clientPhone,
@@ -333,7 +330,7 @@ export async function POST(request: NextRequest) {
         date: dateStr, time: timeStr,
         services: serviceNames,
         totalDuration: totalDuration || 60,
-        therapistName: finalTherapistName,
+        therapistName: whatsappTherapistName,
       }
 
       // For new bookings (not replacements) send confirmation immediately.
