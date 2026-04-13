@@ -171,14 +171,12 @@ export async function sendBookingChange(
 export async function sendBookingReminder(
   data: ReminderData
 ): Promise<WatiResponse> {
-  return sendTemplate(data.clientPhone, 'recordatorio_cita2', [
+  return sendTemplate(data.clientPhone, 'recordatorio_cita4', [
     { name: '1', value: data.clientName },
     { name: '2', value: stripMimosaPrefix(data.locationName) },
     { name: '3', value: data.date },
     { name: '4', value: data.time },
-    // Button URL dynamic params: both Confirmar and Cancelar buttons use {{1}} = appointmentId
-    { name: 'button_url_0', value: data.appointmentId },
-    { name: 'button_url_1', value: data.appointmentId },
+    { name: '5', value: data.appointmentId },
   ])
 }
 
