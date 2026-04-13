@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { addMultipleAppointments, getClientWithCustomFields, removeAppointment } from '@/lib/booking/mindbody'
-import { sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
+import { sendBookingConfirmation, sendBookingChange, isWatiConfigured } from '@/lib/booking/wati'
 import {
   validateRequired,
   sanitizeError,
@@ -303,52 +303,51 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send WhatsApp confirmation if WATI is configured and client phone is provided
     // finalTherapistName may be empty when "Any Therapist" was selected — fall back to a default
     if (!finalTherapistName) {
       finalTherapistName = 'Nuestro equipo'
     }
 
+    // Pre-compute WhatsApp notification data (used for both confirmation and change messages)
     let whatsappSent = false
-    console.log('WhatsApp pre-check:', { watiConfigured: isWatiConfigured(), clientPhone: !!clientPhone, clientName: !!clientName, finalTherapistName })
+    let watiNotificationData: {
+      clientName: string; clientPhone: string; locationName: string
+      date: string; time: string; services: string[]; totalDuration: number; therapistName: string
+    } | null = null
+
+    console.log('WhatsApp pre-check:', { watiConfigured: isWatiConfigured(), clientPhone: !!clientPhone, clientName: !!clientName, finalTherapistName, isReplacement: !!replaceAppointmentId })
     if (isWatiConfigured() && clientPhone && clientName) {
-      try {
-        // Format date for WhatsApp template (dd/mm/yyyy and h:mm a.m./p.m.)
-        // startDateTime has no timezone offset — treat it as Panama local time (-05:00)
-        const hasOffset = /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
-        const bookingDate = new Date(hasOffset ? startDateTime : `${startDateTime}-05:00`)
-        const dateStr = bookingDate.toLocaleDateString('es-PA', {
-          timeZone: 'America/Panama',
-          day: '2-digit', month: '2-digit', year: 'numeric',
-        })
-        const timeStr = bookingDate.toLocaleTimeString('es-PA', {
-          timeZone: 'America/Panama',
-          hour: 'numeric', minute: '2-digit', hour12: true,
-        })
+      const hasOffset = /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
+      const bookingDate = new Date(hasOffset ? startDateTime : `${startDateTime}-05:00`)
+      const dateStr = bookingDate.toLocaleDateString('es-PA', {
+        timeZone: 'America/Panama', day: '2-digit', month: '2-digit', year: 'numeric',
+      })
+      const timeStr = bookingDate.toLocaleTimeString('es-PA', {
+        timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true,
+      })
+      const serviceNames = (services as BookingService[]).map(s => s.name || 'Servicio').filter(Boolean)
 
-        // Get service names
-        const serviceNames = (services as BookingService[])
-          .map(s => s.name || 'Servicio')
-          .filter(Boolean)
+      watiNotificationData = {
+        clientName, clientPhone,
+        locationName: locationName || 'Mimosa Spa Retreat',
+        date: dateStr, time: timeStr,
+        services: serviceNames,
+        totalDuration: totalDuration || 60,
+        therapistName: finalTherapistName,
+      }
 
-        const watiResult = await sendBookingConfirmation({
-          clientName,
-          clientPhone,
-          locationName: locationName || 'Mimosa Spa Retreat',
-          date: dateStr,
-          time: timeStr,
-          services: serviceNames,
-          totalDuration: totalDuration || 60,
-          therapistName: finalTherapistName,
-        })
-
-        whatsappSent = watiResult.result
-        if (!watiResult.result) {
-          console.warn('WhatsApp notification failed:', watiResult.error)
+      // For new bookings (not replacements) send confirmation immediately.
+      // For replacements, the change message is sent after the old appointment is cancelled below.
+      if (!replaceAppointmentId) {
+        try {
+          const watiResult = await sendBookingConfirmation(watiNotificationData)
+          whatsappSent = watiResult.result
+          if (!watiResult.result) {
+            console.warn('WhatsApp confirmation failed:', watiResult.error)
+          }
+        } catch (watiError) {
+          console.error('Error sending WhatsApp confirmation:', watiError)
         }
-      } catch (watiError) {
-        console.error('Error sending WhatsApp notification:', watiError)
-        // Don't fail the booking if WhatsApp fails
       }
     }
 
@@ -411,9 +410,51 @@ export async function POST(request: NextRequest) {
     if (replaceAppointmentId) {
       const oldId = parseInt(replaceAppointmentId, 10)
       if (!isNaN(oldId)) {
+        // Fetch old booking details before cancelling (for notification)
+        let oldBooking: { id: string; appointment_start: string; location_name: string | null } | null = null
+        try {
+          const supabase = getSupabaseAdmin()
+          const { data } = await supabase
+            .from('bookings')
+            .select('id, appointment_start, location_name')
+            .contains('mindbody_appointment_ids', [oldId])
+            .eq('status', 'confirmed')
+            .single()
+          oldBooking = data
+        } catch {
+          // Non-fatal — proceed with cancellation
+        }
+
         try {
           replacedOldAppointment = await removeAppointment(oldId)
-          if (!replacedOldAppointment) {
+
+          if (replacedOldAppointment) {
+            // Update old booking status in Supabase
+            if (oldBooking) {
+              try {
+                const supabase = getSupabaseAdmin()
+                await supabase
+                  .from('bookings')
+                  .update({ status: 'cancelled' })
+                  .eq('id', oldBooking.id)
+              } catch (updateErr) {
+                console.error('Error updating old booking status:', updateErr)
+              }
+            }
+
+            // Send a single "cambio de cita" message with the new appointment details
+            if (watiNotificationData) {
+              try {
+                const watiResult = await sendBookingChange(watiNotificationData)
+                whatsappSent = watiResult.result
+                if (!watiResult.result) {
+                  console.warn('WhatsApp change notification failed:', watiResult.error)
+                }
+              } catch (changeWatiErr) {
+                console.error('Error sending change WhatsApp:', changeWatiErr)
+              }
+            }
+          } else {
             console.warn('Could not cancel old appointment', oldId, '— new booking still confirmed')
           }
         } catch (cancelErr) {

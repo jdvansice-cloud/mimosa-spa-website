@@ -19,6 +19,7 @@ function BookingPageInner() {
   const addService = useBookingStore(state => state.addService)
   const setReplaceAppointmentId = useBookingStore(state => state.setReplaceAppointmentId)
   const replaceAppointmentId = useBookingStore(state => state.replaceAppointmentId)
+  const setReplaceBookingDetails = useBookingStore(state => state.setReplaceBookingDetails)
   const setGlobalDiscount = useBookingStore(state => state.setGlobalDiscount)
 
   const [isInitializing, setIsInitializing] = useState(true)
@@ -35,6 +36,11 @@ function BookingPageInner() {
       const replaceId = searchParams.get('replace')
       if (replaceId) {
         setReplaceAppointmentId(replaceId)
+        // Fetch old booking details for comparison UI in ConfirmStep
+        fetch(`/api/booking/by-appointment?id=${replaceId}`)
+          .then(res => res.ok ? res.json() : null)
+          .then(data => { if (data?.booking) setReplaceBookingDetails(data.booking) })
+          .catch(() => {})
       }
 
       // Load global online discount from site settings

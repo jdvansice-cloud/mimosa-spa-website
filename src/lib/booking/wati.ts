@@ -129,7 +129,28 @@ function stripMimosaPrefix(locationName: string): string {
 export async function sendBookingConfirmation(
   data: BookingConfirmationData
 ): Promise<WatiResponse> {
-  return sendTemplate(data.clientPhone, 'confirmacion_cita', [
+  return sendTemplate(data.clientPhone, 'confirmacion_cita2', [
+    { name: '1', value: data.clientName },
+    { name: '2', value: stripMimosaPrefix(data.locationName) },
+    { name: '3', value: data.date },
+    { name: '4', value: data.time },
+    { name: '5', value: `${data.totalDuration} min` },
+    { name: '6', value: data.therapistName },
+    { name: '7', value: data.services.join(', ') },
+  ])
+}
+
+// ===========================================
+// BOOKING CHANGE NOTIFICATION
+// Template: cambio_cita
+// {{1}} nombre, {{2}} ubicacion, {{3}} fecha, {{4}} hora,
+// {{5}} duracion, {{6}} terapeuta, {{7}} servicios
+// ===========================================
+
+export async function sendBookingChange(
+  data: BookingConfirmationData
+): Promise<WatiResponse> {
+  return sendTemplate(data.clientPhone, 'cambio_cita', [
     { name: '1', value: data.clientName },
     { name: '2', value: stripMimosaPrefix(data.locationName) },
     { name: '3', value: data.date },
@@ -150,7 +171,7 @@ export async function sendBookingConfirmation(
 export async function sendBookingReminder(
   data: ReminderData
 ): Promise<WatiResponse> {
-  return sendTemplate(data.clientPhone, 'recordatorio_cita', [
+  return sendTemplate(data.clientPhone, 'recordatorio_cita2', [
     { name: '1', value: data.clientName },
     { name: '2', value: stripMimosaPrefix(data.locationName) },
     { name: '3', value: data.date },
