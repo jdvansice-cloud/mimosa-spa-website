@@ -1272,12 +1272,24 @@ export async function getAppointmentStatuses(
     Appointments: Array<{ Id: number; Status: string }>
   }
 
-  const params = appointmentIds.map(id => `AppointmentIds=${id}`).join('&')
-  const response = await mindbodyRequest<AppointmentsResponse>(
-    `/appointment/appointments?${params}&limit=200`
-  )
+  // Mindbody's URL length limit requires batching — send max 25 IDs per request
+  const BATCH_SIZE = 25
+  const results: Array<{ id: number; status: string }> = []
 
-  return (response.Appointments || []).map(a => ({ id: a.Id, status: a.Status }))
+  for (let i = 0; i < appointmentIds.length; i += BATCH_SIZE) {
+    const batch = appointmentIds.slice(i, i + BATCH_SIZE)
+    const params = batch.map(id => `AppointmentIds=${id}`).join('&')
+    try {
+      const response = await mindbodyRequest<AppointmentsResponse>(
+        `/appointment/appointments?${params}&limit=200`
+      )
+      results.push(...(response.Appointments || []).map(a => ({ id: a.Id, status: a.Status })))
+    } catch (err) {
+      console.error(`Failed to fetch appointment statuses for batch starting at index ${i}:`, err)
+    }
+  }
+
+  return results
 }
 
 // CLIENT HISTORY & PORTAL FUNCTIONS
