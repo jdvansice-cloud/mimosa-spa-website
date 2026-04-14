@@ -1261,36 +1261,6 @@ export async function addMultipleAppointments(appointments: Array<{
   }
 }
 
-// Fetch appointment statuses from Mindbody by appointment IDs
-// Used by the sync cron to update Supabase with completed/cancelled/noshow statuses
-export async function getAppointmentStatuses(
-  appointmentIds: number[]
-): Promise<Array<{ id: number; status: string }>> {
-  if (appointmentIds.length === 0) return []
-
-  interface AppointmentsResponse {
-    Appointments: Array<{ Id: number; Status: string }>
-  }
-
-  // Mindbody's URL length limit requires batching — send max 25 IDs per request
-  const BATCH_SIZE = 25
-  const results: Array<{ id: number; status: string }> = []
-
-  for (let i = 0; i < appointmentIds.length; i += BATCH_SIZE) {
-    const batch = appointmentIds.slice(i, i + BATCH_SIZE)
-    const params = batch.map(id => `AppointmentIds=${id}`).join('&')
-    try {
-      const response = await mindbodyRequest<AppointmentsResponse>(
-        `/appointment/appointments?${params}&limit=200`
-      )
-      results.push(...(response.Appointments || []).map(a => ({ id: a.Id, status: a.Status })))
-    } catch (err) {
-      console.error(`Failed to fetch appointment statuses for batch starting at index ${i}:`, err)
-    }
-  }
-
-  return results
-}
 
 // CLIENT HISTORY & PORTAL FUNCTIONS
 // ============================================
