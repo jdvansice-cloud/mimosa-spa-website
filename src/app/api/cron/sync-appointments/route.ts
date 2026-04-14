@@ -85,6 +85,7 @@ export async function GET(request: NextRequest) {
     .toISOString().split('T')[0]
 
   console.log(`Syncing ${targetIds.size} of ${bookings.length} total bookings (window: ${startDate} → ${endDate})`)
+  console.log(`Target IDs: ${[...targetIds].join(', ')}`)
 
   // Get all locations
   let locationIds: number[] = []
@@ -114,6 +115,11 @@ export async function GET(request: NextRequest) {
           limit: PAGE_SIZE,
           offset,
         })
+
+        // Log first few IDs from each page to compare against targets
+        if (offset === 0) {
+          console.log(`Location ${locationId} page 1 sample IDs: ${appointments.slice(0, 10).map(a => a.Id).join(', ')}`)
+        }
 
         for (const apt of appointments) {
           if (targetIds.has(apt.Id)) {
