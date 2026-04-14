@@ -336,15 +336,6 @@ export function ConfirmStep() {
           </div>
         )}
 
-        {/* Promotion Badge */}
-        {pricing.hasPromotion && (
-          <div className="mb-4 p-3 bg-gradient-to-r from-gold/20 to-gold/10 border border-gold/30 rounded-xl">
-            <span className="flex items-center gap-2 text-sm font-semibold text-dark">
-              <Star className="w-4 h-4 text-gold" />
-              {activePromotion?.title_es}
-            </span>
-          </div>
-        )}
 
         {/* Appointment Card - Consolidated */}
         <div className="bg-white border border-beige-200 rounded-xl overflow-hidden mb-4">
@@ -387,42 +378,69 @@ export function ConfirmStep() {
           </div>
         </div>
 
-        {/* Services Summary - Compact */}
+        {/* Services Summary */}
         <div className="bg-white border border-beige-200 rounded-xl p-3 mb-4">
           <h3 className="text-xs font-semibold text-warm-gray uppercase tracking-wider mb-2">
             Servicios
           </h3>
-          <div className="space-y-1.5">
-            {selectedServices.map((service) => (
-              <div key={service.Id} className="flex justify-between text-sm">
-                <span className="text-dark">{service.Name}</span>
-              </div>
-            ))}
+          <div className="space-y-2">
+            {pricing.hasPromotion ? (
+              <>
+                {/* Promo header line with original + discounted price */}
+                <div className="flex items-start justify-between gap-2">
+                  <span className="flex items-center gap-1.5 font-semibold text-dark text-sm">
+                    <Star className="w-3.5 h-3.5 text-gold flex-shrink-0 mt-0.5" />
+                    {pricing.promotionName}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+                    <span className="line-through text-warm-gray text-xs">${pricing.servicesSubtotal.toFixed(2)}</span>
+                    <span className="font-semibold text-dark">${pricing.promotionPrice!.toFixed(2)}</span>
+                  </div>
+                </div>
+                {/* Included services — no price */}
+                <div className="pl-5 space-y-1">
+                  {selectedServices.map((service) => (
+                    <div key={service.Id} className="text-sm text-warm-gray">
+                      {service.Name}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              /* No promotion — each service with its price, discounted if applicable */
+              selectedServices.map((service) => {
+                const discountedPrice = pricing.hasGlobalDiscount
+                  ? Math.round(service.Price * (1 - pricing.globalDiscountPercent / 100) * 100) / 100
+                  : null
+                return (
+                  <div key={service.Id} className="flex justify-between text-sm">
+                    <span className="text-dark">{service.Name}</span>
+                    <div className="flex items-center gap-1.5 whitespace-nowrap">
+                      {discountedPrice !== null && (
+                        <span className="line-through text-warm-gray text-xs">${service.Price.toFixed(2)}</span>
+                      )}
+                      <span className="text-dark">${(discountedPrice ?? service.Price).toFixed(2)}</span>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+
+            {/* Addons always shown with price */}
             {selectedAddons.map((addon) => (
               <div key={addon.Id} className="flex justify-between text-sm">
                 <span className="text-dark">+ {addon.Name}</span>
+                <span className="text-dark">${addon.Price.toFixed(2)}</span>
               </div>
             ))}
           </div>
 
-          {/* Pricing Summary */}
+          {/* Totals */}
           <div className="mt-3 pt-3 border-t border-beige-200 space-y-1.5">
             <div className="flex justify-between text-sm">
-              <span className="text-warm-gray">Servicios</span>
-              <span className="text-dark">${pricing.servicesSubtotal.toFixed(2)}</span>
+              <span className="text-warm-gray">Subtotal</span>
+              <span className="text-dark">${(pricing.subtotalBeforeTax - pricing.addonsSubtotal).toFixed(2)}</span>
             </div>
-            {pricing.hasGlobalDiscount && (
-              <div className="flex justify-between text-sm text-green-600">
-                <span>Descuento online ({pricing.globalDiscountPercent}%)</span>
-                <span>-${pricing.globalDiscountAmount.toFixed(2)}</span>
-              </div>
-            )}
-            {pricing.hasPromotion && pricing.promotionDiscount > 0 && (
-              <div className="flex justify-between text-sm text-green-600">
-                <span>Descuento promoción</span>
-                <span>-${pricing.promotionDiscount.toFixed(2)}</span>
-              </div>
-            )}
             {pricing.addonsSubtotal > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-warm-gray">Servicios adicionales</span>
