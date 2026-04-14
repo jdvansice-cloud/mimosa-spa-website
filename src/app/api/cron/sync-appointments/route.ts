@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getLocations, getStaffAppointments } from '@/lib/booking/mindbody'
+import { getLocations, getAllStaffAppointments } from '@/lib/booking/mindbody'
 
 /**
  * GET /api/cron/sync-appointments
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
 
   for (const locationId of locationIds) {
     try {
-      const appointments = await getStaffAppointments({
+      const appointments = await getAllStaffAppointments({
         locationId,
         startDate,
         endDate,
