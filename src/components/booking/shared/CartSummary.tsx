@@ -343,10 +343,16 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
                 <span className="text-warm-gray">Promoción:</span>
                 <span className="text-gold-600 font-medium">${pricing.promotionPrice.toFixed(2)}</span>
               </div>
-              {pricing.regularItemsTotal > 0 && (
+              {pricing.regularServicesSubtotal > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-warm-gray">Servicios adicionales:</span>
+                  <span className="text-dark">${pricing.regularServicesSubtotal.toFixed(2)}</span>
+                </div>
+              )}
+              {pricing.addonsSubtotal > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-warm-gray">Adicionales:</span>
-                  <span className="text-dark">${pricing.regularItemsTotal.toFixed(2)}</span>
+                  <span className="text-dark">${pricing.addonsSubtotal.toFixed(2)}</span>
                 </div>
               )}
             </>

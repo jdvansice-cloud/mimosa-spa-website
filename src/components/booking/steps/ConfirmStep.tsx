@@ -81,16 +81,28 @@ export function ConfirmStep() {
 
   // Calculate pricing with useMemo
   const pricing = useMemo(() => {
-    const servicesSubtotal = selectedServices.reduce((sum, s) => sum + s.Price, 0)
+    const hasPromotion = activePromotion !== null
+
+    // Split services: promo-included vs user-added extras
+    const promoServiceIds = new Set((activePromotion?.services || []).map(s => s.Id))
+    const promoServices = hasPromotion
+      ? selectedServices.filter(s => promoServiceIds.has(s.Id))
+      : selectedServices
+    const extraServices = hasPromotion
+      ? selectedServices.filter(s => !promoServiceIds.has(s.Id))
+      : []
+
+    const promoServicesSubtotal = promoServices.reduce((sum, s) => sum + s.Price, 0)
+    const extraServicesSubtotal = extraServices.reduce((sum, s) => sum + s.Price, 0)
     const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
 
-    const hasPromotion = activePromotion !== null
-    let finalServicesPrice = servicesSubtotal
+    let finalServicesPrice = promoServicesSubtotal + extraServicesSubtotal
     let promotionDiscount = 0
 
     if (hasPromotion && activePromotion) {
-      finalServicesPrice = activePromotion.price
-      promotionDiscount = servicesSubtotal - activePromotion.price
+      // Promotion covers only its included services at a flat price; extras are full price
+      finalServicesPrice = activePromotion.price + extraServicesSubtotal
+      promotionDiscount = promoServicesSubtotal - activePromotion.price
     }
 
     const hasGlobalDiscount = !hasPromotion && globalDiscountActive && globalDiscountPercent > 0
@@ -105,9 +117,10 @@ export function ConfirmStep() {
     const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
 
     return {
-      services: selectedServices,
-      addons: selectedAddons,
-      servicesSubtotal,
+      promoServices,
+      extraServices,
+      promoServicesSubtotal,
+      extraServicesSubtotal,
       addonsSubtotal,
       hasPromotion,
       promotionName: activePromotion?.title_es || null,
@@ -386,25 +399,32 @@ export function ConfirmStep() {
           <div className="space-y-2">
             {pricing.hasPromotion ? (
               <>
-                {/* Promo header line with original + discounted price */}
+                {/* Promo header — strikethrough shows promo-services-only original price */}
                 <div className="flex items-start justify-between gap-2">
                   <span className="flex items-center gap-1.5 font-semibold text-dark text-sm">
                     <Star className="w-3.5 h-3.5 text-gold flex-shrink-0 mt-0.5" />
                     {pricing.promotionName}
                   </span>
                   <div className="flex items-center gap-1.5 text-sm whitespace-nowrap">
-                    <span className="line-through text-warm-gray text-xs">${pricing.servicesSubtotal.toFixed(2)}</span>
+                    <span className="line-through text-warm-gray text-xs">${pricing.promoServicesSubtotal.toFixed(2)}</span>
                     <span className="font-semibold text-dark">${pricing.promotionPrice!.toFixed(2)}</span>
                   </div>
                 </div>
-                {/* Included services — no price */}
+                {/* Promo-included services only — no price */}
                 <div className="pl-5 space-y-1">
-                  {selectedServices.map((service) => (
+                  {pricing.promoServices.map((service) => (
                     <div key={service.Id} className="text-sm text-warm-gray">
                       {service.Name}
                     </div>
                   ))}
                 </div>
+                {/* Extra services added on top of promo — shown with full price */}
+                {pricing.extraServices.map((service) => (
+                  <div key={service.Id} className="flex justify-between text-sm">
+                    <span className="text-dark">{service.Name}</span>
+                    <span className="text-dark">${service.Price.toFixed(2)}</span>
+                  </div>
+                ))}
               </>
             ) : (
               /* No promotion — each service with its price, discounted if applicable */
@@ -437,10 +457,12 @@ export function ConfirmStep() {
 
           {/* Totals */}
           <div className="mt-3 pt-3 border-t border-beige-200 space-y-1.5">
+            {/* Subtotal = services at their final prices (promo price + any extra services) */}
             <div className="flex justify-between text-sm">
               <span className="text-warm-gray">Subtotal</span>
               <span className="text-dark">${(pricing.subtotalBeforeTax - pricing.addonsSubtotal).toFixed(2)}</span>
             </div>
+            {/* Addons line — only if there are addons */}
             {pricing.addonsSubtotal > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-warm-gray">Servicios adicionales</span>
