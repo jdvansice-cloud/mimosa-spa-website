@@ -1180,7 +1180,7 @@ export async function addAppointment(appointmentData: {
   // Mindbody API expects specific field names - ensure proper casing
   // The API is case-sensitive and expects these exact field names
   const requestBody = {
-    ClientId: String(appointmentData.ClientId), // Mindbody expects string for ClientId
+    ClientId: appointmentData.ClientId, // must be numeric — string triggers Custom ID lookup
     LocationId: appointmentData.LocationId,
     StaffId: appointmentData.StaffId,
     SessionTypeId: appointmentData.SessionTypeId,
