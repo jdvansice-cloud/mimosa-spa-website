@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
         LocationId: locationId,
         StaffId: staffId || undefined,
         SessionTypeId: service.sessionTypeId,
-        StartDateTime: currentStartTime.toISOString(),
+        StartDateTime: currentStartTime.toISOString().replace(/\.\d{3}Z$/, ''),
         Notes: noteParts.join(' | '),
         StaffRequested: !!staffRequested,
       })
