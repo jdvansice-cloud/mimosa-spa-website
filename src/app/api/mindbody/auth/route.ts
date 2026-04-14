@@ -86,16 +86,59 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // 1. Search by email — exact match
       try {
-        console.log('Attempting to register client:', {
-          FirstName: firstName,
-          LastName: lastName,
-          Email: email,
-          MobilePhone: phone,
-          BirthDate: birthDate,
-          Gender: gender,
-        })
+        const byEmail = await searchClients(email)
+        const emailMatch = byEmail.find(c =>
+          c.Email?.toLowerCase() === email.toLowerCase()
+        )
+        if (emailMatch) {
+          console.log('Found existing client by email:', emailMatch.Id, emailMatch.Email)
+          return NextResponse.json({
+            success: true,
+            client: {
+              Id: emailMatch.Id,
+              FirstName: emailMatch.FirstName,
+              LastName: emailMatch.LastName,
+              Email: emailMatch.Email,
+              MobilePhone: emailMatch.MobilePhone,
+            },
+            existingClient: true,
+          })
+        }
+      } catch (lookupError) {
+        console.error('Email lookup failed:', lookupError)
+      }
 
+      // 2. Search by phone — normalized match
+      try {
+        const byPhone = await searchClients(phone)
+        const phoneMatch = byPhone.find(c => {
+          const mobileMatch = c.MobilePhone && phoneNumbersMatch(c.MobilePhone, phone)
+          const homeMatch = c.HomePhone && phoneNumbersMatch(c.HomePhone, phone)
+          return mobileMatch || homeMatch
+        })
+        if (phoneMatch) {
+          console.log('Found existing client by phone:', phoneMatch.Id, phoneMatch.MobilePhone)
+          return NextResponse.json({
+            success: true,
+            client: {
+              Id: phoneMatch.Id,
+              FirstName: phoneMatch.FirstName,
+              LastName: phoneMatch.LastName,
+              Email: phoneMatch.Email,
+              MobilePhone: phoneMatch.MobilePhone,
+            },
+            existingClient: true,
+          })
+        }
+      } catch (lookupError) {
+        console.error('Phone lookup failed:', lookupError)
+      }
+
+      // 3. No existing client found — create new
+      try {
+        console.log('No existing client found, creating:', { firstName, lastName, email, phone })
         const client = await addClient({
           FirstName: firstName,
           LastName: lastName,
@@ -104,9 +147,7 @@ export async function POST(request: NextRequest) {
           BirthDate: birthDate,
           Gender: gender,
         })
-
-        console.log('Client registered successfully:', client)
-
+        console.log('Client created:', client.Id)
         return NextResponse.json({
           success: true,
           client: {
@@ -115,50 +156,11 @@ export async function POST(request: NextRequest) {
             LastName: client.LastName,
             Email: client.Email,
             MobilePhone: client.MobilePhone,
-          }
+          },
         })
-      } catch (regError) {
-        const errorMessage = regError instanceof Error ? regError.message : String(regError)
-
-        // If client already exists in Mindbody, look them up instead of erroring
-        if (errorMessage.includes('duplicate client') || errorMessage.includes('InvalidClientCreation')) {
-          console.log('Client already exists in Mindbody, looking up by email:', email)
-          try {
-            const existingClients = await searchClients(email)
-            console.log(`searchClients returned ${existingClients.length} results:`, existingClients.map(c => ({ Id: c.Id, Email: c.Email, Phone: c.MobilePhone })))
-
-            // Try exact email match first, then fall back to first result from email search
-            const match = existingClients.find(c =>
-              c.Email?.toLowerCase() === email.toLowerCase()
-            ) ?? existingClients[0]
-
-            if (match) {
-              console.log('Found existing client:', match.Id, match.Email)
-              return NextResponse.json({
-                success: true,
-                client: {
-                  Id: match.Id,
-                  FirstName: match.FirstName,
-                  LastName: match.LastName,
-                  Email: match.Email,
-                  MobilePhone: match.MobilePhone,
-                },
-                existingClient: true,
-              })
-            }
-            console.warn('No client found in search results for email:', email)
-          } catch (lookupError) {
-            console.error('Failed to look up existing client:', lookupError)
-          }
-        }
-
-        console.error('Registration error details:', {
-          message: errorMessage,
-          firstName,
-          lastName,
-          email,
-          phone,
-        })
+      } catch (createError) {
+        const errorMessage = createError instanceof Error ? createError.message : String(createError)
+        console.error('Client creation failed:', { message: errorMessage, firstName, lastName, email, phone })
         return NextResponse.json(
           { error: ERROR_MESSAGES.REGISTRATION_FAILED, details: errorMessage },
           { status: 500 }
