@@ -943,6 +943,8 @@ export async function getStaffAppointments(params: {
   staffIds?: number[]
   startDate: string
   endDate: string
+  limit?: number
+  offset?: number
 }) {
   interface StaffAppointmentsResponse {
     Appointments: Array<{
@@ -969,6 +971,11 @@ export async function getStaffAppointments(params: {
         LastName: string
       }
     }>
+    PaginationResponse?: {
+      TotalResults: number
+      RequestedLimit: number
+      RequestedOffset: number
+    }
   }
 
   console.log('getStaffAppointments called with:', params)
@@ -977,6 +984,8 @@ export async function getStaffAppointments(params: {
     locationIds: [params.locationId],
     startDate: params.startDate,
     endDate: params.endDate,
+    limit: params.limit ?? 200,
+    offset: params.offset ?? 0,
   }
 
   if (params.staffIds && params.staffIds.length > 0) {
@@ -989,7 +998,37 @@ export async function getStaffAppointments(params: {
 
   console.log('Staff appointments response:', response.Appointments?.length || 0, 'appointments')
 
-  return response.Appointments || []
+  return {
+    appointments: response.Appointments || [],
+    pagination: response.PaginationResponse,
+  }
+}
+
+// Paginated version — fetches all staff appointments across pages
+export async function getAllStaffAppointments(params: {
+  locationId: number
+  staffIds?: number[]
+  startDate: string
+  endDate: string
+}) {
+  const PAGE_SIZE = 200
+  const all: Awaited<ReturnType<typeof getStaffAppointments>>['appointments'] = []
+  let offset = 0
+
+  while (true) {
+    const { appointments, pagination } = await getStaffAppointments({
+      ...params,
+      limit: PAGE_SIZE,
+      offset,
+    })
+    all.push(...appointments)
+
+    const total = pagination?.TotalResults ?? appointments.length
+    offset += PAGE_SIZE
+    if (offset >= total || appointments.length < PAGE_SIZE) break
+  }
+
+  return all
 }
 
 // Get active session types that have availability
