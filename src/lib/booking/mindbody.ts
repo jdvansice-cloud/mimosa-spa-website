@@ -179,13 +179,15 @@ export async function mindbodyRequest<T>(
 
   if (!response.ok) {
     const errorText = await response.text()
+    // Never include HTML bodies (e.g. 502 Bad Gateway pages) in thrown errors
+    const isHtml = errorText.trim().startsWith('<')
     console.error(`Mindbody API error: ${response.status}`, {
       endpoint,
       method,
       body: body ? JSON.stringify(body) : undefined,
-      errorText
+      errorText: isHtml ? `[HTML ${response.status} page]` : errorText,
     })
-    throw new Error(`Mindbody API error: ${response.status} - ${errorText}`)
+    throw new Error(`Mindbody API error: ${response.status} - ${isHtml ? response.statusText || 'Server error' : errorText}`)
   }
 
   return response.json()

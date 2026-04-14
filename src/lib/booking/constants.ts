@@ -216,6 +216,14 @@ export function sanitizeError(error: unknown): string {
     if (message.includes('token')) {
       return ERROR_MESSAGES.GENERIC_ERROR
     }
+    // Mindbody 5xx / gateway errors — never expose raw server messages
+    if (message.match(/Mindbody API error: 5\d\d/) || message.includes('Bad Gateway') || message.includes('Service Unavailable')) {
+      return ERROR_MESSAGES.CONNECTION_ERROR
+    }
+    // Last-resort: strip any stray HTML tags before returning
+    if (message.includes('<') && message.includes('>')) {
+      return ERROR_MESSAGES.GENERIC_ERROR
+    }
 
     // Return the message if it doesn't contain sensitive info
     return message
