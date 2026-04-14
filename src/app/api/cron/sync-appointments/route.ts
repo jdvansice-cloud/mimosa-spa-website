@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getAppointmentStatuses } from '@/lib/booking/mindbody'
+import { getLocations, getStaffAppointments } from '@/lib/booking/mindbody'
 
 /**
  * GET /api/cron/sync-appointments
  * Syncs appointment statuses from Mindbody back to Supabase.
  * Runs daily. Checks confirmed bookings whose appointment time has passed
  * and updates status to: completed, cancelled, or noshow.
+ *
+ * Uses /appointment/staffappointments (date-range query) instead of
+ * /appointment/appointments (by ID) which is not available for this site.
  *
  * Mindbody statuses mapped:
  *   Completed      → completed
@@ -31,7 +34,7 @@ export async function GET(request: NextRequest) {
 
   const { data: bookings, error } = await supabase
     .from('bookings')
-    .select('id, mindbody_appointment_ids, status')
+    .select('id, mindbody_appointment_ids, status, appointment_start')
     .eq('status', 'confirmed')
     .lt('appointment_start', now)
     .not('mindbody_appointment_ids', 'is', null)
@@ -45,31 +48,70 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ synced: 0, message: 'No bookings to sync' })
   }
 
-  // Collect all Mindbody appointment IDs across all bookings
-  const allMindbodyIds: number[] = []
+  // Build ID → bookingId map (use first appointment ID per booking)
   const idToBookingId = new Map<number, string>()
+  const targetIds = new Set<number>()
 
   for (const booking of bookings) {
     const ids = booking.mindbody_appointment_ids as number[] | null
     if (ids?.length) {
-      // Use the first appointment ID as representative for the booking
-      allMindbodyIds.push(ids[0])
       idToBookingId.set(ids[0], booking.id)
+      targetIds.add(ids[0])
     }
   }
 
-  if (allMindbodyIds.length === 0) {
+  if (targetIds.size === 0) {
     return NextResponse.json({ synced: 0, message: 'No Mindbody IDs to check' })
   }
 
-  // Fetch statuses from Mindbody in one call
-  let statuses: Array<{ id: number; status: string }> = []
+  // Determine date range from unsynced bookings (cap lookback at 90 days)
+  const ninetyDaysAgo = new Date()
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+
+  const appointmentDates = bookings
+    .filter(b => b.appointment_start)
+    .map(b => new Date(b.appointment_start as string))
+
+  const minDate = new Date(Math.min(...appointmentDates.map(d => d.getTime())))
+  const startDate = (minDate < ninetyDaysAgo ? ninetyDaysAgo : minDate)
+    .toISOString().split('T')[0]
+  const endDate = new Date().toISOString().split('T')[0]
+
+  console.log(`Syncing ${targetIds.size} appointments from ${startDate} to ${endDate}`)
+
+  // Get all locations
+  let locationIds: number[] = []
   try {
-    statuses = await getAppointmentStatuses(allMindbodyIds)
+    const locations = await getLocations()
+    locationIds = locations.map(l => l.Id)
+    console.log(`Found ${locationIds.length} locations: ${locationIds.join(', ')}`)
   } catch (err) {
-    console.error('Failed to fetch appointment statuses from Mindbody:', err)
-    return NextResponse.json({ error: 'Mindbody fetch failed' }, { status: 500 })
+    console.error('Failed to fetch locations:', err)
+    return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 })
   }
+
+  // Fetch staff appointments for the date range at each location
+  const statusMap = new Map<number, string>()
+
+  for (const locationId of locationIds) {
+    try {
+      const appointments = await getStaffAppointments({
+        locationId,
+        startDate,
+        endDate,
+      })
+      console.log(`Location ${locationId}: ${appointments.length} appointments in range`)
+      for (const apt of appointments) {
+        if (targetIds.has(apt.Id)) {
+          statusMap.set(apt.Id, apt.Status)
+        }
+      }
+    } catch (err) {
+      console.error(`Failed to fetch appointments for location ${locationId}:`, err)
+    }
+  }
+
+  console.log(`Status map built: ${statusMap.size} of ${targetIds.size} IDs found`)
 
   // Map Mindbody status → our status
   function mapStatus(mindbodyStatus: string): string | null {
@@ -85,7 +127,7 @@ export async function GET(request: NextRequest) {
   let synced = 0
   let unchanged = 0
 
-  for (const { id: mindbodyId, status: mindbodyStatus } of statuses) {
+  for (const [mindbodyId, mindbodyStatus] of statusMap) {
     const bookingId = idToBookingId.get(mindbodyId)
     if (!bookingId) continue
 
