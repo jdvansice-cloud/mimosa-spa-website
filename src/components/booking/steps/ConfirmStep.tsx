@@ -457,18 +457,10 @@ export function ConfirmStep() {
 
           {/* Totals */}
           <div className="mt-3 pt-3 border-t border-beige-200 space-y-1.5">
-            {/* Subtotal = services at their final prices (promo price + any extra services) */}
             <div className="flex justify-between text-sm">
               <span className="text-warm-gray">Subtotal</span>
-              <span className="text-dark">${(pricing.subtotalBeforeTax - pricing.addonsSubtotal).toFixed(2)}</span>
+              <span className="text-dark">${pricing.subtotalBeforeTax.toFixed(2)}</span>
             </div>
-            {/* Addons line — only if there are addons */}
-            {pricing.addonsSubtotal > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-warm-gray">Servicios adicionales</span>
-                <span className="text-dark">${pricing.addonsSubtotal.toFixed(2)}</span>
-              </div>
-            )}
             <div className="flex justify-between text-sm">
               <span className="text-warm-gray">ITBM (7%)</span>
               <span className="text-dark">${pricing.itbmAmount.toFixed(2)}</span>
