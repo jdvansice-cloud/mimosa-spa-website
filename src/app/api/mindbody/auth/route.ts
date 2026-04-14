@@ -125,10 +125,15 @@ export async function POST(request: NextRequest) {
           console.log('Client already exists in Mindbody, looking up by email:', email)
           try {
             const existingClients = await searchClients(email)
+            console.log(`searchClients returned ${existingClients.length} results:`, existingClients.map(c => ({ Id: c.Id, Email: c.Email, Phone: c.MobilePhone })))
+
+            // Try exact email match first, then fall back to first result from email search
             const match = existingClients.find(c =>
               c.Email?.toLowerCase() === email.toLowerCase()
-            )
+            ) ?? existingClients[0]
+
             if (match) {
+              console.log('Found existing client:', match.Id, match.Email)
               return NextResponse.json({
                 success: true,
                 client: {
@@ -141,6 +146,7 @@ export async function POST(request: NextRequest) {
                 existingClient: true,
               })
             }
+            console.warn('No client found in search results for email:', email)
           } catch (lookupError) {
             console.error('Failed to look up existing client:', lookupError)
           }
