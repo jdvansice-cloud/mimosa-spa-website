@@ -117,6 +117,11 @@ export function ConfirmStep() {
     const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
 
     return {
+      // Required by CartPricing type
+      services: selectedServices,
+      addons: selectedAddons,
+      servicesSubtotal: promoServicesSubtotal + extraServicesSubtotal,
+      // Split for display
       promoServices,
       extraServices,
       promoServicesSubtotal,
