@@ -14,7 +14,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const success = await confirmAppointment(parseInt(appointmentId))
+    const parsedId = parseInt(appointmentId, 10)
+    if (isNaN(parsedId) || parsedId <= 0) {
+      console.error('Invalid appointment ID received:', appointmentId)
+      return NextResponse.redirect(
+        new URL('/cita/resultado?status=error&message=ID de cita inválido', request.url)
+      )
+    }
+
+    const success = await confirmAppointment(parsedId)
 
     if (!success) {
       return NextResponse.redirect(

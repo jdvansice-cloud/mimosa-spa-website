@@ -62,9 +62,18 @@ export async function GET(request: NextRequest) {
       hour: 'numeric', minute: '2-digit', hour12: true,
     })
 
-    // Use first Mindbody appointment ID for confirm/cancel button URLs
+    // Use first Mindbody appointment ID for confirm/cancel button URLs.
+    // UUID fallback is intentionally removed — parseInt(UUID) → NaN → broken link.
     const mindbodyIds = booking.mindbody_appointment_ids as number[] | null
-    const appointmentId = mindbodyIds?.[0] ? String(mindbodyIds[0]) : String(booking.id)
+    const firstMindbodyId = mindbodyIds?.[0]
+
+    if (!firstMindbodyId) {
+      console.warn(`Booking ${booking.id} has no Mindbody appointment IDs — skipping reminder`)
+      failed++
+      continue
+    }
+
+    const appointmentId = String(firstMindbodyId)
 
     const result = await sendBookingReminder({
       clientName: booking.client_name || 'Cliente',
