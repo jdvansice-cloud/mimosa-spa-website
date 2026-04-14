@@ -138,8 +138,9 @@ export async function mindbodyRequest<T>(
 ): Promise<T> {
   const { method = 'GET', body, params } = options
 
-  // Get access token
-  const token = await getAccessToken()
+  // GET requests retry on transient 5xx (safe — no side effects)
+  // POST/PUT/DELETE do not retry to avoid double-booking or duplicate writes
+  const maxAttempts = method === 'GET' ? 3 : 1
 
   // Build URL with query params
   let url = `${MINDBODY_API_URL}${endpoint}`
@@ -147,50 +148,60 @@ export async function mindbodyRequest<T>(
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        // Handle arrays - Mindbody API expects repeated params for arrays
         if (Array.isArray(value)) {
-          value.forEach(v => {
-            searchParams.append(key, String(v))
-          })
+          value.forEach(v => searchParams.append(key, String(v)))
         } else {
           searchParams.append(key, String(value))
         }
       }
     })
     const queryString = searchParams.toString()
-    if (queryString) {
-      url += `?${queryString}`
-    }
+    if (queryString) url += `?${queryString}`
   }
 
-  console.log('Mindbody API request:', method, url)
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    // Get access token (re-fetched each attempt in case the previous token was stale)
+    const token = await getAccessToken()
 
-  // Make request
-  const response = await fetch(url, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'Api-Key': MINDBODY_API_KEY!,
-      'SiteId': MINDBODY_SITE_ID!,
-      'Authorization': `Bearer ${token}`,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  })
+    console.log('Mindbody API request:', method, url, attempt > 1 ? `(attempt ${attempt})` : '')
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    // Never include HTML bodies (e.g. 502 Bad Gateway pages) in thrown errors
-    const isHtml = errorText.trim().startsWith('<')
-    console.error(`Mindbody API error: ${response.status}`, {
-      endpoint,
+    const response = await fetch(url, {
       method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Api-Key': MINDBODY_API_KEY!,
+        'SiteId': MINDBODY_SITE_ID!,
+        'Authorization': `Bearer ${token}`,
+      },
       body: body ? JSON.stringify(body) : undefined,
-      errorText: isHtml ? `[HTML ${response.status} page]` : errorText,
     })
-    throw new Error(`Mindbody API error: ${response.status} - ${isHtml ? response.statusText || 'Server error' : errorText}`)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      const isHtml = errorText.trim().startsWith('<')
+      const errorDetail = isHtml ? response.statusText || 'Server error' : errorText
+
+      // Retry transient 5xx on GET requests
+      if (response.status >= 500 && attempt < maxAttempts) {
+        console.warn(`Mindbody API ${response.status} on ${endpoint} (attempt ${attempt}/${maxAttempts}), retrying in ${attempt}s…`)
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000))
+        continue
+      }
+
+      console.error(`Mindbody API error: ${response.status}`, {
+        endpoint,
+        method,
+        body: body ? JSON.stringify(body) : undefined,
+        errorText: isHtml ? `[HTML ${response.status} page]` : errorText,
+      })
+      throw new Error(`Mindbody API error: ${response.status} - ${errorDetail}`)
+    }
+
+    return response.json()
   }
 
-  return response.json()
+  // Unreachable but satisfies TypeScript
+  throw new Error(`Mindbody API: all ${maxAttempts} attempts failed for ${endpoint}`)
 }
 
 // ===========================================
