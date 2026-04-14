@@ -107,8 +107,8 @@ function PortalLoginContent() {
       setError('Correo electrónico inválido')
       return
     }
-    if (!isEmail && trimmed.replace(/\D/g, '').length < 8) {
-      setError('Número de teléfono inválido (mínimo 8 dígitos)')
+    if (!isEmail && trimmed.replace(/\D/g, '').length < 10) {
+      setError('Ingresa el número completo con código de país sin el + (ej: Panamá 50766124546)')
       return
     }
 
@@ -751,7 +751,7 @@ function PortalLoginContent() {
             </p>
           </div>
 
-          <div className="relative mb-4">
+          <div className="relative mb-1">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-gray">
               {credential.includes('@')
                 ? <Mail className="w-5 h-5" />
@@ -766,10 +766,13 @@ function PortalLoginContent() {
               className="w-full pl-12 pr-4 py-4 border-2 border-beige-200 rounded-xl
                        text-lg focus:outline-none focus:ring-2 focus:ring-gold/50
                        focus:border-gold transition-all disabled:opacity-50"
-              placeholder="correo@ejemplo.com  o  60001234"
+              placeholder="correo@ejemplo.com  o  50766001234"
               autoFocus
             />
           </div>
+          <p className="text-xs text-warm-gray mb-4">
+            Teléfono: incluye el código de país sin el + &nbsp;·&nbsp; Panamá: <span className="font-medium">507</span>66123456 &nbsp;·&nbsp; EE.UU.: <span className="font-medium">1</span>2125551234
+          </p>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
