@@ -1136,7 +1136,7 @@ export async function getScheduleItems(params: {
 
 // Add appointment
 export async function addAppointment(appointmentData: {
-  ClientId: number
+  ClientId: string | number  // Mindbody accepts the string Id or numeric UniqueId; both map to Custom ID lookup
   LocationId: number
   StaffId?: number
   SessionTypeId: number
@@ -1180,7 +1180,7 @@ export async function addAppointment(appointmentData: {
   // Mindbody API expects specific field names - ensure proper casing
   // The API is case-sensitive and expects these exact field names
   const requestBody = {
-    ClientId: appointmentData.ClientId, // must be numeric — string triggers Custom ID lookup
+    ClientId: appointmentData.ClientId, // string Id from Mindbody client record (Custom ID lookup)
     LocationId: appointmentData.LocationId,
     StaffId: appointmentData.StaffId,
     SessionTypeId: appointmentData.SessionTypeId,
@@ -1256,7 +1256,7 @@ export async function removeAppointment(appointmentId: number): Promise<boolean>
 // Add multiple appointments (for multi-service bookings)
 // All-or-nothing: if any appointment fails, previously created ones are cancelled
 export async function addMultipleAppointments(appointments: Array<{
-  ClientId: number
+  ClientId: string | number  // string Id from Mindbody client record
   LocationId: number
   StaffId?: number
   SessionTypeId: number
@@ -1618,6 +1618,7 @@ export async function getCustomClientFields() {
 // Update client profile interface
 export interface UpdateClientData {
   Id: string
+  Active?: boolean   // Set to true to reactivate an inactive client
   FirstName?: string
   LastName?: string
   Email?: string
@@ -1683,6 +1684,7 @@ export async function getClientWithCustomFields(clientId: string) {
     Clients: Array<{
       Id: string
       UniqueId: number
+      Active: boolean
       FirstName: string
       LastName: string
       Email: string

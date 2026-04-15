@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { addMultipleAppointments, getClientWithCustomFields, removeAppointment } from '@/lib/booking/mindbody'
+import { addMultipleAppointments, getClientWithCustomFields, updateClient, removeAppointment } from '@/lib/booking/mindbody'
 import { sendBookingConfirmation, sendBookingChange, isWatiConfigured } from '@/lib/booking/wati'
 import {
   validateRequired,
@@ -122,6 +122,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Auto-reactivate inactive clients — Mindbody rejects bookings for inactive records
+    // even when the GET lookup succeeds. Reactivating restores full booking capability.
+    if (mindbodyClient.Active === false) {
+      console.warn('Client is inactive in Mindbody, attempting reactivation:', {
+        Id: mindbodyClient.Id,
+        UniqueId: mindbodyClient.UniqueId,
+        Email: mindbodyClient.Email,
+      })
+      try {
+        await updateClient({ Id: mindbodyClient.Id, Active: true })
+        console.log('Client reactivated successfully:', mindbodyClient.Id)
+      } catch (reactivateError) {
+        console.error('Failed to reactivate client:', reactivateError)
+        return NextResponse.json(
+          {
+            error: 'Tu cuenta está inactiva. Por favor contacta al spa para habilitarla.',
+            details: 'Client reactivation failed'
+          },
+          { status: 409 }
+        )
+      }
+    }
+
     // Warn if client has no name (but don't block - Mindbody might still work)
     if (!mindbodyClient.FirstName && !mindbodyClient.LastName) {
       console.warn('BOOKING WARNING: Mindbody client has no name:', {
@@ -132,6 +155,7 @@ export async function POST(request: NextRequest) {
     } else {
       console.log('Mindbody client verified:', {
         Id: mindbodyClient.Id,
+        Active: mindbodyClient.Active,
         FirstName: mindbodyClient.FirstName,
         LastName: mindbodyClient.LastName,
         Email: mindbodyClient.Email
@@ -180,8 +204,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Build appointments array with consecutive start times
+    // Use the string Id from the verified Mindbody client record — this is what
+    // Mindbody's addappointment endpoint expects for the ClientId field.
+    const mindbodyClientId = mindbodyClient.Id
     const appointments: Array<{
-      ClientId: number
+      ClientId: string
       LocationId: number
       StaffId: number | undefined
       SessionTypeId: number
@@ -213,7 +240,7 @@ export async function POST(request: NextRequest) {
       }
 
       appointments.push({
-        ClientId: clientId,
+        ClientId: mindbodyClientId,  // use verified string Id, not raw numeric clientId
         LocationId: locationId,
         StaffId: staffId || undefined,
         SessionTypeId: service.sessionTypeId,
