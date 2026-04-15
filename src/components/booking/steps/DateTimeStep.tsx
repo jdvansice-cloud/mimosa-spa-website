@@ -52,10 +52,13 @@ export function DateTimeStep() {
       setIsLoadingAvailability(true)
       setAvailabilityError(null)
       try {
-        // Get date range (next 30 days)
-        const startDate = new Date()
-        const endDate = new Date()
-        endDate.setDate(endDate.getDate() + 30)
+        // Get date range (next 30 days) using Panama local dates.
+        // toISOString() always returns UTC, so between UTC midnight and 5 AM
+        // (Panama 7 PM–midnight) it would give tomorrow's date instead of today's.
+        // en-CA locale produces YYYY-MM-DD format natively.
+        const panamaLocale = { timeZone: 'America/Panama' } as const
+        const startDate = new Date().toLocaleDateString('en-CA', panamaLocale)
+        const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA', panamaLocale)
 
         // Build service IDs (session type IDs)
         const serviceIds = [
@@ -66,8 +69,8 @@ export function DateTimeStep() {
         const params = new URLSearchParams({
           locationId: selectedLocation.Id.toString(),
           serviceIds,
-          startDate: startDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0],
+          startDate,
+          endDate,
           duration: totalDuration.toString()
         })
 
