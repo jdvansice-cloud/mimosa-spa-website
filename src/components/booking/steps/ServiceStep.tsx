@@ -364,8 +364,7 @@ export function ServiceStep() {
     globalDiscountActive,
   } = useBookingStore()
 
-  // Global discount applies only when no promotion is active
-  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0 && !activePromotion
+  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
 
   const hasServices = useBookingStore(selectHasServices)
   const [groupedServices, setGroupedServices] = useState<Record<string, MindbodyService[]>>({})

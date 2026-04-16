@@ -156,8 +156,12 @@ export async function GET(request: NextRequest) {
               if (!avail.StartDateTime || !avail.EndDateTime) continue
 
               const availStart = new Date(avail.StartDateTime)
-              const availEnd = new Date(avail.EndDateTime)
-              debugWorkingHours.push(`${avail.StartDateTime} - ${avail.EndDateTime}`)
+              // Prefer BookableEndDateTime — Mindbody sets this to the latest time
+              // a new booking can START and still complete within the shift.
+              // EndDateTime is the raw shift end; a booking starting at EndDateTime
+              // would always run over. The fallback path already uses this logic.
+              const availEnd = new Date(avail.BookableEndDateTime || avail.EndDateTime)
+              debugWorkingHours.push(`${avail.StartDateTime} - ${avail.BookableEndDateTime || avail.EndDateTime}`)
 
               // Subtract blocked periods from this availability block
               const effectiveBlocks = subtractBlockedPeriods(
