@@ -97,8 +97,7 @@ export function AddonsStep() {
     globalDiscountActive,
   } = useBookingStore()
 
-  // Global discount applies only when no promotion is active
-  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0 && !activePromotion
+  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
 
   const [localAddons, setLocalAddons] = useState<MindbodyService[]>([])
   const [isLoadingAddons, setIsLoadingAddons] = useState(false)

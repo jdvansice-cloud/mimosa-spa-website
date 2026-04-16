@@ -27,8 +27,7 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
     globalDiscountActive,
   } = useBookingStore()
 
-  // Global discount applies only when no promotion is active
-  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0 && !activePromotion
+  const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
 
   // Separate promotion services from extra regular services
   const { promotionServices, regularServices } = useMemo(() => {
@@ -59,9 +58,9 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
     const regularServicesSubtotal = regularServices.reduce((sum, s) => sum + s.Price, 0)
     const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
 
-    // Apply global discount to services only (not addons), matching ConfirmStep behavior.
-    // Global discount is only active when there is no promotion.
-    const effectiveServicesSubtotal = (showGlobalDiscount && !hasPromotion)
+    // Apply global discount to regular services only (not addons, not promo-included services).
+    // When a promo is active, regularServicesSubtotal = extra services only, so this is correct.
+    const effectiveServicesSubtotal = showGlobalDiscount
       ? Math.round(regularServicesSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
       : regularServicesSubtotal
 

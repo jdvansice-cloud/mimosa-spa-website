@@ -105,11 +105,18 @@ export function ConfirmStep() {
       promotionDiscount = promoServicesSubtotal - activePromotion.price
     }
 
-    const hasGlobalDiscount = !hasPromotion && globalDiscountActive && globalDiscountPercent > 0
+    const hasGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
     let globalDiscountAmount = 0
     if (hasGlobalDiscount) {
-      globalDiscountAmount = Math.round(finalServicesPrice * (globalDiscountPercent / 100) * 100) / 100
-      finalServicesPrice = Math.round((finalServicesPrice - globalDiscountAmount) * 100) / 100
+      if (hasPromotion && activePromotion) {
+        // Only discount extra services, not the promotion price
+        const discountedExtra = Math.round(extraServicesSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
+        globalDiscountAmount = extraServicesSubtotal - discountedExtra
+        finalServicesPrice = activePromotion.price + discountedExtra
+      } else {
+        globalDiscountAmount = Math.round(finalServicesPrice * (globalDiscountPercent / 100) * 100) / 100
+        finalServicesPrice = Math.round((finalServicesPrice - globalDiscountAmount) * 100) / 100
+      }
     }
 
     const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
@@ -423,13 +430,23 @@ export function ConfirmStep() {
                     </div>
                   ))}
                 </div>
-                {/* Extra services added on top of promo — shown with full price */}
-                {pricing.extraServices.map((service) => (
-                  <div key={service.Id} className="flex justify-between text-sm">
-                    <span className="text-dark">{service.Name}</span>
-                    <span className="text-dark">${service.Price.toFixed(2)}</span>
-                  </div>
-                ))}
+                {/* Extra services added on top of promo — discounted if global discount active */}
+                {pricing.extraServices.map((service) => {
+                  const discountedPrice = pricing.hasGlobalDiscount
+                    ? Math.round(service.Price * (1 - pricing.globalDiscountPercent / 100) * 100) / 100
+                    : null
+                  return (
+                    <div key={service.Id} className="flex justify-between text-sm">
+                      <span className="text-dark">{service.Name}</span>
+                      <div className="flex items-center gap-1.5 whitespace-nowrap">
+                        {discountedPrice !== null && (
+                          <span className="line-through text-warm-gray text-xs">${service.Price.toFixed(2)}</span>
+                        )}
+                        <span className="text-dark">${(discountedPrice ?? service.Price).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )
+                })}
               </>
             ) : (
               /* No promotion — each service with its price, discounted if applicable */
