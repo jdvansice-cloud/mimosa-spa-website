@@ -77,11 +77,12 @@ export async function GET(
     try {
       const onlineServices = await getOnlineBookableServicesForPromotions()
 
-      // Filter services to only include those in the promotion that are online bookable
-      // Check both Id (SessionTypeId) and ProductId since promotions might store either
+      // mindbody_service_ids are stored as strings in Supabase; service.Id is a number.
+      // Normalise to strings before comparing to avoid silent type-mismatch failures.
+      const promoIdStrings = new Set(promotion.mindbody_service_ids.map(String))
       const promotionServices = onlineServices.filter(service =>
-        promotion.mindbody_service_ids.includes(service.Id) ||
-        (service.ProductId && promotion.mindbody_service_ids.includes(service.ProductId))
+        promoIdStrings.has(String(service.Id)) ||
+        (service.ProductId && promoIdStrings.has(String(service.ProductId)))
       )
 
       // Map to our MindbodyService format
