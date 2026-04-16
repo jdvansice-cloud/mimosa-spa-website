@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       startDateTime, // ISO string
       notes,
       promotionName,
+      promoServiceIds,
       globalDiscountPercent,
       // Client info for WhatsApp notification
       clientName,
@@ -227,10 +228,14 @@ export async function POST(request: NextRequest) {
     console.log('Start DateTime:', startDateTime)
     console.log('Services:', JSON.stringify(services, null, 2))
 
+    const promoServiceIdSet = new Set<number>(Array.isArray(promoServiceIds) ? promoServiceIds : [])
+
     for (const service of services as BookingService[]) {
       // Build notes: always include "Reservado en línea" + optional promotion or global discount + optional custom notes
+      // Promo-included services get the promotion name; all other discounted items get the global discount label.
       const noteParts: string[] = ['Reservado en línea']
-      if (promotionName) {
+      const isPromoService = promoServiceIdSet.has(service.sessionTypeId)
+      if (isPromoService && promotionName) {
         noteParts.push(`Promo: ${promotionName}`)
       } else if (globalDiscountPercent && globalDiscountPercent > 0) {
         noteParts.push(`Promo Online ${globalDiscountPercent}%`)
