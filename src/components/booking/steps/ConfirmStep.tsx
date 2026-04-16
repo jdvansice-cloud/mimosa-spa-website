@@ -270,7 +270,10 @@ export function ConfirmStep() {
           staffId: staffIdToUse,
           startDateTime,
           promotionName: activePromotion?.title_es,
-          promoServiceIds: activePromotion?.services?.map(s => s.Id) ?? [],
+          // Use mindbody_service_ids (always present from Supabase) rather than
+          // services?.map(s => s.Id) which is optional and may be empty if the
+          // Mindbody fetch in with-services failed.
+          promoServiceIds: activePromotion?.mindbody_service_ids?.map(Number).filter(n => !isNaN(n)) ?? [],
           globalDiscountPercent: pricing.hasGlobalDiscount ? pricing.globalDiscountPercent : 0,
           clientName: finalClientName, // Use fetched name if store had empty name
           clientPhone: finalClientPhone, // Use fetched phone if store had empty phone
