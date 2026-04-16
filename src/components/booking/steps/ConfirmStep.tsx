@@ -107,19 +107,23 @@ export function ConfirmStep() {
 
     const hasGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
     let globalDiscountAmount = 0
+    const effectiveAddonsSubtotal = hasGlobalDiscount
+      ? Math.round(addonsSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
+      : addonsSubtotal
     if (hasGlobalDiscount) {
       if (hasPromotion && activePromotion) {
-        // Only discount extra services, not the promotion price
+        // Only discount extra services (not the promotion price); addons discounted separately above
         const discountedExtra = Math.round(extraServicesSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
-        globalDiscountAmount = extraServicesSubtotal - discountedExtra
+        globalDiscountAmount = (extraServicesSubtotal - discountedExtra) + (addonsSubtotal - effectiveAddonsSubtotal)
         finalServicesPrice = activePromotion.price + discountedExtra
       } else {
         globalDiscountAmount = Math.round(finalServicesPrice * (globalDiscountPercent / 100) * 100) / 100
         finalServicesPrice = Math.round((finalServicesPrice - globalDiscountAmount) * 100) / 100
+        globalDiscountAmount += addonsSubtotal - effectiveAddonsSubtotal
       }
     }
 
-    const subtotalBeforeTax = finalServicesPrice + addonsSubtotal
+    const subtotalBeforeTax = finalServicesPrice + effectiveAddonsSubtotal
     const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
     const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
 
@@ -468,13 +472,23 @@ export function ConfirmStep() {
               })
             )}
 
-            {/* Addons always shown with price */}
-            {selectedAddons.map((addon) => (
-              <div key={addon.Id} className="flex justify-between text-sm">
-                <span className="text-dark">+ {addon.Name}</span>
-                <span className="text-dark">${addon.Price.toFixed(2)}</span>
-              </div>
-            ))}
+            {/* Addons — discounted if global discount active */}
+            {selectedAddons.map((addon) => {
+              const discountedAddonPrice = pricing.hasGlobalDiscount
+                ? Math.round(addon.Price * (1 - pricing.globalDiscountPercent / 100) * 100) / 100
+                : null
+              return (
+                <div key={addon.Id} className="flex justify-between text-sm">
+                  <span className="text-dark">+ {addon.Name}</span>
+                  <div className="flex items-center gap-1.5 whitespace-nowrap">
+                    {discountedAddonPrice !== null && (
+                      <span className="line-through text-warm-gray text-xs">${addon.Price.toFixed(2)}</span>
+                    )}
+                    <span className="text-dark">${(discountedAddonPrice ?? addon.Price).toFixed(2)}</span>
+                  </div>
+                </div>
+              )
+            })}
           </div>
 
           {/* Totals */}

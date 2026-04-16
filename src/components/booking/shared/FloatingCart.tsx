@@ -58,11 +58,14 @@ export function FloatingCart() {
     const regularServicesSubtotal = regularServices.reduce((sum, s) => sum + s.Price, 0)
     const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
 
-    // Apply global discount to regular services only (not addons, not promo-included services)
+    // Apply global discount to extra services and addons (not promo-included services)
     const effectiveRegularServicesSubtotal = showGlobalDiscount
       ? Math.round(regularServicesSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
       : regularServicesSubtotal
-    const regularItemsTotal = effectiveRegularServicesSubtotal + addonsSubtotal
+    const effectiveAddonsSubtotal = showGlobalDiscount
+      ? Math.round(addonsSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
+      : addonsSubtotal
+    const regularItemsTotal = effectiveRegularServicesSubtotal + effectiveAddonsSubtotal
 
     // Combined subtotal before tax
     const subtotalBeforeTax = promotionPrice + regularItemsTotal
@@ -326,10 +329,16 @@ export function FloatingCart() {
                                     </p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    {/* Addons are always full price — discount applies to services only */}
-                                    <span className="text-sm font-semibold text-dark whitespace-nowrap">
-                                      ${addon.Price.toFixed(0)}
-                                    </span>
+                                    {showGlobalDiscount && addon.Price > 0 ? (
+                                      <span className="flex flex-col items-end">
+                                        <span className="text-xs line-through text-warm-gray leading-tight">${addon.Price.toFixed(0)}</span>
+                                        <span className="text-sm font-semibold text-green-600 leading-tight">${(Math.round(addon.Price * (1 - globalDiscountPercent / 100) * 100) / 100).toFixed(0)}</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm font-semibold text-dark whitespace-nowrap">
+                                        ${addon.Price.toFixed(0)}
+                                      </span>
+                                    )}
                                     <button
                                       onClick={() => removeAddon(addon.Id)}
                                       className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50

@@ -58,14 +58,17 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
     const regularServicesSubtotal = regularServices.reduce((sum, s) => sum + s.Price, 0)
     const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
 
-    // Apply global discount to regular services only (not addons, not promo-included services).
+    // Apply global discount to extra services and addons (not promo-included services).
     // When a promo is active, regularServicesSubtotal = extra services only, so this is correct.
     const effectiveServicesSubtotal = showGlobalDiscount
       ? Math.round(regularServicesSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
       : regularServicesSubtotal
+    const effectiveAddonsSubtotal = showGlobalDiscount
+      ? Math.round(addonsSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
+      : addonsSubtotal
 
-    // Combined subtotal before tax: promo price (if any) + effective services + addons
-    const subtotalBeforeTax = promotionPrice + effectiveServicesSubtotal + addonsSubtotal
+    // Combined subtotal before tax: promo price (if any) + effective services + effective addons
+    const subtotalBeforeTax = promotionPrice + effectiveServicesSubtotal + effectiveAddonsSubtotal
 
     // Calculate ITBM (7%)
     const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
@@ -86,6 +89,7 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
       regularServicesSubtotal,
       effectiveServicesSubtotal,
       addonsSubtotal,
+      effectiveAddonsSubtotal,
       subtotalBeforeTax,
       itbmRate: ITBM_RATE,
       itbmAmount,
@@ -289,10 +293,16 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Addons are always full price — discount applies to services only */}
-                    <span className="text-sm font-medium text-dark">
-                      ${addon.Price.toFixed(2)}
-                    </span>
+                    {showGlobalDiscount && addon.Price > 0 ? (
+                      <span className="flex flex-col items-end">
+                        <span className="text-xs line-through text-warm-gray leading-tight">${addon.Price.toFixed(2)}</span>
+                        <span className="text-sm font-medium text-green-600 leading-tight">${(Math.round(addon.Price * (1 - globalDiscountPercent / 100) * 100) / 100).toFixed(2)}</span>
+                      </span>
+                    ) : (
+                      <span className="text-sm font-medium text-dark">
+                        ${addon.Price.toFixed(2)}
+                      </span>
+                    )}
                     {showRemoveButtons && (
                       <button
                         onClick={() => removeAddon(addon.Id)}
@@ -308,11 +318,11 @@ export function CartSummary({ compact = false, showRemoveButtons = true, showClo
           )}
 
           {/* Regular Items Subtotal (only show if there's also a promotion) */}
-          {hasPromotion && (pricing.regularServicesSubtotal + pricing.addonsSubtotal) > 0 && (
+          {hasPromotion && (pricing.effectiveServicesSubtotal + pricing.effectiveAddonsSubtotal) > 0 && (
             <div className="mt-3 pt-3 border-t border-beige-200">
               <div className="flex justify-between text-sm font-medium text-dark">
                 <span>Subtotal adicionales:</span>
-                <span>${(pricing.regularServicesSubtotal + pricing.addonsSubtotal).toFixed(2)}</span>
+                <span>${(pricing.effectiveServicesSubtotal + pricing.effectiveAddonsSubtotal).toFixed(2)}</span>
               </div>
             </div>
           )}
