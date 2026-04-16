@@ -155,6 +155,7 @@ interface BookingActions {
   // Reset
   reset: () => void
   resetToStep: (step: BookingStep) => void
+  resetForNewBooking: () => void
   
   // Cart UI
   openCart: () => void
@@ -592,12 +593,29 @@ export const useBookingStore = create<BookingState & BookingActions>()(
       // ===========================================
       
       reset: () => set({ ...initialState, isCartOpen: false }, false, 'reset'),
-      
+
       resetToStep: (step) => set({
         ...initialState,
         currentStep: step,
         isCartOpen: false
       }, false, 'resetToStep'),
+
+      // Like reset but preserves auth and global discount so the user doesn't
+      // have to re-authenticate and the discount banner stays active.
+      resetForNewBooking: () => set((state) => ({
+        ...initialState,
+        // Preserve auth
+        clientIdentifier: state.clientIdentifier,
+        identifierType: state.identifierType,
+        clientId: state.clientId,
+        clientInfo: state.clientInfo,
+        // Preserve global settings
+        globalDiscountPercent: state.globalDiscountPercent,
+        globalDiscountActive: state.globalDiscountActive,
+        // Start at location step (auth already done)
+        currentStep: 'location',
+        isCartOpen: false,
+      }), false, 'resetForNewBooking'),
     }),
     { name: 'booking-store' }
   )

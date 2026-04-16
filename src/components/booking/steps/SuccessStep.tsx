@@ -24,7 +24,7 @@ export function SuccessStep() {
     activePromotion,
     pricing,
     replaceAppointmentId,
-    reset
+    resetForNewBooking
   } = useBookingStore()
 
   const isReplacement = !!replaceAppointmentId
@@ -56,7 +56,7 @@ export function SuccessStep() {
   }
   
   const handleNewBooking = () => {
-    reset()
+    resetForNewBooking()
   }
   
   return (
