@@ -156,12 +156,19 @@ export async function GET(request: NextRequest) {
               if (!avail.StartDateTime || !avail.EndDateTime) continue
 
               const availStart = new Date(avail.StartDateTime)
-              // Prefer BookableEndDateTime — Mindbody sets this to the latest time
-              // a new booking can START and still complete within the shift.
-              // EndDateTime is the raw shift end; a booking starting at EndDateTime
-              // would always run over. The fallback path already uses this logic.
-              const availEnd = new Date(avail.BookableEndDateTime || avail.EndDateTime)
-              debugWorkingHours.push(`${avail.StartDateTime} - ${avail.BookableEndDateTime || avail.EndDateTime}`)
+              // Prefer BookableEndDateTime if it is valid and after StartDateTime.
+              // Mindbody sometimes returns a sentinel value (e.g. "0001-01-01T00:00:00")
+              // for BookableEndDateTime when the field isn't applicable; using that
+              // as the end would produce a negative-duration block that wipes out all
+              // effective slots via subtractBlockedPeriods.
+              const bookableEndCandidate = avail.BookableEndDateTime ? new Date(avail.BookableEndDateTime) : null
+              const availEnd = (bookableEndCandidate && !isNaN(bookableEndCandidate.getTime()) && bookableEndCandidate > availStart)
+                ? bookableEndCandidate
+                : new Date(avail.EndDateTime)
+              const effectiveEndLabel = (bookableEndCandidate && !isNaN(bookableEndCandidate.getTime()) && bookableEndCandidate > availStart)
+                ? avail.BookableEndDateTime!
+                : avail.EndDateTime
+              debugWorkingHours.push(`${avail.StartDateTime} - ${effectiveEndLabel}`)
 
               // Subtract blocked periods from this availability block
               const effectiveBlocks = subtractBlockedPeriods(
@@ -216,9 +223,13 @@ export async function GET(request: NextRequest) {
     if (availableItems.length === 0 && serviceIdArray.length > 0) {
       console.log('=== SCHEDULE ITEMS EMPTY - TRYING BOOKABLE ITEMS ===')
       try {
+        // Pass only the first session type ID. Mindbody's bookableitems endpoint
+        // interprets multiple sessionTypeIds as "must satisfy ALL simultaneously",
+        // which returns 0 results for multi-service bookings. We only need it to
+        // identify available staff windows; duration filtering happens in slot generation.
         const rawBookableItems = await getBookableItems({
           locationIds: parsedLocationId,
-          sessionTypeIds: serviceIdArray,
+          sessionTypeIds: [serviceIdArray[0]],
           startDate,
           endDate,
         })
