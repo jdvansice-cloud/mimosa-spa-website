@@ -116,8 +116,8 @@ export async function GET(request: NextRequest) {
           const debugAppts: string[] = []
 
           // Get unavailable periods (like "Reparaciones")
-          if (staff.UnavailableItems && staff.UnavailableItems.length > 0) {
-            for (const unavail of staff.UnavailableItems) {
+          if (staff.Unavailabilities && staff.Unavailabilities.length > 0) {
+            for (const unavail of staff.Unavailabilities) {
               if (unavail.StartDateTime && unavail.EndDateTime) {
                 blockedPeriods.push({
                   start: new Date(unavail.StartDateTime),

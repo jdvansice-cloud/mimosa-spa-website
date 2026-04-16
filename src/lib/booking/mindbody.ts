@@ -1105,7 +1105,7 @@ export async function getScheduleItems(params: {
         EndDateTime: string
         BookableEndDateTime?: string
       }>
-      UnavailableItems: Array<{
+      Unavailabilities: Array<{
         Id: number
         StartDateTime: string
         EndDateTime: string
