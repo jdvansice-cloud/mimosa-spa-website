@@ -25,6 +25,7 @@ export function ConfirmStep() {
     setBookingConfirmation,
     setClientInfo,
     setStep,
+    setDate,
     setLoading,
     setError,
     isLoading,
@@ -357,6 +358,9 @@ export function ConfirmStep() {
                 onClick={() => {
                   setError(null)
                   setTimeUnavailable(false)
+                  // Reset selected time & staff so the user picks a fresh slot from
+                  // the refetched availability; keep the same date so they land on it.
+                  if (selectedDate) setDate(selectedDate)
                   setStep('datetime')
                 }}
                 className="mt-3 w-full py-2.5 bg-gold/90 text-dark font-semibold rounded-lg
