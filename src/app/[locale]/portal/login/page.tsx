@@ -61,6 +61,7 @@ function PortalLoginContent() {
   const [credential, setCredential] = useState('')
   const [step, setStep] = useState<LoginStep>('credential')
   const [error, setError] = useState<string | null>(null)
+  const [notFoundEmail, setNotFoundEmail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
   const [availableClients, setAvailableClients] = useState<ClientOption[]>([])
@@ -114,6 +115,7 @@ function PortalLoginContent() {
 
     setStep('sending')
     setError(null)
+    setNotFoundEmail(null)
     setIsLoading(true)
 
     try {
@@ -130,11 +132,16 @@ function PortalLoginContent() {
       }
 
       if (data.notFound || data.clients.length === 0) {
-        // Not found → registration
+        if (isEmail) {
+          // Email not found — let the user review the email or register
+          setNotFoundEmail(trimmed)
+          setStep('credential')
+          return
+        }
+        // Phone not found → go straight to registration with phone pre-filled
         setRegistrationData(prev => ({
           ...prev,
-          email: isEmail ? trimmed : '',
-          phone: isEmail ? '' : trimmed.replace(/\D/g, ''),
+          phone: trimmed.replace(/\D/g, ''),
         }))
         setStep('register')
         return
@@ -760,7 +767,10 @@ function PortalLoginContent() {
             <input
               type="text"
               value={credential}
-              onChange={(e) => setCredential(e.target.value)}
+              onChange={(e) => {
+                setCredential(e.target.value)
+                if (notFoundEmail) setNotFoundEmail(null)
+              }}
               onKeyPress={handleKeyPress}
               disabled={step === 'sending'}
               className="w-full pl-12 pr-4 py-4 border-2 border-beige-200 rounded-xl
@@ -777,6 +787,31 @@ function PortalLoginContent() {
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
               {error}
+            </div>
+          )}
+
+          {notFoundEmail && (
+            <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-sm text-dark mb-3">
+                No encontramos una cuenta con el correo{' '}
+                <span className="font-semibold">{notFoundEmail}</span>. Revisa el
+                correo ingresado o regístrate como nuevo cliente.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setRegistrationData(prev => ({ ...prev, email: notFoundEmail }))
+                  setNotFoundEmail(null)
+                  setError(null)
+                  setStep('register')
+                }}
+                className="w-full py-2.5 bg-gold/10 hover:bg-gold/20 text-dark text-sm
+                         font-medium rounded-lg border border-gold/30 transition-colors
+                         flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                Registrarme con este correo
+              </button>
             </div>
           )}
 
