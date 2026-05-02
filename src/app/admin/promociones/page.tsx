@@ -39,7 +39,7 @@ interface MindbodyPromoCode {
     Id: number
     Name: string
     Type: string
-  }>
+  }> | null
 }
 
 interface PromotionFormData {
@@ -765,7 +765,7 @@ export default function AdminPromotionsPage() {
                               </div>
                             </div>
 
-                            {pc.ApplicableItems.length > 0 && (
+                            {pc.ApplicableItems && pc.ApplicableItems.length > 0 && (
                               <div className="mt-2 text-xs text-blue-600 line-clamp-2">
                                 <span className="font-medium">Servicios:</span> {pc.ApplicableItems.map(i => i.Name).join(', ')}
                               </div>
