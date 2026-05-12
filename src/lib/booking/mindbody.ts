@@ -1826,3 +1826,40 @@ export async function getPromoCodeByCode(code: string): Promise<MindbodyPromoCod
 
   return exactMatch || null
 }
+
+// ============================================================================
+// Gift cards
+// ============================================================================
+
+export interface GiftCardBalance {
+  BarcodeId: string
+  RemainingBalance: number
+}
+
+/**
+ * Look up a gift card's remaining balance by its printed barcode (our serial).
+ * Returns null if Mindbody has no record of the card (i.e. the sale hasn't
+ * been rung up yet, or the serial was mistyped).
+ */
+export async function getGiftCardBalance(
+  barcodeId: string
+): Promise<GiftCardBalance | null> {
+  try {
+    const response = await mindbodyRequest<GiftCardBalance>(
+      '/sale/giftcardbalance',
+      { params: { barcodeId } }
+    )
+    if (!response || typeof response.RemainingBalance !== 'number') {
+      return null
+    }
+    return response
+  } catch (error) {
+    // Mindbody returns an error (4xx) when the barcode isn't found.
+    // Surface as "not sold yet" rather than a generic failure.
+    const msg = error instanceof Error ? error.message : String(error)
+    if (/40[04]|not found|invalid/i.test(msg)) {
+      return null
+    }
+    throw error
+  }
+}
