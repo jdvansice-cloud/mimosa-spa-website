@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Gift, Plus, List, Settings } from 'lucide-react'
+import { Gift, Plus, List, Settings, LayoutTemplate } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
 
 const tiles = [
@@ -14,6 +14,12 @@ const tiles = [
     icon: List,
     title: 'Gift Cards Emitidas',
     description: 'Historial de Gift Cards y Certificados emitidos, con su serial y estado.',
+  },
+  {
+    href: '/admin/giftcards/templates',
+    icon: LayoutTemplate,
+    title: 'Plantillas de Etiqueta',
+    description: 'Vista previa de las plantillas de impresión 2.25" × 1.25" con datos de muestra.',
   },
   {
     href: '/admin/giftcards/settings',
