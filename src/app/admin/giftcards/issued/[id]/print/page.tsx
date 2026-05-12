@@ -1,41 +1,31 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import JsBarcode from 'jsbarcode'
 import { ArrowLeft, Printer, Loader2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui'
+import {
+  GiftCardLabelRenderer,
+  LABEL_WIDTH_IN,
+  LABEL_HEIGHT_IN,
+  LabelCard,
+  formatLabelMoney,
+} from '@/components/admin/giftcards/labels'
 
-interface GiftCard {
+interface GiftCard extends LabelCard {
   id: string
-  serial: string
-  format: 'gift_card' | 'certificado'
-  buyer_name: string
   buyer_email: string | null
-  recipient_name: string
   recipient_email: string | null
-  amount_cents: number
   base_amount_cents: number | null
   tax_cents: number | null
-  currency: string
-  treatment_name: string | null
-  message: string | null
-  print_amount: boolean
-  print_message: boolean
-  print_recipient: boolean
   issued_at: string
   sold_at: string | null
   mindbody_remaining_balance_cents: number | null
   mindbody_synced_at: string | null
 }
 
-function formatMoney(cents: number, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-  }).format(cents / 100)
-}
+const PREVIEW_SCALE = 2
 
 export default function GiftCardPrintPage() {
   const params = useParams<{ id: string }>()
@@ -44,7 +34,6 @@ export default function GiftCardPrintPage() {
   const [error, setError] = useState<string | null>(null)
   const [syncing, setSyncing] = useState(false)
   const [syncMessage, setSyncMessage] = useState<string | null>(null)
-  const barcodeRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
     if (!id) return
@@ -82,17 +71,6 @@ export default function GiftCardPrintPage() {
     }
   }
 
-  useEffect(() => {
-    if (!card || !barcodeRef.current) return
-    JsBarcode(barcodeRef.current, card.serial, {
-      format: 'CODE128',
-      displayValue: false,
-      margin: 0,
-      height: 60,
-      width: 2,
-    })
-  }, [card])
-
   if (error) {
     return <div className="p-8 text-red-600">{error}</div>
   }
@@ -105,12 +83,10 @@ export default function GiftCardPrintPage() {
     )
   }
 
-  const isCert = card.format === 'certificado'
-
   return (
     <div>
-      {/* Mindbody sync status — hidden when printing */}
-      <div className="mb-4 print:hidden">
+      {/* Mindbody sync status */}
+      <div className="mb-4 no-print">
         <div className="rounded-lg border border-beige-300 bg-white p-4 flex flex-wrap items-center gap-4">
           <div className="flex-1 min-w-[200px]">
             <div className="text-xs uppercase tracking-widest text-warm-gray">Estado en Mindbody</div>
@@ -119,7 +95,7 @@ export default function GiftCardPrintPage() {
                 Vendida · Saldo{' '}
                 <span className="font-medium">
                   {card.mindbody_remaining_balance_cents != null
-                    ? formatMoney(card.mindbody_remaining_balance_cents, card.currency)
+                    ? formatLabelMoney(card.mindbody_remaining_balance_cents, card.currency)
                     : '—'}
                 </span>
               </div>
@@ -131,9 +107,7 @@ export default function GiftCardPrintPage() {
                 Última sincronización: {new Date(card.mindbody_synced_at).toLocaleString('es-PA')}
               </div>
             )}
-            {syncMessage && (
-              <div className="text-xs text-dark mt-1">{syncMessage}</div>
-            )}
+            {syncMessage && <div className="text-xs text-dark mt-1">{syncMessage}</div>}
           </div>
           <Button
             type="button"
@@ -147,8 +121,8 @@ export default function GiftCardPrintPage() {
         </div>
       </div>
 
-      {/* Toolbar — hidden when printing */}
-      <div className="mb-6 flex items-center justify-between print:hidden">
+      {/* Toolbar */}
+      <div className="mb-6 flex items-center justify-between no-print">
         <Link
           href="/admin/giftcards/issued"
           className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark"
@@ -156,74 +130,61 @@ export default function GiftCardPrintPage() {
           <ArrowLeft className="h-4 w-4" /> Volver a Emitidas
         </Link>
         <Button onClick={() => window.print()} leftIcon={<Printer className="h-4 w-4" />}>
-          Imprimir
+          Imprimir Etiqueta
         </Button>
       </div>
 
-      {/* Printable label */}
-      <div className="print-card mx-auto bg-white border border-beige-300 rounded-2xl p-8 max-w-2xl shadow-card print:shadow-none print:border-0 print:rounded-none print:max-w-none">
-        <div className="text-center mb-4">
-          <div className="text-xs uppercase tracking-widest text-warm-gray mb-1">
-            Mimosa Spa
-          </div>
-          <div className="text-2xl font-display font-semibold text-dark">
-            {isCert ? 'Certificado de Regalo' : 'Gift Card'}
-          </div>
+      {/* Preview heading */}
+      <div className="mb-3 no-print">
+        <div className="text-xs uppercase tracking-widest text-warm-gray">
+          Vista previa ({PREVIEW_SCALE}× tamaño real · 2.25&quot; × 1.25&quot;)
         </div>
+      </div>
 
-        <div className="space-y-4 text-dark">
-          {card.print_recipient && (
-            <div>
-              <div className="text-xs uppercase tracking-widest text-warm-gray">Para</div>
-              <div className="text-lg font-medium">{card.recipient_name}</div>
-            </div>
-          )}
-
-          {isCert && card.treatment_name && (
-            <div>
-              <div className="text-xs uppercase tracking-widest text-warm-gray">Tratamiento</div>
-              <div className="text-lg font-medium">{card.treatment_name}</div>
-            </div>
-          )}
-
-          {card.print_amount && (
-            <div>
-              <div className="text-xs uppercase tracking-widest text-warm-gray">Valor</div>
-              <div className="text-3xl font-display font-semibold text-gold">
-                {formatMoney(card.amount_cents, card.currency)}
-              </div>
-              {isCert && (
-                <div className="text-xs text-warm-gray mt-1">Incluye ITBMS</div>
-              )}
-            </div>
-          )}
-
-          {card.print_message && card.message && (
-            <div>
-              <div className="text-xs uppercase tracking-widest text-warm-gray">Mensaje</div>
-              <div className="italic">{card.message}</div>
-            </div>
-          )}
-        </div>
-
-        {/* Barcode + serial */}
-        <div className="mt-8 pt-6 border-t border-beige-200 flex flex-col items-center">
-          <svg ref={barcodeRef} />
-          <div className="mt-2 font-mono text-sm text-dark tracking-widest">
-            {card.serial}
-          </div>
-        </div>
-
-        <div className="mt-4 text-center text-xs text-warm-gray">
-          Emitida {new Date(card.issued_at).toLocaleDateString('es-PA')}
+      {/* Scaled preview wrapper.
+          On screen: scale up so staff can read it.
+          On print:  scale 1, no padding, label printed at exact size. */}
+      <div
+        className="preview-wrapper"
+        style={{
+          width: `${LABEL_WIDTH_IN * PREVIEW_SCALE}in`,
+          height: `${LABEL_HEIGHT_IN * PREVIEW_SCALE}in`,
+        }}
+      >
+        <div
+          className="print-label"
+          style={{
+            transform: `scale(${PREVIEW_SCALE})`,
+            transformOrigin: 'top left',
+            border: '1px dashed #c8b78c',
+          }}
+        >
+          <GiftCardLabelRenderer card={card} />
         </div>
       </div>
 
       <style jsx global>{`
+        @page {
+          size: ${LABEL_WIDTH_IN}in ${LABEL_HEIGHT_IN}in;
+          margin: 0;
+        }
         @media print {
-          @page { size: auto; margin: 12mm; }
-          body { background: white; }
-          aside, header, nav { display: none !important; }
+          html, body {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          /* Hide every element on the page by default… */
+          body * { visibility: hidden; }
+          /* …then bring back the label and everything inside it. */
+          .print-label, .print-label * { visibility: visible; }
+          .print-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: none !important;
+            border: 0 !important;
+          }
         }
       `}</style>
     </div>
