@@ -7,6 +7,10 @@ import { sendBookingReminder } from '@/lib/booking/wati'
  * Sends WhatsApp reminders for appointments happening in ~24 hours.
  * Called by Vercel cron every hour (see vercel.json).
  * Protected by CRON_SECRET env var.
+ *
+ * Optional query params (for manual testing):
+ *   ?bookingId=<uuid> — force-send reminder for a specific booking, bypassing
+ *                       the 23-25h time window and the reminder_sent check.
  */
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
@@ -14,23 +18,35 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { searchParams } = new URL(request.url)
+  const forceBookingId = searchParams.get('bookingId')
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // Window: appointments starting between 23h and 25h from now
-  const now = new Date()
-  const windowStart = new Date(now.getTime() + 23 * 60 * 60 * 1000)
-  const windowEnd = new Date(now.getTime() + 25 * 60 * 60 * 1000)
-
-  const { data: bookings, error } = await supabase
+  let query = supabase
     .from('bookings')
     .select('id, client_name, client_phone, location_name, appointment_start, reminder_sent, mindbody_appointment_ids')
-    .eq('status', 'confirmed')
-    .eq('reminder_sent', false)
-    .gte('appointment_start', windowStart.toISOString())
-    .lte('appointment_start', windowEnd.toISOString())
+
+  if (forceBookingId) {
+    // Manual test: bypass time window + reminder_sent check
+    query = query.eq('id', forceBookingId)
+    console.log(`Force-sending reminder for booking ${forceBookingId}`)
+  } else {
+    // Normal cron: appointments starting between 23h and 25h from now
+    const now = new Date()
+    const windowStart = new Date(now.getTime() + 23 * 60 * 60 * 1000)
+    const windowEnd = new Date(now.getTime() + 25 * 60 * 60 * 1000)
+    query = query
+      .eq('status', 'confirmed')
+      .eq('reminder_sent', false)
+      .gte('appointment_start', windowStart.toISOString())
+      .lte('appointment_start', windowEnd.toISOString())
+  }
+
+  const { data: bookings, error } = await query
 
   if (error) {
     console.error('Reminders query error:', error)
