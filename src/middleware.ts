@@ -28,6 +28,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Appointment result page (linked from WhatsApp reminders): no locale prefix
+  if (pathname.startsWith('/cita/')) {
+    return NextResponse.next()
+  }
+
   // Protect admin routes: require a valid session with role=admin
   if (pathname.startsWith('/admin')) {
     let response = NextResponse.next({ request })
