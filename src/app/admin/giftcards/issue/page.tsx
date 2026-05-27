@@ -73,7 +73,6 @@ export default function AdminGiftCardIssuePage() {
   const [message, setMessage] = useState('')
   const [printAmount, setPrintAmount] = useState(true)
   const [printMessage, setPrintMessage] = useState(true)
-  const [printRecipient, setPrintRecipient] = useState(true)
   const [printTreatments, setPrintTreatments] = useState(true)
 
   const [submitting, setSubmitting] = useState(false)
@@ -221,7 +220,7 @@ export default function AdminGiftCardIssuePage() {
       message: message.trim() || null,
       print_amount: printAmount,
       print_message: printMessage,
-      print_recipient: printRecipient,
+      print_recipient: false,
       print_treatments: includeTreatments && printTreatments,
     }
 
@@ -544,11 +543,6 @@ export default function AdminGiftCardIssuePage() {
                 <input type="checkbox" className="w-4 h-4 text-gold focus:ring-gold rounded"
                   checked={printMessage} onChange={e => setPrintMessage(e.target.checked)} />
                 <span className="text-dark">Imprimir el mensaje</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 text-gold focus:ring-gold rounded"
-                  checked={printRecipient} onChange={e => setPrintRecipient(e.target.checked)} />
-                <span className="text-dark">Imprimir el nombre del destinatario</span>
               </label>
               {amountMode === 'treatments' && selectedTreatments.length > 0 && (
                 <label className="flex items-center gap-2 cursor-pointer">

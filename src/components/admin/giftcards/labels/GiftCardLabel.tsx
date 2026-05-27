@@ -7,16 +7,16 @@ import { LabelCard, LABEL_WIDTH_IN, LABEL_HEIGHT_IN, formatLabelMoney } from './
  * Mimosa Gift Card label.
  *
  * Physical size: 2.25" × 1.25" thermal label (Star Micronics TSP143IIIU).
- * Layout (top → bottom, conditional sections):
- *   - Brand strip      MIMOSA SPA · GIFT CARD
- *   - Recipient        Para: <name>          (print_recipient)
- *   - Amount           $XX.XX                (print_amount)
- *   - Treatments       Incluye: A · B · C    (print_treatments && list non-empty)
- *   - Message          "<message>"           (print_message && message)
- *   - Barcode          [CODE128]
- *   - Serial           MGNNNNNN
+ * Layout:
+ *   - Amount         top-right corner            (print_amount)
+ *   - Treatments     Incluye: A · B · C          (print_treatments && list non-empty)
+ *   - Message        "<message>"                 (print_message && message)
+ *   - Barcode        [CODE128, narrow]
+ *   - Serial         MGNNNNNN
  *
- * Tweak this single file to change every issued Gift Card's label.
+ * The recipient name is intentionally NOT printed — staff writes it by hand
+ * on the gift card holder. The brand / "Gift Card" header is also intentionally
+ * omitted; the label only carries data the customer needs.
  */
 export function GiftCardLabel({ card }: { card: LabelCard }) {
   const showTreatments =
@@ -38,34 +38,25 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         lineHeight: 1.1,
       }}
     >
-      {/* Brand strip */}
-      <div
-        className="flex items-baseline justify-between"
-        style={{ fontSize: '7pt', letterSpacing: '0.04em' }}
-      >
-        <span style={{ fontWeight: 700 }}>MIMOSA SPA</span>
-        <span style={{ fontWeight: 600, textTransform: 'uppercase' }}>Gift Card</span>
-      </div>
-
-      <div style={{ borderTop: '0.5pt solid #000', margin: '0.02in 0' }} />
-
-      {/* Content */}
-      <div className="flex-1 flex flex-col justify-center" style={{ gap: '0.02in' }}>
-        {card.print_recipient && (
-          <div style={{ fontSize: '8pt' }}>
-            <span style={{ fontWeight: 600 }}>Para: </span>
-            <span>{card.recipient_name}</span>
-          </div>
-        )}
+      {/* Top content area. Amount sits in the top-right corner; treatments
+          and message flow below it on the left. */}
+      <div className="flex-1 flex flex-col" style={{ gap: '0.03in' }}>
         {card.print_amount && (
-          <div style={{ fontSize: '16pt', fontWeight: 800, lineHeight: 1 }}>
+          <div
+            style={{
+              alignSelf: 'flex-end',
+              fontSize: '18pt',
+              fontWeight: 800,
+              lineHeight: 1,
+            }}
+          >
             {formatLabelMoney(card.amount_cents, card.currency)}
           </div>
         )}
         {treatmentText && (
           <div
             style={{
-              fontSize: '6.5pt',
+              fontSize: '7pt',
               overflow: 'hidden',
               display: '-webkit-box',
               WebkitLineClamp: 2,
@@ -79,7 +70,7 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         {card.print_message && card.message && (
           <div
             style={{
-              fontSize: '6.5pt',
+              fontSize: '7pt',
               fontStyle: 'italic',
               overflow: 'hidden',
               display: '-webkit-box',
@@ -92,9 +83,9 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         )}
       </div>
 
-      {/* Barcode + serial */}
+      {/* Barcode + serial — centered, narrow and short. */}
       <div className="flex flex-col items-center" style={{ gap: '0.01in' }}>
-        <LabelBarcode serial={card.serial} widthIn={1.9} heightIn={0.3} />
+        <LabelBarcode serial={card.serial} widthIn={1.4} heightIn={0.22} />
         <div
           style={{
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
