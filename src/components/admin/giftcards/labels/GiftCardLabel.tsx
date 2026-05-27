@@ -46,6 +46,9 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
             style={{
               alignSelf: 'flex-end',
               marginRight: '0.06in',
+              // Extra space below so the first content line breathes away
+              // from the amount.
+              marginBottom: '0.08in',
               fontSize: '13pt',
               fontWeight: 800,
               lineHeight: 1,
