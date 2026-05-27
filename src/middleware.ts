@@ -60,20 +60,38 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
 
-    const { data: profile } = await supabase
+    // Verify admin role using only the always-present `role` column,
+    // so login keeps working even before later migrations are applied.
+    const { data: roleRow } = await supabase
       .from('profiles')
-      .select('role, gift_card_location_config_id')
+      .select('role')
       .eq('id', user.id)
-      .single() as { data: { role: string; gift_card_location_config_id: string | null } | null; error: unknown }
+      .single() as { data: { role: string } | null; error: unknown }
 
-    if (!profile || profile.role !== 'admin') {
+    if (!roleRow || roleRow.role !== 'admin') {
       return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
+
+    // Optionally load gift_card_location_config_id (introduced in 20260516).
+    // Tolerate the column not existing — the location-restriction feature
+    // simply stays inactive until the migration is applied.
+    let locationConfigId: string | null = null
+    const locResult = await supabase
+      .from('profiles')
+      .select('gift_card_location_config_id')
+      .eq('id', user.id)
+      .maybeSingle() as {
+        data: { gift_card_location_config_id: string | null } | null
+        error: unknown
+      }
+    if (locResult.data && !locResult.error) {
+      locationConfigId = locResult.data.gift_card_location_config_id ?? null
     }
 
     // Location-restricted admins are locked to the gift-card area.
     // Allowed: /admin/giftcards/issue, /admin/giftcards/issued, /admin/giftcards/issued/[id]/print.
     // Anything else under /admin (including /admin itself and /admin/giftcards hub) → redirect to issue.
-    if (profile.gift_card_location_config_id) {
+    if (locationConfigId) {
       const allowed =
         pathname === '/admin/giftcards/issue' ||
         pathname === '/admin/giftcards/issued' ||
