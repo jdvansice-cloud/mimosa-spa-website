@@ -60,10 +60,12 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         {treatmentText && (
           <div
             style={{
-              fontSize: '7pt',
+              fontSize: '6pt',
+              lineHeight: 1.15,
               overflow: 'hidden',
               display: '-webkit-box',
-              WebkitLineClamp: 2,
+              // Up to 3 wrapped lines — fits ~5 treatment names comfortably.
+              WebkitLineClamp: 3,
               WebkitBoxOrient: 'vertical',
             }}
           >
