@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Gift, Plus, List, Settings, LayoutTemplate } from 'lucide-react'
+import { Gift, Plus, List, Settings, LayoutTemplate, Hash } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
 
 const tiles = [
@@ -20,6 +20,12 @@ const tiles = [
     icon: LayoutTemplate,
     title: 'Plantillas de Etiqueta',
     description: 'Vista previa de las plantillas de impresión 2.25" × 1.25" con datos de muestra.',
+  },
+  {
+    href: '/admin/giftcards/types',
+    icon: Hash,
+    title: 'Tipos de Tarjeta',
+    description: 'Sincroniza desde Mindbody y configura prefijo, longitud y categoría por tipo.',
   },
   {
     href: '/admin/giftcards/settings',

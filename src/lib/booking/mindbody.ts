@@ -409,6 +409,37 @@ export async function getSessionTypes(onlineOnly: boolean = true) {
   return sessionTypes
 }
 
+export interface MindbodyResource {
+  Id: number
+  Name: string
+  Color?: string | null
+  Description?: string | null
+  Programs?: Array<{ Id: number; Name?: string; ScheduleType?: string }>
+}
+
+export async function getResources(params: { includeInactive?: boolean; resourceIds?: number[] } = {}) {
+  interface ResourcesResponse {
+    Resources?: MindbodyResource[]
+    PaginationResponse?: {
+      TotalResults: number
+      RequestedLimit: number
+      RequestedOffset: number
+    }
+  }
+
+  const queryParams: Record<string, ParamValue> = { limit: 200 }
+  if (params.includeInactive) queryParams.includeInactive = true
+  if (params.resourceIds && params.resourceIds.length > 0) queryParams.resourceIds = params.resourceIds
+
+  const response = await mindbodyRequest<ResourcesResponse>('/site/resources', {
+    params: queryParams,
+  })
+
+  const resources = response.Resources || []
+  console.log(`Resources from Mindbody:`, resources.length)
+  return resources
+}
+
 // Normalize name for matching between sale/services and sessiontypes
 function normalizeServiceName(name: string): string {
   return name
@@ -840,32 +871,39 @@ export async function getStaffWithAvailability(params: {
 // - staffIds (array) - optional, filters by staff
 // - startDate, endDate - date range
 // - limit - max results (default 100)
+export interface BookableItem {
+  Id: number
+  StartDateTime: string
+  EndDateTime: string
+  Staff: {
+    Id: number
+    FirstName: string
+    LastName: string
+  }
+  Location: {
+    Id: number
+    Name: string
+  }
+  SessionType: {
+    Id: number
+    Name: string
+  }
+  Resources?: Array<{
+    Id: number
+    Name?: string
+  }>
+}
+
 export async function getBookableItems(params: {
   locationIds: number
   sessionTypeIds?: number[]
   staffIds?: number
   startDate: string
   endDate: string
+  includeResourceAvailability?: boolean
 }) {
   interface BookableItemsResponse {
-    AvailableItems: Array<{
-      Id: number
-      StartDateTime: string
-      EndDateTime: string
-      Staff: {
-        Id: number
-        FirstName: string
-        LastName: string
-      }
-      Location: {
-        Id: number
-        Name: string
-      }
-      SessionType: {
-        Id: number
-        Name: string
-      }
-    }>
+    AvailableItems: BookableItem[]
     PaginationResponse?: {
       TotalResults: number
       RequestedLimit: number
@@ -891,6 +929,10 @@ export async function getBookableItems(params: {
 
   if (params.staffIds) {
     queryParams.staffIds = [params.staffIds]
+  }
+
+  if (params.includeResourceAvailability) {
+    queryParams.includeResourceAvailability = true
   }
 
   console.log('getBookableItems query params:', queryParams)
@@ -1862,4 +1904,49 @@ export async function getGiftCardBalance(
     }
     throw error
   }
+}
+
+export interface MindbodyGiftCardProduct {
+  Id: number
+  Name: string
+  Price: number
+}
+
+interface SaleGiftCardsResponse {
+  GiftCards?: Array<{
+    Id: number
+    Name: string
+    Price?: number
+    OnlinePrice?: number
+  }>
+}
+
+/**
+ * Fetch the list of gift card product templates available for purchase
+ * (i.e. the catalog the user shows up against — not individual sold cards).
+ */
+export async function getGiftCardProducts(): Promise<MindbodyGiftCardProduct[]> {
+  const PAGE_SIZE = 200
+  const out: MindbodyGiftCardProduct[] = []
+  let offset = 0
+  let safety = 20
+
+  while (safety-- > 0) {
+    const response = await mindbodyRequest<SaleGiftCardsResponse>(
+      '/sale/giftcards',
+      { params: { 'request.limit': PAGE_SIZE, 'request.offset': offset } }
+    )
+    const page = response.GiftCards ?? []
+    for (const gc of page) {
+      out.push({
+        Id: gc.Id,
+        Name: gc.Name,
+        Price: typeof gc.Price === 'number' ? gc.Price : (gc.OnlinePrice ?? 0),
+      })
+    }
+    if (page.length < PAGE_SIZE) break
+    offset += PAGE_SIZE
+  }
+
+  return out
 }

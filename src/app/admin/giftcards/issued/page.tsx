@@ -8,7 +8,7 @@ import { Button, Card, CardContent } from '@/components/ui'
 interface IssuedRow {
   id: string
   serial: string
-  format: 'gift_card' | 'certificado'
+  format: 'gift_card' | 'certificado' | 'privilege'
   buyer_name: string
   recipient_name: string
   amount_cents: number
@@ -149,7 +149,9 @@ export default function AdminGiftCardsIssuedPage() {
                       <tr key={row.id} className="border-t border-beige-200 hover:bg-beige-50">
                         <td className="px-4 py-3 font-mono text-dark">{row.serial}</td>
                         <td className="px-4 py-3">
-                          {row.format === 'gift_card' ? 'Gift Card' : 'Certificado'}
+                          {row.format === 'certificado' ? 'Certificado'
+                            : row.format === 'privilege' ? 'Privilege'
+                            : 'Gift Card'}
                         </td>
                         <td className="px-4 py-3">{row.buyer_name}</td>
                         <td className="px-4 py-3">{row.recipient_name}</td>

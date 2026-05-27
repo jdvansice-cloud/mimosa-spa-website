@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui'
 import {
   GiftCardLabel,
   CertificadoLabel,
+  MembershipLabel,
   LABEL_WIDTH_IN,
   LABEL_HEIGHT_IN,
   LabelCard,
@@ -14,7 +15,7 @@ import {
 const PREVIEW_SCALE = 2
 
 const sampleGiftCard: LabelCard = {
-  serial: 'MG-000123',
+  serial: 'MG000123',
   format: 'gift_card',
   buyer_name: 'Carlos Pérez',
   recipient_name: 'Ana Gómez',
@@ -28,7 +29,7 @@ const sampleGiftCard: LabelCard = {
 }
 
 const sampleCertificado: LabelCard = {
-  serial: 'MG-000124',
+  serial: 'MC000124',
   format: 'certificado',
   buyer_name: 'María Vega',
   recipient_name: 'Lucía Vega',
@@ -38,6 +39,20 @@ const sampleCertificado: LabelCard = {
   message: 'Con cariño, mamá.',
   print_amount: true,
   print_message: true,
+  print_recipient: true,
+}
+
+const samplePrivilege: LabelCard = {
+  serial: 'PRIV1K000045',
+  format: 'privilege',
+  buyer_name: 'Roberto Castillo',
+  recipient_name: 'Roberto Castillo',
+  amount_cents: 100000,
+  currency: 'USD',
+  treatment_name: 'Membresia Privilege - $1000',
+  message: null,
+  print_amount: true,
+  print_message: false,
   print_recipient: true,
 }
 
@@ -65,8 +80,8 @@ function Preview({ title, file, card }: { title: string; file: string; card: Lab
               border: '1px dashed #c8b78c',
             }}
           >
-            {card.format === 'certificado'
-              ? <CertificadoLabel card={card} />
+            {card.format === 'certificado' ? <CertificadoLabel card={card} />
+              : card.format === 'privilege' ? <MembershipLabel card={card} />
               : <GiftCardLabel card={card} />}
           </div>
         </div>
@@ -107,6 +122,11 @@ export default function AdminGiftCardTemplatesPage() {
           title="Certificado de Regalo"
           file="src/components/admin/giftcards/labels/CertificadoLabel.tsx"
           card={sampleCertificado}
+        />
+        <Preview
+          title="Membresía Privilege"
+          file="src/components/admin/giftcards/labels/MembershipLabel.tsx"
+          card={samplePrivilege}
         />
       </div>
 
