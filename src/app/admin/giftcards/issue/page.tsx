@@ -136,8 +136,12 @@ export default function AdminGiftCardIssuePage() {
   // Lazy load treatments from Supabase (treatment_settings) when entering
   // treatments mode. This is the same source the public menu + booking app
   // use, so it stays consistent with what staff sees elsewhere.
+  //
+  // NOTE: servicesLoading is intentionally NOT in the dep array — including
+  // it would cause this effect to re-run after we flip the flag to true,
+  // cancelling the in-flight fetch and leaving the spinner stuck on.
   useEffect(() => {
-    if (amountMode !== 'treatments' || services !== null || servicesLoading) return
+    if (amountMode !== 'treatments' || services !== null) return
     let cancelled = false
     setServicesLoading(true)
     setServicesError(null)
@@ -160,7 +164,8 @@ export default function AdminGiftCardIssuePage() {
       }
     })()
     return () => { cancelled = true }
-  }, [amountMode, services, servicesLoading])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amountMode, services])
 
   const selectedTreatments = useMemo(
     () => selectedTreatmentIds
