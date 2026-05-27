@@ -38,14 +38,15 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         lineHeight: 1.1,
       }}
     >
-      {/* Top content area. Amount sits in the top-right corner; treatments
-          and message flow below it on the left. */}
+      {/* Top content area. Amount sits in the top-right corner with a touch
+          of inset; treatments and message flow below it on the left. */}
       <div className="flex-1 flex flex-col" style={{ gap: '0.03in' }}>
         {card.print_amount && (
           <div
             style={{
               alignSelf: 'flex-end',
-              fontSize: '18pt',
+              marginRight: '0.06in',
+              fontSize: '13pt',
               fontWeight: 800,
               lineHeight: 1,
             }}
@@ -70,6 +71,9 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         {card.print_message && card.message && (
           <div
             style={{
+              // Extra breathing room above the dedicatoria — separates it
+              // visually from the treatments line.
+              marginTop: treatmentText ? '0.07in' : 0,
               fontSize: '7pt',
               fontStyle: 'italic',
               overflow: 'hidden',
