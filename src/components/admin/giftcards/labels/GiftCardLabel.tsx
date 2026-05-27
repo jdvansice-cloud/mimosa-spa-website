@@ -94,7 +94,7 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
 
       {/* Barcode + serial — centered, narrow and short. */}
       <div className="flex flex-col items-center" style={{ gap: '0.01in' }}>
-        <LabelBarcode serial={card.serial} widthIn={1.4} heightIn={0.22} />
+        <LabelBarcode serial={card.serial} widthIn={1.25} heightIn={0.16} />
         <div
           style={{
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
