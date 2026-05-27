@@ -80,6 +80,7 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
             style={{
               fontSize: '7pt',
               fontStyle: 'italic',
+              textAlign: 'center',
               overflow: 'hidden',
               display: '-webkit-box',
               WebkitLineClamp: 2,
