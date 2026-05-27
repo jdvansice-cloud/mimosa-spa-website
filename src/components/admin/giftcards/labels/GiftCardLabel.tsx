@@ -7,16 +7,16 @@ import { LabelCard, LABEL_WIDTH_IN, LABEL_HEIGHT_IN, formatLabelMoney } from './
  * Mimosa Gift Card label.
  *
  * Physical size: 2.25" × 1.25" thermal label (Star Micronics TSP143IIIU).
- * Layout:
- *   - Amount         top-right corner            (print_amount)
- *   - Treatments     Incluye: A · B · C          (print_treatments && list non-empty)
- *   - Message        "<message>"                 (print_message && message)
- *   - Barcode        [CODE128, narrow]
- *   - Serial         MGNNNNNN
+ * Layout (top → bottom):
+ *   - Amount (top-right corner)             — print_amount
+ *   - Middle band, vertically centered:
+ *       Incluye: A · B · C                  — print_treatments && list non-empty
+ *       "<message>"                         — print_message && message
+ *   - Barcode + serial (centered, bottom)
  *
- * The recipient name is intentionally NOT printed — staff writes it by hand
- * on the gift card holder. The brand / "Gift Card" header is also intentionally
- * omitted; the label only carries data the customer needs.
+ * Recipient name is intentionally not printed — staff writes it by hand on
+ * the gift card holder. No brand header; the label only carries the data
+ * the customer needs.
  */
 export function GiftCardLabel({ card }: { card: LabelCard }) {
   const showTreatments =
@@ -38,25 +38,28 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         lineHeight: 1.1,
       }}
     >
-      {/* Top content area. Amount sits in the top-right corner with a touch
-          of inset; treatments and message flow below it on the left. */}
-      <div className="flex-1 flex flex-col" style={{ gap: '0.03in' }}>
-        {card.print_amount && (
-          <div
-            style={{
-              alignSelf: 'flex-end',
-              marginRight: '0.06in',
-              // Extra space below so the first content line breathes away
-              // from the amount.
-              marginBottom: '0.08in',
-              fontSize: '13pt',
-              fontWeight: 800,
-              lineHeight: 1,
-            }}
-          >
-            {formatLabelMoney(card.amount_cents, card.currency)}
-          </div>
-        )}
+      {/* Amount — anchored top-right with a touch of inset. */}
+      {card.print_amount && (
+        <div
+          style={{
+            alignSelf: 'flex-end',
+            marginRight: '0.06in',
+            fontSize: '13pt',
+            fontWeight: 800,
+            lineHeight: 1,
+          }}
+        >
+          {formatLabelMoney(card.amount_cents, card.currency)}
+        </div>
+      )}
+
+      {/* Middle text band — expands to fill the empty space between amount
+          and barcode, and vertically centers its contents so the gap
+          balances above and below. */}
+      <div
+        className="flex-1 flex flex-col justify-center"
+        style={{ gap: '0.06in' }}
+      >
         {treatmentText && (
           <div
             style={{
@@ -64,7 +67,6 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
               lineHeight: 1.15,
               overflow: 'hidden',
               display: '-webkit-box',
-              // Up to 3 wrapped lines — fits ~5 treatment names comfortably.
               WebkitLineClamp: 3,
               WebkitBoxOrient: 'vertical',
             }}
@@ -76,9 +78,6 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         {card.print_message && card.message && (
           <div
             style={{
-              // Extra breathing room above the dedicatoria — separates it
-              // visually from the treatments line.
-              marginTop: treatmentText ? '0.07in' : 0,
               fontSize: '7pt',
               fontStyle: 'italic',
               overflow: 'hidden',
@@ -92,9 +91,9 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         )}
       </div>
 
-      {/* Barcode + serial — centered, narrow and short. */}
+      {/* Barcode + serial — centered, bottom. */}
       <div className="flex flex-col items-center" style={{ gap: '0.01in' }}>
-        <LabelBarcode serial={card.serial} widthIn={1.25} heightIn={0.16} />
+        <LabelBarcode serial={card.serial} widthIn={1.13} heightIn={0.14} />
         <div
           style={{
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
