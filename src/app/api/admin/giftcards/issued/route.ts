@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('gift_cards')
-    .select('id, serial, format, buyer_name, recipient_name, amount_cents, treatment_name, issued_at, redeemed_at, sold_at, mindbody_remaining_balance_cents, mindbody_synced_at')
+    .select('id, serial, buyer_name, recipient_name, amount_cents, gift_treatment_names, issued_at, redeemed_at, sold_at, mindbody_remaining_balance_cents, mindbody_synced_at')
     .order('issued_at', { ascending: false })
     .limit(limit)
 

@@ -5,8 +5,6 @@ import { ArrowLeft, LayoutTemplate } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
 import {
   GiftCardLabel,
-  CertificadoLabel,
-  MembershipLabel,
   LABEL_WIDTH_IN,
   LABEL_HEIGHT_IN,
   LabelCard,
@@ -14,56 +12,42 @@ import {
 
 const PREVIEW_SCALE = 2
 
-const sampleGiftCard: LabelCard = {
+const samplePlain: LabelCard = {
   serial: 'MG000123',
-  format: 'gift_card',
   buyer_name: 'Carlos Pérez',
   recipient_name: 'Ana Gómez',
   amount_cents: 10000,
   currency: 'USD',
-  treatment_name: null,
+  gift_treatment_names: null,
   message: 'Feliz cumpleaños — disfruta este detalle.',
   print_amount: true,
   print_message: true,
   print_recipient: true,
+  print_treatments: false,
 }
 
-const sampleCertificado: LabelCard = {
-  serial: 'MC000124',
-  format: 'certificado',
+const sampleWithTreatments: LabelCard = {
+  serial: 'MG000124',
   buyer_name: 'María Vega',
   recipient_name: 'Lucía Vega',
-  amount_cents: 8560,
+  amount_cents: 16050,
   currency: 'USD',
-  treatment_name: 'Masaje Relajante 60 min',
+  gift_treatment_names: ['Masaje Relajante 60 min', 'Facial Hidratante'],
   message: 'Con cariño, mamá.',
   print_amount: true,
   print_message: true,
   print_recipient: true,
+  print_treatments: true,
 }
 
-const samplePrivilege: LabelCard = {
-  serial: 'PRIV1K000045',
-  format: 'privilege',
-  buyer_name: 'Roberto Castillo',
-  recipient_name: 'Roberto Castillo',
-  amount_cents: 100000,
-  currency: 'USD',
-  treatment_name: 'Membresia Privilege - $1000',
-  message: null,
-  print_amount: true,
-  print_message: false,
-  print_recipient: true,
-}
-
-function Preview({ title, file, card }: { title: string; file: string; card: LabelCard }) {
+function Preview({ title, subtitle, card }: { title: string; subtitle: string; card: LabelCard }) {
   return (
     <Card variant="default" padding="md">
       <CardContent>
         <div className="mb-3">
           <h2 className="text-lg font-semibold text-dark">{title}</h2>
-          <p className="text-xs text-warm-gray font-mono mt-1">{file}</p>
-          <p className="text-xs text-warm-gray mt-2">
+          <p className="text-xs text-warm-gray mt-1">{subtitle}</p>
+          <p className="text-xs text-warm-gray mt-1">
             Vista previa a {PREVIEW_SCALE}× tamaño real ({LABEL_WIDTH_IN}&quot; × {LABEL_HEIGHT_IN}&quot;)
           </p>
         </div>
@@ -80,9 +64,7 @@ function Preview({ title, file, card }: { title: string; file: string; card: Lab
               border: '1px dashed #c8b78c',
             }}
           >
-            {card.format === 'certificado' ? <CertificadoLabel card={card} />
-              : card.format === 'privilege' ? <MembershipLabel card={card} />
-              : <GiftCardLabel card={card} />}
+            <GiftCardLabel card={card} />
           </div>
         </div>
       </CardContent>
@@ -104,37 +86,29 @@ export default function AdminGiftCardTemplatesPage() {
           <div className="p-2 bg-gold/10 rounded-lg">
             <LayoutTemplate className="h-6 w-6 text-gold" />
           </div>
-          <h1 className="text-3xl font-display font-semibold text-dark">Plantillas de Etiqueta</h1>
+          <h1 className="text-3xl font-display font-semibold text-dark">Plantilla de Etiqueta</h1>
         </div>
         <p className="text-warm-gray">
-          Vista previa de las plantillas de impresión para etiquetas de 2.25&quot; × 1.25&quot;
-          (Star Micronics TSP143IIIU). Datos de muestra.
+          Plantilla única para etiquetas de 2.25&quot; × 1.25&quot; (Star Micronics TSP143IIIU). Datos de muestra.
         </p>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Preview
-          title="Gift Card"
-          file="src/components/admin/giftcards/labels/GiftCardLabel.tsx"
-          card={sampleGiftCard}
+          title="Sin tratamientos"
+          subtitle="Gift Card emitida por un monto directo."
+          card={samplePlain}
         />
         <Preview
-          title="Certificado de Regalo"
-          file="src/components/admin/giftcards/labels/CertificadoLabel.tsx"
-          card={sampleCertificado}
-        />
-        <Preview
-          title="Membresía Privilege"
-          file="src/components/admin/giftcards/labels/MembershipLabel.tsx"
-          card={samplePrivilege}
+          title="Con tratamientos"
+          subtitle="Gift Card cuyo monto se calculó sumando tratamientos."
+          card={sampleWithTreatments}
         />
       </div>
 
       <div className="mt-8 text-sm text-warm-gray max-w-2xl">
-        Para editar el diseño, modifica el archivo correspondiente. La barra de
-        producto, la dedicatoria, los nombres y los flags de impresión son
-        controlados por la plantilla — los datos de cada Gift Card emitida se
-        renderizan en el mismo formato.
+        Edita <code className="font-mono">src/components/admin/giftcards/labels/GiftCardLabel.tsx</code>
+        {' '}para cambiar el diseño. Los datos de cada Gift Card emitida se renderizan en este formato.
       </div>
     </div>
   )

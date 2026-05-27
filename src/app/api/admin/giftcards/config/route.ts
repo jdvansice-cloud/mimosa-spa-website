@@ -4,22 +4,26 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const VALID_CATEGORIES = ['gift_card', 'certificado', 'privilege'] as const
-type Category = (typeof VALID_CATEGORIES)[number]
+export async function GET() {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+  const { data, error } = await supabase
+    .from('gift_card_serial_config')
+    .select('*')
+    .eq('id', 1)
+    .single()
+
+  if (error || !data) {
+    return NextResponse.json({ error: error?.message || 'Not found' }, { status: 404 })
+  }
+  return NextResponse.json({ data })
+}
 
 interface UpdatePayload {
   prefix?: string
   serial_length?: number
-  category?: Category
-  is_active?: boolean
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params
-
+export async function PUT(request: NextRequest) {
   let body: UpdatePayload
   try {
     body = await request.json()
@@ -49,17 +53,6 @@ export async function PATCH(
     update.serial_length = body.serial_length
   }
 
-  if (body.category !== undefined) {
-    if (!VALID_CATEGORIES.includes(body.category)) {
-      return NextResponse.json({ error: 'invalid category' }, { status: 400 })
-    }
-    update.category = body.category
-  }
-
-  if (body.is_active !== undefined) {
-    update.is_active = !!body.is_active
-  }
-
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: 'nothing to update' }, { status: 400 })
   }
@@ -68,9 +61,9 @@ export async function PATCH(
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
   const { data, error } = await supabase
-    .from('gift_card_types')
+    .from('gift_card_serial_config')
     .update(update)
-    .eq('id', id)
+    .eq('id', 1)
     .select()
     .single()
 

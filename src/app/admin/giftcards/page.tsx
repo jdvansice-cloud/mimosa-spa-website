@@ -7,25 +7,25 @@ const tiles = [
     href: '/admin/giftcards/issue',
     icon: Plus,
     title: 'Emitir Nueva',
-    description: 'Crea una Gift Card o Certificado de Regalo, genera el serial e imprime la etiqueta.',
+    description: 'Genera un serial e imprime la etiqueta de una nueva Gift Card.',
   },
   {
     href: '/admin/giftcards/issued',
     icon: List,
     title: 'Gift Cards Emitidas',
-    description: 'Historial de Gift Cards y Certificados emitidos, con su serial y estado.',
+    description: 'Historial de Gift Cards emitidas, con su serial y estado.',
   },
   {
     href: '/admin/giftcards/templates',
     icon: LayoutTemplate,
-    title: 'Plantillas de Etiqueta',
-    description: 'Vista previa de las plantillas de impresión 2.25" × 1.25" con datos de muestra.',
+    title: 'Plantilla de Etiqueta',
+    description: 'Vista previa de la plantilla de impresión 2.25" × 1.25" con datos de muestra.',
   },
   {
-    href: '/admin/giftcards/types',
+    href: '/admin/giftcards/config',
     icon: Hash,
-    title: 'Tipos de Tarjeta',
-    description: 'Sincroniza desde Mindbody y configura prefijo, longitud y categoría por tipo.',
+    title: 'Configuración de Serial',
+    description: 'Prefijo y longitud del número correlativo de las Gift Cards.',
   },
   {
     href: '/admin/giftcards/settings',
@@ -45,7 +45,7 @@ export default function AdminGiftCardsHubPage() {
           </div>
           <h1 className="text-3xl font-display font-semibold text-dark">Gift Cards</h1>
         </div>
-        <p className="text-warm-gray">Emisión, historial y contenido público de Gift Cards y Certificados de Regalo.</p>
+        <p className="text-warm-gray">Emisión, historial, plantilla de impresión y contenido público.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

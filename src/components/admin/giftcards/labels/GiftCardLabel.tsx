@@ -4,20 +4,29 @@ import { LabelBarcode } from './LabelBarcode'
 import { LabelCard, LABEL_WIDTH_IN, LABEL_HEIGHT_IN, formatLabelMoney } from './types'
 
 /**
- * Gift Card label — fixed-amount card.
+ * Mimosa Gift Card label.
  *
- * Physical size: 2.25" × 1.25" thermal label.
- * Layout (top → bottom):
+ * Physical size: 2.25" × 1.25" thermal label (Star Micronics TSP143IIIU).
+ * Layout (top → bottom, conditional sections):
  *   - Brand strip      MIMOSA SPA · GIFT CARD
- *   - Recipient        Para: <name>          (if print_recipient)
- *   - Amount           $XX.XX                (if print_amount)
- *   - Message          "<message>"           (if print_message)
+ *   - Recipient        Para: <name>          (print_recipient)
+ *   - Amount           $XX.XX                (print_amount)
+ *   - Treatments       Incluye: A · B · C    (print_treatments && list non-empty)
+ *   - Message          "<message>"           (print_message && message)
  *   - Barcode          [CODE128]
- *   - Serial           MG-NNNNNN
+ *   - Serial           MGNNNNNN
  *
- * Tweak this file in isolation — no other template depends on it.
+ * Tweak this single file to change every issued Gift Card's label.
  */
 export function GiftCardLabel({ card }: { card: LabelCard }) {
+  const showTreatments =
+    card.print_treatments &&
+    Array.isArray(card.gift_treatment_names) &&
+    card.gift_treatment_names.length > 0
+  const treatmentText = showTreatments
+    ? (card.gift_treatment_names ?? []).join(' · ')
+    : null
+
   return (
     <div
       className="bg-white text-black font-sans flex flex-col"
@@ -38,14 +47,9 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         <span style={{ fontWeight: 600, textTransform: 'uppercase' }}>Gift Card</span>
       </div>
 
-      <div
-        style={{
-          borderTop: '0.5pt solid #000',
-          margin: '0.02in 0',
-        }}
-      />
+      <div style={{ borderTop: '0.5pt solid #000', margin: '0.02in 0' }} />
 
-      {/* Content (recipient / amount / message) */}
+      {/* Content */}
       <div className="flex-1 flex flex-col justify-center" style={{ gap: '0.02in' }}>
         {card.print_recipient && (
           <div style={{ fontSize: '8pt' }}>
@@ -56,6 +60,20 @@ export function GiftCardLabel({ card }: { card: LabelCard }) {
         {card.print_amount && (
           <div style={{ fontSize: '16pt', fontWeight: 800, lineHeight: 1 }}>
             {formatLabelMoney(card.amount_cents, card.currency)}
+          </div>
+        )}
+        {treatmentText && (
+          <div
+            style={{
+              fontSize: '6.5pt',
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            <span style={{ fontWeight: 600 }}>Incluye: </span>
+            <span>{treatmentText}</span>
           </div>
         )}
         {card.print_message && card.message && (

@@ -9,20 +9,19 @@
 export const LABEL_WIDTH_IN = 2.25
 export const LABEL_HEIGHT_IN = 1.25
 
-export type GiftCardFormat = 'gift_card' | 'certificado' | 'privilege'
-
 export interface LabelCard {
   serial: string
-  format: GiftCardFormat
   buyer_name: string
   recipient_name: string
   amount_cents: number
   currency: string
-  treatment_name: string | null
+  /** Optional list of treatments included as a gift. */
+  gift_treatment_names: string[] | null
   message: string | null
   print_amount: boolean
   print_message: boolean
   print_recipient: boolean
+  print_treatments: boolean
 }
 
 export function formatLabelMoney(cents: number, currency = 'USD') {

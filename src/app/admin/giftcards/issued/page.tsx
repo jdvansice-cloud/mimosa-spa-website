@@ -8,11 +8,10 @@ import { Button, Card, CardContent } from '@/components/ui'
 interface IssuedRow {
   id: string
   serial: string
-  format: 'gift_card' | 'certificado' | 'privilege'
   buyer_name: string
   recipient_name: string
   amount_cents: number
-  treatment_name: string | null
+  gift_treatment_names: string[] | null
   issued_at: string
   redeemed_at: string | null
   sold_at: string | null
@@ -127,10 +126,10 @@ export default function AdminGiftCardsIssuedPage() {
                 <thead className="bg-beige-100 text-left text-warm-gray uppercase text-xs">
                   <tr>
                     <th className="px-4 py-3">Serial</th>
-                    <th className="px-4 py-3">Formato</th>
                     <th className="px-4 py-3">Comprador</th>
                     <th className="px-4 py-3">Destinatario</th>
                     <th className="px-4 py-3">Monto</th>
+                    <th className="px-4 py-3">Tratamientos</th>
                     <th className="px-4 py-3">Saldo Mindbody</th>
                     <th className="px-4 py-3">Emitida</th>
                     <th className="px-4 py-3">Estado</th>
@@ -148,14 +147,14 @@ export default function AdminGiftCardsIssuedPage() {
                     return (
                       <tr key={row.id} className="border-t border-beige-200 hover:bg-beige-50">
                         <td className="px-4 py-3 font-mono text-dark">{row.serial}</td>
-                        <td className="px-4 py-3">
-                          {row.format === 'certificado' ? 'Certificado'
-                            : row.format === 'privilege' ? 'Privilege'
-                            : 'Gift Card'}
-                        </td>
                         <td className="px-4 py-3">{row.buyer_name}</td>
                         <td className="px-4 py-3">{row.recipient_name}</td>
                         <td className="px-4 py-3">{formatMoney(row.amount_cents)}</td>
+                        <td className="px-4 py-3 text-warm-gray text-xs">
+                          {row.gift_treatment_names && row.gift_treatment_names.length > 0
+                            ? row.gift_treatment_names.join(' · ')
+                            : '—'}
+                        </td>
                         <td className="px-4 py-3">
                           {row.mindbody_remaining_balance_cents != null ? (
                             <span className="text-dark">{formatMoney(row.mindbody_remaining_balance_cents)}</span>
