@@ -6,11 +6,26 @@ import Link from 'next/link'
 import { Gift, ArrowLeft, Loader2, Plus, X } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 
-interface MindbodyService {
-  Id: number
-  Name: string
-  Price: number
-  Category: string
+interface Treatment {
+  mindbody_service_id: number
+  service_name: string
+  price: number
+  program_id: number | null
+  category: string | null
+}
+
+type TreatmentGroup = 'body' | 'facial' | 'addon'
+
+const GROUP_LABEL: Record<TreatmentGroup, string> = {
+  body: 'Tratamientos Corporales',
+  facial: 'Tratamientos Faciales',
+  addon: 'Adicionales',
+}
+
+interface TreatmentsResponse {
+  data: Treatment[]
+  grouped: Record<TreatmentGroup, Treatment[]>
+  count: number
 }
 
 interface LocationConfig {
@@ -55,7 +70,10 @@ export default function AdminGiftCardIssuePage() {
   const [configId, setConfigId] = useState<string>('')
 
   // Mindbody treatments (loaded lazily when treatments mode is opened)
-  const [services, setServices] = useState<MindbodyService[] | null>(null)
+  const [services, setServices] = useState<Treatment[] | null>(null)
+  const [groupedServices, setGroupedServices] = useState<Record<TreatmentGroup, Treatment[]>>({
+    body: [], facial: [], addon: [],
+  })
   const [servicesLoading, setServicesLoading] = useState(false)
   const [servicesError, setServicesError] = useState<string | null>(null)
 
@@ -115,7 +133,9 @@ export default function AdminGiftCardIssuePage() {
     return () => { cancelled = true }
   }, [])
 
-  // Lazy load Mindbody services when entering treatments mode
+  // Lazy load treatments from Supabase (treatment_settings) when entering
+  // treatments mode. This is the same source the public menu + booking app
+  // use, so it stays consistent with what staff sees elsewhere.
   useEffect(() => {
     if (amountMode !== 'treatments' || services !== null || servicesLoading) return
     let cancelled = false
@@ -123,10 +143,16 @@ export default function AdminGiftCardIssuePage() {
     setServicesError(null)
     ;(async () => {
       try {
-        const res = await fetch('/api/mindbody/services?type=all&includeOffline=true')
-        const data = await res.json()
-        if (!res.ok) throw new Error(data?.error || 'Error al cargar tratamientos')
-        if (!cancelled) setServices(data.services ?? [])
+        const res = await fetch('/api/admin/giftcards/treatments')
+        const data = await res.json() as TreatmentsResponse | { error?: string }
+        if (!res.ok) {
+          throw new Error('error' in data && data.error ? data.error : 'Error al cargar tratamientos')
+        }
+        if (!cancelled) {
+          const typed = data as TreatmentsResponse
+          setServices(typed.data ?? [])
+          setGroupedServices(typed.grouped ?? { body: [], facial: [], addon: [] })
+        }
       } catch (e) {
         if (!cancelled) setServicesError(e instanceof Error ? e.message : 'Error al cargar tratamientos')
       } finally {
@@ -138,13 +164,13 @@ export default function AdminGiftCardIssuePage() {
 
   const selectedTreatments = useMemo(
     () => selectedTreatmentIds
-      .map(id => services?.find(s => s.Id === id))
-      .filter((s): s is MindbodyService => !!s),
+      .map(id => services?.find(s => s.mindbody_service_id === id))
+      .filter((s): s is Treatment => !!s),
     [selectedTreatmentIds, services],
   )
 
   const treatmentSubtotalCents = useMemo(
-    () => selectedTreatments.reduce((acc, s) => acc + Math.round(s.Price * 100), 0),
+    () => selectedTreatments.reduce((acc, s) => acc + Math.round(s.price * 100), 0),
     [selectedTreatments],
   )
 
@@ -161,26 +187,20 @@ export default function AdminGiftCardIssuePage() {
     return toCents(openAmount)
   }, [amountMode, treatmentTotalCents, openAmount])
 
-  const treatmentsByCategory = useMemo(() => {
-    const groups: Record<string, MindbodyService[]> = {}
+  // Three fixed buckets in display order (Body / Facial / Addon).
+  // Filter out already-selected rows and apply the search query.
+  const groupOrder: TreatmentGroup[] = ['body', 'facial', 'addon']
+  const visibleGroups = useMemo(() => {
     const query = treatmentsSearch.trim().toLowerCase()
-    for (const s of services ?? []) {
-      if (selectedTreatmentIds.includes(s.Id)) continue
-      if (query && !s.Name.toLowerCase().includes(query)) continue
-      const cat = s.Category || 'General'
-      if (!groups[cat]) groups[cat] = []
-      groups[cat].push(s)
-    }
-    for (const cat of Object.keys(groups)) {
-      groups[cat].sort((a, b) => a.Name.localeCompare(b.Name))
-    }
-    return groups
-  }, [services, selectedTreatmentIds, treatmentsSearch])
-
-  const sortedTreatmentCategories = useMemo(
-    () => Object.keys(treatmentsByCategory).sort((a, b) => a.localeCompare(b)),
-    [treatmentsByCategory],
-  )
+    return groupOrder
+      .map(g => ({
+        group: g,
+        items: (groupedServices[g] ?? [])
+          .filter(s => !selectedTreatmentIds.includes(s.mindbody_service_id))
+          .filter(s => !query || s.service_name.toLowerCase().includes(query)),
+      }))
+      .filter(g => g.items.length > 0)
+  }, [groupedServices, selectedTreatmentIds, treatmentsSearch])
 
   const addTreatment = (id: number) => {
     setSelectedTreatmentIds(prev => prev.includes(id) ? prev : [...prev, id])
@@ -213,7 +233,7 @@ export default function AdminGiftCardIssuePage() {
       recipient_email: recipientEmail.trim() || null,
       amount_cents: computedAmountCents,
       gift_treatment_names: includeTreatments
-        ? selectedTreatments.map(s => s.Name)
+        ? selectedTreatments.map(s => s.service_name)
         : null,
       base_amount_cents: includeTreatments ? treatmentSubtotalCents : null,
       tax_cents: includeTreatments ? treatmentItbmsCents : null,
@@ -379,15 +399,17 @@ export default function AdminGiftCardIssuePage() {
                   ) : (
                     <ul className="divide-y divide-beige-200 border border-beige-200 rounded-lg overflow-hidden">
                       {selectedTreatments.map(s => (
-                        <li key={s.Id} className="flex items-center justify-between px-3 py-2 text-sm">
+                        <li key={s.mindbody_service_id} className="flex items-center justify-between px-3 py-2 text-sm">
                           <div className="flex-1">
-                            <div className="text-dark">{s.Name}</div>
-                            <div className="text-xs text-warm-gray">{s.Category}</div>
+                            <div className="text-dark">{s.service_name}</div>
+                            {s.category && (
+                              <div className="text-xs text-warm-gray">{s.category}</div>
+                            )}
                           </div>
-                          <div className="text-dark font-medium mr-3">${s.Price.toFixed(2)}</div>
+                          <div className="text-dark font-medium mr-3">${s.price.toFixed(2)}</div>
                           <button
                             type="button"
-                            onClick={() => removeTreatment(s.Id)}
+                            onClick={() => removeTreatment(s.mindbody_service_id)}
                             className="p-1 text-warm-gray hover:text-red-500"
                             aria-label="Quitar"
                           >
@@ -420,25 +442,25 @@ export default function AdminGiftCardIssuePage() {
                         onChange={e => setTreatmentsSearch(e.target.value)}
                       />
                       <div className="max-h-72 overflow-y-auto border border-beige-200 rounded-lg">
-                        {sortedTreatmentCategories.length === 0 ? (
+                        {visibleGroups.length === 0 ? (
                           <div className="px-3 py-4 text-sm text-warm-gray text-center">
                             No hay resultados.
                           </div>
                         ) : (
-                          sortedTreatmentCategories.map(cat => (
-                            <div key={cat}>
+                          visibleGroups.map(({ group, items }) => (
+                            <div key={group}>
                               <div className="px-3 py-1 bg-beige-100 text-xs uppercase tracking-widest text-warm-gray sticky top-0">
-                                {cat}
+                                {GROUP_LABEL[group]}
                               </div>
-                              {treatmentsByCategory[cat].map(s => (
+                              {items.map(s => (
                                 <button
-                                  key={s.Id}
+                                  key={s.mindbody_service_id}
                                   type="button"
-                                  onClick={() => addTreatment(s.Id)}
+                                  onClick={() => addTreatment(s.mindbody_service_id)}
                                   className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-beige-50 border-t border-beige-200"
                                 >
-                                  <span className="text-dark text-left flex-1">{s.Name}</span>
-                                  <span className="text-warm-gray mr-3">${s.Price.toFixed(2)}</span>
+                                  <span className="text-dark text-left flex-1">{s.service_name}</span>
+                                  <span className="text-warm-gray mr-3">${s.price.toFixed(2)}</span>
                                   <Plus className="h-4 w-4 text-gold" />
                                 </button>
                               ))}
