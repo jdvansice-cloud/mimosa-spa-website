@@ -13,6 +13,22 @@ interface MindbodyService {
   Category: string
 }
 
+interface LocationConfig {
+  id: string
+  mindbody_location_id: number
+  location_name: string
+  prefix: string
+  serial_length: number
+  next_sequence_value: number
+  is_active: boolean
+}
+
+interface MeResponse {
+  locationConfigId: string | null
+  locationName: string | null
+  isSuperAdmin: boolean
+}
+
 type AmountMode = 'amount' | 'treatments'
 
 const DEFAULT_ITBMS_PERCENT = 7
@@ -30,6 +46,13 @@ function toCents(value: string): number {
 
 export default function AdminGiftCardIssuePage() {
   const router = useRouter()
+
+  // Scope (location restriction) + available locations
+  const [me, setMe] = useState<MeResponse | null>(null)
+  const [locations, setLocations] = useState<LocationConfig[]>([])
+  const [scopeLoading, setScopeLoading] = useState(true)
+  const [scopeError, setScopeError] = useState<string | null>(null)
+  const [configId, setConfigId] = useState<string>('')
 
   // Mindbody treatments (loaded lazily when treatments mode is opened)
   const [services, setServices] = useState<MindbodyService[] | null>(null)
@@ -55,6 +78,43 @@ export default function AdminGiftCardIssuePage() {
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Load my scope + the location configs I can use.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [meRes, cfgRes] = await Promise.all([
+          fetch('/api/admin/giftcards/me'),
+          fetch('/api/admin/giftcards/config'),
+        ])
+        const meData = await meRes.json()
+        const cfgData = await cfgRes.json()
+        if (!meRes.ok) throw new Error(meData?.error || 'Error al cargar permisos')
+        if (!cfgRes.ok) throw new Error(cfgData?.error || 'Error al cargar ubicaciones')
+        if (cancelled) return
+
+        const meTyped: MeResponse = meData
+        const activeConfigs: LocationConfig[] = (cfgData.data ?? []).filter((c: LocationConfig) => c.is_active)
+
+        setMe(meTyped)
+        setLocations(activeConfigs)
+
+        // Location-restricted admins: lock to their config.
+        // Super admins: preselect the only one if there's just one.
+        if (meTyped.locationConfigId) {
+          setConfigId(meTyped.locationConfigId)
+        } else if (activeConfigs.length === 1) {
+          setConfigId(activeConfigs[0].id)
+        }
+      } catch (e) {
+        if (!cancelled) setScopeError(e instanceof Error ? e.message : 'Error')
+      } finally {
+        if (!cancelled) setScopeLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   // Lazy load Mindbody services when entering treatments mode
   useEffect(() => {
@@ -134,6 +194,7 @@ export default function AdminGiftCardIssuePage() {
     e.preventDefault()
     setError(null)
 
+    if (!configId) return setError('Selecciona una ubicación')
     if (!buyerName.trim()) return setError('Nombre del comprador requerido')
     if (!recipientName.trim()) return setError('Nombre del destinatario requerido')
     if (computedAmountCents <= 0) {
@@ -145,6 +206,7 @@ export default function AdminGiftCardIssuePage() {
     const includeTreatments = amountMode === 'treatments' && selectedTreatments.length > 0
 
     const payload = {
+      gift_card_serial_config_id: configId,
       buyer_name: buyerName.trim(),
       buyer_email: buyerEmail.trim() || null,
       buyer_phone: buyerPhone.trim() || null,
@@ -179,15 +241,32 @@ export default function AdminGiftCardIssuePage() {
     }
   }
 
+  if (scopeLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-gold" />
+      </div>
+    )
+  }
+
+  if (scopeError) {
+    return <div className="p-8 text-red-600">{scopeError}</div>
+  }
+
+  const isLocationLocked = !!me?.locationConfigId
+  const selectedLocation = locations.find(l => l.id === configId)
+
   return (
     <div>
       <div className="mb-8">
-        <Link
-          href="/admin/giftcards"
-          className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark mb-3"
-        >
-          <ArrowLeft className="h-4 w-4" /> Gift Cards
-        </Link>
+        {!isLocationLocked && (
+          <Link
+            href="/admin/giftcards"
+            className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark mb-3"
+          >
+            <ArrowLeft className="h-4 w-4" /> Gift Cards
+          </Link>
+        )}
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2 bg-gold/10 rounded-lg">
             <Gift className="h-6 w-6 text-gold" />
@@ -195,11 +274,54 @@ export default function AdminGiftCardIssuePage() {
           <h1 className="text-3xl font-display font-semibold text-dark">Emitir Gift Card</h1>
         </div>
         <p className="text-warm-gray">
-          Define el monto (por tratamientos o directo), genera el serial e imprime la etiqueta.
+          {isLocationLocked
+            ? `Ubicación: ${me?.locationName ?? '—'}. Define el monto, genera el serial e imprime la etiqueta.`
+            : 'Selecciona la ubicación, define el monto y genera el serial para imprimir.'}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Location picker — super admin only */}
+        {!isLocationLocked && (
+          <Card variant="default" padding="md">
+            <CardHeader><CardTitle>Ubicación</CardTitle></CardHeader>
+            <CardContent>
+              {locations.length === 0 ? (
+                <div className="text-sm text-warm-gray">
+                  No hay ubicaciones activas.{' '}
+                  <Link href="/admin/giftcards/config" className="text-gold hover:underline">
+                    Crear una ubicación
+                  </Link>
+                </div>
+              ) : (
+                <select
+                  className="input"
+                  value={configId}
+                  onChange={e => setConfigId(e.target.value)}
+                  required
+                >
+                  <option value="">— Selecciona una ubicación —</option>
+                  {locations.map(loc => (
+                    <option key={loc.id} value={loc.id}>
+                      {loc.location_name} ({loc.prefix})
+                    </option>
+                  ))}
+                </select>
+              )}
+              {selectedLocation && (
+                <div className="text-xs text-warm-gray mt-2">
+                  Prefijo: <span className="font-mono text-dark">{selectedLocation.prefix}</span>
+                  {' · '}Próximo serial:{' '}
+                  <span className="font-mono text-dark">
+                    {selectedLocation.prefix}
+                    {String(selectedLocation.next_sequence_value).padStart(selectedLocation.serial_length, '0')}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Step 1: amount */}
         <Card variant="default" padding="md">
           <CardHeader><CardTitle>1. Monto</CardTitle></CardHeader>

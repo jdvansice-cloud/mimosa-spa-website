@@ -62,12 +62,26 @@ export async function middleware(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, gift_card_location_config_id')
       .eq('id', user.id)
-      .single() as { data: { role: string } | null; error: unknown }
+      .single() as { data: { role: string; gift_card_location_config_id: string | null } | null; error: unknown }
 
     if (!profile || profile.role !== 'admin') {
       return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
+
+    // Location-restricted admins are locked to the gift-card area.
+    // Allowed: /admin/giftcards/issue, /admin/giftcards/issued, /admin/giftcards/issued/[id]/print.
+    // Anything else under /admin (including /admin itself and /admin/giftcards hub) → redirect to issue.
+    if (profile.gift_card_location_config_id) {
+      const allowed =
+        pathname === '/admin/giftcards/issue' ||
+        pathname === '/admin/giftcards/issued' ||
+        /^\/admin\/giftcards\/issued\/[^/]+\/print$/.test(pathname)
+
+      if (!allowed) {
+        return NextResponse.redirect(new URL('/admin/giftcards/issue', request.url))
+      }
     }
 
     return response

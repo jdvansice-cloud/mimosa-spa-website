@@ -13,13 +13,15 @@ import {
   User,
   Sparkles,
   Gift,
-  Award
+  Award,
+  Plus,
+  List,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
 import { useAuthStore } from '@/lib/auth/store'
 
-const navItems = [
+const fullNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },
@@ -30,10 +32,26 @@ const navItems = [
   { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
 ]
 
-export function AdminSidebar() {
+// Limited nav for location-restricted admins.
+const locationAdminNavItems = [
+  { href: '/admin/giftcards/issue', label: 'Emitir Gift Card', icon: Plus },
+  { href: '/admin/giftcards/issued', label: 'Emitidas', icon: List },
+]
+
+interface AdminSidebarProps {
+  isLocationRestricted?: boolean
+  locationName?: string | null
+}
+
+export function AdminSidebar({
+  isLocationRestricted = false,
+  locationName = null,
+}: AdminSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut, isLoading } = useAuthStore()
+
+  const navItems = isLocationRestricted ? locationAdminNavItems : fullNavItems
 
   const isActive = (href: string) => {
     if (href === '/admin') {
@@ -52,7 +70,11 @@ export function AdminSidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-cream/10">
         <Logo theme="dark" size="md" />
-        <p className="text-xs text-cream/50 mt-3">Panel de Administración</p>
+        <p className="text-xs text-cream/50 mt-3">
+          {isLocationRestricted
+            ? (locationName ? `Gift Cards · ${locationName}` : 'Gift Cards')
+            : 'Panel de Administración'}
+        </p>
       </div>
 
       {/* Navigation */}
@@ -60,7 +82,7 @@ export function AdminSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.href)
-          
+
           return (
             <Link
               key={item.href}
@@ -81,22 +103,23 @@ export function AdminSidebar() {
 
       {/* Footer */}
       <div className="p-4 border-t border-cream/10 space-y-2">
-        {/* User info */}
         {user && (
           <div className="flex items-center gap-3 px-4 py-2 text-cream/70">
             <User className="h-4 w-4" />
             <span className="text-sm truncate">{user.email}</span>
           </div>
         )}
-        
-        <Link
-          href="/es"
-          target="_blank"
-          className="flex items-center gap-3 px-4 py-2 text-cream/70 hover:text-cream transition-colors"
-        >
-          <ExternalLink className="h-4 w-4" />
-          <span className="text-sm">Ver Sitio</span>
-        </Link>
+
+        {!isLocationRestricted && (
+          <Link
+            href="/es"
+            target="_blank"
+            className="flex items-center gap-3 px-4 py-2 text-cream/70 hover:text-cream transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span className="text-sm">Ver Sitio</span>
+          </Link>
+        )}
         <button
           onClick={handleSignOut}
           disabled={isLoading}

@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 interface IssuePayload {
+  gift_card_serial_config_id: string
   buyer_name: string
   buyer_email?: string | null
   buyer_phone?: string | null
   recipient_name: string
   recipient_email?: string | null
   amount_cents: number
-  // Optional treatments-as-a-gift breakdown (customer reference + label).
   gift_treatment_names?: string[] | null
   base_amount_cents?: number | null
   tax_cents?: number | null
@@ -24,6 +25,9 @@ interface IssuePayload {
 }
 
 export async function POST(request: NextRequest) {
+  const ctx = await getGiftCardAdminContext()
+  if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   let body: IssuePayload
   try {
     body = await request.json()
@@ -31,6 +35,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
+  if (!body.gift_card_serial_config_id) {
+    return NextResponse.json({ error: 'gift_card_serial_config_id required' }, { status: 400 })
+  }
   if (!body.buyer_name?.trim()) {
     return NextResponse.json({ error: 'buyer_name required' }, { status: 400 })
   }
@@ -41,10 +48,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'amount_cents must be a positive integer' }, { status: 400 })
   }
 
+  // Location-restricted admins can only issue for their own location.
+  if (ctx.locationConfigId && ctx.locationConfigId !== body.gift_card_serial_config_id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-  // Mint the serial from the single global counter.
-  const { data: serial, error: serialError } = await supabase.rpc('next_giftcard_serial')
+  // Load the config to capture mindbody_location_id and verify it's active.
+  const { data: config, error: configError } = await supabase
+    .from('gift_card_serial_config')
+    .select('id, mindbody_location_id, is_active')
+    .eq('id', body.gift_card_serial_config_id)
+    .single()
+
+  if (configError || !config) {
+    return NextResponse.json({ error: 'location config not found' }, { status: 404 })
+  }
+  if (!config.is_active) {
+    return NextResponse.json({ error: 'location config is inactive' }, { status: 400 })
+  }
+
+  // Mint the serial from the location's counter.
+  const { data: serial, error: serialError } = await supabase.rpc(
+    'next_giftcard_serial',
+    { p_config_id: body.gift_card_serial_config_id }
+  )
 
   if (serialError || !serial) {
     console.error('next_giftcard_serial RPC error:', serialError)
@@ -61,7 +90,9 @@ export async function POST(request: NextRequest) {
 
   const insert = {
     serial,
-    format: 'gift_card', // single global type
+    format: 'gift_card',
+    gift_card_serial_config_id: config.id,
+    mindbody_location_id: config.mindbody_location_id,
     buyer_name: body.buyer_name.trim(),
     buyer_email: body.buyer_email?.trim() || null,
     buyer_phone: body.buyer_phone?.trim() || null,
@@ -77,6 +108,7 @@ export async function POST(request: NextRequest) {
     print_recipient: body.print_recipient,
     print_treatments: body.print_treatments,
     notes: body.notes?.trim() || null,
+    issued_by: ctx.userId,
   }
 
   const { data, error } = await supabase
