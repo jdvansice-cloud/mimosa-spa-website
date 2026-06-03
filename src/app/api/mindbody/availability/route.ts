@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getBookableItems, getStaffAppointmentAvailability, getScheduleItems, getStaff } from '@/lib/booking/mindbody'
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
+import { getV1EligibleResourcesPerService } from '@/lib/booking/eligibility'
 
 // GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&startDate=2026-01-15&endDate=2026-01-29&duration=90
 // Returns available time slots in 15-min increments where at least one therapist
@@ -51,11 +52,42 @@ export async function GET(request: NextRequest) {
 
     const duration = totalDuration ? parseInt(totalDuration) : 60
 
+    // Phase 1A feature flag: when true, slots are filtered by resource freedom
+    // in addition to staff freedom. Default false → behavior unchanged.
+    // See docs/PRD_ROOM_RESOURCE_BOOKING.md §6.1.
+    const ROOMS_AWARE_AVAILABILITY = process.env.ROOMS_AWARE_AVAILABILITY === 'true'
+
     console.log('=== AVAILABILITY REQUEST ===')
     console.log('Location ID:', parsedLocationId)
     console.log('Session Type IDs:', serviceIdArray)
     console.log('Date range:', startDate, 'to', endDate)
     console.log('Required duration:', duration, 'minutes')
+    console.log('ROOMS_AWARE_AVAILABILITY:', ROOMS_AWARE_AVAILABILITY)
+
+    // When ROOMS_AWARE_AVAILABILITY is on, fetch the v1-eligible resources for
+    // the requested service(s) at this location. Slots will be filtered to
+    // require at least one of these resources to be free for the full duration.
+    // For multi-service bookings, we use the first session type's eligible set
+    // (Phase 1A simplification — multi-service-aware checks come in Phase 1C).
+    let v1EligibleResourceIds: Set<number> = new Set()
+    if (ROOMS_AWARE_AVAILABILITY && serviceIdArray.length > 0) {
+      try {
+        const eligibilityMap = await getV1EligibleResourcesPerService({
+          sessionTypeIds: [serviceIdArray[0]],
+          locationId: parsedLocationId,
+        })
+        v1EligibleResourceIds = eligibilityMap.get(serviceIdArray[0]) || new Set()
+        console.log(`v1-eligible resources for service ${serviceIdArray[0]} at location ${parsedLocationId}:`, v1EligibleResourceIds.size)
+        if (v1EligibleResourceIds.size === 0) {
+          console.warn(`No v1-eligible resources configured for service ${serviceIdArray[0]} at location ${parsedLocationId} — slot grid will be empty`)
+        }
+      } catch (err) {
+        // Fail-safe: if eligibility lookup errors out, fall back to legacy
+        // behavior (no resource filtering) rather than emptying the slot grid.
+        console.error('Eligibility lookup failed, falling back to staff-only availability:', err)
+        v1EligibleResourceIds = new Set()
+      }
+    }
 
     // Get available items from Mindbody
     // Note: /appointment/bookableitems REQUIRES sessionTypeIds parameter
@@ -89,6 +121,12 @@ export async function GET(request: NextRequest) {
     // This gives us full availability windows (staff working hours minus appointments/blocks)
     // which is more comprehensive than getBookableItems (which returns limited pre-computed slots)
     let staffBlockedPeriods = new Map<number, { start: Date; end: Date }[]>()
+
+    // Resource-aware (Phase 1A): per-resource busy periods extracted from
+    // Appointments[].Resources[] returned by scheduleitems. Legacy appointments
+    // booked without ResourceIds have empty Resources arrays and won't
+    // contribute here — a known transition-period gap, see PRD §6.1.
+    const resourceBusyPeriods = new Map<number, { start: Date; end: Date }[]>()
 
     if (validStaffIds.length > 0) {
       try {
@@ -132,11 +170,24 @@ export async function GET(request: NextRequest) {
           if (staff.Appointments && staff.Appointments.length > 0) {
             for (const appt of staff.Appointments) {
               if (appt.StartDateTime && appt.EndDateTime && appt.Status !== 'Cancelled') {
-                blockedPeriods.push({
-                  start: new Date(appt.StartDateTime),
-                  end: new Date(appt.EndDateTime)
-                })
+                const apptStart = new Date(appt.StartDateTime)
+                const apptEnd = new Date(appt.EndDateTime)
+                blockedPeriods.push({ start: apptStart, end: apptEnd })
                 debugAppts.push(`[APPT] ${appt.StartDateTime} - ${appt.EndDateTime}`)
+                // Resource-aware (Phase 1A): also record which resources this
+                // appointment occupies. Empty/missing Resources[] is silently
+                // ignored — legacy roomless appointments.
+                if (ROOMS_AWARE_AVAILABILITY && Array.isArray(appt.Resources)) {
+                  for (const r of appt.Resources) {
+                    if (typeof r?.Id !== 'number') continue
+                    let periods = resourceBusyPeriods.get(r.Id)
+                    if (!periods) {
+                      periods = []
+                      resourceBusyPeriods.set(r.Id, periods)
+                    }
+                    periods.push({ start: apptStart, end: apptEnd })
+                  }
+                }
               }
             }
           }
@@ -468,8 +519,31 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        // Phase 1A resource-freedom layer: when the flag is on, the slot must
+        // also have at least one v1-eligible resource free for the full duration.
+        // A resource is "free" if it has no overlapping busy period from any
+        // existing appointment (per Appointments[].Resources from scheduleitems).
+        let resourceCheckPassed = true
+        if (ROOMS_AWARE_AVAILABILITY) {
+          if (v1EligibleResourceIds.size === 0) {
+            // No eligible resources known → can't book this service here. Hide slot.
+            resourceCheckPassed = false
+          } else {
+            resourceCheckPassed = false
+            for (const resourceId of v1EligibleResourceIds) {
+              const busy = resourceBusyPeriods.get(resourceId) || []
+              const hasOverlap = busy.some(p => !(slotEnd <= p.start || currentSlot >= p.end))
+              if (!hasOverlap) {
+                resourceCheckPassed = true
+                break
+              }
+            }
+          }
+        }
+
         // Only add slot if at least one staff member is available
-        if (availableStaffIds.length > 0) {
+        // (and, when ROOMS_AWARE_AVAILABILITY is on, at least one resource too)
+        if (availableStaffIds.length > 0 && resourceCheckPassed) {
           slots.push({
             time: slotTime,
             displayTime: formatTime(slotTime),
@@ -508,6 +582,10 @@ export async function GET(request: NextRequest) {
         locationId: parsedLocationId,
         rawItemsCount: availableItems.length,
         staffAvailability: staffDebugInfo,
+        // Phase 1A surface so we can verify the flag's effect in soft-launch:
+        roomsAwareAvailability: ROOMS_AWARE_AVAILABILITY,
+        v1EligibleResourceCount: v1EligibleResourceIds.size,
+        resourcesWithObservedAppointments: resourceBusyPeriods.size,
       }
     })
 

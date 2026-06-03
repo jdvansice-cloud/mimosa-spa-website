@@ -1174,6 +1174,29 @@ export async function getActiveSessionTypes(params: {
 }
 
 // Get schedule items - returns raw schedule blocks for staff
+export interface ScheduleItemAppointment {
+  Id: number
+  StartDateTime: string
+  EndDateTime: string
+  Status: string
+  Duration?: number
+  ProgramId?: number
+  SessionTypeId?: number
+  StaffId?: number
+  LocationId?: number
+  ClientId?: string
+  SessionType?: {
+    Id: number
+    Name: string
+  }
+  // Resources Mindbody returns on the appointment. Empty array on legacy
+  // appointments booked before our flow started attaching ResourceIds.
+  Resources?: Array<{
+    Id: number
+    Name?: string
+  }>
+}
+
 export async function getScheduleItems(params: {
   locationIds: number[]
   staffIds?: number[]
@@ -1185,16 +1208,7 @@ export async function getScheduleItems(params: {
       Id: number
       FirstName: string
       LastName: string
-      Appointments: Array<{
-        Id: number
-        StartDateTime: string
-        EndDateTime: string
-        Status: string
-        SessionType?: {
-          Id: number
-          Name: string
-        }
-      }>
+      Appointments: ScheduleItemAppointment[]
       Availabilities: Array<{
         Id: number
         StartDateTime: string
