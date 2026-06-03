@@ -417,6 +417,60 @@ export interface MindbodyResource {
   Programs?: Array<{ Id: number; Name?: string; ScheduleType?: string }>
 }
 
+export interface MindbodyResourceAvailability {
+  ResourceId: number
+  ResourceName?: string
+  StartDateTime?: string
+  EndDateTime?: string
+  Programs?: Array<{ Id: number; Name?: string; ScheduleType?: string }>
+  ProgramId?: number
+  LocationId?: number
+  // Some Mindbody responses also include these for context:
+  Staff?: { Id: number; FirstName?: string; LastName?: string }
+  SessionType?: { Id: number; Name?: string }
+}
+
+export async function getResourceAvailabilities(params: {
+  startDate: string
+  endDate?: string
+  programIds?: number[]
+  locationIds?: number[]
+  resourceIds?: number[]
+  scheduleTypes?: Array<'Appointment' | 'Resource' | 'Media'>
+  limit?: number
+  offset?: number
+}) {
+  interface Response {
+    PaginationResponse?: {
+      RequestedLimit: number
+      RequestedOffset: number
+      PageSize: number
+      TotalResults: number
+    }
+    ResourceAvailabilities?: MindbodyResourceAvailability[]
+  }
+
+  const queryParams: Record<string, ParamValue> = {
+    startDate: params.startDate,
+    limit: params.limit ?? 200,
+    offset: params.offset ?? 0,
+  }
+  if (params.endDate) queryParams.endDate = params.endDate
+  if (params.programIds && params.programIds.length > 0) queryParams.programIds = params.programIds
+  if (params.locationIds && params.locationIds.length > 0) queryParams.locationIds = params.locationIds
+  if (params.resourceIds && params.resourceIds.length > 0) queryParams.resourceIds = params.resourceIds
+  if (params.scheduleTypes && params.scheduleTypes.length > 0) queryParams.scheduleTypes = params.scheduleTypes
+
+  const response = await mindbodyRequest<Response>('/site/resourceavailabilities', {
+    params: queryParams,
+  })
+
+  const items = response.ResourceAvailabilities || []
+  console.log(`ResourceAvailabilities from Mindbody:`, items.length, 'items')
+  if (response.PaginationResponse) console.log('Pagination:', response.PaginationResponse)
+  return items
+}
+
 export async function getResources(params: { includeInactive?: boolean; resourceIds?: number[] } = {}) {
   interface ResourcesResponse {
     Resources?: MindbodyResource[]
