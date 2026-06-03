@@ -90,9 +90,11 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Load lookups for validation.
+  // Load lookups for validation. Include ALL session types (not just
+  // onlineOnly) so Mimosa can map in-cabin / staff-only services the same
+  // way they appear in Mindbody admin's Manage Rooms screen.
   const [sessionTypes, locations, resources] = await Promise.all([
-    getSessionTypes(true),
+    getSessionTypes(false),
     getLocations(),
     getResources({ includeInactive: false }),
   ])
@@ -329,9 +331,14 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const format = (searchParams.get('format') || 'json').toLowerCase()
+  // For the reference + template CSVs we want EVERY session type that Mindbody
+  // admin can attach to a room (including services not flagged online-bookable),
+  // because the "Manage Rooms" admin UI lists all of them. The audit's
+  // launch-blocker check still uses onlineOnly=true downstream.
+  const onlineOnly = searchParams.get('onlineOnly') === 'true'
 
   const [sessionTypes, locations, resources] = await Promise.all([
-    getSessionTypes(true),
+    getSessionTypes(onlineOnly),
     getLocations(),
     getResources({ includeInactive: false }),
   ])
