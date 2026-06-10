@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Mail, MessageCircle, ArrowRight, Loader2, User, UserPlus, Phone, RefreshCw } from 'lucide-react'
 import { OtpInput } from '@/components/ui'
 import { OtpChannelChoice } from '@/components/auth'
+import { cn } from '@/lib/utils'
 
 type LoginStep =
   | 'credential'
@@ -56,9 +57,12 @@ function PortalLoginContent() {
     return supabaseRef.current as SupabaseClient
   }
 
-  const [credential, setCredential] = useState('')
+  const [loginMethod, setLoginMethod] = useState<'phone' | 'email'>('phone')
+  const [loginPhone, setLoginPhone] = useState('')
+  const [loginEmail, setLoginEmail] = useState('')
   const [step, setStep] = useState<LoginStep>('credential')
   const [error, setError] = useState<string | null>(null)
+  const [notFoundEmail, setNotFoundEmail] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
   const [availableClients, setAvailableClients] = useState<ClientOption[]>([])
@@ -93,31 +97,44 @@ function PortalLoginContent() {
   }, [searchParams])
 
   const handleCredentialSubmit = async () => {
-    const trimmed = credential.trim()
-    if (!trimmed) {
-      setError('Ingresa tu correo o número de teléfono')
-      return
-    }
+    const isEmail = loginMethod === 'email'
+    let credential: string
 
-    const isEmail = trimmed.includes('@')
-    if (isEmail && !trimmed.includes('.')) {
-      setError('Correo electrónico inválido')
-      return
-    }
-    if (!isEmail && trimmed.replace(/\D/g, '').length < 8) {
-      setError('Número de teléfono inválido (mínimo 8 dígitos)')
-      return
+    if (isEmail) {
+      credential = loginEmail.trim()
+      if (!credential) {
+        setError('Ingresa tu correo electrónico')
+        return
+      }
+      if (!credential.includes('@') || !credential.includes('.')) {
+        setError('Correo electrónico inválido')
+        return
+      }
+    } else {
+      const cc = countryCode.replace(/\D/g, '')
+      const local = loginPhone.replace(/\D/g, '')
+      if (!local) {
+        setError('Ingresa tu número de teléfono')
+        return
+      }
+      // WATI format: country code + number, NO + sign (e.g. 50766124546)
+      credential = `${cc}${local}`
+      if (credential.length < 10) {
+        setError('Ingresa el número completo (ej: 6612 3456)')
+        return
+      }
     }
 
     setStep('sending')
     setError(null)
+    setNotFoundEmail(null)
     setIsLoading(true)
 
     try {
       const response = await fetch('/api/portal/auth/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: trimmed }),
+        body: JSON.stringify({ credential }),
       })
 
       const data = await response.json()
@@ -127,10 +144,17 @@ function PortalLoginContent() {
       }
 
       if (data.notFound || data.clients.length === 0) {
+        if (isEmail) {
+          // Email not found — let the user review the email or register
+          setNotFoundEmail(credential)
+          setStep('credential')
+          return
+        }
+        // Phone not found → registration. Pre-fill the LOCAL number only;
+        // the shared countryCode selector already reflects the login selection.
         setRegistrationData(prev => ({
           ...prev,
-          email: isEmail ? trimmed : '',
-          phone: isEmail ? '' : trimmed.replace(/\D/g, ''),
+          phone: loginPhone.replace(/\D/g, ''),
         }))
         setStep('register')
         return
@@ -725,23 +749,90 @@ function PortalLoginContent() {
             <p className="text-sm text-warm-gray mt-1">Ingresa tu correo electrónico o número de teléfono</p>
           </div>
 
-          <div className="relative mb-4">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-gray">
-              {credential.includes('@') ? <Mail className="w-5 h-5" /> : <Phone className="w-5 h-5" />}
-            </div>
-            <input
-              type="text"
-              value={credential}
-              onChange={(e) => setCredential(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={step === 'sending'}
-              className="w-full pl-12 pr-4 py-4 border-2 border-beige-200 rounded-xl
-                       text-lg focus:outline-none focus:ring-2 focus:ring-gold/50
-                       focus:border-gold transition-all disabled:opacity-50"
-              placeholder="correo@ejemplo.com  o  60001234"
-              autoFocus
-            />
+          {/* Method toggle: phone or email */}
+          <div className="flex gap-1 mb-4 p-1 bg-beige-50 rounded-xl">
+            <button
+              type="button"
+              onClick={() => { setLoginMethod('phone'); setError(null) }}
+              className={cn(
+                'flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2',
+                loginMethod === 'phone'
+                  ? 'bg-white text-dark shadow-sm'
+                  : 'text-warm-gray hover:text-dark'
+              )}
+            >
+              <Phone className="w-4 h-4" /> Teléfono
+            </button>
+            <button
+              type="button"
+              onClick={() => { setLoginMethod('email'); setError(null) }}
+              className={cn(
+                'flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2',
+                loginMethod === 'email'
+                  ? 'bg-white text-dark shadow-sm'
+                  : 'text-warm-gray hover:text-dark'
+              )}
+            >
+              <Mail className="w-4 h-4" /> Correo
+            </button>
           </div>
+
+          {loginMethod === 'phone' ? (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-dark mb-1">Número de teléfono / WhatsApp</label>
+              <div className="flex gap-2">
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  disabled={step === 'sending'}
+                  className="w-24 px-2 py-4 border-2 border-beige-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all bg-white text-sm disabled:opacity-50"
+                >
+                  <option value="+507">+507</option>
+                  <option value="+1">+1</option>
+                  <option value="+52">+52</option>
+                  <option value="+57">+57</option>
+                  <option value="+506">+506</option>
+                  <option value="+593">+593</option>
+                  <option value="+51">+51</option>
+                  <option value="+58">+58</option>
+                  <option value="+34">+34</option>
+                </select>
+                <div className="relative flex-1">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
+                  <input
+                    type="tel"
+                    value={loginPhone}
+                    onChange={(e) => setLoginPhone(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    disabled={step === 'sending'}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-beige-200 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all disabled:opacity-50"
+                    placeholder="6612 3456"
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-warm-gray mt-2">
+                Selecciona tu código de país e ingresa tu número (sin el código).
+              </p>
+            </div>
+          ) : (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-dark mb-1">Correo electrónico</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => { setLoginEmail(e.target.value); if (notFoundEmail) setNotFoundEmail(null) }}
+                  onKeyPress={handleKeyPress}
+                  disabled={step === 'sending'}
+                  className="w-full pl-12 pr-4 py-4 border-2 border-beige-200 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all disabled:opacity-50"
+                  placeholder="correo@ejemplo.com"
+                  autoFocus
+                />
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
@@ -749,9 +840,34 @@ function PortalLoginContent() {
             </div>
           )}
 
+          {notFoundEmail && (
+            <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-sm text-dark mb-3">
+                No encontramos una cuenta con el correo{' '}
+                <span className="font-semibold">{notFoundEmail}</span>. Revisa el
+                correo ingresado o regístrate como nuevo cliente.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setRegistrationData(prev => ({ ...prev, email: notFoundEmail }))
+                  setNotFoundEmail(null)
+                  setError(null)
+                  setStep('register')
+                }}
+                className="w-full py-2.5 bg-gold/10 hover:bg-gold/20 text-dark text-sm
+                         font-medium rounded-lg border border-gold/30 transition-colors
+                         flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                Registrarme con este correo
+              </button>
+            </div>
+          )}
+
           <button
             onClick={handleCredentialSubmit}
-            disabled={step === 'sending' || !credential.trim()}
+            disabled={step === 'sending' || (loginMethod === 'phone' ? !loginPhone.trim() : !loginEmail.trim())}
             className="w-full py-4 bg-gradient-to-r from-gold to-gold/90 text-dark
                      font-semibold rounded-xl hover:shadow-lg transition-all
                      disabled:opacity-50 disabled:cursor-not-allowed
