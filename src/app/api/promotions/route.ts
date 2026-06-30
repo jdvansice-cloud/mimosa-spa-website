@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { requireAdmin } from '@/lib/auth/require-admin'
 
 // Lazy-initialized Supabase client to avoid build-time errors
 let supabaseAdmin: SupabaseClient | null = null
@@ -79,14 +80,10 @@ export async function GET(request: NextRequest) {
 // POST /api/promotions - Create new promotion
 export async function POST(request: NextRequest) {
   try {
+    const denied = await requireAdmin()
+    if (denied) return denied
+
     const supabase = getSupabaseAdmin()
-
-    // Check authentication
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
 
     // Ensure mindbody_service_ids is an array of integers
@@ -120,14 +117,10 @@ export async function POST(request: NextRequest) {
 // PUT /api/promotions - Update existing promotion
 export async function PUT(request: NextRequest) {
   try {
+    const denied = await requireAdmin()
+    if (denied) return denied
+
     const supabase = getSupabaseAdmin()
-
-    // Check authentication
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const { id, ...updateData } = body
 
@@ -170,14 +163,10 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/promotions - Delete promotion
 export async function DELETE(request: NextRequest) {
   try {
+    const denied = await requireAdmin()
+    if (denied) return denied
+
     const supabase = getSupabaseAdmin()
-
-    // Check authentication
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
