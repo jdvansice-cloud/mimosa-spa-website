@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { getAllServices } from '@/lib/booking/mindbody'
+import { requireAdmin } from '@/lib/auth/require-admin'
 
 // Lazy-initialized Supabase client to avoid build-time errors
 let supabaseAdmin: SupabaseClient | null = null
@@ -133,6 +134,9 @@ export async function GET() {
 // POST - Update treatment settings
 export async function POST(request: NextRequest) {
   try {
+    const denied = await requireAdmin()
+    if (denied) return denied
+
     // Validate environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('Missing Supabase environment variables')
@@ -214,6 +218,9 @@ export async function POST(request: NextRequest) {
 // PATCH - Update a single treatment setting
 export async function PATCH(request: NextRequest) {
   try {
+    const denied = await requireAdmin()
+    if (denied) return denied
+
     const body = await request.json()
     const { mindbody_service_id, ...updates } = body
 
