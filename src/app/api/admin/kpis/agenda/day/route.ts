@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
   else return NextResponse.json({ error: 'location inválida' }, { status: 400 })
 
   try {
-    return NextResponse.json({ date, appointments: await getAgendaDay(date, location) })
+    return NextResponse.json({ date, ...(await getAgendaDay(date, location)) })
   } catch (err) {
     console.error('agenda/day failed:', err)
     return NextResponse.json(

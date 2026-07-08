@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { LOCATION_NAMES, PANAMA_TZ } from './constants'
+import { ANNUAL_BUDGETS, LOCATION_IDS, LOCATION_MANAGERS, LOCATION_NAMES, PANAMA_TZ } from './constants'
 import { addDays, panamaToday } from './sync'
 
 // ===========================================
@@ -81,6 +81,18 @@ export interface KpiPayload {
   }
   prebooked: { clientsSeen: number; withNext: number; rate: number | null }
   noShow: { count: number; rate: number | null; lyRate: number | null }
+  /** Ownership budget for the selected scope/period (null in gc mode or years without a budget). */
+  budget: {
+    year: number
+    annual: number
+    /** Month budget (mtd/lastmonth, seasonality-weighted) or the annual budget (ytd). */
+    periodTarget: number
+    /** Where sales should be by asOf at budget pace (null for complete periods). */
+    expectedToDate: number | null
+    /** True when a flat 1/12 split was used (no full prior-year seasonality). */
+    approx: boolean
+    perLocation: Array<{ locationId: number; name: string; manager: string; annual: number; netYtd: number }> | null
+  } | null
   topServices: Array<{ name: string; net: number; count: number }>
   /** Top 25 spenders in the period (UI shows 10, expandable). */
   topClients: Array<{ name: string; visits: number; net: number }>
@@ -586,6 +598,64 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
   }
   const lyPeriodTotal = goals?.net ?? null
 
+  // ---- ownership budget vs actuals ----
+  const budgetMap = ANNUAL_BUDGETS[curYear]
+  let budget: KpiPayload['budget'] = null
+  if (budgetMap && !gcMode) {
+    const locIds = location === 'all' ? [...LOCATION_IDS] : [location]
+    const annual = locIds.reduce((sum, id) => sum + (budgetMap[id] ?? 0), 0)
+    const prevMonthly = mNet.prev
+    const prevTotal = prevMonthly.reduce((sum, v) => sum + v, 0)
+    // Seasonality-weighted month targets need a full prior year (SFC opened mid-2025 → flat 1/12)
+    const hasSeasonality = prevTotal > 0 && prevMonthly.every(v => v > prevTotal * 0.01)
+    const monthShare = (i: number) => (hasSeasonality ? prevMonthly[i] / prevTotal : 1 / 12)
+    const dayOfMonth = Number(asOf.slice(8, 10))
+    const dim = daysInMonth(curYear, curMonthIdx + 1)
+
+    let periodTarget: number | null = null
+    let expectedToDate: number | null = null
+    if (period === 'mtd') {
+      periodTarget = annual * monthShare(curMonthIdx)
+      expectedToDate = periodTarget * (dayOfMonth / dim)
+    } else if (period === 'lastmonth' && Number(range.start.slice(0, 4)) === curYear) {
+      periodTarget = annual * monthShare(Number(range.start.slice(5, 7)) - 1)
+    } else if (period === 'ytd') {
+      periodTarget = annual
+      let cum = 0
+      for (let i = 0; i < curMonthIdx; i++) cum += monthShare(i)
+      cum += monthShare(curMonthIdx) * (dayOfMonth / dim)
+      expectedToDate = annual * cum
+    }
+
+    if (periodTarget !== null && annual > 0) {
+      // YTD net per location for the split card (from the daily cash view)
+      let perLocation: NonNullable<KpiPayload['budget']>['perLocation'] = null
+      if (location === 'all') {
+        const ytdByLoc = new Map<number, number>()
+        for (const row of salesDaily) {
+          if (row.sale_date >= `${curYear}-01-01`) {
+            ytdByLoc.set(row.location_id, (ytdByLoc.get(row.location_id) ?? 0) + Number(row.net))
+          }
+        }
+        perLocation = [...LOCATION_IDS].map(id => ({
+          locationId: id,
+          name: LOCATION_NAMES[id],
+          manager: LOCATION_MANAGERS[id],
+          annual: budgetMap[id] ?? 0,
+          netYtd: round2(ytdByLoc.get(id) ?? 0),
+        }))
+      }
+      budget = {
+        year: curYear,
+        annual,
+        periodTarget: Math.round(periodTarget),
+        expectedToDate: expectedToDate !== null ? Math.round(expectedToDate) : null,
+        approx: !hasSeasonality,
+        perLocation,
+      }
+    }
+  }
+
   // ---- sales chart series for the selected period ----
   let series: KpiSeries
   if (period === 'today') {
@@ -726,6 +796,7 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
     visits: { count: curVisits.visitCount, lyCount: lyVisitCount },
     newClients: { count: curVisits.newClients, lyCount: lyNew },
     goals,
+    budget,
     monthly,
     retention: {
       cohortMonth: cohort.label,

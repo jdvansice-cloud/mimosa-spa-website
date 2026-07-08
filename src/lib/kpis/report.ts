@@ -1,3 +1,4 @@
+import { getScheduleItems, getStaff } from '@/lib/booking/mindbody'
 import { panamaToday } from './sync'
 import {
   fetchAll,
@@ -272,6 +273,77 @@ export interface AgendaAppointment {
   locationId: number
 }
 
+export interface StaffAvailability {
+  staffId: number
+  staffName: string
+  /** Working windows in minutes from midnight (unavailabilities subtracted). */
+  blocks: Array<{ startMin: number; endMin: number }>
+}
+
+export interface AgendaDaySchedule {
+  appointments: AgendaAppointment[]
+  availability: StaffAvailability[]
+}
+
+function stampToMin(stamp: string): number {
+  const hm = stamp.replace(/Z$/, '').slice(11, 16)
+  return Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5))
+}
+
+/** Merge overlapping intervals, then subtract the `minus` intervals. */
+function netIntervals(
+  blocks: Array<{ startMin: number; endMin: number }>,
+  minus: Array<{ startMin: number; endMin: number }>
+): Array<{ startMin: number; endMin: number }> {
+  const merged = [...blocks]
+    .sort((a, b) => a.startMin - b.startMin)
+    .reduce<Array<{ startMin: number; endMin: number }>>((acc, b) => {
+      const last = acc[acc.length - 1]
+      if (last && b.startMin <= last.endMin) last.endMin = Math.max(last.endMin, b.endMin)
+      else acc.push({ ...b })
+      return acc
+    }, [])
+  let result = merged
+  for (const m of minus) {
+    result = result.flatMap(b => {
+      if (m.endMin <= b.startMin || m.startMin >= b.endMin) return [b]
+      const parts: Array<{ startMin: number; endMin: number }> = []
+      if (m.startMin > b.startMin) parts.push({ startMin: b.startMin, endMin: m.startMin })
+      if (m.endMin < b.endMin) parts.push({ startMin: m.endMin, endMin: b.endMin })
+      return parts
+    })
+  }
+  return result.filter(b => b.endMin > b.startMin)
+}
+
+/**
+ * Therapist working hours for one day, fetched live from Mindbody
+ * (small: 1 call). Returns [] if the call fails — the schedule still renders.
+ */
+async function getDayAvailability(date: string, location: KpiLocation): Promise<StaffAvailability[]> {
+  try {
+    const locationIds = location === 'all' ? [1, 2] : [location]
+    // scheduleitems only returns schedules when staffIds are passed explicitly
+    const staff = await getStaff()
+    const staffIds = staff.map(s => s.Id)
+    if (staffIds.length === 0) return []
+    const staffMembers = await getScheduleItems({ locationIds, staffIds, startDate: date, endDate: date })
+    return staffMembers
+      .map(m => ({
+        staffId: m.Id,
+        staffName: [m.FirstName, m.LastName].filter(Boolean).join(' ').trim(),
+        blocks: netIntervals(
+          (m.Availabilities ?? []).map(a => ({ startMin: stampToMin(a.StartDateTime), endMin: stampToMin(a.EndDateTime) })),
+          (m.Unavailabilities ?? []).map(u => ({ startMin: stampToMin(u.StartDateTime), endMin: stampToMin(u.EndDateTime) }))
+        ),
+      }))
+      .filter(a => a.staffName && a.blocks.length > 0)
+  } catch (err) {
+    console.error('getDayAvailability failed (rendering without):', err)
+    return []
+  }
+}
+
 interface AgendaDayApptRow {
   id: number
   start_datetime: string
@@ -284,10 +356,11 @@ interface AgendaDayApptRow {
   client_id: string | null
 }
 
-/** Appointments for one day (cancelled excluded), with client names, for the schedule view. */
-export async function getAgendaDay(date: string, location: KpiLocation): Promise<AgendaAppointment[]> {
+/** Appointments (cancelled excluded) + therapist availability for one day. */
+export async function getAgendaDay(date: string, location: KpiLocation): Promise<AgendaDaySchedule> {
   const supabase = serviceClient()
 
+  const availabilityPromise = getDayAvailability(date, location)
   const rows = await fetchAll<AgendaDayApptRow>((from, to) => {
     let q = supabase
       .from('mb_appointments')
@@ -313,7 +386,7 @@ export async function getAgendaDay(date: string, location: KpiLocation): Promise
     }
   }
 
-  return rows.map(r => {
+  const appointments = rows.map(r => {
     const start = r.start_datetime.slice(11, 16)
     const startMin = Number(start.slice(0, 2)) * 60 + Number(start.slice(3, 5))
     const durationMin = r.duration_min ?? (r.end_datetime
@@ -335,6 +408,8 @@ export async function getAgendaDay(date: string, location: KpiLocation): Promise
       locationId: r.location_id,
     }
   })
+
+  return { appointments, availability: await availabilityPromise }
 }
 
 interface SaleRow {

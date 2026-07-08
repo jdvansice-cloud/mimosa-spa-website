@@ -308,6 +308,39 @@ function KpisInner() {
                 {data.sales.saleCount.toLocaleString('en-US')} {t('usos')} · {t('promedio')} {money(data.sales.avgTicket)} {t('por uso')}
               </p>
             )}
+            {data.budget && (
+              <div className="mt-3 rounded-xl bg-white/70 border border-gold-200 px-3 py-2">
+                <div className="flex items-baseline justify-between gap-2 text-xs">
+                  <span className="text-warm-gray">
+                    {t('Presupuesto')} {data.budget.year}
+                    {data.period !== 'ytd' && <> · {MONTHS_LONG[lang][Number(data.range.start.slice(5, 7)) - 1]}</>}
+                    : <b className="text-dark tabular-nums">{money(data.budget.periodTarget)}</b>
+                    {data.budget.approx && <span className="text-[9px]"> ({t('aprox. 1/12')})</span>}
+                  </span>
+                  <b className="text-spa-green tabular-nums">{pct(data.sales.net / data.budget.periodTarget)}</b>
+                </div>
+                <div className="relative h-2 mt-1.5 rounded-full bg-beige overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-spa-green"
+                    style={{ width: `${Math.min(100, (100 * data.sales.net) / data.budget.periodTarget)}%` }}
+                  />
+                  {data.budget.expectedToDate !== null && (
+                    <div
+                      className="absolute top-0 bottom-0 w-[2px] bg-gold-600"
+                      style={{ left: `${Math.min(99, (100 * data.budget.expectedToDate) / data.budget.periodTarget)}%` }}
+                    />
+                  )}
+                </div>
+                {data.budget.expectedToDate !== null && data.budget.expectedToDate > 0 && (
+                  <p className="text-[10px] text-warm-gray mt-1 tabular-nums">
+                    {t('esperado a la fecha')}: {money(data.budget.expectedToDate)} · {t('ritmo')}:{' '}
+                    <b className={data.sales.net >= data.budget.expectedToDate ? 'text-spa-green' : 'text-red-700'}>
+                      {pct(data.sales.net / data.budget.expectedToDate)}
+                    </b>
+                  </p>
+                )}
+              </div>
+            )}
             <p className="text-[11px] text-warm-gray mt-3">{chartTitle(data)}</p>
             <DualLine series={data.sales.series} formatY={moneyCompact} formatValue={money} />
             <Legend curLabel={String(data.monthly.curYear)} prevLabel={String(data.monthly.prevYear)} />
@@ -472,6 +505,18 @@ function KpisInner() {
                     <div className="h-2 rounded-full bg-beige overflow-hidden">
                       <div className="h-full rounded-full bg-spa-green" style={{ width: `${s.sharePct}%` }} />
                     </div>
+                    {data.period === 'ytd' && (() => {
+                      const b = data.budget?.perLocation?.find(x => x.locationId === s.locationId)
+                      if (!b || b.annual <= 0) return null
+                      return (
+                        <p className="text-[10px] text-warm-gray mt-1 tabular-nums">
+                          {t('Presupuesto')} {data.budget!.year} ({b.manager}): {money(b.annual)} ·{' '}
+                          <b className={b.netYtd / b.annual >= (data.budget!.expectedToDate ?? 0) / data.budget!.annual ? 'text-spa-green' : 'text-dark'}>
+                            {pct(b.netYtd / b.annual)}
+                          </b>
+                        </p>
+                      )
+                    })()}
                   </div>
                 ))}
               </div>

@@ -37,6 +37,10 @@ const EN: Record<string, string> = {
   'sin datos de': 'no data from',
   'para comparar': 'to compare against',
   'Meta —': 'Goal —',
+  'Presupuesto': 'Budget',
+  'esperado a la fecha': 'expected to date',
+  'ritmo': 'pace',
+  'aprox. 1/12': 'approx. 1/12',
   'completo': 'full',
   'usos': 'redemptions',
   'promedio': 'avg',
@@ -128,6 +132,7 @@ const EN: Record<string, string> = {
   'canceladas': 'cancelled',
   'Sin citas este día.': 'No appointments this day.',
   'No se pudo cargar el día.': 'Could not load the day.',
+  'horario disponible': 'working hours',
   'sin llegar': 'not arrived', 'llegó': 'arrived', 'completada': 'completed',
 }
 

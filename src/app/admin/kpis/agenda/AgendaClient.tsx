@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
-import type { AgendaAppointment, AgendaMonth } from '@/lib/kpis/report'
+import type { AgendaAppointment, AgendaMonth, StaffAvailability } from '@/lib/kpis/report'
 import { BlackSpinner, CardBox, DeltaChip, Label, LoadingCard, deltaPct } from '../shared'
 import { LangProvider, LangToggle, MONTHS_LONG, WEEKDAY_LETTERS, formatDateLang, useLang, useT } from '../i18n'
 
@@ -56,7 +56,10 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-type DayState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; appointments: AgendaAppointment[] }
+type DayState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ready'; appointments: AgendaAppointment[]; availability: StaffAvailability[] }
 
 /** Block color by appointment status. */
 function statusClasses(status: string): string {
@@ -187,7 +190,7 @@ function AgendaInner() {
       const res = await fetch(`/api/admin/kpis/agenda/day?date=${date}&location=${l}`, { cache: 'no-store' })
       if (!res.ok) throw new Error()
       const body = await res.json()
-      setDayCache(prev => ({ ...prev, [date]: { status: 'ready', appointments: body.appointments } }))
+      setDayCache(prev => ({ ...prev, [date]: { status: 'ready', appointments: body.appointments, availability: body.availability ?? [] } }))
     } catch {
       setDayCache(prev => ({ ...prev, [date]: { status: 'error' } }))
     }
@@ -237,12 +240,16 @@ function AgendaInner() {
     const weekStart = mondayOf(selectedDate)
     const weekDays = Array.from({ length: 7 }, (_, i) => addDaysStr(weekStart, i))
     const appts = state?.status === 'ready' ? state.appointments : []
-    const staffNames = [...new Set(appts.map(a => a.staffName))].sort((a, b) => a.localeCompare(b, 'es'))
+    const availability = state?.status === 'ready' ? state.availability : []
+    const availByName = new Map(availability.map(a => [a.staffName, a.blocks]))
+    // Columns: everyone with an appointment OR on shift that day
+    const staffNames = [...new Set([...appts.map(a => a.staffName), ...availability.map(a => a.staffName)])]
+      .sort((a, b) => a.localeCompare(b, 'es'))
 
-    const mins = appts.map(a => a.startMin)
-    const ends = appts.map(a => a.startMin + a.durationMin)
-    const startHour = appts.length ? Math.min(8, Math.floor(Math.min(...mins) / 60)) : 8
-    const endHour = appts.length ? Math.max(20, Math.ceil(Math.max(...ends) / 60)) : 20
+    const mins = [...appts.map(a => a.startMin), ...availability.flatMap(a => a.blocks.map(b => b.startMin))]
+    const ends = [...appts.map(a => a.startMin + a.durationMin), ...availability.flatMap(a => a.blocks.map(b => b.endMin))]
+    const startHour = mins.length ? Math.min(8, Math.floor(Math.min(...mins) / 60)) : 8
+    const endHour = ends.length ? Math.max(20, Math.ceil(Math.max(...ends) / 60)) : 20
     const gridH = (endHour - startHour) * HOUR_PX
     const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i)
     const isFutureDay = selectedDate > today
@@ -302,7 +309,7 @@ function AgendaInner() {
         )}
 
         {state?.status === 'ready' && (
-          appts.length === 0 ? (
+          appts.length === 0 && availability.length === 0 ? (
             <CardBox><p className="text-sm text-warm-gray">{t('Sin citas este día.')}</p></CardBox>
           ) : (
             <CardBox className="p-0 overflow-hidden">
@@ -335,7 +342,17 @@ function AgendaInner() {
                       ))}
                     </div>
                     {staffNames.map(name => (
-                      <div key={name} className="w-28 shrink-0 relative border-l border-beige-200" style={{ height: gridH }}>
+                      <div key={name} className="w-28 shrink-0 relative border-l border-beige-200 bg-beige-100/50" style={{ height: gridH }}>
+                        {(availByName.get(name) ?? []).map((b, i) => (
+                          <div
+                            key={`av${i}`}
+                            className="absolute inset-x-0 bg-spa-green/10"
+                            style={{
+                              top: ((b.startMin - startHour * 60) / 60) * HOUR_PX,
+                              height: ((b.endMin - b.startMin) / 60) * HOUR_PX,
+                            }}
+                          />
+                        ))}
                         {hours.map(h => (
                           <div key={h} className="absolute inset-x-0 border-t border-beige-200/70" style={{ top: (h - startHour) * HOUR_PX }} />
                         ))}
@@ -380,6 +397,7 @@ function AgendaInner() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 px-3 py-2 border-t border-beige-200 text-[10px] text-warm-gray">
+                <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-spa-green/10 border border-spa-green/30 mr-1" />{t('horario disponible')}</span>
                 <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-white border border-beige-500 mr-1" />{t('sin llegar')}</span>
                 <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-gold-100 border border-gold-500 mr-1" />{t('llegó')}</span>
                 <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-spa-green/40 mr-1" />{t('completada')}</span>
