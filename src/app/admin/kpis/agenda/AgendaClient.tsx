@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { AgendaAppointment, AgendaMonth } from '@/lib/kpis/report'
-import { BlackSpinner, CardBox, DeltaChip, Label, LoadingCard, MONTHS_ES_LONG, deltaPct, formatDateEs } from '../shared'
+import { BlackSpinner, CardBox, DeltaChip, Label, LoadingCard, deltaPct } from '../shared'
+import { LangProvider, LangToggle, MONTHS_LONG, WEEKDAY_LETTERS, formatDateLang, useLang, useT } from '../i18n'
 
 // ===========================================
 // Agenda — calendario mensual con citas por día; al tocar un día se abre
@@ -19,7 +20,6 @@ const LOCATIONS: Array<{ key: LocationKey; label: string }> = [
   { key: '2', label: 'San Francisco' },
 ]
 
-const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 const MIN_MONTH = '2024-07'
 const HOUR_PX = 72
 // Blocks shorter than this render as if they lasted this long, so tiny
@@ -107,6 +107,17 @@ function layoutColumn(appts: AgendaAppointment[]): PlacedAppt[] {
 }
 
 export function AgendaClient() {
+  return (
+    <LangProvider>
+      <AgendaInner />
+    </LangProvider>
+  )
+}
+
+function AgendaInner() {
+  const { lang } = useLang()
+  const t = useT()
+  const WEEKDAYS = WEEKDAY_LETTERS[lang]
   const today = panamaToday()
   const maxMonth = shiftMonth(today.slice(0, 7), 2)
   const [month, setMonth] = useState(today.slice(0, 7))
@@ -208,7 +219,7 @@ export function AgendaClient() {
               : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
           }`}
         >
-          {l.label}
+          {t(l.label)}
         </button>
       ))}
     </div>
@@ -243,13 +254,13 @@ export function AgendaClient() {
             onClick={() => setSelectedDate(null)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-beige hover:bg-beige-300 text-dark text-sm font-medium"
           >
-            <ArrowLeft className="h-4 w-4" /> Mes
+            <ArrowLeft className="h-4 w-4" /> {t('Mes')}
           </button>
           <div>
-            <h1 className="text-xl font-display font-semibold text-dark capitalize leading-tight">{formatDateEs(selectedDate)}</h1>
+            <h1 className="text-xl font-display font-semibold text-dark capitalize leading-tight">{formatDateLang(selectedDate, lang)}</h1>
             <p className="text-xs text-warm-gray">
-              {appts.length} citas
-              {!isFutureDay && <> · {appts.filter(a => a.noShow).length} no-shows</>}
+              {appts.length} {t('citas')}
+              {!isFutureDay && <> · {appts.filter(a => a.noShow).length} {t('no-shows')}</>}
             </p>
           </div>
         </div>
@@ -287,12 +298,12 @@ export function AgendaClient() {
           <div className="bg-white border border-beige-400 rounded-2xl flex items-center justify-center h-60"><BlackSpinner /></div>
         )}
         {state?.status === 'error' && (
-          <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">No se pudo cargar el día.</div>
+          <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{t('No se pudo cargar el día.')}</div>
         )}
 
         {state?.status === 'ready' && (
           appts.length === 0 ? (
-            <CardBox><p className="text-sm text-warm-gray">Sin citas este día.</p></CardBox>
+            <CardBox><p className="text-sm text-warm-gray">{t('Sin citas este día.')}</p></CardBox>
           ) : (
             <CardBox className="p-0 overflow-hidden">
               <div className="overflow-x-auto">
@@ -369,9 +380,9 @@ export function AgendaClient() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 px-3 py-2 border-t border-beige-200 text-[10px] text-warm-gray">
-                <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-white border border-beige-500 mr-1" />sin llegar</span>
-                <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-gold-100 border border-gold-500 mr-1" />llegó</span>
-                <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-spa-green/40 mr-1" />completada</span>
+                <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-white border border-beige-500 mr-1" />{t('sin llegar')}</span>
+                <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-gold-100 border border-gold-500 mr-1" />{t('llegó')}</span>
+                <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-spa-green/40 mr-1" />{t('completada')}</span>
                 <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-red-200 border border-red-300 mr-1" />no-show</span>
               </div>
             </CardBox>
@@ -385,8 +396,11 @@ export function AgendaClient() {
   return (
     <div className="max-w-xl">
       <div className="mb-5">
-        <h1 className="text-3xl font-display font-semibold text-dark">Agenda</h1>
-        <p className="text-sm text-warm-gray mt-1">Toca un día para ver el horario por terapeuta</p>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-display font-semibold text-dark">{t('Agenda')}</h1>
+          <LangToggle />
+        </div>
+        <p className="text-sm text-warm-gray mt-1">{t('Toca un día para ver el horario por terapeuta')}</p>
       </div>
 
       {/* Sticky controls */}
@@ -395,16 +409,16 @@ export function AgendaClient() {
           <button
             onClick={() => setMonth(shiftMonth(month, -1))}
             disabled={month <= MIN_MONTH}
-            aria-label="Mes anterior"
+            aria-label={t('Mes anterior')}
             className="p-2 rounded-lg bg-white border border-beige-400 hover:bg-beige disabled:opacity-40"
           >
             <ChevronLeft className="h-4 w-4 text-dark" />
           </button>
-          <p className="text-base font-bold text-dark capitalize">{MONTHS_ES_LONG[m - 1]} {y}</p>
+          <p className="text-base font-bold text-dark capitalize">{MONTHS_LONG[lang][m - 1]} {y}</p>
           <button
             onClick={() => setMonth(shiftMonth(month, 1))}
             disabled={month >= maxMonth}
-            aria-label="Mes siguiente"
+            aria-label={t('Mes siguiente')}
             className="p-2 rounded-lg bg-white border border-beige-400 hover:bg-beige disabled:opacity-40"
           >
             <ChevronRight className="h-4 w-4 text-dark" />
@@ -425,24 +439,24 @@ export function AgendaClient() {
         <div className="space-y-4">
           {/* Month total — compared over the same dates, with the full LY month as goal */}
           <div className="rounded-2xl border border-gold-200 bg-gold-50 p-4">
-            <Label>Citas del mes</Label>
+            <Label>{t('Citas del mes')}</Label>
             <div className="flex items-baseline gap-3 flex-wrap mt-1">
               <span className="text-3xl font-bold text-dark tabular-nums">{data.totals.activeToDate.toLocaleString('en-US')}</span>
               <DeltaChip delta={deltaPct(data.totals.activeToDate, data.totals.lySameDates)} suffix={`vs ${lyYear}`} />
             </div>
             <p className="text-xs text-warm-gray mt-1">
               {data.totals.lySameDates > 0
-                ? `${data.totals.lySameDates.toLocaleString('en-US')} citas en las mismas fechas de ${lyYear}`
-                : `sin datos de ${lyYear} para comparar`}
+                ? `${data.totals.lySameDates.toLocaleString('en-US')} ${t('citas en las mismas fechas de')} ${lyYear}`
+                : `${t('sin datos de')} ${lyYear} ${t('para comparar')}`}
             </p>
             {data.totals.lyFullMonth > 0 && (
               <p className="text-xs text-warm-gray mt-0.5">
-                Meta — {MONTHS_ES_LONG[m - 1]} {lyYear} completo: <b className="text-dark">{data.totals.lyFullMonth.toLocaleString('en-US')}</b>
+                {t('Meta —')} {lang === 'es' ? `${MONTHS_LONG.es[m - 1]} ${lyYear} completo` : `full ${MONTHS_LONG.en[m - 1]} ${lyYear}`}: <b className="text-dark">{data.totals.lyFullMonth.toLocaleString('en-US')}</b>
               </p>
             )}
             {data.totals.futureBooked > 0 && (
               <p className="text-xs text-spa-green font-bold mt-0.5">
-                + {data.totals.futureBooked.toLocaleString('en-US')} reservas futuras este mes
+                + {data.totals.futureBooked.toLocaleString('en-US')} {t('reservas futuras este mes')}
               </p>
             )}
           </div>
@@ -478,13 +492,13 @@ export function AgendaClient() {
               })}
             </div>
             <div className="flex justify-between text-[10px] text-warm-gray mt-3">
-              <span>■ más intenso = más citas</span>
-              <span><span className="text-spa-green font-bold">verde</span> = reservas futuras</span>
+              <span>■ {t('más intenso = más citas')}</span>
+              <span><span className="text-spa-green font-bold">{t('verde')}</span> {t('= reservas futuras')}</span>
             </div>
           </CardBox>
 
           <p className="text-center text-xs text-warm-gray pb-4">
-            Hoy se actualiza al entrar y cada 5 min mientras la página esté abierta · reservas futuras ~60 días adelante
+            {t('Hoy se actualiza al entrar y cada 5 min mientras la página esté abierta · reservas futuras ~60 días adelante')}
           </p>
         </div>
       )}

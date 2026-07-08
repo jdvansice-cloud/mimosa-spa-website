@@ -5,8 +5,9 @@ import { RefreshCw, ChevronDown } from 'lucide-react'
 import type { KpiPayload, KpiPeriod, KpiSeries } from '@/lib/kpis/queries'
 import {
   CardBox, DeltaChip, DualLine, GOLD, GREEN, Label, Legend, LoadingCard,
-  MONTHS_ES_LONG, deltaPct, formatDateEs, money, moneyCompact, pct, pct1,
+  deltaPct, money, moneyCompact, pct, pct1,
 } from './shared'
+import { LangProvider, LangToggle, MONTHS_LONG, formatDateLang, useLang, useT } from './i18n'
 
 // ===========================================
 // KPI dashboard — mobile-first, all money net of ITBMS.
@@ -30,10 +31,7 @@ const LOCATIONS: Array<{ key: LocationKey; label: string }> = [
   { key: '2', label: 'San Francisco' },
 ]
 
-function cohortLabel(month: string): string {
-  const [y, m] = month.split('-').map(Number)
-  return `${MONTHS_ES_LONG[m - 1]} ${y}`
-}
+
 
 /** Grouped monthly bars, current year vs previous year. */
 function YearBars({ cur, prev, labels }: { cur: Array<number | null>; prev: Array<number | null>; labels: string[] }) {
@@ -74,6 +72,7 @@ function ExpandableStat({
   open: boolean
   onToggle: () => void
 }) {
+  const t = useT()
   return (
     <div className={`bg-white border rounded-2xl transition-colors ${open ? 'border-spa-green col-span-2' : 'border-beige-400'}`}>
       <button
@@ -91,7 +90,7 @@ function ExpandableStat({
       </button>
       {open && (
         <div className="px-4 pb-4">
-          <p className="text-[11px] text-warm-gray">Por mes · {curYear} vs {prevYear}</p>
+          <p className="text-[11px] text-warm-gray">{t('Por mes')} · {curYear} vs {prevYear}</p>
           <DualLine
             series={{ unit: 'month', labels: monthLabels, current: chart.cur, previous: chart.prev }}
             formatY={chartFormat}
@@ -106,6 +105,16 @@ function ExpandableStat({
 // ---------- main component ----------
 
 export function KpisClient() {
+  return (
+    <LangProvider>
+      <KpisInner />
+    </LangProvider>
+  )
+}
+
+function KpisInner() {
+  const { lang } = useLang()
+  const t = useT()
   const [period, setPeriod] = useState<KpiPeriod>('mtd')
   const [location, setLocation] = useState<LocationKey>('all')
   const [data, setData] = useState<KpiPayload | null>(null)
@@ -164,20 +173,21 @@ export function KpisClient() {
 
   const lyYear = data ? data.lyRange.start.slice(0, 4) : ''
   const vsLabel = `vs ${lyYear}`
+  const monthName = (start: string) => MONTHS_LONG[lang][Number(start.slice(5, 7)) - 1]
   const goalPeriodLabel = data
     ? data.period === 'ytd'
-      ? `${lyYear} completo`
-      : `${MONTHS_ES_LONG[Number(data.range.start.slice(5, 7)) - 1]} ${lyYear} completo`
+      ? lang === 'es' ? `${lyYear} completo` : `full ${lyYear}`
+      : lang === 'es' ? `${monthName(data.range.start)} ${lyYear} completo` : `full ${monthName(data.range.start)} ${lyYear}`
     : ''
-  const goalLine = (v: string | null) => (data?.goals && v ? `Meta — ${goalPeriodLabel}: ${v}` : null)
+  const goalLine = (v: string | null) => (data?.goals && v ? `${t('Meta —')} ${goalPeriodLabel}: ${v}` : null)
 
   function chartTitle(d: KpiPayload): string {
-    if (d.period === 'today') return `Ayer vs ${d.lyRange.start}`
+    if (d.period === 'today') return `${t('Ayer')} vs ${d.lyRange.start}`
     if (d.period === 'mtd' || d.period === 'lastmonth') {
-      const m = MONTHS_ES_LONG[Number(d.range.start.slice(5, 7)) - 1]
-      return `${m} ${d.range.start.slice(0, 4)} vs ${m} ${lyYear} · por día`
+      const m = monthName(d.range.start)
+      return `${m} ${d.range.start.slice(0, 4)} vs ${m} ${lyYear} · ${t('por día')}`
     }
-    return `${d.range.start.slice(0, 4)} vs ${lyYear} · por mes`
+    return `${d.range.start.slice(0, 4)} vs ${lyYear} · ${t('por mes')}`
   }
 
   return (
@@ -185,13 +195,16 @@ export function KpisClient() {
       {/* Header */}
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-display font-semibold text-dark">KPIs</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-display font-semibold text-dark">KPIs</h1>
+            <LangToggle />
+          </div>
           <p className="text-sm text-warm-gray mt-1">
-            Ventas netas sin ITBMS, método de caja · comparado con las mismas fechas del año pasado
+            {t('Ventas netas sin ITBMS, método de caja · comparado con las mismas fechas del año pasado')}
           </p>
           {data && (
-            <p className="text-xs font-bold text-spa-green mt-1 capitalize">
-              Solo días completos — datos hasta el {formatDateEs(data.asOf)}
+            <p className="text-xs font-bold text-spa-green mt-1">
+              {t('Solo días completos — datos hasta el')} {formatDateLang(data.asOf, lang)}
             </p>
           )}
         </div>
@@ -203,7 +216,7 @@ export function KpisClient() {
           {syncing
             ? <span className="inline-block h-4 w-4 rounded-full border-2 border-dark border-t-transparent animate-spin motion-reduce:animate-none" />
             : <RefreshCw className="h-4 w-4" />}
-          {syncing ? 'Sincronizando…' : 'Actualizar'}
+          {syncing ? t('Sincronizando…') : t('Actualizar')}
         </button>
       </div>
 
@@ -221,7 +234,7 @@ export function KpisClient() {
                 : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
             }`}
           >
-            {p.label}
+            {t(p.label)}
           </button>
         ))}
       </div>
@@ -237,7 +250,7 @@ export function KpisClient() {
                 : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
             }`}
           >
-            {l.label}
+            {t(l.label)}
           </button>
         ))}
         <button
@@ -249,7 +262,7 @@ export function KpisClient() {
               : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
           }`}
         >
-          Uso de gift cards
+          {t('Uso de gift cards')}
         </button>
       </div>
       </div>
@@ -275,26 +288,24 @@ export function KpisClient() {
         <div className="space-y-4">
           {/* Net sales hero + dual-year chart for the selected period */}
           <div className="rounded-2xl border border-gold-200 bg-gold-50 p-4">
-            <Label>{gcMode ? 'Gift cards redimidas · neto sin ITBMS' : 'Ventas netas · sin ITBMS'}</Label>
+            <Label>{t(gcMode ? 'Gift cards redimidas · neto sin ITBMS' : 'Ventas netas · sin ITBMS')}</Label>
             <div className="flex items-baseline gap-3 flex-wrap mt-1">
               <span className="text-4xl font-bold text-dark tabular-nums">{money(data.sales.net)}</span>
               <DeltaChip delta={deltaPct(data.sales.net, data.sales.lyNet)} suffix={vsLabel} />
             </div>
             <p className="text-xs text-warm-gray mt-1">
               {data.sales.lyNet > 0
-                ? `${money(data.sales.lyNet)} en las mismas fechas de ${lyYear} (${data.lyRange.start.slice(5)} → ${data.lyRange.end.slice(5)})`
-                : `sin datos de ${lyYear} para comparar`}
+                ? `${money(data.sales.lyNet)} ${t('en las mismas fechas de')} ${lyYear} (${data.lyRange.start.slice(5)} → ${data.lyRange.end.slice(5)})`
+                : `${t('sin datos de')} ${lyYear} ${t('para comparar')}`}
             </p>
             {data.sales.lyPeriodTotal !== null && data.sales.lyPeriodTotal > 0 && (
               <p className="text-xs text-warm-gray mt-0.5">
-                Meta — {data.period === 'ytd'
-                  ? `${lyYear} completo`
-                  : `${MONTHS_ES_LONG[Number(data.range.start.slice(5, 7)) - 1]} ${lyYear} completo`}: <b className="text-dark">{money(data.sales.lyPeriodTotal)}</b>
+                {t('Meta —')} {goalPeriodLabel}: <b className="text-dark">{money(data.sales.lyPeriodTotal)}</b>
               </p>
             )}
             {gcMode && (
               <p className="text-xs text-warm-gray mt-0.5">
-                {data.sales.saleCount.toLocaleString('en-US')} usos · promedio {money(data.sales.avgTicket)} por uso
+                {data.sales.saleCount.toLocaleString('en-US')} {t('usos')} · {t('promedio')} {money(data.sales.avgTicket)} {t('por uso')}
               </p>
             )}
             <p className="text-[11px] text-warm-gray mt-3">{chartTitle(data)}</p>
@@ -305,7 +316,7 @@ export function KpisClient() {
           {/* Stat grid — each card expands into a monthly comparison chart */}
           {!gcMode && <div className="grid grid-cols-2 gap-3">
             <ExpandableStat
-              label="Ticket promedio"
+              label={t('Ticket promedio')}
               value={money(data.sales.avgTicket)}
               chip={<DeltaChip delta={deltaPct(data.sales.avgTicket, data.sales.lyAvgTicket)} suffix={vsLabel} />}
               goal={goalLine(data.goals ? money(data.goals.avgTicket) : null)}
@@ -318,7 +329,7 @@ export function KpisClient() {
               onToggle={() => setOpenStat(openStat === 'ticket' ? null : 'ticket')}
             />
             <ExpandableStat
-              label="Visitas"
+              label={t('Visitas')}
               value={data.visits.count.toLocaleString('en-US')}
               chip={<DeltaChip delta={deltaPct(data.visits.count, data.visits.lyCount)} suffix={vsLabel} />}
               goal={goalLine(data.goals ? data.goals.visits.toLocaleString('en-US') : null)}
@@ -331,7 +342,7 @@ export function KpisClient() {
               onToggle={() => setOpenStat(openStat === 'visitas' ? null : 'visitas')}
             />
             <ExpandableStat
-              label="Primeras visitas"
+              label={t('Primeras visitas')}
               value={String(data.newClients.count)}
               chip={<DeltaChip delta={deltaPct(data.newClients.count, data.newClients.lyCount)} suffix={vsLabel} />}
               goal={goalLine(data.goals ? String(data.goals.newClients) : null)}
@@ -344,7 +355,7 @@ export function KpisClient() {
               onToggle={() => setOpenStat(openStat === 'nuevos' ? null : 'nuevos')}
             />
             <ExpandableStat
-              label="No-shows + canc. tardías"
+              label={t('No-shows + canc. tardías')}
               value={pct(data.noShow.rate)}
               chip={
                 <DeltaChip
@@ -367,48 +378,48 @@ export function KpisClient() {
           {/* Retention / pre-booked / acquisition don't apply to gift-card usage */}
           {!gcMode && <>
           <CardBox>
-            <Label>Retención · clientes nuevos</Label>
+            <Label>{t('Retención · clientes nuevos')}</Label>
             {data.retention.cohortSize > 0 ? (
               <>
                 <p className="text-sm text-dark mt-2">
-                  De <b className="text-spa-green">{data.retention.cohortSize} clientes nuevos</b> en {cohortLabel(data.retention.cohortMonth)},{' '}
-                  <b className="text-spa-green">{data.retention.returned} regresaron</b> dentro de 90 días.
+                  {t('De')} <b className="text-spa-green">{data.retention.cohortSize} {t('clientes nuevos')}</b> {t('en')} {MONTHS_LONG[lang][Number(data.retention.cohortMonth.slice(5, 7)) - 1]} {data.retention.cohortMonth.slice(0, 4)},{' '}
+                  <b className="text-spa-green">{data.retention.returned} {t('regresaron')}</b> {t('dentro de 90 días.')}
                 </p>
                 <div className="flex items-center gap-4 mt-2">
                   <span className="font-display font-semibold text-5xl text-spa-green leading-none">{pct(data.retention.rate)}</span>
                   <span className="text-xs text-warm-gray leading-relaxed">
                     {data.retention.lyRate !== null
-                      ? <>mismo cohorte de {lyYear}: {pct(data.retention.lyRate)} ({data.retention.lyReturned} de {data.retention.lyCohortSize})</>
-                      : <>sin cohorte comparable en {lyYear}</>}
+                      ? <>{t('mismo cohorte de')} {lyYear}: {pct(data.retention.lyRate)} ({data.retention.lyReturned} {t('de')} {data.retention.lyCohortSize})</>
+                      : <>{t('sin cohorte comparable en')} {lyYear}</>}
                   </span>
                 </div>
                 <div className="flex gap-2 mt-3">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">Industria 35%</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${data.retention.rate !== null && data.retention.rate >= 0.5 ? 'bg-green-100 text-green-800' : 'bg-beige text-warm-gray'}`}>Meta 50%</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">{t('Industria 35%')}</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${data.retention.rate !== null && data.retention.rate >= 0.5 ? 'bg-green-100 text-green-800' : 'bg-beige text-warm-gray'}`}>{t('Meta 50%')}</span>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-warm-gray mt-2">Aún no hay datos del cohorte.</p>
+              <p className="text-sm text-warm-gray mt-2">{t('Aún no hay datos del cohorte.')}</p>
             )}
           </CardBox>
 
           {/* Pre-booked */}
           <CardBox>
-            <Label>Ya reagendados</Label>
+            <Label>{t('Ya reagendados')}</Label>
             <div className="flex items-center gap-4 mt-2">
               <span className="font-display font-semibold text-5xl text-spa-green leading-none">{pct(data.prebooked.rate)}</span>
               <span className="text-xs text-warm-gray leading-relaxed">
-                {data.prebooked.withNext} de {data.prebooked.clientsSeen} clientes del período<br />ya tienen su próxima cita
+                {data.prebooked.withNext} {t('de')} {data.prebooked.clientsSeen} {t('clientes del período')}<br />{t('ya tienen su próxima cita')}
               </span>
             </div>
             <div className="flex gap-2 mt-3">
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">Meta ≥50%</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">{t('Meta ≥50%')}</span>
             </div>
           </CardBox>
 
           {/* Acquisition: monthly bars, both years */}
           <CardBox>
-            <Label>Adquisición · primeras visitas por mes</Label>
+            <Label>{t('Adquisición · primeras visitas por mes')}</Label>
             <YearBars cur={data.monthly.newClients.cur} prev={data.monthly.newClients.prev} labels={data.monthly.labels} />
             <Legend curLabel={String(data.monthly.curYear)} prevLabel={String(data.monthly.prevYear)} />
           </CardBox>
@@ -416,14 +427,14 @@ export function KpisClient() {
 
           {/* Revenue mix */}
           <CardBox>
-            <Label>Mezcla de ingresos</Label>
+            <Label>{t('Mezcla de ingresos')}</Label>
             {(() => {
               const { service, retail, giftcard } = data.sales.mix
               const total = service + retail + giftcard
               const segs = [
-                { label: 'Servicios', value: service, cls: 'bg-spa-green' },
-                { label: 'Retail', value: retail, cls: 'bg-spa-green/50' },
-                { label: 'Gift cards', value: giftcard, cls: 'bg-gold-600' },
+                { label: t('Servicios'), value: service, cls: 'bg-spa-green' },
+                { label: t('Retail'), value: retail, cls: 'bg-spa-green/50' },
+                { label: t('Gift cards'), value: giftcard, cls: 'bg-gold-600' },
               ]
               return total > 0 ? (
                 <>
@@ -442,7 +453,7 @@ export function KpisClient() {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-warm-gray mt-2">Sin ventas en el período.</p>
+                <p className="text-sm text-warm-gray mt-2">{t('Sin ventas en el período.')}</p>
               )
             })()}
           </CardBox>
@@ -450,7 +461,7 @@ export function KpisClient() {
           {/* Location split */}
           {data.locationSplit && (
             <CardBox>
-              <Label>Por sucursal</Label>
+              <Label>{t('Por sucursal')}</Label>
               <div className="space-y-3 mt-3">
                 {data.locationSplit.map(s => (
                   <div key={s.locationId}>
@@ -469,9 +480,9 @@ export function KpisClient() {
 
           {/* Top services */}
           <CardBox>
-            <Label>{gcMode ? 'Top servicios pagados con gift card' : 'Top servicios · neto del período'}</Label>
+            <Label>{t(gcMode ? 'Top servicios pagados con gift card' : 'Top servicios · neto del período')}</Label>
             <div className="mt-2 divide-y divide-dashed divide-beige-400">
-              {data.topServices.length === 0 && <p className="text-sm text-warm-gray py-2">Sin servicios en el período.</p>}
+              {data.topServices.length === 0 && <p className="text-sm text-warm-gray py-2">{t('Sin servicios en el período.')}</p>}
               {data.topServices.slice(0, showAllServices ? 25 : 5).map(s => (
                 <div key={s.name} className="flex justify-between items-center gap-3 py-2 text-sm">
                   <span className="text-dark">{s.name} <span className="text-warm-gray">×{s.count}</span></span>
@@ -485,24 +496,24 @@ export function KpisClient() {
                 aria-expanded={showAllServices}
                 className="w-full mt-2 py-2 rounded-lg bg-beige hover:bg-beige-300 text-dark text-xs font-bold transition-colors"
               >
-                {showAllServices ? 'Ver top 5' : 'Ver top 25'}
+                {t(showAllServices ? 'Ver top 5' : 'Ver top 25')}
               </button>
             )}
           </CardBox>
 
           {/* Top clients */}
           <CardBox>
-            <Label>{gcMode ? 'Top clientes · gift cards redimidas' : 'Top clientes · neto del período'}</Label>
+            <Label>{t(gcMode ? 'Top clientes · gift cards redimidas' : 'Top clientes · neto del período')}</Label>
             {data.topClients.length === 0 ? (
-              <p className="text-sm text-warm-gray py-2 mt-2">Sin clientes en el período.</p>
+              <p className="text-sm text-warm-gray py-2 mt-2">{t('Sin clientes en el período.')}</p>
             ) : (
               <>
                 <table className="w-full mt-2 text-sm">
                   <thead>
                     <tr className="text-[10px] font-bold tracking-wider uppercase text-warm-gray">
-                      <th className="text-left font-bold py-1.5">Cliente</th>
-                      <th className="text-right font-bold py-1.5">Visitas</th>
-                      <th className="text-right font-bold py-1.5">Neto</th>
+                      <th className="text-left font-bold py-1.5">{t('Cliente')}</th>
+                      <th className="text-right font-bold py-1.5">{t('Visitas')}</th>
+                      <th className="text-right font-bold py-1.5">{t('Neto')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-dashed divide-beige-400">
@@ -523,7 +534,7 @@ export function KpisClient() {
                     aria-expanded={showAllClients}
                     className="w-full mt-2 py-2 rounded-lg bg-beige hover:bg-beige-300 text-dark text-xs font-bold transition-colors"
                   >
-                    {showAllClients ? 'Ver top 10' : 'Ver top 25'}
+                    {t(showAllClients ? 'Ver top 10' : 'Ver top 25')}
                   </button>
                 )}
               </>
@@ -532,23 +543,23 @@ export function KpisClient() {
 
           {/* Staff */}
           {!gcMode && <CardBox>
-            <Label>Top 10 terapeutas · neto atribuido</Label>
+            <Label>{t('Top 10 terapeutas · neto atribuido')}</Label>
             {data.staff.length === 0 ? (
-              <p className="text-sm text-warm-gray py-2 mt-2">Sin visitas en el período.</p>
+              <p className="text-sm text-warm-gray py-2 mt-2">{t('Sin visitas en el período.')}</p>
             ) : (
               <table className="w-full mt-2 text-sm">
                 <thead>
                   <tr className="text-[10px] font-bold tracking-wider uppercase text-warm-gray">
-                    <th className="text-left font-bold py-1.5">Terapeuta</th>
-                    <th className="text-right font-bold py-1.5">Visitas</th>
-                    <th className="text-right font-bold py-1.5">Horas</th>
-                    <th className="text-right font-bold py-1.5">Neto</th>
+                    <th className="text-left font-bold py-1.5">{t('Terapeuta')}</th>
+                    <th className="text-right font-bold py-1.5">{t('Visitas')}</th>
+                    <th className="text-right font-bold py-1.5">{t('Horas')}</th>
+                    <th className="text-right font-bold py-1.5">{t('Neto')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dashed divide-beige-400">
                   {data.staff.map(s => (
                     <tr key={s.name} className={s.name === 'Sin asignar' || s.name === 'Resto del equipo' ? 'text-warm-gray' : 'text-dark'}>
-                      <td className="py-2 pr-2">{s.name}</td>
+                      <td className="py-2 pr-2">{t(s.name)}</td>
                       <td className="py-2 text-right tabular-nums">{s.visits}</td>
                       <td className="py-2 text-right tabular-nums">{s.hours}</td>
                       <td className="py-2 text-right tabular-nums font-bold text-dark">{money(s.net)}</td>
@@ -558,13 +569,13 @@ export function KpisClient() {
               </table>
             )}
             <p className="text-[10px] text-warm-gray mt-2">
-              Ingreso de servicios atribuido a la terapeuta de la cita del mismo día del cliente.
-              &ldquo;Resto del equipo&rdquo; incluye a las demás terapeutas y ventas sin cita asociada.
+              {t('Ingreso de servicios atribuido a la terapeuta de la cita del mismo día del cliente.')}{' '}
+              {t('“Resto del equipo” incluye a las demás terapeutas y ventas sin cita asociada.')}
             </p>
           </CardBox>}
 
           <p className="text-center text-xs text-warm-gray pb-4">
-            {data.range.start} → {data.range.end} · comparado con {data.lyRange.start} → {data.lyRange.end}
+            {data.range.start} → {data.range.end} · {t('comparado con')} {data.lyRange.start} → {data.lyRange.end}
           </p>
         </div>
       )}

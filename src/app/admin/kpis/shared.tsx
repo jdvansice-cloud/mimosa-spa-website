@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { KpiSeries } from '@/lib/kpis/queries'
+import { useT } from './i18n'
 
 // Shared UI pieces for the KPIs section (dashboard + sales report).
 
@@ -47,11 +48,12 @@ export function formatDateEs(date: string): string {
 }
 
 export function BlackSpinner() {
+  const t = useT()
   return (
     <span
       className="inline-block h-6 w-6 rounded-full border-2 border-dark border-t-transparent animate-spin motion-reduce:animate-none"
       role="status"
-      aria-label="Cargando"
+      aria-label={t('Cargando')}
     />
   )
 }
@@ -65,7 +67,8 @@ export function LoadingCard({ tall = false }: { tall?: boolean }) {
 }
 
 export function DeltaChip({ delta, invert = false, suffix }: { delta: number | null; invert?: boolean; suffix?: string }) {
-  if (delta === null) return <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">sin dato {suffix}</span>
+  const t = useT()
+  if (delta === null) return <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">{t('sin dato')} {suffix}</span>
   const up = delta >= 0
   const good = invert ? !up : up
   return (
@@ -102,6 +105,7 @@ export function DualLine({
   /** Formatter for the tap readout (defaults to formatY). */
   formatValue?: (v: number) => string
 }) {
+  const t = useT()
   const [sel, setSel] = useState<number | null>(null)
   const fmtV = formatValue ?? formatY
   const W = 320, H = 110, PAD_X = 6, PAD_TOP = 14, PAD_BOT = 16
@@ -131,7 +135,7 @@ export function DualLine({
   }
 
   const selLabel = sel !== null
-    ? series.unit === 'day' ? `Día ${series.labels[sel]}` : series.labels[sel]
+    ? series.unit === 'day' ? `${t('Día')} ${series.labels[sel]}` : t(series.labels[sel])
     : null
   const selCur = sel !== null ? series.current[sel] : null
   const selPrev = sel !== null ? series.previous[sel] : null
@@ -164,13 +168,13 @@ export function DualLine({
         )}
         {series.labels.map((l, i) =>
           i % every === 0 ? (
-            <text key={i} x={PAD_X + i * stepX} y={H - 4} fontSize="8" fill="#8A8478" textAnchor="middle">{l}</text>
+            <text key={i} x={PAD_X + i * stepX} y={H - 4} fontSize="8" fill="#8A8478" textAnchor="middle">{t(l)}</text>
           ) : null
         )}
       </svg>
       <p className="text-[11px] tabular-nums text-warm-gray h-4 mt-0.5">
         {sel === null ? (
-          <span className="italic">Toca el gráfico para ver valores</span>
+          <span className="italic">{t('Toca el gráfico para ver valores')}</span>
         ) : (
           <>
             <b className="text-dark">{selLabel}</b>

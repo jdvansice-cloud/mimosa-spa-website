@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -72,7 +73,30 @@ export function AdminSidebar({
   const router = useRouter()
   const { user, signOut, isLoading } = useAuthStore()
 
-  const navItems = isMobileManager
+  // Safety net: the server layout may have rendered before the session
+  // existed (e.g. right after login), so verify the role client-side too.
+  const [clientMM, setClientMM] = useState<boolean | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { getClient } = await import('@/lib/supabase/client')
+        const supabase = getClient()
+        const { data: { user: u } } = await supabase.auth.getUser()
+        if (!u) return
+        const { data } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', u.id)
+          .single() as { data: { role: string } | null }
+        if (!cancelled && data) setClientMM(data.role === 'mobile_manager')
+      } catch { /* keep the server-resolved value */ }
+    })()
+    return () => { cancelled = true }
+  }, [user?.id])
+
+  const effectiveMM = clientMM ?? isMobileManager
+  const navItems = effectiveMM
     ? fullNavItems.filter(item => item.section === 'Mobile Manager')
     : isLocationRestricted
       ? locationAdminNavItems

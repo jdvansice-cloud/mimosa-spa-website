@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { MONTHS_ES_LONG } from '../shared'
+import { MONTHS_LONG, WEEKDAY_LETTERS, useLang, useT } from '../i18n'
 
 // Single-calendar date-range picker (flight-search style):
 // first tap = start, second tap = end; tapping before the start restarts.
 
-const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 const MIN_DATE = '2024-07-01' // start of synced history
 
 function ymd(y: number, m1: number, d: number): string {
@@ -25,6 +24,8 @@ export function RangeCalendar({
   onApply: (range: { start: string; end: string }) => void
   onClose: () => void
 }) {
+  const { lang } = useLang()
+  const t = useT()
   const [viewY, setViewY] = useState(Number(initial.end.slice(0, 4)))
   const [viewM, setViewM] = useState(Number(initial.end.slice(5, 7))) // 1-12
   const [selStart, setSelStart] = useState<string | null>(initial.start)
@@ -62,17 +63,17 @@ export function RangeCalendar({
   return (
     <div className="bg-white border border-beige-400 rounded-2xl p-4 shadow-lg w-full max-w-sm">
       <div className="flex items-center justify-between mb-2">
-        <button onClick={() => nav(-1)} aria-label="Mes anterior" className="p-1.5 rounded-lg hover:bg-beige">
+        <button onClick={() => nav(-1)} aria-label={t('Mes anterior')} className="p-1.5 rounded-lg hover:bg-beige">
           <ChevronLeft className="h-4 w-4 text-dark" />
         </button>
-        <p className="text-sm font-bold text-dark capitalize">{MONTHS_ES_LONG[viewM - 1]} {viewY}</p>
-        <button onClick={() => nav(1)} aria-label="Mes siguiente" className="p-1.5 rounded-lg hover:bg-beige">
+        <p className="text-sm font-bold text-dark capitalize">{MONTHS_LONG[lang][viewM - 1]} {viewY}</p>
+        <button onClick={() => nav(1)} aria-label={t('Mes siguiente')} className="p-1.5 rounded-lg hover:bg-beige">
           <ChevronRight className="h-4 w-4 text-dark" />
         </button>
       </div>
 
       <div className="grid grid-cols-7 text-center text-[10px] font-bold text-warm-gray mb-1">
-        {WEEKDAYS.map((d, i) => <span key={i} className="py-1">{d}</span>)}
+        {WEEKDAY_LETTERS[lang].map((d, i) => <span key={i} className="py-1">{d}</span>)}
       </div>
       <div className="grid grid-cols-7 text-center text-sm">
         {cells.map((date, i) => {
@@ -105,20 +106,20 @@ export function RangeCalendar({
       </div>
 
       <p className="text-xs text-warm-gray mt-2">
-        {selStart && !selEnd && <>Desde <b className="text-dark">{selStart}</b> — elige la fecha final</>}
-        {selStart && selEnd && <>Del <b className="text-dark">{selStart}</b> al <b className="text-dark">{selEnd}</b></>}
+        {selStart && !selEnd && <>{t('Desde')} <b className="text-dark">{selStart}</b> — {t('elige la fecha final')}</>}
+        {selStart && selEnd && <>{t('Del')} <b className="text-dark">{selStart}</b> {t('al')} <b className="text-dark">{selEnd}</b></>}
       </p>
 
       <div className="flex justify-end gap-2 mt-3">
         <button onClick={onClose} className="px-3 py-1.5 rounded-lg text-sm font-medium text-warm-gray hover:bg-beige">
-          Cancelar
+          {t('Cancelar')}
         </button>
         <button
           disabled={!selStart || !selEnd}
           onClick={() => selStart && selEnd && onApply({ start: selStart, end: selEnd })}
           className="px-4 py-1.5 rounded-lg text-sm font-bold bg-spa-green text-white disabled:opacity-40"
         >
-          Aplicar
+          {t('Aplicar')}
         </button>
       </div>
     </div>
