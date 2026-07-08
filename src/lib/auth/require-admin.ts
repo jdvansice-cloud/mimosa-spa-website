@@ -15,6 +15,18 @@ import { createClient } from '@/lib/supabase/server'
  *   if (denied) return denied
  */
 export async function requireAdmin(): Promise<NextResponse | null> {
+  return requireRole(['admin'])
+}
+
+/**
+ * Access check for the Mobile Manager section (/admin/kpis*): full admins
+ * and mobile_manager users are both allowed.
+ */
+export async function requireKpisAccess(): Promise<NextResponse | null> {
+  return requireRole(['admin', 'mobile_manager'])
+}
+
+async function requireRole(roles: string[]): Promise<NextResponse | null> {
   let supabase
   try {
     supabase = await createClient()
@@ -33,7 +45,7 @@ export async function requireAdmin(): Promise<NextResponse | null> {
     .eq('id', user.id)
     .single() as { data: { role: string } | null }
 
-  if (!profile || profile.role !== 'admin') {
+  if (!profile || !roles.includes(profile.role)) {
     return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
   }
 

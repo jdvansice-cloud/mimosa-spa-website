@@ -4,6 +4,11 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Stray lockfiles in $HOME make Turbopack infer the wrong workspace root
+  // in dev (API routes 404). Pin it to this repo.
+  turbopack: {
+    root: import.meta.dirname,
+  },
   images: {
     remotePatterns: [
       {

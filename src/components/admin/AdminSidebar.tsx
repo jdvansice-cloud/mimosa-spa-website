@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
+  BarChart3,
+  Receipt,
+  CalendarDays,
   Tag,
   Image,
   ImagePlus,
@@ -21,8 +24,19 @@ import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
 import { useAuthStore } from '@/lib/auth/store'
 
-const fullNavItems = [
+interface NavItem {
+  href: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  section?: string
+}
+
+const fullNavItems: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  // Mobile Manager section
+  { href: '/admin/kpis', label: 'KPIs', icon: BarChart3, section: 'Mobile Manager' },
+  { href: '/admin/kpis/ventas', label: 'Reporte de Ventas', icon: Receipt, section: 'Mobile Manager' },
+  { href: '/admin/kpis/agenda', label: 'Agenda', icon: CalendarDays, section: 'Mobile Manager' },
   { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },
   { href: '/admin/giftcards', label: 'Gift Cards', icon: Gift },
@@ -33,7 +47,7 @@ const fullNavItems = [
 ]
 
 // Limited nav for location-restricted admins.
-const locationAdminNavItems = [
+const locationAdminNavItems: NavItem[] = [
   { href: '/admin/giftcards/issue', label: 'Emitir Gift Card', icon: Plus },
   { href: '/admin/giftcards/issued', label: 'Emitidas', icon: List },
 ]
@@ -41,21 +55,33 @@ const locationAdminNavItems = [
 interface AdminSidebarProps {
   isLocationRestricted?: boolean
   locationName?: string | null
+  isMobileManager?: boolean
+  /** Mobile drawer state — ignored on md+ where the sidebar is always visible. */
+  isOpen?: boolean
+  onClose?: () => void
 }
 
 export function AdminSidebar({
   isLocationRestricted = false,
   locationName = null,
+  isMobileManager = false,
+  isOpen = false,
+  onClose,
 }: AdminSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut, isLoading } = useAuthStore()
 
-  const navItems = isLocationRestricted ? locationAdminNavItems : fullNavItems
+  const navItems = isMobileManager
+    ? fullNavItems.filter(item => item.section === 'Mobile Manager')
+    : isLocationRestricted
+      ? locationAdminNavItems
+      : fullNavItems
 
   const isActive = (href: string) => {
-    if (href === '/admin') {
-      return pathname === '/admin'
+    // Exact-match hubs so sub-pages don't light up the parent entry too
+    if (href === '/admin' || href === '/admin/kpis') {
+      return pathname === href
     }
     return pathname.startsWith(href)
   }
@@ -66,7 +92,14 @@ export function AdminSidebar({
   }
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-dark text-cream flex flex-col">
+    <aside
+      className={cn(
+        'fixed left-0 top-0 bottom-0 z-40 w-64 bg-dark text-cream flex flex-col',
+        'transform transition-transform duration-200 motion-reduce:transition-none',
+        'lg:translate-x-0',
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      )}
+    >
       {/* Logo */}
       <div className="p-6 border-b border-cream/10">
         <Logo theme="dark" size="md" />
@@ -79,16 +112,28 @@ export function AdminSidebar({
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => {
+        {navItems.map((item, i) => {
           const Icon = item.icon
           const active = isActive(item.href)
+          const section = item.section
+          const prevSection = navItems[i - 1]?.section
+          const startsSection = section && section !== prevSection
+          const endsSection = !section && prevSection
 
           return (
+            <div key={item.href}>
+              {startsSection && (
+                <p className="px-4 pt-4 pb-1 text-[10px] font-bold tracking-[0.14em] uppercase text-gold/80">
+                  {section}
+                </p>
+              )}
+              {endsSection && <div className="h-3" />}
             <Link
-              key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                section ? 'pl-6' : '',
                 active
                   ? 'bg-gold text-dark'
                   : 'text-cream/70 hover:bg-cream/10 hover:text-cream'
@@ -97,6 +142,7 @@ export function AdminSidebar({
               <Icon className="h-5 w-5" />
               <span className="font-medium">{item.label}</span>
             </Link>
+            </div>
           )
         })}
       </nav>

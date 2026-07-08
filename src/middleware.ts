@@ -68,8 +68,17 @@ export async function middleware(request: NextRequest) {
       .eq('id', user.id)
       .single() as { data: { role: string } | null; error: unknown }
 
-    if (!roleRow || roleRow.role !== 'admin') {
+    if (!roleRow || (roleRow.role !== 'admin' && roleRow.role !== 'mobile_manager')) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
+
+    // mobile_manager: access limited to the Mobile Manager section
+    if (roleRow.role === 'mobile_manager') {
+      const inKpis = pathname === '/admin/kpis' || pathname.startsWith('/admin/kpis/')
+      if (!inKpis) {
+        return NextResponse.redirect(new URL('/admin/kpis', request.url))
+      }
+      return response
     }
 
     // Optionally load gift_card_location_config_id (introduced in 20260516).

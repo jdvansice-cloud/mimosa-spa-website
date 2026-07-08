@@ -26,15 +26,27 @@ export const metadata = {
   },
 }
 
-/** Resolve whether the logged-in user is location-restricted (gift-card-only admin). */
+/** Resolve the logged-in user's admin scope (location-restricted or Mobile-Manager-only). */
 async function fetchAdminScope(): Promise<{
   isLocationRestricted: boolean
   locationName: string | null
+  isMobileManager: boolean
 }> {
+  const none = { isLocationRestricted: false, locationName: null, isMobileManager: false }
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { isLocationRestricted: false, locationName: null }
+    if (!user) return none
+
+    const { data: roleRow } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single<{ role: string }>()
+
+    if (roleRow?.role === 'mobile_manager') {
+      return { ...none, isMobileManager: true }
+    }
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -43,7 +55,7 @@ async function fetchAdminScope(): Promise<{
       .single<{ gift_card_location_config_id: string | null }>()
 
     if (!profile?.gift_card_location_config_id) {
-      return { isLocationRestricted: false, locationName: null }
+      return none
     }
 
     const { data: config } = await supabase
@@ -55,9 +67,10 @@ async function fetchAdminScope(): Promise<{
     return {
       isLocationRestricted: true,
       locationName: config?.location_name ?? null,
+      isMobileManager: false,
     }
   } catch {
-    return { isLocationRestricted: false, locationName: null }
+    return none
   }
 }
 
@@ -79,6 +92,7 @@ export default async function AdminLayout({
         <AdminLayoutClient
           isLocationRestricted={scope.isLocationRestricted}
           locationName={scope.locationName}
+          isMobileManager={scope.isMobileManager}
         >
           {children}
         </AdminLayoutClient>
