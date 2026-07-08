@@ -315,7 +315,6 @@ function KpisInner() {
                     {t('Presupuesto')} {data.budget.year}
                     {data.period !== 'ytd' && <> · {MONTHS_LONG[lang][Number(data.range.start.slice(5, 7)) - 1]}</>}
                     : <b className="text-dark tabular-nums">{money(data.budget.periodTarget)}</b>
-                    {data.budget.approx && <span className="text-[9px]"> ({t('aprox. 1/12')})</span>}
                   </span>
                   <b className="text-spa-green tabular-nums">{pct(data.sales.net / data.budget.periodTarget)}</b>
                 </div>
