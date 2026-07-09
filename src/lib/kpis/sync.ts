@@ -191,6 +191,7 @@ interface MbAppointment {
   ClientId: string | null
   SessionTypeId: number | null
   FirstAppointment: boolean
+  StaffRequested: boolean
 }
 
 interface AppointmentsResponse {
@@ -228,6 +229,7 @@ export async function syncAppointments(startDate: string, endDate: string) {
           client_id: a.ClientId != null ? String(a.ClientId) : null,
           session_type_id: a.SessionTypeId ?? null,
           first_appointment: a.FirstAppointment ?? false,
+          staff_requested: a.StaffRequested ?? false,
           synced_at: new Date().toISOString(),
         })
       }
