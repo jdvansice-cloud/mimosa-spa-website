@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft, LayoutTemplate } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
 import {
-  GiftCardLabel,
+  GiftCardLabelPreview,
   LABEL_WIDTH_IN,
   LABEL_HEIGHT_IN,
   LabelCard,
@@ -51,21 +51,8 @@ function Preview({ title, subtitle, card }: { title: string; subtitle: string; c
             Vista previa a {PREVIEW_SCALE}× tamaño real ({LABEL_WIDTH_IN}&quot; × {LABEL_HEIGHT_IN}&quot;)
           </p>
         </div>
-        <div
-          style={{
-            width: `${LABEL_WIDTH_IN * PREVIEW_SCALE}in`,
-            height: `${LABEL_HEIGHT_IN * PREVIEW_SCALE}in`,
-          }}
-        >
-          <div
-            style={{
-              transform: `scale(${PREVIEW_SCALE})`,
-              transformOrigin: 'top left',
-              border: '1px dashed #c8b78c',
-            }}
-          >
-            <GiftCardLabel card={card} />
-          </div>
+        <div className="inline-block" style={{ border: '1px dashed #c8b78c' }}>
+          <GiftCardLabelPreview card={card} scale={PREVIEW_SCALE} />
         </div>
       </CardContent>
     </Card>
@@ -89,7 +76,8 @@ export default function AdminGiftCardTemplatesPage() {
           <h1 className="text-3xl font-display font-semibold text-dark">Plantilla de Etiqueta</h1>
         </div>
         <p className="text-warm-gray">
-          Plantilla única para etiquetas de 2.25&quot; × 1.25&quot; (Star Micronics TSP143IIIU). Datos de muestra.
+          Plantilla única para etiquetas de 3&quot; × 2&quot; con marca negra — Star Micronics TSP143 vía QZ Tray
+          (bitmap a 203 dpi, área imprimible 72 mm). Datos de muestra.
         </p>
       </div>
 
@@ -107,7 +95,7 @@ export default function AdminGiftCardTemplatesPage() {
       </div>
 
       <div className="mt-8 text-sm text-warm-gray max-w-2xl">
-        Edita <code className="font-mono">src/components/admin/giftcards/labels/GiftCardLabel.tsx</code>
+        Edita <code className="font-mono">src/components/admin/giftcards/labels/renderLabelCanvas.ts</code>
         {' '}para cambiar el diseño. Los datos de cada Gift Card emitida se renderizan en este formato.
       </div>
     </div>

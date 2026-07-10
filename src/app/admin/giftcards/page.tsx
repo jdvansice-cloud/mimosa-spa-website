@@ -19,7 +19,7 @@ const tiles = [
     href: '/admin/giftcards/templates',
     icon: LayoutTemplate,
     title: 'Plantilla de Etiqueta',
-    description: 'Vista previa de la plantilla de impresión 2.25" × 1.25" con datos de muestra.',
+    description: 'Vista previa de la plantilla de impresión 3" × 2" con datos de muestra.',
   },
   {
     href: '/admin/giftcards/config',

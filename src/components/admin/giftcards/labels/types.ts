@@ -1,13 +1,17 @@
 // Shared types for thermal-label templates.
 //
-// Physical label: 2.25" wide × 1.25" tall, adhered to the back of a
-// 3.25" × 2.2" gift card. Printed on a Star Micronics TSP143IIIU (203 dpi).
+// Physical media: 3" × 2" die-cut labels on an 80 mm roll, separated by a
+// black mark on the liner. Printed on a Star Micronics TSP143 (203 dpi) with
+// the black-mark sensor enabled and the auto-cutter OFF — the printer feeds
+// to the next mark after each label. The TSP143 can only print across the
+// middle 72 mm (2.835") of the roll, so the design canvas below is that
+// printable area; the driver centers it on the label.
 //
 // Keep templates as pure functions of `LabelCard` so tweaking copy / layout
 // is a single-file edit.
 
-export const LABEL_WIDTH_IN = 2.25
-export const LABEL_HEIGHT_IN = 1.25
+export const LABEL_WIDTH_IN = 2.835 // 72 mm — TSP143 printable width
+export const LABEL_HEIGHT_IN = 2 // 50.8 mm — die-cut label height (black-mark pitch)
 
 export interface LabelCard {
   serial: string
