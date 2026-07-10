@@ -9,7 +9,7 @@ import {
   GiftCardLabelPreview,
   renderLabelCanvas,
   LABEL_WIDTH_IN,
-  LABEL_HEIGHT_IN,
+  LABEL_PITCH_IN,
   LabelCard,
   formatLabelMoney,
 } from '@/components/admin/giftcards/labels'
@@ -231,7 +231,7 @@ export default function GiftCardPrintPage() {
 
       <style jsx global>{`
         @page {
-          size: ${LABEL_WIDTH_IN}in ${LABEL_HEIGHT_IN}in;
+          size: ${LABEL_WIDTH_IN}in ${LABEL_PITCH_IN}in;
           margin: 0;
         }
         .print-only {

@@ -11,7 +11,12 @@
 // is a single-file edit.
 
 export const LABEL_WIDTH_IN = 2.835 // 72 mm — TSP143 printable width
-export const LABEL_HEIGHT_IN = 2 // 50.8 mm — die-cut label height (black-mark pitch)
+export const LABEL_HEIGHT_IN = 2 // 50.8 mm — die-cut label height (printed area)
+// Label pitch: top of one label to top of the next (label + gap), measured
+// on the roll. The TSP143III has NO black-mark sensor, so each print must
+// advance exactly one pitch; the print page height uses this, not the
+// label height. Staff aligns the roll once when loading.
+export const LABEL_PITCH_IN = 52.5 / 25.4 // 52.5 mm measured 2026-07-10
 
 export interface LabelCard {
   serial: string

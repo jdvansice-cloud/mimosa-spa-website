@@ -8,7 +8,7 @@
 // requests are signed and QZ prints silently. Without them QZ shows its
 // "Allow" prompt once — staff checks "Remember this decision".
 
-import { LABEL_WIDTH_IN, LABEL_HEIGHT_IN } from '@/components/admin/giftcards/labels/types'
+import { LABEL_WIDTH_IN, LABEL_PITCH_IN } from '@/components/admin/giftcards/labels/types'
 
 const PRINTER_STORAGE_KEY = 'giftcard-qz-printer'
 const DEFAULT_PRINTER_HINT = 'TSP143'
@@ -135,9 +135,11 @@ export async function printLabelCanvas(canvas: HTMLCanvasElement): Promise<strin
   await connect(qz)
   const printer = await resolvePrinter(qz)
 
+  // Page height = label PITCH (52.5 mm), not label height: the TSP143III has
+  // no mark sensor, so the page length is what advances the roll one label.
   const config = qz.configs.create(printer, {
     units: 'in',
-    size: { width: LABEL_WIDTH_IN, height: LABEL_HEIGHT_IN },
+    size: { width: LABEL_WIDTH_IN, height: LABEL_PITCH_IN },
     margins: 0,
     density: 203,
     colorType: 'blackwhite',
