@@ -31,18 +31,24 @@ async function getQz(): Promise<Qz> {
   if (!qzPromise) {
     qzPromise = import('qz-tray').then((mod) => {
       const qz = mod.default ?? mod
-      qz.security.setCertificatePromise((resolve: (v?: string) => void, reject: (v?: string) => void) => {
+      // When signing isn't configured (endpoints 404), fall back to
+      // anonymous requests by RESOLVING empty — a rejected signature
+      // promise makes qz-tray.js abort every call before it is sent.
+      qz.security.setCertificatePromise((resolve: (v?: string) => void) => {
         fetch('/api/admin/qz/cert')
-          .then((r) => (r.ok ? r.text().then(resolve) : reject('QZ signing not configured')))
-          .catch(() => reject('QZ cert unavailable'))
+          .then((r) => (r.ok ? r.text().then(resolve) : resolve(undefined)))
+          .catch(() => resolve(undefined))
       })
       qz.security.setSignatureAlgorithm('SHA512')
-      qz.security.setSignaturePromise((toSign: string) =>
-        fetch('/api/admin/qz/sign', { method: 'POST', body: toSign }).then((r) => {
-          if (!r.ok) throw new Error('QZ signing not configured')
-          return r.text()
-        })
-      )
+      // NOTE: qz-tray 2.2.x requires the resolver-factory form here — despite
+      // its typings, returning a Promise directly throws "Promise resolver
+      // #<Promise> is not a function" inside qz-tray.js.
+      qz.security.setSignaturePromise((toSign: string) => (resolve: (v?: string) => void) => {
+        fetch('/api/admin/qz/sign', { method: 'POST', body: toSign })
+          .then((r) => (r.ok ? r.text() : ''))
+          .then(resolve)
+          .catch(() => resolve(''))
+      })
       return qz
     })
   }
