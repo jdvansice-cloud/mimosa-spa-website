@@ -58,7 +58,7 @@ async function getQz(): Promise<Qz> {
 async function connect(qz: Qz) {
   if (qz.websocket.isActive()) return
   try {
-    await qz.websocket.connect({ retries: 1, delay: 1 })
+    await qz.websocket.connect({ retries: 3, delay: 1 })
   } catch {
     throw new QzError(
       'connect',
@@ -103,6 +103,14 @@ async function resolvePrinter(qz: Qz): Promise<string> {
   try {
     return (await qz.printers.find(DEFAULT_PRINTER_HINT)) as string
   } catch {
+    // The Star is the system default at the front desk — same fallback the
+    // wash-fold-oms POS uses before giving up.
+    try {
+      const def = (await qz.printers.getDefault()) as string
+      if (def) return def
+    } catch {
+      // no default printer either — fall through to the picker
+    }
     let all: string[] = []
     try {
       const found = await qz.printers.find()
