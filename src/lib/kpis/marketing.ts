@@ -80,7 +80,13 @@ function fetchEvents(supabase: Supabase, start: string, end: string): Promise<Ev
 
 /** utm_source wins; otherwise referrer host; otherwise direct. */
 function channelOf(e: EventRow): string {
-  if (e.utm_source) return e.utm_source.toLowerCase()
+  if (e.utm_source) {
+    const s = e.utm_source.toLowerCase()
+    if (s === 'ig') return 'instagram'
+    if (s === 'fb') return 'facebook'
+    if (s === 'wa') return 'whatsapp'
+    return s
+  }
   if (e.referrer) {
     try {
       const host = new URL(e.referrer).hostname.replace(/^www\./, '')
