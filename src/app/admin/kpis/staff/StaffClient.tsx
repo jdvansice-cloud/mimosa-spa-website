@@ -188,14 +188,22 @@ function StaffInner() {
           {/* Team summary */}
           <CardBox>
             <Label>{t('Equipo')}</Label>
-            <div className="flex flex-wrap gap-x-6 gap-y-1 mt-2 text-sm text-dark tabular-nums">
-              <span><b>{data.members.length}</b> {t('terapeutas')}</span>
-              <span><b>{data.team.hours.toLocaleString('en-US')}</b> {t('horas')}</span>
-              <span><b>{data.team.visits.toLocaleString('en-US')}</b> {t('visitas')}</span>
-              <span><b>{money(data.team.net)}</b> {t('neto')}</span>
-              <span><b>{money(data.team.tips)}</b> {t('propinas')}</span>
-              <span><b>{pct(data.team.requestedPct)}</b> {t('solicitadas')}</span>
-              <span><b>{money(data.team.cabinaNet)}</b> {t('venta cabina')} · <b>{pct(data.team.cabinaAttach)}</b> {t('de las visitas')}</span>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-4 gap-y-3 mt-3">
+              {[
+                { v: String(data.members.length), l: t('terapeutas') },
+                { v: data.team.hours.toLocaleString('en-US'), l: t('horas') },
+                { v: data.team.visits.toLocaleString('en-US'), l: t('visitas') },
+                { v: money(data.team.net), l: t('neto') },
+                { v: money(data.team.tips), l: t('propinas') },
+                { v: pct(data.team.requestedPct), l: t('solicitadas') },
+                { v: money(data.team.cabinaNet), l: t('venta cabina') },
+                { v: pct(data.team.cabinaAttach), l: `${t('venta cabina')} / ${t('visitas')}` },
+              ].map(s => (
+                <div key={s.l}>
+                  <p className="text-base font-bold text-dark tabular-nums leading-tight">{s.v}</p>
+                  <p className="text-[11px] text-warm-gray leading-tight">{s.l}</p>
+                </div>
+              ))}
             </div>
           </CardBox>
 
