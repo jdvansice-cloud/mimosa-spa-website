@@ -21,6 +21,7 @@ import {
   Award,
   Plus,
   List,
+  Megaphone,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
@@ -40,6 +41,7 @@ const fullNavItems: NavItem[] = [
   { href: '/admin/kpis/ventas', label: 'Reporte de Ventas', icon: Receipt, section: 'Mobile Manager' },
   { href: '/admin/kpis/agenda', label: 'Agenda', icon: CalendarDays, section: 'Mobile Manager' },
   { href: '/admin/kpis/staff', label: 'Staff', icon: Users, section: 'Mobile Manager' },
+  { href: '/admin/kpis/marketing', label: 'Marketing', icon: Megaphone, section: 'Mobile Manager' },
   { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },
   { href: '/admin/giftcards', label: 'Gift Cards', icon: Gift },

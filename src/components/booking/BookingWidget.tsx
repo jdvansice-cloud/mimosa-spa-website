@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useBookingStore, selectCurrentStepNumber } from '@/lib/booking/store'
+import { track } from '@/lib/track'
 import { StepProgress } from './shared/StepProgress'
 import { FloatingCart } from './shared/FloatingCart'
 import { ClientSelector } from './shared/ClientSelector'
@@ -43,6 +44,24 @@ export function BookingWidget() {
   const stepNumber = useBookingStore(selectCurrentStepNumber)
   const [isSticky, setIsSticky] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
+
+  // Booking funnel: one first-party event per step reached (dedup per session
+  // handled at query time via distinct session_id).
+  const selectedLocation = useBookingStore(state => state.selectedLocation)
+  const selectedServices = useBookingStore(state => state.selectedServices)
+  const trackedSteps = useRef(new Set<string>())
+  useEffect(() => {
+    if (trackedSteps.current.has(currentStep)) return
+    trackedSteps.current.add(currentStep)
+    const event = currentStep === 'success' ? 'booking_completed' : `booking_step_${currentStep}`
+    track(event, {
+      locationId: selectedLocation?.Id,
+      meta: {
+        services: selectedServices.map(s => s.Name).slice(0, 5),
+        service_count: selectedServices.length,
+      },
+    })
+  }, [currentStep, selectedLocation, selectedServices])
 
   // Intersection Observer for sticky header
   useEffect(() => {
