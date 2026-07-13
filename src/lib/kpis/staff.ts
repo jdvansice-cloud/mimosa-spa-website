@@ -40,6 +40,13 @@ export interface StaffMemberKpis {
   availableHours: number | null
   utilizationPct: number | null
   topServices: Array<{ name: string; count: number }>
+  /** "Ventas en Cabina" — add-ons the therapist sold during the service (Mindbody category −14). */
+  cabinaNet: number
+  lyCabinaNet: number
+  cabinaCount: number
+  /** cabina items sold ÷ visits — the up-sell attach rate. */
+  cabinaAttach: number | null
+  topCabina: Array<{ name: string; count: number }>
 }
 
 export interface StaffKpisPayload {
@@ -48,7 +55,16 @@ export interface StaffKpisPayload {
   asOf: string
   range: { start: string; end: string }
   lyRange: { start: string; end: string }
-  team: { hours: number; visits: number; net: number; tips: number; requestedPct: number | null }
+  team: {
+    hours: number
+    visits: number
+    net: number
+    tips: number
+    requestedPct: number | null
+    cabinaNet: number
+    cabinaCount: number
+    cabinaAttach: number | null
+  }
   members: StaffMemberKpis[] // net desc
 }
 
@@ -69,10 +85,14 @@ interface ApptRow {
   staff_requested: boolean
 }
 
+/** Mindbody treatment category "ventas en Cabina" — items sold in the cabin during the service. */
+const CABINA_CATEGORY_ID = -14
+
 interface ItemRow {
   sale_id: number
   description: string | null
   bucket: string
+  category_id: number | null
   net_amount: number
   returned: boolean
   sale: {
@@ -101,7 +121,7 @@ function fetchItems(supabase: Supabase, start: string, end: string, location: Kp
   return fetchAll<ItemRow>((from, to) => {
     let q = supabase
       .from('mb_sale_items')
-      .select('sale_id,line_no,description,bucket,net_amount,returned,sale:mb_sales!inner(sale_date,location_id,client_id,gc_paid,comp_paid,total_paid)')
+      .select('sale_id,line_no,description,bucket,category_id,net_amount,returned,sale:mb_sales!inner(sale_date,location_id,client_id,gc_paid,comp_paid,total_paid)')
       .gte('sale.sale_date', start)
       .lte('sale.sale_date', end)
     if (location !== 'all') q = q.eq('sale.location_id', location)
@@ -138,6 +158,9 @@ interface Attribution {
   net: Map<string, number>
   tips: Map<string, number>
   services: Map<string, Map<string, number>> // staff → service name → count
+  cabinaNet: Map<string, number>
+  cabinaCount: Map<string, number>
+  cabinaItems: Map<string, Map<string, number>> // staff → cabina item → count
 }
 
 /** Attribute service revenue and tips to the therapist of the client's same-day appointment. */
@@ -152,6 +175,9 @@ function attribute(items: ItemRow[], appts: ApptRow[]): Attribution {
   const net = new Map<string, number>()
   const tips = new Map<string, number>()
   const services = new Map<string, Map<string, number>>()
+  const cabinaNet = new Map<string, number>()
+  const cabinaCount = new Map<string, number>()
+  const cabinaItems = new Map<string, Map<string, number>>()
   for (const it of items) {
     if (it.returned || !it.sale.client_id) continue
     const staff = staffByClientDate.get(`${it.sale.client_id}|${it.sale.sale_date}|${it.sale.location_id}`)
@@ -169,8 +195,16 @@ function attribute(items: ItemRow[], appts: ApptRow[]): Attribution {
     } else {
       net.set(staff, (net.get(staff) ?? 0) + amount)
     }
+    if (it.bucket !== 'tip' && it.category_id === CABINA_CATEGORY_ID) {
+      cabinaNet.set(staff, (cabinaNet.get(staff) ?? 0) + amount)
+      cabinaCount.set(staff, (cabinaCount.get(staff) ?? 0) + 1)
+      const name = (it.description || 'Venta en cabina').trim()
+      const byName = cabinaItems.get(staff) ?? new Map<string, number>()
+      byName.set(name, (byName.get(name) ?? 0) + 1)
+      cabinaItems.set(staff, byName)
+    }
   }
-  return { net, tips, services }
+  return { net, tips, services, cabinaNet, cabinaCount, cabinaItems }
 }
 
 /** Scheduled hours per staff for short ranges (≤62 days), live from Mindbody. */
@@ -302,12 +336,21 @@ export async function getStaffKpis(period: KpiPeriod, location: KpiLocation): Pr
           .sort((a, b) => b[1] - a[1])
           .slice(0, 3)
           .map(([n, count]) => ({ name: n, count })),
+        cabinaNet: round2(cur.cabinaNet.get(name) ?? 0),
+        lyCabinaNet: round2(ly.cabinaNet.get(name) ?? 0),
+        cabinaCount: cur.cabinaCount.get(name) ?? 0,
+        cabinaAttach: e.visits > 0 ? (cur.cabinaCount.get(name) ?? 0) / e.visits : null,
+        topCabina: [...(cur.cabinaItems.get(name) ?? new Map<string, number>()).entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([n, count]) => ({ name: n, count })),
       }
     })
     .sort((a, b) => b.net - a.net)
 
   const teamVisits = members.reduce((s, m) => s + m.visits, 0)
   const teamRequested = members.reduce((s, m) => s + (m.requestedPct ?? 0) * m.visits, 0)
+  const teamCabinaCount = members.reduce((s, m) => s + m.cabinaCount, 0)
 
   return {
     period,
@@ -321,6 +364,9 @@ export async function getStaffKpis(period: KpiPeriod, location: KpiLocation): Pr
       net: round2(members.reduce((s, m) => s + m.net, 0)),
       tips: round2(members.reduce((s, m) => s + m.tips, 0)),
       requestedPct: teamVisits > 0 ? teamRequested / teamVisits : null,
+      cabinaNet: round2(members.reduce((s, m) => s + m.cabinaNet, 0)),
+      cabinaCount: teamCabinaCount,
+      cabinaAttach: teamVisits > 0 ? teamCabinaCount / teamVisits : null,
     },
     members,
   }

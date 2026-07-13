@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowUpDown, Award, Clock, HandCoins } from 'lucide-react'
+import { ArrowUpDown, Award, Clock, HandCoins, ShoppingBag } from 'lucide-react'
 import type { StaffKpisPayload, StaffMemberKpis } from '@/lib/kpis/staff'
 import type { KpiPeriod } from '@/lib/kpis/queries'
 import { CardBox, DeltaChip, Label, LoadingCard, deltaPct, money, pct } from '../shared'
@@ -13,7 +13,7 @@ import { LangProvider, LangToggle, formatDateLang, useLang, useT } from '../i18n
 // ===========================================
 
 type LocationKey = 'all' | '1' | '2'
-type SortKey = 'net' | 'hours' | 'visits' | 'tips' | 'requestedPct' | 'repeatRate'
+type SortKey = 'net' | 'hours' | 'visits' | 'tips' | 'cabinaNet' | 'requestedPct' | 'repeatRate'
 
 const PERIODS: Array<{ key: KpiPeriod; label: string }> = [
   { key: 'mtd', label: 'Mes' },
@@ -78,6 +78,7 @@ function StaffInner() {
         requested: [...eligible].sort((a, b) => (b.requestedPct ?? -1) - (a.requestedPct ?? -1))[0],
         tipped: [...eligible].sort((a, b) => (b.tipRate ?? -1) - (a.tipRate ?? -1))[0],
         hours: [...eligible].sort((a, b) => b.hours - a.hours)[0],
+        cabina: [...eligible].sort((a, b) => b.cabinaNet - a.cabinaNet)[0],
       }
     : null
 
@@ -143,14 +144,14 @@ function StaffInner() {
 
       {loading || !data ? (
         <div className="space-y-4" aria-busy="true">
-          <div className="grid grid-cols-3 gap-3"><LoadingCard /><LoadingCard /><LoadingCard /></div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3"><LoadingCard /><LoadingCard /><LoadingCard /><LoadingCard /></div>
           <LoadingCard tall />
         </div>
       ) : (
         <div className="space-y-4">
           {/* Podium */}
           {podium && (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="rounded-2xl border border-gold-200 bg-gold-50 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-gold-700">
                   <Award className="h-3.5 w-3.5" />{t('Más solicitada')}
@@ -172,6 +173,15 @@ function StaffInner() {
                 <p className="text-sm font-bold text-dark mt-1 leading-tight">{podium.hours.name.split(' ')[0]}</p>
                 <p className="text-xs text-warm-gray tabular-nums">{podium.hours.hours} h</p>
               </div>
+              <div className="rounded-2xl border border-gold-200 bg-gold-50 p-3">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-gold-700">
+                  <ShoppingBag className="h-3.5 w-3.5" />{t('Venta cabina')}
+                </div>
+                <p className="text-sm font-bold text-dark mt-1 leading-tight">{podium.cabina.cabinaNet > 0 ? podium.cabina.name.split(' ')[0] : '—'}</p>
+                <p className="text-xs text-warm-gray tabular-nums">
+                  {podium.cabina.cabinaNet > 0 ? `${money(podium.cabina.cabinaNet)} · ${podium.cabina.cabinaCount} ${t('extras')}` : t('sin ventas')}
+                </p>
+              </div>
             </div>
           )}
 
@@ -185,13 +195,14 @@ function StaffInner() {
               <span><b>{money(data.team.net)}</b> {t('neto')}</span>
               <span><b>{money(data.team.tips)}</b> {t('propinas')}</span>
               <span><b>{pct(data.team.requestedPct)}</b> {t('solicitadas')}</span>
+              <span><b>{money(data.team.cabinaNet)}</b> {t('venta cabina')} · <b>{pct(data.team.cabinaAttach)}</b> {t('de las visitas')}</span>
             </div>
           </CardBox>
 
           {/* Sortable table */}
           <CardBox className="p-0 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[640px]">
+              <table className="w-full text-sm min-w-[720px]">
                 <thead>
                   <tr className="text-[10px] text-left border-b border-beige-300 bg-beige-100/60">
                     <th className="py-1.5 pl-4 font-bold uppercase tracking-wider text-warm-gray">{t('Terapeuta')}</th>
@@ -199,6 +210,7 @@ function StaffInner() {
                     {th('visits', t('Visitas'), 'text-right')}
                     {th('net', t('Neto'), 'text-right')}
                     {th('tips', t('Propinas'), 'text-right')}
+                    {th('cabinaNet', t('Cabina'), 'text-right')}
                     {th('requestedPct', t('Solicitada'), 'text-right')}
                     {th('repeatRate', t('Fidelidad'), 'text-right pr-4')}
                   </tr>
@@ -217,7 +229,7 @@ function StaffInner() {
               </table>
             </div>
             <p className="text-[10px] text-warm-gray px-4 py-2 border-t border-beige-200">
-              {t('Neto y propinas atribuidos por la cita del mismo día del cliente · Solicitada = el cliente pidió a esa terapeuta · Fidelidad = clientes de hace 3–6 meses que volvieron con ella en 90 días (mín. 5)')}
+              {t('Neto y propinas atribuidos por la cita del mismo día del cliente · Cabina = extras de la categoría “ventas en Cabina” vendidos durante el servicio · Solicitada = el cliente pidió a esa terapeuta · Fidelidad = clientes de hace 3–6 meses que volvieron con ella en 90 días (mín. 5)')}
             </p>
           </CardBox>
         </div>
@@ -239,12 +251,13 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
         <td className="py-2.5 text-right tabular-nums">{m.visits}</td>
         <td className="py-2.5 text-right tabular-nums font-bold text-dark">{money(m.net)}</td>
         <td className="py-2.5 text-right tabular-nums">{money(m.tips)}</td>
+        <td className="py-2.5 text-right tabular-nums">{m.cabinaNet > 0 ? money(m.cabinaNet) : '—'}</td>
         <td className="py-2.5 text-right tabular-nums">{pct(m.requestedPct)}</td>
         <td className="py-2.5 pr-4 text-right tabular-nums">{pct(m.repeatRate)}</td>
       </tr>
       {open && (
         <tr className="bg-beige-100/60">
-          <td colSpan={7} className="px-4 py-3">
+          <td colSpan={8} className="px-4 py-3">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
               <span className="flex items-center gap-1.5">
                 <DeltaChip delta={deltaPct(m.net, m.lyNet)} suffix={`${t('neto')} vs ${lyYear}`} />
@@ -266,10 +279,21 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
               {m.repeatRate !== null && (
                 <span className="text-warm-gray tabular-nums">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b> ({t('cohorte')} {m.repeatCohortSize})</span>
               )}
+              {m.cabinaCount > 0 && (
+                <span className="text-warm-gray tabular-nums">
+                  {t('venta cabina')}: <b className="text-dark">{money(m.cabinaNet)}</b> · {m.cabinaCount} {t('extras')} · <b className="text-dark">{pct(m.cabinaAttach)}</b> {t('de sus visitas')}
+                  {m.lyCabinaNet > 0 && <> · {lyYear}: {money(m.lyCabinaNet)}</>}
+                </span>
+              )}
             </div>
             {m.topServices.length > 0 && (
               <p className="text-xs text-warm-gray mt-2">
                 {t('Top servicios')}: {m.topServices.map(s => `${s.name} ×${s.count}`).join(' · ')}
+              </p>
+            )}
+            {m.topCabina.length > 0 && (
+              <p className="text-xs text-warm-gray mt-1">
+                {t('Top venta cabina')}: {m.topCabina.map(s => `${s.name} ×${s.count}`).join(' · ')}
               </p>
             )}
           </td>
