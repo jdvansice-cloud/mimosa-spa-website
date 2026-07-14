@@ -9,6 +9,14 @@ const nextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  // Branded short links for social bios (UTM-tagged for the Marketing page)
+  async redirects() {
+    return [
+      { source: '/ig', destination: '/?utm_source=instagram&utm_medium=bio', permanent: false },
+      { source: '/fb', destination: '/?utm_source=facebook&utm_medium=bio', permanent: false },
+      { source: '/wa', destination: '/?utm_source=whatsapp&utm_medium=chat', permanent: false },
+    ]
+  },
   images: {
     remotePatterns: [
       {
