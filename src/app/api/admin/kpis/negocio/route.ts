@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const month = searchParams.get('month')
-  if (month && !/^\d{4}-\d{2}-01$/.test(month)) {
+  if (month && month !== 'ytd' && !/^\d{4}-\d{2}-01$/.test(month)) {
     return NextResponse.json({ error: 'mes inválido' }, { status: 400 })
   }
   const locationParam = searchParams.get('location') ?? 'all'

@@ -75,11 +75,17 @@ export async function getBizKpis(monthParam?: string | null, location: 'all' | 1
 
   const { data: monthRows } = await supabase
     .from('biz_files')
-    .select('month')
+    .select('month,doc_type')
     .order('month', { ascending: false })
   const months = [...new Set((monthRows ?? []).map(r => r.month as string))]
+  // months with revenue data — a stray statement (e.g. a Visa cycle crossing
+  // months) shouldn't count as an "imported month" for the YTD budget
+  const closeoutMonths = new Set((monthRows ?? []).filter(r => r.doc_type === 'mb_closeout').map(r => r.month as string))
   if (months.length === 0) return { months: [] }
-  const month = monthParam && months.includes(monthParam) ? monthParam : months[0]
+  // 'ytd' aggregates every imported month of the latest year
+  const isYtd = monthParam === 'ytd'
+  const month = !isYtd && monthParam && months.includes(monthParam) ? monthParam : months[0]
+  const rangeStart = isYtd ? `${month.slice(0, 4)}-01-01` : month
   const end = new Date(`${month}T00:00:00Z`)
   end.setUTCMonth(end.getUTCMonth() + 1)
   const monthEnd = end.toISOString().slice(0, 10)
@@ -94,28 +100,28 @@ export async function getBizKpis(monthParam?: string | null, location: 'all' | 1
       supabase
         .from('biz_bank_txns')
         .select('account_key,location_id,txn_date,description,note,debit,credit,balance,category')
-        .gte('txn_date', month).lt('txn_date', monthEnd)
+        .gte('txn_date', rangeStart).lt('txn_date', monthEnd)
         .order('id', { ascending: true }).range(from, to) as unknown as PromiseLike<{ data: TxnRow[] | null; error: { message: string } | null }>
     ),
     fetchAll<{ location_id: number | null; gross: number; consumo: number; tip: number; itbms_withheld: number; commission: number; commission_itbms: number }>((from, to) =>
       supabase
         .from('biz_card_settlements')
         .select('location_id,gross,consumo,tip,itbms_withheld,commission,commission_itbms')
-        .gte('txn_date', month).lt('txn_date', monthEnd)
+        .gte('txn_date', rangeStart).lt('txn_date', monthEnd)
         .order('id', { ascending: true }).range(from, to) as unknown as PromiseLike<{ data: never[] | null; error: { message: string } | null }>
     ),
     fetchAll<{ doc_type: string; location_id: number; sale_date: string; cash: number; card: number; misc: number; subtotal: number | null; itbms: number | null; total: number }>((from, to) =>
       supabase
         .from('biz_daily_sales')
         .select('doc_type,location_id,sale_date,cash,card,misc,subtotal,itbms,total')
-        .gte('sale_date', month).lt('sale_date', monthEnd)
+        .gte('sale_date', rangeStart).lt('sale_date', monthEnd)
         .order('id', { ascending: true }).range(from, to) as unknown as PromiseLike<{ data: never[] | null; error: { message: string } | null }>
     ),
     fetchAll<{ vendor: string; description: string | null; amount: number; itbms: number; total: number }>((from, to) =>
       supabase
         .from('biz_socio_expenses')
         .select('vendor,description,amount,itbms,total,file:biz_files!inner(month)')
-        .eq('file.month', month)
+        .gte('file.month', rangeStart).lte('file.month', month)
         .order('id', { ascending: true }).range(from, to) as unknown as PromiseLike<{ data: never[] | null; error: { message: string } | null }>
     ),
   ])
@@ -139,10 +145,16 @@ export async function getBizKpis(monthParam?: string | null, location: 'all' | 1
   const year = Number(month.slice(0, 4))
   const mIdx = Number(month.slice(5, 7)) - 1
   const budgets = MONTHLY_BUDGETS[year]
+  // YTD budget covers only the months actually imported this year, so the
+  // % of budget stays honest until older packets are backfilled
+  const monthIdxs = isYtd
+    ? [...closeoutMonths].filter(m => m.startsWith(`${year}-`)).map(m => Number(m.slice(5, 7)) - 1)
+    : [mIdx]
+  const budgetFor = (loc: 1 | 2) => monthIdxs.reduce((s, i) => s + (budgets?.[loc]?.[i] ?? 0), 0)
   const budget = budgets
     ? location === 'all'
-      ? (budgets[1]?.[mIdx] ?? 0) + (budgets[2]?.[mIdx] ?? 0)
-      : budgets[location]?.[mIdx] ?? null
+      ? budgetFor(1) + budgetFor(2)
+      : budgetFor(location)
     : null
 
   // Mindbody-synced accrual net for the same month (cross-check).
@@ -151,7 +163,7 @@ export async function getBizKpis(monthParam?: string | null, location: 'all' | 1
   let mbQ = supabase
     .from('kpi_daily_sales')
     .select('net,bucket')
-    .gte('sale_date', month).lt('sale_date', monthEnd)
+    .gte('sale_date', rangeStart).lt('sale_date', monthEnd)
     .neq('bucket', 'giftcard')
   if (location !== 'all') mbQ = mbQ.eq('location_id', location)
   const { data: mbRows } = await mbQ
@@ -253,7 +265,7 @@ export async function getBizKpis(monthParam?: string | null, location: 'all' | 1
   let invQ = supabase
     .from('biz_invoices')
     .select('amount,status,file:biz_files!inner(month)')
-    .eq('file.month', month)
+    .gte('file.month', rangeStart).lte('file.month', month)
   if (location !== 'all') invQ = invQ.eq('location_id', location)
   const { data: invRows } = await invQ
   const invoicedAuthorized = (invRows ?? []).filter(r => r.status === 'authorized').reduce((s, r) => s + Number(r.amount), 0)
@@ -278,7 +290,7 @@ export async function getBizKpis(monthParam?: string | null, location: 'all' | 1
   if (bankWithheldVmc > 0 && settlementWithheld > 0) checks.push(check('itbms_withheld_recon', bankWithheldVmc, settlementWithheld, Math.max(20, bankWithheldVmc * 0.05)))
 
   return {
-    month,
+    month: isYtd ? 'ytd' : month,
     location,
     months,
     files: (filesRes.data ?? []).map(f => ({

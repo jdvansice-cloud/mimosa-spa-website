@@ -144,6 +144,15 @@ function NegocioInner() {
             </button>
           ))}
           <button
+            onClick={() => { setMonth('ytd'); load('ytd', location) }}
+            aria-pressed={data?.month === 'ytd'}
+            className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+              data?.month === 'ytd' ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+            }`}
+          >
+            {t('Año')}
+          </button>
+          <button
             onClick={() => setShowImport(v => !v)}
             aria-expanded={showImport}
             className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold border transition-colors ${
