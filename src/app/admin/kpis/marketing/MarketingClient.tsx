@@ -212,19 +212,19 @@ function MarketingInner() {
               <table className="w-full text-sm mt-2">
                 <thead>
                   <tr className="text-[10px] text-left border-b border-beige-300 bg-beige-100/60 uppercase tracking-wider text-warm-gray">
-                    <th className="py-1.5 pl-4 font-bold">{t('Canal')}</th>
-                    <th className="py-1.5 font-bold text-right">{t('Sesiones')}</th>
-                    <th className="py-1.5 font-bold text-right">{t('Inician reserva')}</th>
-                    <th className="py-1.5 font-bold text-right pr-4">{t('Reservan')}</th>
+                    <th className="py-1.5 pl-4 pr-2 font-bold">{t('Canal')}</th>
+                    <th className="py-1.5 px-2 font-bold text-right">{t('Sesiones')}</th>
+                    <th className="py-1.5 px-2 font-bold text-right">{t('Inician reserva')}</th>
+                    <th className="py-1.5 pl-2 pr-4 font-bold text-right">{t('Reservan')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dashed divide-beige-300">
                   {data.channels.map(c => (
                     <tr key={c.channel}>
-                      <td className="py-2 pl-4 font-medium text-dark">{c.channel === 'direct' ? t('directo') : c.channel}</td>
-                      <td className="py-2 text-right tabular-nums">{c.sessions}</td>
-                      <td className="py-2 text-right tabular-nums">{c.bookingStarts}</td>
-                      <td className="py-2 text-right tabular-nums font-bold text-dark pr-4">{c.bookings}</td>
+                      <td className="py-2 pl-4 pr-2 font-medium text-dark break-all">{c.channel === 'direct' ? t('directo') : c.channel}</td>
+                      <td className="py-2 px-2 text-right tabular-nums">{c.sessions}</td>
+                      <td className="py-2 px-2 text-right tabular-nums">{c.bookingStarts}</td>
+                      <td className="py-2 pl-2 pr-4 text-right tabular-nums font-bold text-dark">{c.bookings}</td>
                     </tr>
                   ))}
                 </tbody>

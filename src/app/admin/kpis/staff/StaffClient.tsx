@@ -231,19 +231,22 @@ function StaffInner() {
 
           {/* Sortable table */}
           <CardBox className="p-0 overflow-hidden">
-            <div className="overflow-x-auto">
-              {/* Mobile shows the 4 key columns; the rest lives in the tap-to-expand row */}
-              <table className="w-full text-sm sm:min-w-[720px]">
+            <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+              {/* All columns always visible: the card scrolls sideways on phones
+                  and the therapist name stays pinned on the left. */}
+              <table className="w-full text-sm min-w-[680px]">
                 <thead>
                   <tr className="text-[10px] text-left border-b border-beige-300 bg-beige-100/60">
-                    <th className="py-1.5 pl-3 sm:pl-4 font-bold uppercase tracking-wider text-warm-gray">{t('Terapeuta')}</th>
-                    {th('hours', t('Horas'), 'text-right hidden sm:table-cell')}
-                    {th('visits', t('Visitas'), 'text-right')}
-                    {th('net', t('Neto'), 'text-right')}
-                    {th('tips', t('Propinas'), 'text-right hidden sm:table-cell')}
-                    {th('cabinaNet', t('Cabina'), 'text-right hidden sm:table-cell')}
-                    {th('requestedPct', t('Solicitada'), 'text-right pr-3 sm:pr-0')}
-                    {th('repeatRate', t('Fidelidad'), 'text-right pr-4 hidden sm:table-cell')}
+                    <th className="sticky left-0 z-10 bg-beige-100 py-1.5 pl-4 pr-3 font-bold uppercase tracking-wider text-warm-gray border-r border-beige-200">
+                      {t('Terapeuta')}
+                    </th>
+                    {th('hours', t('Horas'), 'text-right px-2.5')}
+                    {th('visits', t('Visitas'), 'text-right px-2.5')}
+                    {th('net', t('Neto'), 'text-right px-2.5')}
+                    {th('tips', t('Propinas'), 'text-right px-2.5')}
+                    {th('cabinaNet', t('Cabina'), 'text-right px-2.5')}
+                    {th('requestedPct', t('Solicitada'), 'text-right px-2.5')}
+                    {th('repeatRate', t('Fidelidad'), 'text-right pl-2.5 pr-4')}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dashed divide-beige-300">
@@ -277,23 +280,24 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
         onClick={onToggle}
         className={`cursor-pointer transition-colors ${open ? 'bg-beige-100' : 'hover:bg-beige-100/50'}`}
       >
-        <td className="py-2.5 pl-3 sm:pl-4 pr-2 font-medium text-dark">{m.name}</td>
-        <td className="py-2.5 text-right tabular-nums hidden sm:table-cell">{m.hours}</td>
-        <td className="py-2.5 text-right tabular-nums">{m.visits}</td>
-        <td className="py-2.5 text-right tabular-nums font-bold text-dark">{money(m.net)}</td>
-        <td className="py-2.5 text-right tabular-nums hidden sm:table-cell">{money(m.tips)}</td>
-        <td className="py-2.5 text-right tabular-nums hidden sm:table-cell">{m.cabinaNet > 0 ? money(m.cabinaNet) : '—'}</td>
-        <td className="py-2.5 text-right tabular-nums pr-3 sm:pr-0">{pct(m.requestedPct)}</td>
-        <td className="py-2.5 pr-4 text-right tabular-nums hidden sm:table-cell">{pct(m.repeatRate)}</td>
+        <td className={`sticky left-0 z-10 py-2.5 pl-4 pr-3 font-medium text-dark whitespace-nowrap border-r border-beige-200 ${open ? 'bg-beige-100' : 'bg-white'}`}>
+          {m.name}
+        </td>
+        <td className="py-2.5 px-2.5 text-right tabular-nums">{m.hours}</td>
+        <td className="py-2.5 px-2.5 text-right tabular-nums">{m.visits}</td>
+        <td className="py-2.5 px-2.5 text-right tabular-nums font-bold text-dark">{money(m.net)}</td>
+        <td className="py-2.5 px-2.5 text-right tabular-nums">{money(m.tips)}</td>
+        <td className="py-2.5 px-2.5 text-right tabular-nums">{m.cabinaNet > 0 ? money(m.cabinaNet) : '—'}</td>
+        <td className="py-2.5 px-2.5 text-right tabular-nums">{pct(m.requestedPct)}</td>
+        <td className="py-2.5 pl-2.5 pr-4 text-right tabular-nums">{pct(m.repeatRate)}</td>
       </tr>
       {open && (
         <tr className="bg-beige-100/60">
-          <td colSpan={8} className="px-4 py-3">
+          {/* inner div pins to the visible viewport so the detail reads fine
+              even when the table is scrolled sideways */}
+          <td colSpan={8} className="py-3">
+            <div className="sticky left-0 max-w-[calc(100vw-4rem)] sm:max-w-xl px-4">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
-              {/* columns hidden on phones surface here instead */}
-              <span className="text-warm-gray tabular-nums sm:hidden">{t('horas')}: <b className="text-dark">{m.hours}</b></span>
-              <span className="text-warm-gray tabular-nums sm:hidden">{t('propinas')}: <b className="text-dark">{money(m.tips)}</b></span>
-              <span className="text-warm-gray tabular-nums sm:hidden">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b></span>
               <span className="flex items-center gap-1.5">
                 <DeltaChip delta={deltaPct(m.net, m.lyNet)} suffix={`${t('neto')} vs ${lyYear}`} />
               </span>
@@ -312,7 +316,7 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
                 </span>
               )}
               {m.repeatRate !== null && (
-                <span className="text-warm-gray tabular-nums hidden sm:inline">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b> ({t('cohorte')} {m.repeatCohortSize})</span>
+                <span className="text-warm-gray tabular-nums">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b> ({t('cohorte')} {m.repeatCohortSize})</span>
               )}
               {m.cabinaCount > 0 && (
                 <span className="text-warm-gray tabular-nums">
@@ -331,6 +335,7 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
                 {t('Top venta cabina')}: {m.topCabina.map(s => `${s.name} ×${s.count}`).join(' · ')}
               </p>
             )}
+            </div>
           </td>
         </tr>
       )}

@@ -568,8 +568,8 @@ function KpisInner() {
                         <td className="py-2 pr-2">
                           <span className="text-warm-gray tabular-nums">{i + 1}.</span> {c.name}
                         </td>
-                        <td className="py-2 text-right tabular-nums">{gcMode ? '—' : c.visits}</td>
-                        <td className="py-2 text-right tabular-nums font-bold">{money(c.net)}</td>
+                        <td className="py-2 px-2 text-right tabular-nums">{gcMode ? '—' : c.visits}</td>
+                        <td className="py-2 pl-2 text-right tabular-nums font-bold">{money(c.net)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -606,9 +606,9 @@ function KpisInner() {
                   {data.staff.map(s => (
                     <tr key={s.name} className={s.name === 'Sin asignar' || s.name === 'Resto del equipo' ? 'text-warm-gray' : 'text-dark'}>
                       <td className="py-2 pr-2">{t(s.name)}</td>
-                      <td className="py-2 text-right tabular-nums">{s.visits}</td>
-                      <td className="py-2 text-right tabular-nums">{s.hours}</td>
-                      <td className="py-2 text-right tabular-nums font-bold text-dark">{money(s.net)}</td>
+                      <td className="py-2 px-2 text-right tabular-nums">{s.visits}</td>
+                      <td className="py-2 px-2 text-right tabular-nums">{s.hours}</td>
+                      <td className="py-2 pl-2 text-right tabular-nums font-bold text-dark">{money(s.net)}</td>
                     </tr>
                   ))}
                 </tbody>
