@@ -262,6 +262,7 @@ const EN: Record<string, string> = {
   'Seguros': 'Insurance',
   'Equipamiento': 'Equipment',
   'Vehículos': 'Vehicles',
+  'Depósitos en garantía (no gasto)': 'Security deposits (not an expense)',
   'Atenciones y eventos': 'Events & hospitality',
   // negocio checks
   'Cierre de caja vs Mindbody API (sin gift cards)': 'Register closeout vs Mindbody API (excl. gift cards)',

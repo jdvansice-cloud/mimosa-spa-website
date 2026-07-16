@@ -12,6 +12,8 @@ export const INTERNAL_CATEGORIES = new Set([
   // card tips collected from clients and passed through to therapists —
   // never company revenue, so paying them out is not an expense either
   'Propinas pagadas (interno)',
+  // security deposits are an asset (refundable), not a monthly expense
+  'Depósitos en garantía (no gasto)',
 ])
 
 const RULES: Array<[RegExp, string]> = [
@@ -20,6 +22,8 @@ const RULES: Array<[RegExp, string]> = [
   [/SU PAGO RECIBIDO/, 'Transferencia interna'],
   [/PAGO .*VISA|ABONO .*VISA|VISA BAC|PAGO \d{4}-\d{2}\*/, 'Pago de tarjeta (interno)'],
   [/PROPINA/, 'Propinas pagadas (interno)'],
+  // e.g. "Abono a contrato de arrendamiento de vehículo" = lease guarantee deposit
+  [/ABONO A CONTRATO|DEPOSITO DE GARANTIA|DEPÓSITO DE GARANTÍA/, 'Depósitos en garantía (no gasto)'],
   [/REEMBOLSO.*(SOCIO|GABY|MELI)|(GABY|MELI).*REEMBOLSO|REEMBOLSOS VARIOS/, 'Reembolso socios (interno)'],
   // transfers to the partners (personal-paid expense reimbursements)
   [/CAMBEFORT|MELI ?AVILA|AVILA,? MELI/, 'Reembolso socios (interno)'],
