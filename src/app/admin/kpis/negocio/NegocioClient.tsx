@@ -463,21 +463,6 @@ function Dashboard({ data }: { data: BizPayload }) {
         </CardBox>
       )}
 
-      {/* Files of the month */}
-      <CardBox>
-        <Label>{t('Archivos del mes')}</Label>
-        <ul className="mt-2 space-y-1 text-xs">
-          {data.files.map((f, i) => (
-            <li key={i} className="flex items-center gap-2">
-              <span className={`shrink-0 w-2 h-2 rounded-full ${f.status === 'imported' ? 'bg-spa-green' : f.status === 'superseded' ? 'bg-beige-400' : 'bg-gold'}`} />
-              <span className={`truncate ${f.status === 'superseded' ? 'text-warm-gray line-through' : 'text-dark'}`}>{f.filename}</span>
-              <span className="text-warm-gray whitespace-nowrap ml-auto">
-                {t(DOC_LABELS[f.docType] ?? f.docType)}{f.rows > 0 ? ` · ${f.rows}` : ''}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </CardBox>
     </div>
   )
 }
