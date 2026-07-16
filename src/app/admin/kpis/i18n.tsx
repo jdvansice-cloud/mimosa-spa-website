@@ -213,6 +213,8 @@ const EN: Record<string, string> = {
   'Incluye': 'Includes',
   'pagados por los socios (cxp Socios) · transferencias internas y pagos de tarjeta excluidos':
     'paid personally by the partners (cxp Socios) · internal transfers and card payments excluded',
+  'de gastos compartidos (BAC, Visa, socios) asignados por participación en ingresos':
+    'of shared costs (BAC, Visa, partners) allocated by revenue share',
   'Propinas · tarjeta': 'Tips · card',
   'Gift cards · flujo del mes': 'Gift cards · month flow',
   'vendidas': 'sold', 'redimidas': 'redeemed',

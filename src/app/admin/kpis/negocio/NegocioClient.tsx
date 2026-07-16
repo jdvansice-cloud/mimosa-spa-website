@@ -15,6 +15,14 @@ import { LangProvider, LangToggle, MONTHS_LONG, useLang, useT } from '../i18n'
 
 const LOC_NAMES: Record<string, string> = { '1': 'Costa del Este', '2': 'San Francisco' }
 
+type LocationKey = 'all' | '1' | '2'
+
+const LOCATIONS: Array<{ key: LocationKey; label: string }> = [
+  { key: 'all', label: 'Todas' },
+  { key: '1', label: 'Costa del Este' },
+  { key: '2', label: 'San Francisco' },
+]
+
 const DOC_LABELS: Record<string, string> = {
   bg_statement: 'Estado de cuenta Banco General',
   bg_ach: 'Detalle ACH Banco General',
@@ -71,17 +79,18 @@ function NegocioInner() {
   const { lang } = useLang()
   const t = useT()
   const [month, setMonth] = useState<string | null>(null)
+  const [location, setLocation] = useState<LocationKey>('all')
   const [data, setData] = useState<BizPayload | null>(null)
   const [empty, setEmpty] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
 
-  const load = useCallback(async (m: string | null) => {
+  const load = useCallback(async (m: string | null, l: LocationKey = 'all') => {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/kpis/negocio${m ? `?month=${m}` : ''}`, { cache: 'no-store' })
+      const res = await fetch(`/api/admin/kpis/negocio?location=${l}${m ? `&month=${m}` : ''}`, { cache: 'no-store' })
       if (!res.ok) {
         const body = await res.json().catch(() => null)
         throw new Error(body?.error || `Error ${res.status}`)
@@ -119,11 +128,11 @@ function NegocioInner() {
 
       {/* Sticky: months + import toggle */}
       <div className="sticky top-14 lg:top-0 z-20 -mx-2 px-2 pt-2 pb-3 mb-4 bg-cream/95 backdrop-blur-sm border-b border-beige-300">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
           {(data?.months ?? []).map(m => (
             <button
               key={m}
-              onClick={() => { setMonth(m); load(m) }}
+              onClick={() => { setMonth(m); load(m, location) }}
               aria-pressed={m === data?.month}
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors capitalize ${
                 m === data?.month ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
@@ -142,9 +151,23 @@ function NegocioInner() {
             <Upload className="h-4 w-4" />{t('Importar archivos')}
           </button>
         </div>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Sucursal">
+          {LOCATIONS.map(l => (
+            <button
+              key={l.key}
+              onClick={() => { setLocation(l.key); load(month, l.key) }}
+              aria-pressed={location === l.key}
+              className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+                location === l.key ? 'bg-dark text-white border-dark' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+              }`}
+            >
+              {t(l.label)}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {showImport && <ImportPanel onDone={() => load(month)} />}
+      {showImport && <ImportPanel onDone={() => load(month, location)} />}
 
       {error && <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
 
@@ -358,6 +381,11 @@ function Dashboard({ data }: { data: BizPayload }) {
         {data.expenses.socioTotal > 0 && (
           <p className="text-[10px] text-warm-gray mt-2">
             {t('Incluye')} {money(data.expenses.socioTotal)} {t('pagados por los socios (cxp Socios) · transferencias internas y pagos de tarjeta excluidos')}
+          </p>
+        )}
+        {data.expenses.revenueShare !== null && data.expenses.sharedAllocated > 0 && (
+          <p className="text-[10px] text-warm-gray mt-1">
+            {t('Incluye')} {money(data.expenses.sharedAllocated)} {t('de gastos compartidos (BAC, Visa, socios) asignados por participación en ingresos')} ({pct(data.expenses.revenueShare)})
           </p>
         )}
       </CardBox>

@@ -17,8 +17,14 @@ export async function GET(request: NextRequest) {
   if (month && !/^\d{4}-\d{2}-01$/.test(month)) {
     return NextResponse.json({ error: 'mes inválido' }, { status: 400 })
   }
+  const locationParam = searchParams.get('location') ?? 'all'
+  let location: 'all' | 1 | 2
+  if (locationParam === 'all') location = 'all'
+  else if (locationParam === '1') location = 1
+  else if (locationParam === '2') location = 2
+  else return NextResponse.json({ error: 'location inválida' }, { status: 400 })
   try {
-    return NextResponse.json(await getBizKpis(month))
+    return NextResponse.json(await getBizKpis(month, location))
   } catch (err) {
     console.error('kpis/negocio failed:', err)
     return NextResponse.json(

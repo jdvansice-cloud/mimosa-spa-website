@@ -153,7 +153,7 @@ export async function importPacketFiles(
         await insertRows(supabase, 'biz_bank_txns', p.bankTxns.map(t => ({
           file_id: fileId,
           account_key: p.accountKey,
-          location_id: p.locationId,
+          location_id: t.locationId ?? p.locationId,
           txn_date: t.txnDate,
           description: t.description,
           debit: t.debit,

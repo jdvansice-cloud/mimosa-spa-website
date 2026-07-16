@@ -31,6 +31,8 @@ export interface BankTxn {
   debit: number
   credit: number
   balance: number | null
+  /** Row-level location when the source hints one (e.g. Visa notes "Mimosa CDE / …"). */
+  locationId?: number | null
 }
 
 export interface AchNote {
@@ -374,6 +376,8 @@ function parseVisa(rows: Row[]): ParsedFile | null {
       debit: amt > 0 ? amt : 0,
       credit: amt < 0 ? -amt : 0,
       balance: null,
+      // the human-written note often names the location ("Mimosa CDE / Insumos…")
+      locationId: note ? detectLocation(note.toUpperCase()) : null,
     })
   }
   return {
