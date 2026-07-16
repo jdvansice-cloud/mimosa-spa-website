@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, FileUp, Loader2, Upload } from 'lucide-rea
 import type { BizPayload } from '@/lib/biz/kpis'
 import { CardBox, Label, LoadingCard, money, pct, pct1 } from '../shared'
 import { LangProvider, LangToggle, MONTHS_LONG, useLang, useT } from '../i18n'
+import { prefetchStaffKpis } from '../prefetch'
 
 // ===========================================
 // Negocio — business KPIs from the monthly accountant packet.
@@ -113,6 +114,7 @@ function NegocioInner() {
   }, [])
 
   useEffect(() => { load(month) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { prefetchStaffKpis() }, [])
 
   return (
     <div className="max-w-xl">

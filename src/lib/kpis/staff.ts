@@ -234,7 +234,12 @@ async function availableHoursByStaff(start: string, end: string, location: KpiLo
   }
 }
 
-export async function getStaffKpis(period: KpiPeriod, location: KpiLocation): Promise<StaffKpisPayload> {
+export async function getStaffKpis(
+  period: KpiPeriod,
+  location: KpiLocation,
+  /** Skip the live Mindbody schedules call (utilization) for a fast first paint. */
+  includeAvailability = true
+): Promise<StaffKpisPayload> {
   const supabase = serviceClient()
   const asOf = addDays(panamaToday(), -1)
   const range = rangeFor(period, asOf)
@@ -247,7 +252,9 @@ export async function getStaffKpis(period: KpiPeriod, location: KpiLocation): Pr
     fetchItems(supabase, lyRange.start, lyRange.end, location),
     // Loyalty cohort: visits 90–180 days ago + their 90-day follow-up window
     fetchAppts(supabase, addDays(asOf, -180), asOf, location),
-    availableHoursByStaff(range.start, range.end > asOf ? asOf : range.end, location),
+    includeAvailability
+      ? availableHoursByStaff(range.start, range.end > asOf ? asOf : range.end, location)
+      : Promise.resolve(null),
   ])
 
   const cur = attribute(curItems, curAppts)

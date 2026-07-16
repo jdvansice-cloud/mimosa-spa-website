@@ -5,6 +5,7 @@ import type { MarketingPayload } from '@/lib/kpis/marketing'
 import type { KpiPeriod } from '@/lib/kpis/queries'
 import { CardBox, Label, LoadingCard, DualLine, pct } from '../shared'
 import { LangProvider, LangToggle, formatDateLang, useLang, useT } from '../i18n'
+import { prefetchStaffKpis } from '../prefetch'
 
 // ===========================================
 // Marketing — first-party web analytics: traffic, acquisition channels
@@ -71,6 +72,7 @@ function MarketingInner() {
   }, [])
 
   useEffect(() => { load(period, location) }, [period, location, load])
+  useEffect(() => { prefetchStaffKpis() }, [])
 
   const maxFunnel = data ? Math.max(...data.funnel.steps.map(s => s.sessions), 1) : 1
 

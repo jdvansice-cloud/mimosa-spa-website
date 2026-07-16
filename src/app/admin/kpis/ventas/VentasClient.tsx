@@ -8,6 +8,7 @@ import {
   deltaPct, money, money2, moneyCompact,
 } from '../shared'
 import { LangProvider, LangToggle, formatDateLang, useLang, useT } from '../i18n'
+import { prefetchStaffKpis } from '../prefetch'
 import { RangeCalendar } from './RangeCalendar'
 
 // ===========================================
@@ -92,6 +93,7 @@ function VentasInner() {
 
   const [refreshTick, setRefreshTick] = useState(0)
   useEffect(() => { load(range, location, gcMode) }, [range, location, gcMode, load, refreshTick])
+  useEffect(() => { prefetchStaffKpis() }, [])
 
   // Background refresh of today's sales/appointments: on entry, every 5 min
   // while open, and when the tab becomes visible again. Server skips if

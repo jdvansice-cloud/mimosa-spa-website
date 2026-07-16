@@ -28,8 +28,11 @@ export async function GET(request: NextRequest) {
   else if (locationParam === '2') location = 2
   else return NextResponse.json({ error: 'location inválida' }, { status: 400 })
 
+  // availability=0 skips the live Mindbody schedules call (fast first paint)
+  const includeAvailability = searchParams.get('availability') !== '0'
+
   try {
-    return NextResponse.json(await getStaffKpis(period, location))
+    return NextResponse.json(await getStaffKpis(period, location, includeAvailability))
   } catch (err) {
     console.error('staff kpis failed:', err)
     return NextResponse.json(

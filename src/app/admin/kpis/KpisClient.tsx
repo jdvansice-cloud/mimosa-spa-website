@@ -8,6 +8,7 @@ import {
   deltaPct, money, moneyCompact, pct, pct1,
 } from './shared'
 import { LangProvider, LangToggle, MONTHS_LONG, formatDateLang, useLang, useT } from './i18n'
+import { prefetchStaffKpis } from './prefetch'
 
 // ===========================================
 // KPI dashboard — mobile-first, all money net of ITBMS.
@@ -152,6 +153,7 @@ function KpisInner() {
   }, [])
 
   useEffect(() => { load(period, location, gcMode) }, [period, location, gcMode, load])
+  useEffect(() => { prefetchStaffKpis() }, [])
 
   async function refreshNow() {
     setSyncing(true)

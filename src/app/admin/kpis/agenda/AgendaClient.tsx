@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { AgendaAppointment, AgendaMonth, StaffAvailability } from '@/lib/kpis/report'
 import { BlackSpinner, CardBox, DeltaChip, Label, LoadingCard, deltaPct } from '../shared'
 import { LangProvider, LangToggle, MONTHS_LONG, WEEKDAY_LETTERS, formatDateLang, useLang, useT } from '../i18n'
+import { prefetchStaffKpis } from '../prefetch'
 
 // ===========================================
 // Agenda — calendario mensual con citas por día; al tocar un día se abre
@@ -150,6 +151,7 @@ function AgendaInner() {
   }, [])
 
   useEffect(() => { load(month, location) }, [month, location, load, refreshTick])
+  useEffect(() => { prefetchStaffKpis() }, [])
 
   // Background refresh of today's appointments: on entry, then every 5 min
   // while the page stays open, and when the tab becomes visible again

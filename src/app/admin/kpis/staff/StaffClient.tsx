@@ -6,6 +6,7 @@ import type { StaffKpisPayload, StaffMemberKpis } from '@/lib/kpis/staff'
 import type { KpiPeriod } from '@/lib/kpis/queries'
 import { CardBox, DeltaChip, Label, LoadingCard, deltaPct, money, pct } from '../shared'
 import { LangProvider, LangToggle, formatDateLang, useLang, useT } from '../i18n'
+import { readStaffCache, writeStaffCache } from '../prefetch'
 
 // ===========================================
 // Staff performance — hours, revenue, tips, requested %, client loyalty.
@@ -47,15 +48,36 @@ function StaffInner() {
   const [openRow, setOpenRow] = useState<string | null>(null)
 
   const load = useCallback(async (p: KpiPeriod, l: LocationKey) => {
-    setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(`/api/admin/kpis/staff?period=${p}&location=${l}`, { cache: 'no-store' })
+    const fetchStaff = async (availability: boolean) => {
+      const res = await fetch(
+        `/api/admin/kpis/staff?period=${p}&location=${l}&availability=${availability ? '1' : '0'}`,
+        { cache: 'no-store' }
+      )
       if (!res.ok) {
         const body = await res.json().catch(() => null)
         throw new Error(body?.error || `Error ${res.status}`)
       }
-      setData(await res.json())
+      return (await res.json()) as StaffKpisPayload
+    }
+    // Serve the prefetched/last payload instantly when available…
+    const cached = readStaffCache<StaffKpisPayload>(p, l)
+    if (cached) {
+      setData(cached)
+      setLoading(false)
+    } else {
+      setLoading(true)
+    }
+    try {
+      // …otherwise paint fast without the live Mindbody utilization call…
+      if (!cached) {
+        setData(await fetchStaff(false))
+        setLoading(false)
+      }
+      // …and always refresh with the full payload in the background.
+      const full = await fetchStaff(true)
+      setData(full)
+      writeStaffCache(p, l, full)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo cargar')
     } finally {
