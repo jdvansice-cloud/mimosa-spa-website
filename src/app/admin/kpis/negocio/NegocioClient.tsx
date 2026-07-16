@@ -115,7 +115,7 @@ function NegocioInner() {
   useEffect(() => { load(month) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-xl">
       <div className="mb-5">
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-display font-semibold text-dark">{t('Negocio')}</h1>

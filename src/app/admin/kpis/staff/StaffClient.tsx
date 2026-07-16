@@ -94,7 +94,7 @@ function StaffInner() {
   )
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-xl">
       <div className="mb-5">
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-display font-semibold text-dark">Staff</h1>
@@ -210,17 +210,18 @@ function StaffInner() {
           {/* Sortable table */}
           <CardBox className="p-0 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[720px]">
+              {/* Mobile shows the 4 key columns; the rest lives in the tap-to-expand row */}
+              <table className="w-full text-sm sm:min-w-[720px]">
                 <thead>
                   <tr className="text-[10px] text-left border-b border-beige-300 bg-beige-100/60">
-                    <th className="py-1.5 pl-4 font-bold uppercase tracking-wider text-warm-gray">{t('Terapeuta')}</th>
-                    {th('hours', t('Horas'), 'text-right')}
+                    <th className="py-1.5 pl-3 sm:pl-4 font-bold uppercase tracking-wider text-warm-gray">{t('Terapeuta')}</th>
+                    {th('hours', t('Horas'), 'text-right hidden sm:table-cell')}
                     {th('visits', t('Visitas'), 'text-right')}
                     {th('net', t('Neto'), 'text-right')}
-                    {th('tips', t('Propinas'), 'text-right')}
-                    {th('cabinaNet', t('Cabina'), 'text-right')}
-                    {th('requestedPct', t('Solicitada'), 'text-right')}
-                    {th('repeatRate', t('Fidelidad'), 'text-right pr-4')}
+                    {th('tips', t('Propinas'), 'text-right hidden sm:table-cell')}
+                    {th('cabinaNet', t('Cabina'), 'text-right hidden sm:table-cell')}
+                    {th('requestedPct', t('Solicitada'), 'text-right pr-3 sm:pr-0')}
+                    {th('repeatRate', t('Fidelidad'), 'text-right pr-4 hidden sm:table-cell')}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dashed divide-beige-300">
@@ -254,19 +255,23 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
         onClick={onToggle}
         className={`cursor-pointer transition-colors ${open ? 'bg-beige-100' : 'hover:bg-beige-100/50'}`}
       >
-        <td className="py-2.5 pl-4 pr-2 font-medium text-dark whitespace-nowrap">{m.name}</td>
-        <td className="py-2.5 text-right tabular-nums">{m.hours}</td>
+        <td className="py-2.5 pl-3 sm:pl-4 pr-2 font-medium text-dark">{m.name}</td>
+        <td className="py-2.5 text-right tabular-nums hidden sm:table-cell">{m.hours}</td>
         <td className="py-2.5 text-right tabular-nums">{m.visits}</td>
         <td className="py-2.5 text-right tabular-nums font-bold text-dark">{money(m.net)}</td>
-        <td className="py-2.5 text-right tabular-nums">{money(m.tips)}</td>
-        <td className="py-2.5 text-right tabular-nums">{m.cabinaNet > 0 ? money(m.cabinaNet) : '—'}</td>
-        <td className="py-2.5 text-right tabular-nums">{pct(m.requestedPct)}</td>
-        <td className="py-2.5 pr-4 text-right tabular-nums">{pct(m.repeatRate)}</td>
+        <td className="py-2.5 text-right tabular-nums hidden sm:table-cell">{money(m.tips)}</td>
+        <td className="py-2.5 text-right tabular-nums hidden sm:table-cell">{m.cabinaNet > 0 ? money(m.cabinaNet) : '—'}</td>
+        <td className="py-2.5 text-right tabular-nums pr-3 sm:pr-0">{pct(m.requestedPct)}</td>
+        <td className="py-2.5 pr-4 text-right tabular-nums hidden sm:table-cell">{pct(m.repeatRate)}</td>
       </tr>
       {open && (
         <tr className="bg-beige-100/60">
           <td colSpan={8} className="px-4 py-3">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+              {/* columns hidden on phones surface here instead */}
+              <span className="text-warm-gray tabular-nums sm:hidden">{t('horas')}: <b className="text-dark">{m.hours}</b></span>
+              <span className="text-warm-gray tabular-nums sm:hidden">{t('propinas')}: <b className="text-dark">{money(m.tips)}</b></span>
+              <span className="text-warm-gray tabular-nums sm:hidden">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b></span>
               <span className="flex items-center gap-1.5">
                 <DeltaChip delta={deltaPct(m.net, m.lyNet)} suffix={`${t('neto')} vs ${lyYear}`} />
               </span>
@@ -285,7 +290,7 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
                 </span>
               )}
               {m.repeatRate !== null && (
-                <span className="text-warm-gray tabular-nums">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b> ({t('cohorte')} {m.repeatCohortSize})</span>
+                <span className="text-warm-gray tabular-nums hidden sm:inline">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b> ({t('cohorte')} {m.repeatCohortSize})</span>
               )}
               {m.cabinaCount > 0 && (
                 <span className="text-warm-gray tabular-nums">
