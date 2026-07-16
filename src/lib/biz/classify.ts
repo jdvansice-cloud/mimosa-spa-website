@@ -31,7 +31,9 @@ const RULES: Array<[RegExp, string]> = [
   // "Servicios Profesionales" on transfers = commission-based therapist pay (labor)
   [/VACACIONES|PLANILLA|SALARIO|QUINCENA|DECIMO|DÉCIMO|XIII MES|LIQUIDACION|LIQUIDACIÓN|SERVICIOS PROFESIONALES/, 'Planilla'],
   // fixed costs
-  [/PANARENTING|ARRENDAMIENTO|ALQUILER|STAR PLAZA/, 'Alquiler'],
+  // PANARENTING is a car-leasing company — vehicle costs are NOT spa rent
+  [/PANARENTING|VEHICULO|VEHÍCULO/, 'Vehículos'],
+  [/ARRENDAMIENTO|ALQUILER|STAR PLAZA/, 'Alquiler'],
   [/MUNICIPIO|TASA UNICA|TASA ÚNICA|\bDGI\b|\bMEF\b|\bANIP\b|MULTA/, 'Impuestos y tasas'],
   [/ENSA|NATURGY|IDAAN|TIGO|\+ ?MOVIL|MAS ?MOVIL|CABLE ONDA|INTERNET|ELECTRICIDAD|\bAGUA\b|\bLUZ\b/, 'Servicios públicos'],
   // operations

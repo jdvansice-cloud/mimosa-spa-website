@@ -261,6 +261,7 @@ const EN: Record<string, string> = {
   'Sin clasificar': 'Unclassified',
   'Seguros': 'Insurance',
   'Equipamiento': 'Equipment',
+  'Vehículos': 'Vehicles',
   'Atenciones y eventos': 'Events & hospitality',
   // negocio checks
   'Cierre de caja vs Mindbody API (sin gift cards)': 'Register closeout vs Mindbody API (excl. gift cards)',
