@@ -32,8 +32,8 @@ export function pct(n: number | null): string {
   return n === null ? '—' : Math.round(n * 100) + '%'
 }
 
-export function pct1(n: number): string {
-  return (n * 100).toFixed(1) + '%'
+export function pct1(n: number | null): string {
+  return n === null ? '—' : (n * 100).toFixed(1) + '%'
 }
 
 export function deltaPct(cur: number, ly: number): number | null {
