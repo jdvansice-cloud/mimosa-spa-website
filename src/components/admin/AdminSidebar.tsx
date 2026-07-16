@@ -38,9 +38,9 @@ interface NavItem {
 const fullNavItems: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   // Mobile Manager section
+  { href: '/admin/kpis/agenda', label: 'Agenda', icon: CalendarDays, section: 'Mobile Manager' },
   { href: '/admin/kpis', label: 'KPIs', icon: BarChart3, section: 'Mobile Manager' },
   { href: '/admin/kpis/ventas', label: 'Reporte de Ventas', icon: Receipt, section: 'Mobile Manager' },
-  { href: '/admin/kpis/agenda', label: 'Agenda', icon: CalendarDays, section: 'Mobile Manager' },
   { href: '/admin/kpis/staff', label: 'Staff', icon: Users, section: 'Mobile Manager' },
   { href: '/admin/kpis/marketing', label: 'Marketing', icon: Megaphone, section: 'Mobile Manager' },
   { href: '/admin/kpis/negocio', label: 'Negocio', icon: Landmark, section: 'Mobile Manager' },
