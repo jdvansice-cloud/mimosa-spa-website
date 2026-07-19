@@ -244,7 +244,38 @@ export async function syncAppointments(startDate: string, endDate: string) {
     if (error) throw new Error(`mb_appointments upsert: ${error.message}`)
   }
 
-  return { appointments: rows.length }
+  // Reconcile deletions: Mindbody drops cancelled appointments from the API
+  // instead of returning them with a Cancelled status, so anything in the
+  // window that the API no longer returns is a ghost and must go — otherwise
+  // the Agenda over-counts vs the Mindbody app. Skipped when the fetch came
+  // back empty, so a hiccup can never wipe history.
+  let deleted = 0
+  if (rows.length > 0) {
+    const fetched = new Set(rows.map(r => r.id as number))
+    const stale: number[] = []
+    const DB_PAGE = 1000
+    let from = 0
+    while (true) {
+      const { data: existing, error } = await supabase
+        .from('mb_appointments')
+        .select('id')
+        .gte('start_datetime', `${startDate}T00:00:00`)
+        .lte('start_datetime', `${endDate}T23:59:59`)
+        .order('id', { ascending: true })
+        .range(from, from + DB_PAGE - 1)
+      if (error) throw new Error(`mb_appointments scan: ${error.message}`)
+      for (const r of existing ?? []) if (!fetched.has(r.id as number)) stale.push(r.id as number)
+      if (!existing || existing.length < DB_PAGE) break
+      from += DB_PAGE
+    }
+    for (const batch of chunk(stale, 200)) {
+      const { error } = await supabase.from('mb_appointments').delete().in('id', batch)
+      if (error) throw new Error(`mb_appointments delete: ${error.message}`)
+      deleted += batch.length
+    }
+  }
+
+  return { appointments: rows.length, deleted }
 }
 
 // ===========================================
