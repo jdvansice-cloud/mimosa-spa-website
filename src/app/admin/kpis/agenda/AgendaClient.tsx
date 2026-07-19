@@ -496,12 +496,17 @@ function AgendaInner() {
                   <button
                     key={d.date}
                     onClick={() => openDay(d.date, location, dayCache)}
-                    className={`rounded-xl py-2 flex flex-col items-center gap-1 border transition-colors ${
-                      isToday ? 'border-gold' : 'border-transparent hover:border-beige-400'
+                    className={`rounded-xl py-2 flex flex-col items-center gap-1 border-2 transition-colors ${
+                      isToday ? 'border-gold-600 shadow-sm' : 'border-transparent hover:border-beige-400'
                     }`}
                     style={{ background: heat > 0 ? `rgba(122, 158, 126, ${heat.toFixed(2)})` : undefined }}
                   >
-                    <span className="text-base font-bold leading-none tabular-nums text-dark">
+                    {/* today's date gets a solid gold disc */}
+                    <span
+                      className={`text-base font-bold leading-none tabular-nums text-dark ${
+                        isToday ? 'bg-gold rounded-full w-6 h-6 flex items-center justify-center -my-0.5' : ''
+                      }`}
+                    >
                       {Number(d.date.slice(8, 10))}
                     </span>
                     {/* count as a solid pill so it stays readable on the heat tint */}
