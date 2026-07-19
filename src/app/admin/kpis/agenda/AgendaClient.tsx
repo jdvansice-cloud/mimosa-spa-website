@@ -497,7 +497,7 @@ function AgendaInner() {
                     key={d.date}
                     onClick={() => openDay(d.date, location, dayCache)}
                     className={`rounded-xl py-2 flex flex-col items-center gap-1 border-2 transition-colors ${
-                      isToday ? 'border-gold-600 shadow-sm' : 'border-transparent hover:border-beige-400'
+                      isToday ? 'border-gold-600 shadow-sm' : 'border-beige-200 hover:border-beige-400'
                     }`}
                     style={{ background: heat > 0 ? `rgba(122, 158, 126, ${heat.toFixed(2)})` : undefined }}
                   >
