@@ -496,15 +496,24 @@ function AgendaInner() {
                   <button
                     key={d.date}
                     onClick={() => openDay(d.date, location, dayCache)}
-                    className={`rounded-xl py-1.5 flex flex-col items-center gap-0.5 border transition-colors ${
+                    className={`rounded-xl py-2 flex flex-col items-center gap-1 border transition-colors ${
                       isToday ? 'border-gold' : 'border-transparent hover:border-beige-400'
                     }`}
                     style={{ background: heat > 0 ? `rgba(122, 158, 126, ${heat.toFixed(2)})` : undefined }}
                   >
-                    <span className={`text-base font-bold leading-none tabular-nums ${isToday ? 'text-dark' : 'text-dark'}`}>
+                    <span className="text-base font-bold leading-none tabular-nums text-dark">
                       {Number(d.date.slice(8, 10))}
                     </span>
-                    <span className={`text-[10px] leading-none tabular-nums ${isFuture ? 'text-spa-green font-bold' : 'text-warm-gray'}`}>
+                    {/* count as a solid pill so it stays readable on the heat tint */}
+                    <span
+                      className={`text-[11px] font-bold leading-none tabular-nums px-1.5 py-0.5 rounded-full min-w-[22px] ${
+                        d.active > 0
+                          ? isFuture
+                            ? 'bg-spa-green text-white'
+                            : 'bg-white/90 text-dark shadow-sm'
+                          : 'text-beige-400'
+                      }`}
+                    >
                       {d.active > 0 ? d.active : '·'}
                     </span>
                   </button>
