@@ -163,13 +163,21 @@ interface Attribution {
   cabinaItems: Map<string, Map<string, number>> // staff → cabina item → count
 }
 
-/** Attribute service revenue and tips to the therapist of the client's same-day appointment. */
+/**
+ * Attribute service revenue and tips via the client's same-day appointment(s).
+ * When a client saw MORE THAN ONE therapist that day (couples, day spa), the
+ * ticket splits proportionally to each therapist's appointment minutes —
+ * otherwise the first therapist on the schedule inherits the whole ticket
+ * and looks artificially productive.
+ */
 function attribute(items: ItemRow[], appts: ApptRow[]): Attribution {
-  const staffByClientDate = new Map<string, string>()
+  const partsByKey = new Map<string, Map<string, number>>() // key → staff → minutes
   for (const a of appts) {
     if (CANCELLED.has(a.status) || !a.client_id || !a.staff_name) continue
     const key = `${a.client_id}|${a.start_datetime.slice(0, 10)}|${a.location_id}`
-    if (!staffByClientDate.has(key)) staffByClientDate.set(key, a.staff_name)
+    const parts = partsByKey.get(key) ?? new Map<string, number>()
+    parts.set(a.staff_name, (parts.get(a.staff_name) ?? 0) + (a.duration_min ?? 60))
+    partsByKey.set(key, parts)
   }
   const factors = cashFactors(items)
   const net = new Map<string, number>()
@@ -180,28 +188,38 @@ function attribute(items: ItemRow[], appts: ApptRow[]): Attribution {
   const cabinaItems = new Map<string, Map<string, number>>()
   for (const it of items) {
     if (it.returned || !it.sale.client_id) continue
-    const staff = staffByClientDate.get(`${it.sale.client_id}|${it.sale.sale_date}|${it.sale.location_id}`)
-    if (!staff) continue
-    const amount = (Number(it.net_amount) || 0) * (factors.get(it.sale_id) ?? 1)
-    if (it.bucket === 'tip') {
-      // Tips are what the client chose to give — count them in full
-      tips.set(staff, (tips.get(staff) ?? 0) + (Number(it.net_amount) || 0))
-    } else if (it.bucket === 'service') {
-      net.set(staff, (net.get(staff) ?? 0) + amount)
+    const parts = partsByKey.get(`${it.sale.client_id}|${it.sale.sale_date}|${it.sale.location_id}`)
+    if (!parts || parts.size === 0) continue
+    const totalMin = [...parts.values()].reduce((s, v) => s + v, 0)
+    let primary = '', primaryMin = -1
+    for (const [st, min] of parts) if (min > primaryMin) { primaryMin = min; primary = st }
+
+    const full = Number(it.net_amount) || 0
+    const amount = full * (factors.get(it.sale_id) ?? 1)
+    for (const [staff, min] of parts) {
+      const share = totalMin > 0 ? min / totalMin : 1 / parts.size
+      if (it.bucket === 'tip') {
+        // Tips are what the client chose to give — full value, split by share
+        tips.set(staff, (tips.get(staff) ?? 0) + full * share)
+      } else {
+        net.set(staff, (net.get(staff) ?? 0) + amount * share)
+      }
+    }
+    // item COUNTS stay whole and go to the main therapist of the day
+    if (it.bucket === 'service') {
       const name = (it.description || 'Servicio').trim()
-      const byName = services.get(staff) ?? new Map<string, number>()
+      const byName = services.get(primary) ?? new Map<string, number>()
       byName.set(name, (byName.get(name) ?? 0) + 1)
-      services.set(staff, byName)
-    } else {
-      net.set(staff, (net.get(staff) ?? 0) + amount)
+      services.set(primary, byName)
     }
     if (it.bucket !== 'tip' && it.category_id === CABINA_CATEGORY_ID) {
-      cabinaNet.set(staff, (cabinaNet.get(staff) ?? 0) + amount)
-      cabinaCount.set(staff, (cabinaCount.get(staff) ?? 0) + 1)
+      // a cabin extra is sold by the treating therapist — credit the main one
+      cabinaNet.set(primary, (cabinaNet.get(primary) ?? 0) + amount)
+      cabinaCount.set(primary, (cabinaCount.get(primary) ?? 0) + 1)
       const name = (it.description || 'Venta en cabina').trim()
-      const byName = cabinaItems.get(staff) ?? new Map<string, number>()
+      const byName = cabinaItems.get(primary) ?? new Map<string, number>()
       byName.set(name, (byName.get(name) ?? 0) + 1)
-      cabinaItems.set(staff, byName)
+      cabinaItems.set(primary, byName)
     }
   }
   return { net, tips, services, cabinaNet, cabinaCount, cabinaItems }

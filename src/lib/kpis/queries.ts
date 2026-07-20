@@ -681,7 +681,9 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
 
   // ---- staff attribution ----
   const staffMap = new Map<string, { name: string; visits: number; hours: number; net: number }>()
-  const apptByClientDate = new Map<string, string>()
+  // key → therapist → minutes; multi-therapist days split the ticket
+  // proportionally to each therapist's appointment time
+  const apptPartsByClientDate = new Map<string, Map<string, number>>()
   for (const a of curVisits.visits) {
     const name = a.staff_name || 'Sin asignar'
     const entry = staffMap.get(name) ?? { name, visits: 0, hours: 0, net: 0 }
@@ -690,14 +692,25 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
     staffMap.set(name, entry)
     if (a.client_id) {
       const key = `${a.client_id}|${a.start_datetime.slice(0, 10)}|${a.location_id}`
-      if (!apptByClientDate.has(key)) apptByClientDate.set(key, name)
+      const parts = apptPartsByClientDate.get(key) ?? new Map<string, number>()
+      parts.set(name, (parts.get(name) ?? 0) + (a.duration_min ?? 60))
+      apptPartsByClientDate.set(key, parts)
     }
   }
   let unassignedNet = 0
   for (const [key, net] of cur.serviceByClientDate) {
-    const staffName = apptByClientDate.get(key)
-    if (staffName && staffMap.has(staffName)) staffMap.get(staffName)!.net += net
-    else unassignedNet += net
+    const parts = apptPartsByClientDate.get(key)
+    if (!parts || parts.size === 0) {
+      unassignedNet += net
+      continue
+    }
+    const totalMin = [...parts.values()].reduce((s, v) => s + v, 0)
+    for (const [staffName, min] of parts) {
+      const share = totalMin > 0 ? min / totalMin : 1 / parts.size
+      const entry = staffMap.get(staffName)
+      if (entry) entry.net += net * share
+      else unassignedNet += net * share
+    }
   }
   const ranked = [...staffMap.values()]
     .map(s => ({ ...s, hours: Math.round(s.hours * 10) / 10, net: round2(s.net) }))
