@@ -29,6 +29,9 @@ interface BookingState {
   currentStep: BookingStep
   isLoading: boolean
   error: string | null
+  // Set when Mindbody rejects a booking because the slot was just taken;
+  // displayed as a banner on the datetime step.
+  slotConflictNotice: string | null
   
   // Client Authentication
   clientIdentifier: string
@@ -104,6 +107,7 @@ interface BookingActions {
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   clearError: () => void
+  setSlotConflictNotice: (notice: string | null) => void
   
   // Auth Actions
   setClientIdentifier: (identifier: string) => void
@@ -172,6 +176,7 @@ const initialState: BookingState = {
   currentStep: 'auth',
   isLoading: false,
   error: null,
+  slotConflictNotice: null,
   
   // Client
   clientIdentifier: '',
@@ -288,6 +293,8 @@ export const useBookingStore = create<BookingState & BookingActions>()(
       setError: (error) => set({ error, isLoading: false }, false, 'setError'),
       
       clearError: () => set({ error: null }, false, 'clearError'),
+      
+      setSlotConflictNotice: (notice) => set({ slotConflictNotice: notice }, false, 'setSlotConflictNotice'),
       
       // ===========================================
       // AUTH ACTIONS

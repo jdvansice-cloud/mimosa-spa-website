@@ -161,6 +161,51 @@ export async function POST(request: NextRequest) {
       } catch (createError) {
         const errorMessage = createError instanceof Error ? createError.message : String(createError)
         console.error('Client creation failed:', { message: errorMessage, firstName, lastName, email, phone })
+
+        // Mindbody says the client already exists. This happens when the
+        // email/phone lookups above failed transiently (e.g. Mindbody 500s)
+        // and we fell through to creation. Retry the lookups once — if we can
+        // find the existing record now, log the user into it instead of erroring.
+        if (/duplicate client/i.test(errorMessage)) {
+          try {
+            const byEmail = await searchClients(email)
+            const emailMatch = byEmail.find(c =>
+              c.Email?.toLowerCase() === email.toLowerCase()
+            )
+            const byPhone = emailMatch ? [] : await searchClients(phone)
+            const phoneMatch = byPhone.find(c => {
+              const mobileMatch = c.MobilePhone && phoneNumbersMatch(c.MobilePhone, phone)
+              const homeMatch = c.HomePhone && phoneNumbersMatch(c.HomePhone, phone)
+              return mobileMatch || homeMatch
+            })
+            const match = emailMatch || phoneMatch
+            if (match) {
+              console.log('Duplicate-client recovery: found existing client', match.Id)
+              return NextResponse.json({
+                success: true,
+                client: {
+                  Id: match.Id,
+                  FirstName: match.FirstName,
+                  LastName: match.LastName,
+                  Email: match.Email,
+                  MobilePhone: match.MobilePhone,
+                },
+                existingClient: true,
+              })
+            }
+          } catch (retryError) {
+            console.error('Duplicate-client recovery lookup failed:', retryError)
+          }
+
+          return NextResponse.json(
+            {
+              error: 'Ya existe una cuenta con estos datos. Intenta iniciar sesión con tu número de teléfono o correo, o contáctanos por WhatsApp.',
+              duplicateClient: true,
+            },
+            { status: 409 }
+          )
+        }
+
         return NextResponse.json(
           { error: ERROR_MESSAGES.REGISTRATION_FAILED, details: errorMessage },
           { status: 500 }
