@@ -28,13 +28,13 @@ export function ConfirmStep() {
     setDate,
     setLoading,
     setError,
+    setSlotConflictNotice,
     isLoading,
     error
   } = useBookingStore()
 
   const totalDuration = useBookingStore(selectTotalDuration)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [timeUnavailable, setTimeUnavailable] = useState(false)
   const [displayClientName, setDisplayClientName] = useState<string>('')
 
   // Fetch client name on mount if missing from store
@@ -297,8 +297,16 @@ export function ConfirmStep() {
 
       if (!response.ok) {
         if (data.timeUnavailable) {
-          setTimeUnavailable(true)
-          setError(data.error || 'El horario seleccionado no está disponible.')
+          // Slot was taken while the user was confirming. Clear the stale
+          // time/staff selection and send them straight back to the datetime
+          // step — it refetches availability on mount, so the dead slot
+          // disappears. The banner there explains what happened.
+          setError(null)
+          setSlotConflictNotice(
+            'Ese horario acaba de ocuparse. Elige otro horario disponible.'
+          )
+          if (selectedDate) setDate(selectedDate)
+          setStep('datetime')
         } else {
           throw new Error(data.error || 'Error al crear la reserva')
         }
@@ -353,23 +361,6 @@ export function ConfirmStep() {
               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <p className="text-sm">{error}</p>
             </div>
-            {timeUnavailable && (
-              <button
-                onClick={() => {
-                  setError(null)
-                  setTimeUnavailable(false)
-                  // Reset selected time & staff so the user picks a fresh slot from
-                  // the refetched availability; keep the same date so they land on it.
-                  if (selectedDate) setDate(selectedDate)
-                  setStep('datetime')
-                }}
-                className="mt-3 w-full py-2.5 bg-gold/90 text-dark font-semibold rounded-lg
-                         hover:bg-gold transition-colors text-sm flex items-center justify-center gap-1.5"
-              >
-                <Calendar className="w-4 h-4" />
-                Elegir otro horario
-              </button>
-            )}
           </div>
         )}
 
