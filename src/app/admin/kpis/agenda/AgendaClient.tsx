@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { AgendaAppointment, AgendaMonth, StaffAvailability } from '@/lib/kpis/report'
-import { BlackSpinner, CardBox, DeltaChip, Label, LoadingCard, deltaPct } from '../shared'
+import { BlackSpinner, CardBox, DeltaChip, Label, LoadingCard, deltaPct, money } from '../shared'
 import { LangProvider, LangToggle, MONTHS_LONG, WEEKDAY_LETTERS, formatDateLang, useLang, useT } from '../i18n'
 import { prefetchStaffKpis } from '../prefetch'
 
@@ -477,6 +477,9 @@ function AgendaInner() {
             {data.totals.futureBooked > 0 && (
               <p className="text-xs text-spa-green font-bold mt-0.5">
                 + {data.totals.futureBooked.toLocaleString('en-US')} {t('reservas futuras este mes')}
+                {data.totals.expectedIncome !== null && (
+                  <> · ≈ {money(data.totals.expectedIncome)} {t('ingreso esperado')}</>
+                )}
               </p>
             )}
           </div>

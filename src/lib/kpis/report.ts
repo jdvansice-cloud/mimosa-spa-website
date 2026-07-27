@@ -1,5 +1,5 @@
 import { getScheduleItems, getStaff } from '@/lib/booking/mindbody'
-import { panamaToday } from './sync'
+import { addDays, panamaToday } from './sync'
 import {
   fetchAll,
   fetchDaily,
@@ -204,10 +204,12 @@ export interface AgendaMonth {
     lySameDates: number
     /** LY complete month — the goal. */
     lyFullMonth: number
+    /** Estimated net income of the month's remaining bookings (last-30-days $/appointment-minute × booked minutes). */
+    expectedIncome: number | null
   }
 }
 
-interface AgendaApptRow { start_datetime: string; status: string }
+interface AgendaApptRow { start_datetime: string; status: string; duration_min: number | null }
 
 export async function getAgendaMonth(month: string, location: KpiLocation): Promise<AgendaMonth> {
   const supabase = serviceClient()
@@ -217,17 +219,41 @@ export async function getAgendaMonth(month: string, location: KpiLocation): Prom
   const lyStart = minusOneYear(start)
   const lyEnd = minusOneYear(end)
 
-  const [appts, lyAppts] = await Promise.all([
+  const today = panamaToday()
+  const rateStart = addDays(today, -30)
+  const rateEnd = addDays(today, -1)
+
+  const [appts, lyAppts, rateNetRows, rateAppts] = await Promise.all([
     fetchAll<AgendaApptRow>((from, to) => {
       let q = supabase
         .from('mb_appointments')
-        .select('start_datetime,status')
+        .select('start_datetime,status,duration_min')
         .gte('start_datetime', `${start}T00:00:00`)
         .lte('start_datetime', `${end}T23:59:59`)
       if (location !== 'all') q = q.eq('location_id', location)
-      return q.range(from, to) as unknown as PromiseLike<{ data: AgendaApptRow[] | null; error: { message: string } | null }>
+      return q.order('id', { ascending: true }).range(from, to) as unknown as PromiseLike<{ data: AgendaApptRow[] | null; error: { message: string } | null }>
     }),
     fetchDaily<DailyApptRow>(supabase, 'kpi_daily_appointments', 'day', lyStart, lyEnd, location),
+    // last 30 complete days: service net + appointment minutes → $/minute
+    (() => {
+      let q = supabase
+        .from('kpi_daily_sales')
+        .select('net')
+        .eq('bucket', 'service')
+        .gte('sale_date', rateStart)
+        .lte('sale_date', rateEnd)
+      if (location !== 'all') q = q.eq('location_id', location)
+      return q
+    })(),
+    fetchAll<{ duration_min: number | null; status: string }>((from, to) => {
+      let q = supabase
+        .from('mb_appointments')
+        .select('duration_min,status')
+        .gte('start_datetime', `${rateStart}T00:00:00`)
+        .lte('start_datetime', `${rateEnd}T23:59:59`)
+      if (location !== 'all') q = q.eq('location_id', location)
+      return q.order('id', { ascending: true }).range(from, to) as unknown as PromiseLike<{ data: Array<{ duration_min: number | null; status: string }> | null; error: { message: string } | null }>
+    }),
   ])
 
   const byDate = new Map<string, AgendaDay>()
@@ -241,10 +267,25 @@ export async function getAgendaMonth(month: string, location: KpiLocation): Prom
   }
 
   const days = [...byDate.values()]
-  const today = panamaToday()
   // Compare like-for-like: only dates that have already happened
   const cutoff = end < today ? end : today
   const lyCutoff = minusOneYear(cutoff)
+
+  // Expected income of the remaining bookings: recent $/appointment-minute ×
+  // minutes on the books. Duration-weighted so a 90-min booking counts more
+  // than a 30-min one.
+  const rateNet = (rateNetRows.data ?? []).reduce((s, r) => s + Number(r.net ?? 0), 0)
+  const rateMinutes = rateAppts
+    .filter(a => !['Cancelled', 'LateCancelled', 'NoShow'].includes(a.status))
+    .reduce((s, a) => s + (a.duration_min ?? 0), 0)
+  const perMinute = rateMinutes > 0 ? rateNet / rateMinutes : null
+  const futureMinutes = appts
+    .filter(a => a.start_datetime.slice(0, 10) > cutoff && !['Cancelled', 'LateCancelled', 'NoShow'].includes(a.status))
+    .reduce((s, a) => s + (a.duration_min ?? 0), 0)
+  const expectedIncome = perMinute !== null && futureMinutes > 0
+    ? Math.round(perMinute * futureMinutes)
+    : null
+
   return {
     month,
     days,
@@ -253,6 +294,7 @@ export async function getAgendaMonth(month: string, location: KpiLocation): Prom
       futureBooked: days.filter(d => d.date > cutoff).reduce((s, d) => s + d.active, 0),
       lySameDates: lyAppts.filter(r => r.day <= lyCutoff).reduce((s, r) => s + r.visits + r.missed, 0),
       lyFullMonth: lyAppts.reduce((s, r) => s + r.visits + r.missed, 0),
+      expectedIncome,
     },
   }
 }

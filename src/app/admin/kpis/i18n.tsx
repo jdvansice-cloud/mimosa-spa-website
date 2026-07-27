@@ -278,6 +278,7 @@ const EN: Record<string, string> = {
   'Citas del mes': 'Appointments this month',
   'citas en las mismas fechas de': 'appointments on the same dates of',
   'reservas futuras este mes': 'future bookings this month',
+  'ingreso esperado': 'expected income',
   'más intenso = más citas': 'darker = more appointments',
   'verde': 'green', '= reservas futuras': '= future bookings',
   'Reservas futuras sincronizadas ~60 días adelante': 'Future bookings synced ~60 days ahead',
