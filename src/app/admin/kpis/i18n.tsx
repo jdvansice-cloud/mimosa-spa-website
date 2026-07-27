@@ -292,6 +292,46 @@ const EN: Record<string, string> = {
   'No se pudo cargar el día.': 'Could not load the day.',
   'horario disponible': 'working hours',
   'sin llegar': 'not arrived', 'llegó': 'arrived', 'completada': 'completed',
+  // asistencia
+  'Asistencia': 'Attendance',
+  'Marcaciones del reloj NGTeco vs horarios y citas de Mindbody · tardanzas, salidas y horas trabajadas':
+    'NGTeco clock punches vs Mindbody schedules and appointments · lateness, departures and hours worked',
+  'Importar reporte': 'Import report',
+  'Importar reporte de asistencia': 'Import attendance report',
+  'Aún no hay marcaciones. En la app NGTeco Time ve a Reportes, exporta el Excel del período y súbelo aquí.':
+    'No punches yet. In the NGTeco Time app go to Reports, export the period as Excel and upload it here.',
+  'Importando marcaciones…': 'Importing punches…',
+  'Arrastra aquí el export de NGTeco Time': 'Drop the NGTeco Time export here',
+  'xlsx, xls o csv · subir un período repetido corrige las marcaciones anteriores, no las duplica':
+    'xlsx, xls or csv · re-uploading a period corrects earlier punches instead of duplicating them',
+  'Elegir archivo': 'Choose file',
+  'personas': 'people', 'marcaciones': 'punches',
+  'No se pudieron cargar los horarios de Mindbody; las tardanzas se calculan contra la primera cita del día.':
+    'Mindbody schedules could not be loaded; lateness is measured against the first appointment of the day.',
+  'Sin match en Mindbody (revisa el nombre en el reloj):':
+    'No Mindbody match (check the name on the clock):',
+  'Horas trabajadas': 'Hours worked',
+  'programadas': 'scheduled',
+  'sin horario Mindbody': 'no Mindbody schedule',
+  'Horas en citas': 'Hours in appointments',
+  'del tiempo presente': 'of time on site',
+  'Días con tardanza': 'Days arriving late',
+  'más de': 'more than',
+  'min después del horario': 'min after the scheduled start',
+  'Incidencias': 'Incidents',
+  'sin marcar salida': 'missing punch-out',
+  'ausencias con horario': 'absences on a scheduled day',
+  'vinculado con Mindbody': 'matched with Mindbody',
+  'sin match en Mindbody': 'no Mindbody match',
+  'días': 'days',
+  'del horario': 'of schedule',
+  'tardanzas': 'late arrivals',
+  'prom.': 'avg.',
+  'salidas tempranas': 'early departures',
+  'Fecha': 'Date', 'Entrada': 'In', 'Salida': 'Out', 'Horario': 'Schedule', 'Citas': 'Appointments',
+  'no marcó': 'no punch',
+  'sin salida': 'no punch-out',
+  'citas desde': 'appointments from',
 }
 
 const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({

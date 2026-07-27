@@ -23,6 +23,7 @@ import {
   List,
   Megaphone,
   Landmark,
+  AlarmClock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
@@ -44,6 +45,7 @@ const fullNavItems: NavItem[] = [
   { href: '/admin/kpis/staff', label: 'Staff', icon: Users, section: 'Mobile Manager' },
   { href: '/admin/kpis/marketing', label: 'Marketing', icon: Megaphone, section: 'Mobile Manager' },
   { href: '/admin/kpis/negocio', label: 'Negocio', icon: Landmark, section: 'Mobile Manager' },
+  { href: '/admin/kpis/asistencia', label: 'Asistencia', icon: AlarmClock, section: 'Mobile Manager' },
   { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },
   { href: '/admin/giftcards', label: 'Gift Cards', icon: Gift },
