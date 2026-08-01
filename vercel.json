@@ -12,6 +12,14 @@
     {
       "path": "/api/cron/sync-appointments",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/sync-giftcards",
+      "schedule": "15 * * * *"
+    },
+    {
+      "path": "/api/cron/sync-kpis",
+      "schedule": "30 12-23,0-2 * * *"
     }
   ]
 }

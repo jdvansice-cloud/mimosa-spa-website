@@ -275,6 +275,8 @@ export interface Profile {
   full_name: string | null
   role: 'user' | 'admin'
   mindbody_client_id: number | null
+  /** When set on a role='admin' profile, the user is location-restricted (only sees their location's gift card page). */
+  gift_card_location_config_id: string | null
   created_at: string
   updated_at: string
 }
@@ -285,6 +287,7 @@ export interface ProfileUpdate {
   full_name?: string | null
   role?: 'user' | 'admin'
   mindbody_client_id?: number | null
+  gift_card_location_config_id?: string | null
 }
 
 // Supabase Database types (generated from schema)

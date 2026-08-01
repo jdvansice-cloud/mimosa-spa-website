@@ -118,7 +118,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .eq('id', data.user!.id)
         .single() as { data: { role: string } | null; error: unknown }
 
-      if (!profile || profile.role !== 'admin') {
+      if (!profile || (profile.role !== 'admin' && profile.role !== 'mobile_manager')) {
         await supabase.auth.signOut()
         set({ error: 'No tienes permisos de administrador.', isLoading: false, user: null, session: null })
         return { success: false, error: 'Not admin' }

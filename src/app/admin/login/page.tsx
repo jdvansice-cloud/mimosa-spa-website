@@ -1,23 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Mail, KeyRound } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { Logo } from '@/components/layout/Logo'
 import { useAuthStore } from '@/lib/auth/store'
 
 export default function AdminLoginPage() {
-  const router = useRouter()
   const { user, isLoading, error, otpEmail, sendOtp, verifyOtp, clearError } = useAuthStore()
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
 
   useEffect(() => {
     if (user) {
-      router.replace('/admin')
+      // Full navigation (not router.replace): the admin layout was rendered
+      // while unauthenticated, so it must re-render server-side to resolve
+      // the user's scope (mobile_manager / location-restricted sidebar).
+      window.location.assign('/admin')
     }
-  }, [user, router])
+  }, [user])
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,7 +31,8 @@ export default function AdminLoginPage() {
     clearError()
     const result = await verifyOtp(otpEmail!, otp)
     if (result.success) {
-      router.push('/admin')
+      // Full navigation so the server layout re-renders with the new session
+      window.location.assign('/admin')
     }
   }
 

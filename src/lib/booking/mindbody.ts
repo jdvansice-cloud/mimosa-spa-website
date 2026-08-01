@@ -409,6 +409,91 @@ export async function getSessionTypes(onlineOnly: boolean = true) {
   return sessionTypes
 }
 
+export interface MindbodyResource {
+  Id: number
+  Name: string
+  Color?: string | null
+  Description?: string | null
+  Programs?: Array<{ Id: number; Name?: string; ScheduleType?: string }>
+}
+
+export interface MindbodyResourceAvailability {
+  ResourceId: number
+  ResourceName?: string
+  StartDateTime?: string
+  EndDateTime?: string
+  Programs?: Array<{ Id: number; Name?: string; ScheduleType?: string }>
+  ProgramId?: number
+  LocationId?: number
+  // Some Mindbody responses also include these for context:
+  Staff?: { Id: number; FirstName?: string; LastName?: string }
+  SessionType?: { Id: number; Name?: string }
+}
+
+export async function getResourceAvailabilities(params: {
+  startDate: string
+  endDate?: string
+  programIds?: number[]
+  locationIds?: number[]
+  resourceIds?: number[]
+  scheduleTypes?: Array<'Appointment' | 'Resource' | 'Media'>
+  limit?: number
+  offset?: number
+}) {
+  interface Response {
+    PaginationResponse?: {
+      RequestedLimit: number
+      RequestedOffset: number
+      PageSize: number
+      TotalResults: number
+    }
+    ResourceAvailabilities?: MindbodyResourceAvailability[]
+  }
+
+  const queryParams: Record<string, ParamValue> = {
+    startDate: params.startDate,
+    limit: params.limit ?? 200,
+    offset: params.offset ?? 0,
+  }
+  if (params.endDate) queryParams.endDate = params.endDate
+  if (params.programIds && params.programIds.length > 0) queryParams.programIds = params.programIds
+  if (params.locationIds && params.locationIds.length > 0) queryParams.locationIds = params.locationIds
+  if (params.resourceIds && params.resourceIds.length > 0) queryParams.resourceIds = params.resourceIds
+  if (params.scheduleTypes && params.scheduleTypes.length > 0) queryParams.scheduleTypes = params.scheduleTypes
+
+  const response = await mindbodyRequest<Response>('/site/resourceavailabilities', {
+    params: queryParams,
+  })
+
+  const items = response.ResourceAvailabilities || []
+  console.log(`ResourceAvailabilities from Mindbody:`, items.length, 'items')
+  if (response.PaginationResponse) console.log('Pagination:', response.PaginationResponse)
+  return items
+}
+
+export async function getResources(params: { includeInactive?: boolean; resourceIds?: number[] } = {}) {
+  interface ResourcesResponse {
+    Resources?: MindbodyResource[]
+    PaginationResponse?: {
+      TotalResults: number
+      RequestedLimit: number
+      RequestedOffset: number
+    }
+  }
+
+  const queryParams: Record<string, ParamValue> = { limit: 200 }
+  if (params.includeInactive) queryParams.includeInactive = true
+  if (params.resourceIds && params.resourceIds.length > 0) queryParams.resourceIds = params.resourceIds
+
+  const response = await mindbodyRequest<ResourcesResponse>('/site/resources', {
+    params: queryParams,
+  })
+
+  const resources = response.Resources || []
+  console.log(`Resources from Mindbody:`, resources.length)
+  return resources
+}
+
 // Normalize name for matching between sale/services and sessiontypes
 function normalizeServiceName(name: string): string {
   return name
@@ -840,32 +925,39 @@ export async function getStaffWithAvailability(params: {
 // - staffIds (array) - optional, filters by staff
 // - startDate, endDate - date range
 // - limit - max results (default 100)
+export interface BookableItem {
+  Id: number
+  StartDateTime: string
+  EndDateTime: string
+  Staff: {
+    Id: number
+    FirstName: string
+    LastName: string
+  }
+  Location: {
+    Id: number
+    Name: string
+  }
+  SessionType: {
+    Id: number
+    Name: string
+  }
+  Resources?: Array<{
+    Id: number
+    Name?: string
+  }>
+}
+
 export async function getBookableItems(params: {
   locationIds: number
   sessionTypeIds?: number[]
   staffIds?: number
   startDate: string
   endDate: string
+  includeResourceAvailability?: boolean
 }) {
   interface BookableItemsResponse {
-    AvailableItems: Array<{
-      Id: number
-      StartDateTime: string
-      EndDateTime: string
-      Staff: {
-        Id: number
-        FirstName: string
-        LastName: string
-      }
-      Location: {
-        Id: number
-        Name: string
-      }
-      SessionType: {
-        Id: number
-        Name: string
-      }
-    }>
+    AvailableItems: BookableItem[]
     PaginationResponse?: {
       TotalResults: number
       RequestedLimit: number
@@ -891,6 +983,10 @@ export async function getBookableItems(params: {
 
   if (params.staffIds) {
     queryParams.staffIds = [params.staffIds]
+  }
+
+  if (params.includeResourceAvailability) {
+    queryParams.includeResourceAvailability = true
   }
 
   console.log('getBookableItems query params:', queryParams)
@@ -1078,6 +1174,29 @@ export async function getActiveSessionTypes(params: {
 }
 
 // Get schedule items - returns raw schedule blocks for staff
+export interface ScheduleItemAppointment {
+  Id: number
+  StartDateTime: string
+  EndDateTime: string
+  Status: string
+  Duration?: number
+  ProgramId?: number
+  SessionTypeId?: number
+  StaffId?: number
+  LocationId?: number
+  ClientId?: string
+  SessionType?: {
+    Id: number
+    Name: string
+  }
+  // Resources Mindbody returns on the appointment. Empty array on legacy
+  // appointments booked before our flow started attaching ResourceIds.
+  Resources?: Array<{
+    Id: number
+    Name?: string
+  }>
+}
+
 export async function getScheduleItems(params: {
   locationIds: number[]
   staffIds?: number[]
@@ -1089,16 +1208,7 @@ export async function getScheduleItems(params: {
       Id: number
       FirstName: string
       LastName: string
-      Appointments: Array<{
-        Id: number
-        StartDateTime: string
-        EndDateTime: string
-        Status: string
-        SessionType?: {
-          Id: number
-          Name: string
-        }
-      }>
+      Appointments: ScheduleItemAppointment[]
       Availabilities: Array<{
         Id: number
         StartDateTime: string
@@ -1826,3 +1936,41 @@ export async function getPromoCodeByCode(code: string): Promise<MindbodyPromoCod
 
   return exactMatch || null
 }
+
+// ============================================================================
+// Gift cards
+// ============================================================================
+
+export interface GiftCardBalance {
+  BarcodeId: string
+  RemainingBalance: number
+}
+
+/**
+ * Look up a gift card's remaining balance by its printed barcode (our serial).
+ * Returns null if Mindbody has no record of the card (i.e. the sale hasn't
+ * been rung up yet, or the serial was mistyped).
+ */
+export async function getGiftCardBalance(
+  barcodeId: string
+): Promise<GiftCardBalance | null> {
+  try {
+    const response = await mindbodyRequest<GiftCardBalance>(
+      '/sale/giftcardbalance',
+      { params: { barcodeId } }
+    )
+    if (!response || typeof response.RemainingBalance !== 'number') {
+      return null
+    }
+    return response
+  } catch (error) {
+    // Mindbody returns an error (4xx) when the barcode isn't found.
+    // Surface as "not sold yet" rather than a generic failure.
+    const msg = error instanceof Error ? error.message : String(error)
+    if (/40[04]|not found|invalid/i.test(msg)) {
+      return null
+    }
+    throw error
+  }
+}
+
