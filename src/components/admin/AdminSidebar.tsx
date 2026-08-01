@@ -23,7 +23,6 @@ import {
   List,
   Megaphone,
   BedDouble,
-  AlarmClock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
@@ -44,9 +43,9 @@ const fullNavItems: NavItem[] = [
   { href: '/admin/kpis/ventas', label: 'Reporte de Ventas', icon: Receipt, section: 'Mobile Manager' },
   { href: '/admin/kpis/staff', label: 'Staff', icon: Users, section: 'Mobile Manager' },
   { href: '/admin/kpis/marketing', label: 'Marketing', icon: Megaphone, section: 'Mobile Manager' },
-  // Negocio page hidden from nav for now (page still reachable at /admin/kpis/negocio)
+  // Negocio and Asistencia hidden from nav for now
+  // (pages still reachable at /admin/kpis/negocio and /admin/kpis/asistencia)
   { href: '/admin/kpis/capacidad', label: 'Capacidad', icon: BedDouble, section: 'Mobile Manager' },
-  { href: '/admin/kpis/asistencia', label: 'Asistencia', icon: AlarmClock, section: 'Mobile Manager' },
   { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },
   { href: '/admin/giftcards', label: 'Gift Cards', icon: Gift },
