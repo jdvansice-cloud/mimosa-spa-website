@@ -1,10 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Plus, Loader2, Clock, Check, Sparkles, Tag } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Plus, Loader2, Clock, Check, Sparkles, Tag, Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
+
+// Data-driven second-treatment pairing rules, ordered by evidence strength
+// from 6 months of real visits (Feb–Jul 2026):
+//   425× Mimosa Relax 60 + Oriental de Pies 30 · 186× Liberador 45 + Pies camilla 30
+//   118× Mimosa Profundo 60 + Pies 30 · 71× Facial Limpieza Profundo + Liberador 30
+// Each rule: if a selected service matches `when`, suggest first catalog service
+// matching one of `suggest` (skipped if already selected).
+const PAIRING_RULES: Array<{ when: RegExp; suggest: RegExp[] }> = [
+  { when: /facial/i, suggest: [/Liberador de Tension 30/i, /Masaje Oriental de Pies.*30/i] },
+  { when: /oriental de pies/i, suggest: [/Mimosa Relax - 60/i] },
+  { when: /liberador/i, suggest: [/Masaje Oriental de Pies en camilla - 30/i, /Masaje Oriental de Pies - 30/i] },
+  { when: /relax|profundo|detox|aromaterapia|piedras|calma|drenaje/i, suggest: [/Masaje Oriental de Pies - 30/i, /Facial de Limpieza Express/i] },
+]
 
 // Addon Tile Component - Clickable anywhere
 function AddonTile({
@@ -95,6 +108,9 @@ export function AddonsStep() {
     activePromotion,
     globalDiscountPercent,
     globalDiscountActive,
+    selectedServices,
+    services,
+    addService,
   } = useBookingStore()
 
   const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
@@ -102,6 +118,35 @@ export function AddonsStep() {
   const [localAddons, setLocalAddons] = useState<MindbodyService[]>([])
   const [isLoadingAddons, setIsLoadingAddons] = useState(false)
   const [addonsError, setAddonsError] = useState<string | null>(null)
+  const [mainCatalog, setMainCatalog] = useState<MindbodyService[]>(services)
+  const [suggestionDismissed, setSuggestionDismissed] = useState(false)
+
+  // Ensure we have the main-services catalog for the pairing suggestion
+  // (store.services can be empty when the flow skipped ServiceStep, e.g. promos)
+  useEffect(() => {
+    if (mainCatalog.length > 0 || !selectedLocation || activePromotion) return
+    fetch(`/api/mindbody/services?locationId=${selectedLocation.Id}&type=main`)
+      .then(r => r.json())
+      .then(d => { if (d.services) setMainCatalog(d.services) })
+      .catch(() => { /* suggestion simply won't render */ })
+  }, [mainCatalog.length, selectedLocation, activePromotion])
+
+  // Second-treatment suggestion: only for single-service, non-promo bookings
+  const suggestedService = useMemo(() => {
+    if (activePromotion || suggestionDismissed) return null
+    if (selectedServices.length !== 1 || mainCatalog.length === 0) return null
+    const current = selectedServices[0]
+    for (const rule of PAIRING_RULES) {
+      if (!rule.when.test(current.Name)) continue
+      for (const target of rule.suggest) {
+        const match = mainCatalog.find(s =>
+          target.test(s.Name) && s.Id !== current.Id && s.OnlineBooking !== false
+        )
+        if (match) return match
+      }
+    }
+    return null
+  }, [activePromotion, suggestionDismissed, selectedServices, mainCatalog])
 
   // Fetch addons on mount
   useEffect(() => {
@@ -178,6 +223,61 @@ export function AddonsStep() {
             {' '}en todas las reservas online
           </p>
         </div>
+      )}
+
+      {/* Second-treatment suggestion (data-driven pairing) */}
+      {suggestedService && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 p-3.5 bg-gold/5 border-2 border-gold/40 rounded-xl"
+        >
+          <div className="flex items-start gap-2.5">
+            <div className="w-8 h-8 bg-gold/15 rounded-full flex items-center justify-center flex-shrink-0">
+              <Heart className="w-4 h-4 text-gold" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-dark">
+                Completa tu experiencia
+              </p>
+              <p className="text-xs text-warm-gray mb-2.5">
+                Quienes reservan {selectedServices[0]?.Name} suelen acompañarlo con:
+              </p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3">
+                <span className="font-semibold text-dark text-sm">{suggestedService.Name}</span>
+                <span className="text-sm font-bold text-gold-600">+${suggestedService.Price.toFixed(0)}</span>
+                {suggestedService.Duration > 0 && (
+                  <span className="flex items-center gap-1 text-xs text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full">
+                    <Clock className="w-3 h-3" />
+                    +{suggestedService.Duration} min
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    addService(suggestedService)
+                    setSuggestionDismissed(true)
+                  }}
+                  className="flex-1 py-2 bg-gradient-to-r from-gold to-gold/90 text-dark
+                           text-sm font-semibold rounded-lg hover:shadow-md transition-all
+                           flex items-center justify-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4" />
+                  Agregar a mi reserva
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSuggestionDismissed(true)}
+                  className="px-3 py-2 text-sm text-warm-gray hover:text-dark transition-colors"
+                >
+                  Ahora no
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       )}
       
       {/* Loading State */}
