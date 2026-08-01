@@ -22,7 +22,7 @@ import {
   Plus,
   List,
   Megaphone,
-  Landmark,
+  BedDouble,
   AlarmClock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -44,7 +44,8 @@ const fullNavItems: NavItem[] = [
   { href: '/admin/kpis/ventas', label: 'Reporte de Ventas', icon: Receipt, section: 'Mobile Manager' },
   { href: '/admin/kpis/staff', label: 'Staff', icon: Users, section: 'Mobile Manager' },
   { href: '/admin/kpis/marketing', label: 'Marketing', icon: Megaphone, section: 'Mobile Manager' },
-  { href: '/admin/kpis/negocio', label: 'Negocio', icon: Landmark, section: 'Mobile Manager' },
+  // Negocio page hidden from nav for now (page still reachable at /admin/kpis/negocio)
+  { href: '/admin/kpis/capacidad', label: 'Capacidad', icon: BedDouble, section: 'Mobile Manager' },
   { href: '/admin/kpis/asistencia', label: 'Asistencia', icon: AlarmClock, section: 'Mobile Manager' },
   { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
   { href: '/admin/promociones', label: 'Promociones', icon: Tag },

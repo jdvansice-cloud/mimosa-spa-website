@@ -20,6 +20,16 @@ const EN: Record<string, string> = {
   'Día': 'Day',
   'Ene': 'Jan', 'Feb': 'Feb', 'Mar': 'Mar', 'Abr': 'Apr', 'May': 'May', 'Jun': 'Jun',
   'Jul': 'Jul', 'Ago': 'Aug', 'Sep': 'Sep', 'Oct': 'Oct', 'Nov': 'Nov', 'Dic': 'Dec',
+  // capacidad
+  'Capacidad': 'Capacity',
+  'capacidad': 'capacity',
+  'Espacios de tratamiento ocupados vs techo físico (camas + sillas), bloques de 30 min':
+    'Treatment spots occupied vs physical ceiling (beds + chairs), 30-min blocks',
+  'Pico del día': "Day's peak",
+  'Pico promedio por día (últimas 4 semanas)': 'Average peak by weekday (last 4 weeks)',
+  '≥90% = al tope físico: solo crece con combos, horario extendido o llenando valles':
+    '≥90% = at the physical ceiling: growth only via combos, extended hours or filling valleys',
+  'Hoy': 'Today',
   // filters
   'Ayer': 'Yesterday', 'Mes': 'Month', 'Mes pasado': 'Last month', 'Año': 'Year',
   'Este mes': 'This month', 'Este año': 'This year', 'Rango': 'Range',
