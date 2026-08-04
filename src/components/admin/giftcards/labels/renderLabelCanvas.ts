@@ -213,8 +213,8 @@ export async function renderLabelCanvas(
   const serialTop = LABEL_DOTS_H - PAD_BOTTOM - SERIAL_SIZE
   const barsTop = serialTop - SERIAL_GAP - BARS_H
   ctx.drawImage(bars, Math.round((W - bars.width) / 2), barsTop)
-  ctx.font = `600 ${SERIAL_SIZE}px ${MONO}`
-  if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = `${pt(1.8)}px`
+  ctx.font = `400 ${SERIAL_SIZE}px ${MONO}`
+  if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = `${pt(1.4)}px`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
   ctx.fillText(card.serial, centerX, serialTop)
