@@ -23,12 +23,12 @@ const PAD_BOTTOM = pt(7)
 
 const PRICE_SIZE = pt(26) // the number
 const PRICE_SUP = Math.round(PRICE_SIZE * 0.52) // $ and cents, top-aligned
-const EYEBROW_SIZE = pt(6) // "INCLUYE"
-const TREAT_SIZE = pt(8.5)
+const EYEBROW_SIZE = pt(6.5) // "INCLUYE"
+const TREAT_SIZE = pt(9.5)
 const TREAT_LINE = Math.round(TREAT_SIZE * 1.35)
-const MSG_SIZE = pt(10)
+const MSG_SIZE = pt(11)
 const MSG_LINE = Math.round(MSG_SIZE * 1.3)
-const SERIAL_SIZE = pt(8.5)
+const SERIAL_SIZE = pt(9)
 
 const BARS_H = Math.round(0.27 * DPI)
 const BARS_MAX_W = Math.round(2.4 * DPI)
@@ -205,7 +205,7 @@ export async function renderLabelCanvas(
   let bandTop = PAD_TOP
   if (card.print_amount) {
     const h = drawPrice(ctx, card.amount_cents, rightX, PAD_TOP)
-    bandTop = PAD_TOP + h + pt(3)
+    bandTop = PAD_TOP + h + pt(2)
   }
 
   // Barcode + serial — centered, bottom.
@@ -249,12 +249,33 @@ export async function renderLabelCanvas(
         )
       : []
 
-  const eyebrowH = treatLines.length ? EYEBROW_SIZE + pt(2.5) : 0
+  // Bigger body sizes can overflow the band when both blocks max out their
+  // line clamps — drop trailing lines (with ellipsis) before crowding the
+  // barcode.
+  const bandH = barsTop - pt(2) - bandTop
+  const eyebrowH = () => (treatLines.length ? EYEBROW_SIZE + pt(2.5) : 0)
+  const contentH = () =>
+    eyebrowH() +
+    treatLines.length * TREAT_LINE +
+    (treatLines.length && msgLines.length ? pt(5) : 0) +
+    msgLines.length * MSG_LINE
+  const ellipsize = (lines: Seg[][]) => {
+    const last = lines[lines.length - 1]
+    const seg = last[last.length - 1]
+    if (!seg.text.endsWith('…')) last[last.length - 1] = { ...seg, text: seg.text + '…' }
+  }
+  while (contentH() > bandH && msgLines.length > 1) {
+    msgLines.pop()
+    ellipsize(msgLines)
+  }
+  while (contentH() > bandH && treatLines.length > 1) {
+    treatLines.pop()
+    ellipsize(treatLines)
+  }
   const treatH = treatLines.length * TREAT_LINE
   const msgH = msgLines.length * MSG_LINE
-  const gap = treatLines.length && msgLines.length ? pt(6) : 0
-  const bandH = barsTop - pt(2) - bandTop
-  let y = bandTop + Math.max(0, (bandH - (eyebrowH + treatH + gap + msgH)) / 2)
+  const gap = treatLines.length && msgLines.length ? pt(5) : 0
+  let y = bandTop + Math.max(0, (bandH - (eyebrowH() + treatH + gap + msgH)) / 2)
 
   if (treatLines.length) {
     ctx.font = `700 ${EYEBROW_SIZE}px ${LATO}`
@@ -263,7 +284,7 @@ export async function renderLabelCanvas(
     ctx.textBaseline = 'top'
     ctx.fillText('INCLUYE', centerX, y)
     if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = '0px'
-    y += eyebrowH
+    y += eyebrowH()
     for (const line of treatLines) {
       drawCenteredLine(ctx, line, centerX, y + (TREAT_LINE - TREAT_SIZE) / 2)
       y += TREAT_LINE
