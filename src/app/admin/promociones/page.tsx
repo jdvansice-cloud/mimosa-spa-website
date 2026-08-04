@@ -60,6 +60,9 @@ interface PromotionFormData {
   discount_type: 'Percent' | 'Amount' | null
   discount_amount: number | null
   image_url: string | null
+  // UI-only: when true, `price` is set by hand and never recalculated from
+  // services/discount. Not persisted — inferred on edit from price mismatch.
+  manual_price: boolean
 }
 
 const defaultFormData: PromotionFormData = {
@@ -80,6 +83,7 @@ const defaultFormData: PromotionFormData = {
   discount_type: null,
   discount_amount: null,
   image_url: null,
+  manual_price: false,
 }
 
 export default function AdminPromotionsPage() {
@@ -301,6 +305,8 @@ export default function AdminPromotionsPage() {
       promo_code: promoCode.Code,
       discount_type: discountType,
       discount_amount: discountAmount,
+      // Importing from Mindbody implies the calculated price
+      manual_price: false,
     })
 
     // If no services matched, pre-fill the service search to help user find services manually
@@ -349,7 +355,8 @@ export default function AdminPromotionsPage() {
         ...prev,
         mindbody_service_ids: newIds,
         original_price: totalPrice,
-        price: Math.round(promoPrice * 100) / 100,
+        // Manual price is never clobbered by service changes
+        price: prev.manual_price ? prev.price : Math.round(promoPrice * 100) / 100,
         duration_minutes: totalDuration,
         services: serviceNames,
         // Auto-set description if empty
@@ -365,7 +372,7 @@ export default function AdminPromotionsPage() {
       return {
         ...prev,
         discount_type: newType,
-        price: Math.round(promoPrice * 100) / 100,
+        price: prev.manual_price ? prev.price : Math.round(promoPrice * 100) / 100,
       }
     })
   }
@@ -377,7 +384,7 @@ export default function AdminPromotionsPage() {
       return {
         ...prev,
         discount_amount: newAmount,
-        price: Math.round(promoPrice * 100) / 100,
+        price: prev.manual_price ? prev.price : Math.round(promoPrice * 100) / 100,
       }
     })
   }
@@ -442,6 +449,17 @@ export default function AdminPromotionsPage() {
   // Open edit modal
   const handleEdit = (promotion: Promotion) => {
     setEditingPromotion(promotion)
+    // Infer whether the stored price was set by hand: if it doesn't match the
+    // calculated (subtotal − discount) price, treat it as a manual override so
+    // editing services/discount won't clobber it.
+    const expectedPrice = Math.round(
+      calculatePromoPrice(
+        promotion.original_price || 0,
+        promotion.discount_type || null,
+        promotion.discount_amount || null
+      ) * 100
+    ) / 100
+    const inferredManual = Math.abs((promotion.price ?? 0) - expectedPrice) > 0.01
     setFormData({
       title_es: promotion.title_es,
       title_en: promotion.title_en || '',
@@ -460,6 +478,7 @@ export default function AdminPromotionsPage() {
       discount_type: promotion.discount_type || null,
       discount_amount: promotion.discount_amount || null,
       image_url: promotion.image_url || null,
+      manual_price: inferredManual,
     })
     setServiceSearch('')
     setImagePreview(null)
@@ -475,9 +494,11 @@ export default function AdminPromotionsPage() {
 
     try {
       const method = editingPromotion ? 'PUT' : 'POST'
+      // manual_price is a UI-only flag — the promotions table has no such column
+      const { manual_price: _manualPrice, ...payload } = formData
       const body = editingPromotion
-        ? { id: editingPromotion.id, ...formData }
-        : formData
+        ? { id: editingPromotion.id, ...payload }
+        : payload
 
       const response = await fetch('/api/promotions', {
         method,
@@ -1052,9 +1073,59 @@ export default function AdminPromotionsPage() {
                   </span>
                 </div>
                 <div className="border-t border-green-300 pt-2 flex justify-between">
-                  <span className="font-semibold text-dark">Precio Promocional:</span>
-                  <span className="font-bold text-lg text-green-700">${formData.price.toFixed(2)}</span>
+                  <span className="font-semibold text-dark">
+                    {formData.manual_price ? 'Precio calculado (referencia):' : 'Precio Promocional:'}
+                  </span>
+                  <span className={`font-bold text-lg ${formData.manual_price ? 'text-warm-gray line-through' : 'text-green-700'}`}>
+                    ${calculatePromoPrice(formData.original_price || 0, formData.discount_type, formData.discount_amount).toFixed(2)}
+                  </span>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Manual Price Override */}
+          {formData.mindbody_service_ids.length > 0 && (
+            <div className={`rounded-lg p-4 border ${formData.manual_price ? 'bg-gold/10 border-gold/40' : 'bg-beige-50 border-beige-200'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  id="manual_price"
+                  checked={formData.manual_price}
+                  onChange={(e) => {
+                    const manual = e.target.checked
+                    setFormData(prev => ({
+                      ...prev,
+                      manual_price: manual,
+                      // Turning override off restores the calculated price
+                      price: manual
+                        ? prev.price
+                        : Math.round(calculatePromoPrice(prev.original_price || 0, prev.discount_type, prev.discount_amount) * 100) / 100,
+                    }))
+                  }}
+                />
+                <label htmlFor="manual_price" className="text-sm font-medium text-dark">
+                  Fijar precio manualmente
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="relative w-40">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray text-sm">$</span>
+                  <input
+                    type="number"
+                    className={`input pl-7 ${formData.manual_price ? '' : 'bg-beige-100 text-warm-gray'}`}
+                    value={formData.price}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value ? parseFloat(e.target.value) : 0 }))}
+                    readOnly={!formData.manual_price}
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <p className="text-xs text-warm-gray">
+                  {formData.manual_price
+                    ? 'Este precio se usará tal cual — no se recalcula al cambiar servicios o descuento.'
+                    : 'Precio calculado automáticamente (subtotal − descuento). Marca la casilla para fijarlo a mano.'}
+                </p>
               </div>
             </div>
           )}
