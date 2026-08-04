@@ -1,31 +1,36 @@
 'use client'
 
 import JsBarcode from 'jsbarcode'
-import { LabelCard, formatLabelMoney, LABEL_WIDTH_IN, LABEL_HEIGHT_IN } from './types'
+import { LabelCard, LABEL_WIDTH_IN, LABEL_HEIGHT_IN } from './types'
 
 // The label is rasterized at the printers' native 203 dpi so the printed
 // dots match the canvas pixels 1:1 — no browser/driver scaling in the path.
 // Width varies per printer profile (D520 3in / TSP143 2.835in).
+//
+// Design: Apple-gift-card minimalism adapted to 1-bit thermal — a small
+// raised "$" beside a large plain number (cents raised and small, hidden
+// when zero), tiny letterspaced caps as the only structural labels, no
+// rules or boxes, whitespace doing the layout work.
 const DPI = 203
 export const LABEL_DOTS_H = Math.round(LABEL_HEIGHT_IN * DPI) // 406
 
-// pt → dots (203/72). Sizes mirror the approved label design.
+// pt → dots (203/72).
 const pt = (n: number) => Math.round((n * DPI) / 72)
 
-const PAD_TOP = pt(6.5)
-const PAD_X = pt(11.5) // ≈4 mm — die-cut position tolerance on the D520
+const PAD_TOP = pt(7)
+const PAD_X = pt(11.5) // ≈4 mm — die-cut position tolerance
 const PAD_BOTTOM = pt(7)
 
-const EYEBROW_SIZE = pt(6.5)
-const AMOUNT_SIZE = pt(16)
-const TREAT_SIZE = pt(8)
-const TREAT_LINE = Math.round(TREAT_SIZE * 1.3)
-const MSG_SIZE = pt(9.5)
-const MSG_LINE = Math.round(MSG_SIZE * 1.25)
-const SERIAL_SIZE = pt(9)
-const BAND_GAP = pt(5)
+const PRICE_SIZE = pt(26) // the number
+const PRICE_SUP = Math.round(PRICE_SIZE * 0.52) // $ and cents, top-aligned
+const EYEBROW_SIZE = pt(6) // "INCLUYE"
+const TREAT_SIZE = pt(8.5)
+const TREAT_LINE = Math.round(TREAT_SIZE * 1.35)
+const MSG_SIZE = pt(10)
+const MSG_LINE = Math.round(MSG_SIZE * 1.3)
+const SERIAL_SIZE = pt(8.5)
 
-const BARS_H = Math.round(0.27 * DPI) // barcode bar height (0.27in)
+const BARS_H = Math.round(0.27 * DPI)
 const BARS_MAX_W = Math.round(2.4 * DPI)
 const SERIAL_GAP = pt(2)
 
@@ -98,6 +103,50 @@ function drawCenteredLine(
   }
 }
 
+/**
+ * Price in the Apple gift card idiom: raised small "$", large number, and —
+ * only when the amount has cents — raised small cents. Right-aligned so it
+ * anchors the top-right corner. Returns the block height.
+ */
+function drawPrice(
+  ctx: CanvasRenderingContext2D,
+  amountCents: number,
+  rightX: number,
+  topY: number
+): number {
+  const whole = Math.floor(amountCents / 100).toLocaleString('en-US')
+  const cents = amountCents % 100
+  const centsText = cents > 0 ? String(cents).padStart(2, '0') : null
+
+  const numFont = `700 ${PRICE_SIZE}px ${LATO}`
+  const supFont = `700 ${PRICE_SUP}px ${LATO}`
+  ctx.textBaseline = 'top'
+  ctx.textAlign = 'left'
+
+  ctx.font = supFont
+  const dollarW = ctx.measureText('$').width
+  const centsW = centsText ? ctx.measureText(centsText).width : 0
+  ctx.font = numFont
+  const numW = ctx.measureText(whole).width
+
+  const gap = pt(0.7)
+  const total = dollarW + gap + numW + (centsText ? gap + centsW : 0)
+  const supY = topY + pt(1.2) // optical top alignment of the small glyphs
+  let x = rightX - total
+
+  ctx.font = supFont
+  ctx.fillText('$', x, supY)
+  x += dollarW + gap
+  ctx.font = numFont
+  ctx.fillText(whole, x, topY)
+  x += numW + gap
+  if (centsText) {
+    ctx.font = supFont
+    ctx.fillText(centsText, x, supY)
+  }
+  return PRICE_SIZE
+}
+
 /** Code128 bars at exact dot multiples (3 dots/module, 2 if it must fit). */
 function renderBarcode(serial: string): HTMLCanvasElement {
   const bc = document.createElement('canvas')
@@ -124,10 +173,10 @@ export async function renderLabelCanvas(
   widthIn: number = LABEL_WIDTH_IN
 ): Promise<HTMLCanvasElement> {
   await Promise.all([
+    document.fonts.load(`700 ${PRICE_SIZE}px ${LATO}`),
+    document.fonts.load(`700 ${PRICE_SUP}px ${LATO}`),
     document.fonts.load(`700 ${EYEBROW_SIZE}px ${LATO}`),
-    document.fonts.load(`900 ${AMOUNT_SIZE}px ${LATO}`),
     document.fonts.load(`400 ${TREAT_SIZE}px ${LATO}`),
-    document.fonts.load(`700 ${TREAT_SIZE}px ${LATO}`),
     document.fonts.load(`italic 400 ${MSG_SIZE}px ${LATO}`),
   ])
 
@@ -144,38 +193,27 @@ export async function renderLabelCanvas(
   const centerX = W / 2
   const rightX = W - PAD_X
 
-  // Amount block — top right.
+  // Price — top right. When hidden, the middle band owns the whole top.
   let bandTop = PAD_TOP
   if (card.print_amount) {
-    ctx.textBaseline = 'top'
-    ctx.textAlign = 'right'
-    ctx.font = `700 ${EYEBROW_SIZE}px ${LATO}`
-    if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = `${pt(1.4)}px`
-    ctx.fillText('VALOR', rightX, PAD_TOP)
-    if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = '0px'
-    ctx.font = `900 ${AMOUNT_SIZE}px ${LATO}`
-    ctx.fillText(
-      formatLabelMoney(card.amount_cents, card.currency),
-      rightX,
-      PAD_TOP + EYEBROW_SIZE + pt(1.5)
-    )
-    bandTop = PAD_TOP + EYEBROW_SIZE + pt(1.5) + AMOUNT_SIZE + pt(2)
+    const h = drawPrice(ctx, card.amount_cents, rightX, PAD_TOP)
+    bandTop = PAD_TOP + h + pt(3)
   }
 
-  // Barcode + serial block — bottom, centered.
+  // Barcode + serial — centered, bottom.
   const bars = renderBarcode(card.serial)
   const serialTop = LABEL_DOTS_H - PAD_BOTTOM - SERIAL_SIZE
   const barsTop = serialTop - SERIAL_GAP - BARS_H
   ctx.drawImage(bars, Math.round((W - bars.width) / 2), barsTop)
   ctx.font = `600 ${SERIAL_SIZE}px ${MONO}`
-  if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = `${pt(1.6)}px`
+  if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = `${pt(1.8)}px`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
   ctx.fillText(card.serial, centerX, serialTop)
   if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = '0px'
 
-  // Middle band — treatments and/or message, vertically centered between
-  // the amount block and the barcode.
+  // Middle band — whichever of treatments / message are enabled, vertically
+  // centered together in the space between price and barcode.
   const showTreatments =
     card.print_treatments &&
     Array.isArray(card.gift_treatment_names) &&
@@ -184,9 +222,8 @@ export async function renderLabelCanvas(
     ? wrapSegments(
         ctx,
         [
-          { text: 'Incluye:', font: `700 ${TREAT_SIZE}px ${LATO}` },
           {
-            text: (card.gift_treatment_names ?? []).join(' · '),
+            text: (card.gift_treatment_names ?? []).join('  ·  '),
             font: `400 ${TREAT_SIZE}px ${LATO}`,
           },
         ],
@@ -204,14 +241,25 @@ export async function renderLabelCanvas(
         )
       : []
 
+  const eyebrowH = treatLines.length ? EYEBROW_SIZE + pt(2.5) : 0
   const treatH = treatLines.length * TREAT_LINE
   const msgH = msgLines.length * MSG_LINE
-  const gap = treatLines.length && msgLines.length ? BAND_GAP : 0
+  const gap = treatLines.length && msgLines.length ? pt(6) : 0
   const bandH = barsTop - pt(2) - bandTop
-  let y = bandTop + Math.max(0, (bandH - (treatH + gap + msgH)) / 2)
-  for (const line of treatLines) {
-    drawCenteredLine(ctx, line, centerX, y + (TREAT_LINE - TREAT_SIZE) / 2)
-    y += TREAT_LINE
+  let y = bandTop + Math.max(0, (bandH - (eyebrowH + treatH + gap + msgH)) / 2)
+
+  if (treatLines.length) {
+    ctx.font = `700 ${EYEBROW_SIZE}px ${LATO}`
+    if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = `${pt(1.3)}px`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+    ctx.fillText('INCLUYE', centerX, y)
+    if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = '0px'
+    y += eyebrowH
+    for (const line of treatLines) {
+      drawCenteredLine(ctx, line, centerX, y + (TREAT_LINE - TREAT_SIZE) / 2)
+      y += TREAT_LINE
+    }
   }
   y += gap
   for (const line of msgLines) {
