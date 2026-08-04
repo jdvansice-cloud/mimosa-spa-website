@@ -179,7 +179,7 @@ function StaffInner() {
                   <Award className="h-3.5 w-3.5" />{t('Más solicitada')}
                 </div>
                 <p className="text-sm font-bold text-dark mt-1 leading-tight">{podium.requested.name.split(' ')[0]}</p>
-                <p className="text-xs text-warm-gray tabular-nums">{pct(podium.requested.requestedPct)} {t('de sus visitas')}</p>
+                <p className="text-xs text-warm-gray tabular-nums">{pct(podium.requested.requestedPct)} {t('de sus tratamientos')}</p>
               </div>
               <div className="rounded-2xl border border-gold-200 bg-gold-50 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-gold-700">
@@ -214,7 +214,8 @@ function StaffInner() {
               {[
                 { v: String(data.members.length), l: t('terapeutas') },
                 { v: data.team.hours.toLocaleString('en-US'), l: t('horas') },
-                { v: data.team.visits.toLocaleString('en-US'), l: t('visitas') },
+                { v: data.team.clientVisits.toLocaleString('en-US'), l: t('visitas') },
+                { v: data.team.visits.toLocaleString('en-US'), l: t('tratamientos') },
                 { v: money(data.team.net), l: t('neto') },
                 { v: money(data.team.tips), l: t('propinas') },
                 { v: pct(data.team.requestedPct), l: t('solicitadas') },
@@ -241,7 +242,7 @@ function StaffInner() {
                       {t('Terapeuta')}
                     </th>
                     {th('hours', t('Horas'), 'text-right px-2.5')}
-                    {th('visits', t('Visitas'), 'text-right px-2.5')}
+                    {th('visits', t('Tratam.'), 'text-right px-2.5')}
                     {th('net', t('Neto'), 'text-right px-2.5')}
                     {th('tips', t('Propinas'), 'text-right px-2.5')}
                     {th('cabinaNet', t('Cabina'), 'text-right px-2.5')}
@@ -304,7 +305,8 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
               <span className="flex items-center gap-1.5">
                 <DeltaChip delta={deltaPct(m.hours, m.lyHours)} suffix={`${t('horas')} vs ${lyYear}`} />
               </span>
-              <span className="text-warm-gray tabular-nums">{t('promedio')}/{t('visita')}: <b className="text-dark">{money(m.avgPerVisit)}</b></span>
+              <span className="text-warm-gray tabular-nums">{t('visitas')}: <b className="text-dark">{m.clientVisits}</b></span>
+              <span className="text-warm-gray tabular-nums">{t('promedio')}/{t('tratamiento')}: <b className="text-dark">{money(m.avgPerVisit)}</b></span>
               <span className="text-warm-gray tabular-nums">{t('primeras visitas')}: <b className="text-dark">{m.firstVisits}</b></span>
               <span className="text-warm-gray tabular-nums">no-shows: <b className="text-dark">{pct(m.noShowRate)}</b></span>
               {m.tipRate !== null && (
@@ -320,7 +322,7 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
               )}
               {m.cabinaCount > 0 && (
                 <span className="text-warm-gray tabular-nums">
-                  {t('venta cabina')}: <b className="text-dark">{money(m.cabinaNet)}</b> · {m.cabinaCount} {t('extras')} · <b className="text-dark">{pct(m.cabinaAttach)}</b> {t('de sus visitas')}
+                  {t('venta cabina')}: <b className="text-dark">{money(m.cabinaNet)}</b> · {m.cabinaCount} {t('extras')} · <b className="text-dark">{pct(m.cabinaAttach)}</b> {t('de sus tratamientos')}
                   {m.lyCabinaNet > 0 && <> · {lyYear}: {money(m.lyCabinaNet)}</>}
                 </span>
               )}

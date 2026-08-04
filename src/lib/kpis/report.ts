@@ -6,6 +6,7 @@ import {
   minusOneYear,
   serviceClient,
   type DailyApptRow,
+  type DailyClientVisitRow,
   type DailyCountRow,
   type DailySaleRow,
   type KpiLocation,
@@ -81,12 +82,12 @@ export async function getSalesReport(start: string, end: string, location: KpiLo
       ? Promise.resolve([] as DailyCountRow[])
       : fetchDaily<DailyCountRow>(supabase, 'kpi_daily_sale_counts', 'sale_date', start, end, location),
     gcMode
-      ? Promise.resolve([] as DailyApptRow[])
-      : fetchDaily<DailyApptRow>(supabase, 'kpi_daily_appointments', 'day', start, end, location),
+      ? Promise.resolve([] as DailyClientVisitRow[])
+      : fetchDaily<DailyClientVisitRow>(supabase, 'kpi_daily_client_visits', 'day', start, end, location),
     fetchDaily<DailySaleRow & GcUsageRow>(supabase, salesView, 'sale_date', lyRange.start, lyRange.end, location),
     gcMode
-      ? Promise.resolve([] as DailyApptRow[])
-      : fetchDaily<DailyApptRow>(supabase, 'kpi_daily_appointments', 'day', lyRange.start, lyRange.end, location),
+      ? Promise.resolve([] as DailyClientVisitRow[])
+      : fetchDaily<DailyClientVisitRow>(supabase, 'kpi_daily_client_visits', 'day', lyRange.start, lyRange.end, location),
   ])
 
   const netByDate = new Map<string, number>()

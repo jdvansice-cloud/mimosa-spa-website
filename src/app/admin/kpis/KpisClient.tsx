@@ -58,10 +58,12 @@ function YearBars({ cur, prev, labels }: { cur: Array<number | null>; prev: Arra
 
 /** Stat card that expands into a monthly comparison chart when tapped. */
 function ExpandableStat({
-  label, value, chip, goal, chart, chartFormat, curYear, prevYear, monthLabels, open, onToggle,
+  label, value, sub, chip, goal, chart, chartFormat, curYear, prevYear, monthLabels, open, onToggle,
 }: {
   label: string
   value: string
+  /** Small companion line under the value (e.g. treatments behind the visits). */
+  sub?: string | null
   chip: React.ReactNode
   /** "Meta — <period> completo: <value>" line, when the period is still in progress. */
   goal?: string | null
@@ -86,6 +88,7 @@ function ExpandableStat({
           <ChevronDown className={`h-4 w-4 text-warm-gray shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
         </div>
         <p className="text-2xl font-bold text-dark tabular-nums mt-1">{value}</p>
+        {sub && <p className="text-[10px] text-warm-gray tabular-nums">{sub}</p>}
         <div className="mt-1">{chip}</div>
         {goal && <p className="text-[10px] text-warm-gray mt-1 tabular-nums">{goal}</p>}
       </button>
@@ -365,6 +368,7 @@ function KpisInner() {
             <ExpandableStat
               label={t('Visitas')}
               value={data.visits.count.toLocaleString('en-US')}
+              sub={`${data.treatments.count.toLocaleString('en-US')} ${t('tratamientos')}`}
               chip={<DeltaChip delta={deltaPct(data.visits.count, data.visits.lyCount)} suffix={vsLabel} />}
               goal={goalLine(data.goals ? data.goals.visits.toLocaleString('en-US') : null)}
               chart={data.monthly.visits}
@@ -597,7 +601,7 @@ function KpisInner() {
                 <thead>
                   <tr className="text-[10px] font-bold tracking-wider uppercase text-warm-gray">
                     <th className="text-left font-bold py-1.5">{t('Terapeuta')}</th>
-                    <th className="text-right font-bold py-1.5">{t('Visitas')}</th>
+                    <th className="text-right font-bold py-1.5">{t('Tratam.')}</th>
                     <th className="text-right font-bold py-1.5">{t('Horas')}</th>
                     <th className="text-right font-bold py-1.5">{t('Neto')}</th>
                   </tr>

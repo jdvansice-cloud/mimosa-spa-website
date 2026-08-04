@@ -91,6 +91,8 @@ const EN: Record<string, string> = {
   'Terapeuta': 'Therapist', 'Horas': 'Hours',
   'Sin visitas en el período.': 'No visits in this period.',
   'visitas': 'visits', 'ventas': 'sales',
+  'Tratamientos': 'Treatments', 'tratamientos': 'treatments', 'tratamiento': 'treatment',
+  'Tratam.': 'Treatm.', 'de sus tratamientos': 'of her treatments',
   'Resto del equipo': 'Rest of the team', 'Sin asignar': 'Unassigned',
   'Sin cita asociada': 'No linked appointment',
   'Ingreso de servicios atribuido a la terapeuta de la cita del mismo día del cliente.':

@@ -50,7 +50,10 @@ export interface KpiPayload {
     mix: { service: number; retail: number; giftcard: number }
     series: KpiSeries
   }
+  /** Client visits: one client on one day = 1 visit, regardless of treatments. */
   visits: { count: number; lyCount: number }
+  /** Treatments: appointment count (a visit can include several treatments). */
+  treatments: { count: number; lyCount: number }
   newClients: { count: number; lyCount: number }
   /** Full previous period per metric (complete LY month/year) — null for already-complete periods. */
   goals: {
@@ -174,6 +177,7 @@ interface ApptRow {
 export interface DailySaleRow { sale_date: string; location_id: number; bucket: string; net: number }
 export interface DailyCountRow { sale_date: string; location_id: number; sale_count: number }
 export interface DailyApptRow { day: string; location_id: number; visits: number; missed: number; new_clients: number }
+export interface DailyClientVisitRow { day: string; location_id: number; visits: number; treatments: number }
 
 const CANCELLED_STATUSES = new Set(['Cancelled', 'LateCancelled', 'NoShow'])
 const MISSED_STATUSES = new Set(['NoShow', 'LateCancelled'])
@@ -386,9 +390,17 @@ function visitStats(appts: ApptRow[]) {
   const newClientIds = new Set(
     visits.filter(a => a.first_appointment && a.client_id).map(a => a.client_id as string)
   )
+  // client visits: one client on one day (per location) = 1 visit
+  const clientDays = new Set<string>()
+  let anonymous = 0
+  for (const a of visits) {
+    if (a.client_id) clientDays.add(`${a.client_id}|${a.start_datetime.slice(0, 10)}|${a.location_id}`)
+    else anonymous++
+  }
   return {
     visits,
     visitCount: visits.length,
+    clientVisitCount: clientDays.size + anonymous,
     missed,
     noShowRate: attempted > 0 ? missed / attempted : null,
     newClients: newClientIds.size,
@@ -491,7 +503,7 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
   const noAppts = Promise.resolve([] as ApptRow[])
   const [
     curItems, lyDayItems,
-    salesDailyRaw, countsDailyRaw, apptsDaily,
+    salesDailyRaw, countsDailyRaw, apptsDaily, cvDaily,
     curAppts, futureAppts,
     cohortWindowAppts, lyCohortWindowAppts,
     syncState,
@@ -505,6 +517,9 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
       ? Promise.resolve([] as DailyCountRow[])
       : fetchDaily<DailyCountRow>(supabase, 'kpi_daily_sale_counts', 'sale_date', viewStart, asOf, location),
     fetchDaily<DailyApptRow>(supabase, 'kpi_daily_appointments', 'day', viewStart, asOf, location),
+    gcMode
+      ? Promise.resolve([] as DailyClientVisitRow[])
+      : fetchDaily<DailyClientVisitRow>(supabase, 'kpi_daily_client_visits', 'day', viewStart, asOf, location),
     // Appointment-based metrics don't apply to the gift-card view
     gcMode ? noAppts : fetchAppts(supabase, `${range.start}T00:00:00`, `${range.end}T23:59:59`, location),
     gcMode ? noAppts : fetchAppts(supabase, nowStamp, `${addDays(asOf, 91)}T23:59:59`, location),
@@ -528,19 +543,27 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
   // ---- last-year figures from the daily views ----
   const lyNet = sumSales(salesDaily, lyRange)
   const lySaleCount = sumCounts(countsDaily, lyRange)
-  let lyVisitCount = 0, lyMissed = 0, lyNew = 0
+  let lyTreatments = 0, lyMissed = 0, lyNew = 0
   for (const row of apptsDaily) {
     if (inRange(row.day, lyRange)) {
-      lyVisitCount += row.visits
+      lyTreatments += row.visits
       lyMissed += row.missed
       lyNew += row.new_clients
     }
   }
-  const lyAttempted = lyVisitCount + lyMissed
+  let lyClientVisits = 0
+  for (const row of cvDaily) if (inRange(row.day, lyRange)) lyClientVisits += row.visits
+  const lyAttempted = lyTreatments + lyMissed
 
   // ---- monthly drill-down series (Jan..Dec, current vs previous year) ----
   const mk = () => ({ cur: new Array<number>(12).fill(0), prev: new Array<number>(12).fill(0) })
-  const mNet = mk(), mCount = mk(), mVisits = mk(), mMissed = mk(), mNew = mk()
+  const mNet = mk(), mCount = mk(), mVisits = mk(), mMissed = mk(), mNew = mk(), mCV = mk()
+  for (const row of cvDaily) {
+    for (const [year, side] of [[curYear, 'cur'], [prevYear, 'prev']] as const) {
+      const i = monthIdx(row.day, year)
+      if (i >= 0) mCV[side][i] += row.visits
+    }
+  }
   for (const row of salesDaily) {
     let i = monthIdx(row.sale_date, curYear)
     if (i >= 0) mNet.cur[i] += Number(row.net)
@@ -572,7 +595,7 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
     prevYear,
     net: { cur: nullFuture(mNet.cur.map(round2), curMonthIdx), prev: mNet.prev.map(round2) },
     avgTicket: { cur: nullFuture(ticketOf(mNet.cur, mCount.cur), curMonthIdx), prev: ticketOf(mNet.prev, mCount.prev) },
-    visits: { cur: nullFuture(mVisits.cur, curMonthIdx), prev: mVisits.prev.map(v => v) },
+    visits: { cur: nullFuture(mCV.cur, curMonthIdx), prev: mCV.prev.map(v => v) },
     newClients: { cur: nullFuture(mNew.cur, curMonthIdx), prev: mNew.prev.map(v => v) },
     noShowRate: { cur: nullFuture(rateOf(mMissed.cur, mVisits.cur), curMonthIdx), prev: rateOf(mMissed.prev, mVisits.prev) },
   }
@@ -589,7 +612,7 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
     goals = {
       net: round2(gNet),
       avgTicket: gCount > 0 ? round2(gNet / gCount) : 0,
-      visits: gVisits,
+      visits: pick(mCV.prev),
       newClients: pick(mNew.prev),
       noShowRate: gVisits + gMissed > 0 ? gMissed / (gVisits + gMissed) : 0,
     }
@@ -750,9 +773,15 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
       if (name) clientNameById.set(c.id, name)
     }
   }
+  // client visits = distinct days, not appointment count
   const visitsByClient = new Map<string, number>()
+  const seenClientDays = new Set<string>()
   for (const a of curVisits.visits) {
-    if (a.client_id) visitsByClient.set(a.client_id, (visitsByClient.get(a.client_id) ?? 0) + 1)
+    if (!a.client_id) continue
+    const key = `${a.client_id}|${a.start_datetime.slice(0, 10)}`
+    if (seenClientDays.has(key)) continue
+    seenClientDays.add(key)
+    visitsByClient.set(a.client_id, (visitsByClient.get(a.client_id) ?? 0) + 1)
   }
   const topClients = topSpenders.map(([id, net]) => ({
     name: clientNameById.get(id) ?? `Cliente ${id}`,
@@ -799,7 +828,8 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
       },
       series,
     },
-    visits: { count: curVisits.visitCount, lyCount: lyVisitCount },
+    visits: { count: curVisits.clientVisitCount, lyCount: lyClientVisits },
+    treatments: { count: curVisits.visitCount, lyCount: lyTreatments },
     newClients: { count: curVisits.newClients, lyCount: lyNew },
     goals,
     budget,
