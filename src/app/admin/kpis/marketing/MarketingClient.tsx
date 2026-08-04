@@ -5,6 +5,7 @@ import type { MarketingPayload } from '@/lib/kpis/marketing'
 import type { KpiPeriod } from '@/lib/kpis/queries'
 import { CardBox, Label, LoadingCard, DualLine, pct } from '../shared'
 import { LangProvider, LangToggle, formatDateLang, useLang, useT } from '../i18n'
+import { DictionaryLink } from '../explain'
 import { prefetchStaffKpis } from '../prefetch'
 
 // ===========================================
@@ -82,6 +83,7 @@ function MarketingInner() {
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-display font-semibold text-dark">Marketing</h1>
           <LangToggle />
+          <DictionaryLink />
         </div>
         <p className="text-sm text-warm-gray mt-1">{t('Tráfico del sitio, canales de adquisición y embudo de reservas online')}</p>
         {data?.firstEventDate && (
@@ -136,28 +138,28 @@ function MarketingInner() {
           {/* Traffic tiles */}
           <div className="grid grid-cols-2 gap-3">
             <CardBox>
-              <Label>{t('Sesiones')}</Label>
+              <Label info="sesiones">{t('Sesiones')}</Label>
               <p className="text-2xl font-bold text-dark tabular-nums mt-1">{data.traffic.sessions.toLocaleString('en-US')}</p>
               {data.traffic.mobilePct !== null && (
                 <p className="text-xs text-warm-gray tabular-nums">{pct(data.traffic.mobilePct)} {t('desde móvil')}</p>
               )}
             </CardBox>
             <CardBox>
-              <Label>{t('Vistas de página')}</Label>
+              <Label info="paginas">{t('Vistas de página')}</Label>
               <p className="text-2xl font-bold text-dark tabular-nums mt-1">{data.traffic.pageViews.toLocaleString('en-US')}</p>
               {data.traffic.viewsPerSession !== null && (
                 <p className="text-xs text-warm-gray tabular-nums">{data.traffic.viewsPerSession} {t('por sesión')}</p>
               )}
             </CardBox>
             <CardBox>
-              <Label>{t('Reservas online')}</Label>
+              <Label info="reservas_online">{t('Reservas online')}</Label>
               <p className="text-2xl font-bold text-dark tabular-nums mt-1">{data.funnel.completed.toLocaleString('en-US')}</p>
               <p className="text-xs text-warm-gray tabular-nums">
                 {pct(data.funnel.visitToComplete)} {t('de las sesiones')}
               </p>
             </CardBox>
             <CardBox>
-              <Label>{t('Conversión del embudo')}</Label>
+              <Label info="conversion">{t('Conversión del embudo')}</Label>
               <p className="text-2xl font-bold text-dark tabular-nums mt-1">{pct(data.funnel.startToComplete)}</p>
               <p className="text-xs text-warm-gray">{t('de quienes abren la reserva, completan')}</p>
             </CardBox>
@@ -165,7 +167,7 @@ function MarketingInner() {
 
           {/* Daily page views */}
           <CardBox>
-            <Label>{t('Vistas de página por día')}</Label>
+            <Label info="vistas_dia">{t('Vistas de página por día')}</Label>
             <div className="mt-2">
               <DualLine series={data.traffic.series} formatY={v => String(Math.round(v))} />
             </div>
@@ -173,7 +175,7 @@ function MarketingInner() {
 
           {/* Booking funnel */}
           <CardBox>
-            <Label>{t('Embudo de reserva online')}</Label>
+            <Label info="embudo">{t('Embudo de reserva online')}</Label>
             <div className="mt-3 space-y-2">
               {data.funnel.steps.map((s, i) => {
                 const prev = i > 0 ? data.funnel.steps[i - 1].sessions : null
@@ -205,7 +207,7 @@ function MarketingInner() {
 
           {/* Channels */}
           <CardBox className="p-0 overflow-hidden">
-            <div className="px-4 pt-4"><Label>{t('Canales de adquisición')}</Label></div>
+            <div className="px-4 pt-4"><Label info="canales">{t('Canales de adquisición')}</Label></div>
             {data.channels.length === 0 ? (
               <p className="text-sm text-warm-gray px-4 py-3">{t('Aún no hay sesiones en el período.')}</p>
             ) : (
@@ -237,7 +239,7 @@ function MarketingInner() {
 
           {/* Top pages */}
           <CardBox>
-            <Label>{t('Páginas más vistas')}</Label>
+            <Label info="top_paginas">{t('Páginas más vistas')}</Label>
             {data.traffic.topPages.length === 0 ? (
               <p className="text-sm text-warm-gray mt-2">{t('Aún no hay vistas en el período.')}</p>
             ) : (
@@ -254,7 +256,7 @@ function MarketingInner() {
 
           {/* Online share */}
           <CardBox>
-            <Label>{t('Reservas online vs citas del período')}</Label>
+            <Label info="online_share">{t('Reservas online vs citas del período')}</Label>
             <p className="text-2xl font-bold text-dark tabular-nums mt-1">{pct(data.onlineShare.pct)}</p>
             <p className="text-xs text-warm-gray tabular-nums">
               {data.onlineShare.completed.toLocaleString('en-US')} {t('reservas online')} · {data.onlineShare.appointments.toLocaleString('en-US')} {t('citas')}

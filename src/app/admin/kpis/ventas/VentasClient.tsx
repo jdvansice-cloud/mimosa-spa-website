@@ -8,6 +8,7 @@ import {
   deltaPct, money, money2, moneyCompact,
 } from '../shared'
 import { LangProvider, LangToggle, formatDateLang, useLang, useT } from '../i18n'
+import { DictionaryLink } from '../explain'
 import { prefetchStaffKpis } from '../prefetch'
 import { RangeCalendar } from './RangeCalendar'
 
@@ -167,6 +168,7 @@ function VentasInner() {
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-display font-semibold text-dark">{t('Reporte de Ventas')}</h1>
           <LangToggle />
+          <DictionaryLink />
         </div>
         <p className="text-sm text-warm-gray mt-1">{t('Ventas netas por día, sin ITBMS ni propinas · comparado con el año pasado')}</p>
       </div>
@@ -254,7 +256,7 @@ function VentasInner() {
         <div className="space-y-4">
           {/* Comparative chart */}
           <div className="rounded-2xl border border-gold-200 bg-gold-50 p-4">
-            <Label>{t(gcMode ? 'Gift cards redimidas · comparativo' : 'Ventas netas · comparativo')}</Label>
+            <Label info="ventas_chart">{t(gcMode ? 'Gift cards redimidas · comparativo' : 'Ventas netas · comparativo')}</Label>
             <div className="flex items-baseline gap-3 flex-wrap mt-1">
               <span className="text-3xl font-bold text-dark tabular-nums">{money(data.totals.net)}</span>
               <DeltaChip delta={deltaPct(data.totals.net, data.totals.lyNet)} suffix={`vs ${lyYear}`} />

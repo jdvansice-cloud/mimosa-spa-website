@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { KpiSeries } from '@/lib/kpis/queries'
 import { useT } from './i18n'
+import { InfoTip } from './explain'
 
 // Shared UI pieces for the KPIs section (dashboard + sales report).
 
@@ -189,8 +190,13 @@ export function DualLine({
   )
 }
 
-export function Label({ children }: { children: React.ReactNode }) {
-  return <p className="text-[11px] font-bold tracking-widest uppercase text-warm-gray">{children}</p>
+export function Label({ children, info }: { children: React.ReactNode; info?: string }) {
+  return (
+    <p className="text-[11px] font-bold tracking-widest uppercase text-warm-gray">
+      {children}
+      {info && <InfoTip k={info} />}
+    </p>
+  )
 }
 
 export function CardBox({ children, className = '' }: { children: React.ReactNode; className?: string }) {

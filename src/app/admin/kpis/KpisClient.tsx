@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { RefreshCw, ChevronDown } from 'lucide-react'
+import { RefreshCw, ChevronDown, Info } from 'lucide-react'
+import { ExplainText, InfoTip, DictionaryLink } from './explain'
 import type { KpiPayload, KpiPeriod, KpiSeries } from '@/lib/kpis/queries'
 import {
   CardBox, DeltaChip, DualLine, GOLD, GREEN, Label, Legend, LoadingCard,
@@ -58,10 +59,12 @@ function YearBars({ cur, prev, labels }: { cur: Array<number | null>; prev: Arra
 
 /** Stat card that expands into a monthly comparison chart when tapped. */
 function ExpandableStat({
-  label, value, sub, chip, goal, chart, chartFormat, curYear, prevYear, monthLabels, open, onToggle,
+  label, value, sub, info, chip, goal, chart, chartFormat, curYear, prevYear, monthLabels, open, onToggle,
 }: {
   label: string
   value: string
+  /** explain.tsx key — ⓘ hint in the header, explanation shown when expanded. */
+  info?: string
   /** Small companion line under the value (e.g. treatments behind the visits). */
   sub?: string | null
   chip: React.ReactNode
@@ -84,7 +87,7 @@ function ExpandableStat({
         className="w-full text-left p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-2xl"
       >
         <div className="flex items-start justify-between gap-2">
-          <Label>{label}</Label>
+          <Label>{label}{info && <Info className="h-3 w-3 inline ml-1.5 align-[-1px] text-warm-gray/60" />}</Label>
           <ChevronDown className={`h-4 w-4 text-warm-gray shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
         </div>
         <p className="text-2xl font-bold text-dark tabular-nums mt-1">{value}</p>
@@ -94,6 +97,7 @@ function ExpandableStat({
       </button>
       {open && (
         <div className="px-4 pb-4">
+          {info && <ExplainText k={info} className="mb-2" />}
           <p className="text-[11px] text-warm-gray">{t('Por mes')} · {curYear} vs {prevYear}</p>
           <DualLine
             series={{ unit: 'month', labels: monthLabels, current: chart.cur, previous: chart.prev }}
@@ -203,6 +207,7 @@ function KpisInner() {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-display font-semibold text-dark">KPIs</h1>
             <LangToggle />
+          <DictionaryLink />
           </div>
           <p className="text-sm text-warm-gray mt-1">
             {t('Ventas netas sin ITBMS, método de caja · comparado con las mismas fechas del año pasado')}
@@ -293,7 +298,7 @@ function KpisInner() {
         <div className="space-y-4">
           {/* Net sales hero + dual-year chart for the selected period */}
           <div className="rounded-2xl border border-gold-200 bg-gold-50 p-4">
-            <Label>{t(gcMode ? 'Gift cards redimidas · neto sin ITBMS' : 'Ventas netas · sin ITBMS')}</Label>
+            <Label info="neto">{t(gcMode ? 'Gift cards redimidas · neto sin ITBMS' : 'Ventas netas · sin ITBMS')}</Label>
             <div className="flex items-baseline gap-3 flex-wrap mt-1">
               <span className="text-4xl font-bold text-dark tabular-nums">{money(data.sales.net)}</span>
               <DeltaChip delta={deltaPct(data.sales.net, data.sales.lyNet)} suffix={vsLabel} />
@@ -317,7 +322,7 @@ function KpisInner() {
               <div className="mt-3 rounded-xl bg-white/70 border border-gold-200 px-3 py-2">
                 <div className="flex items-baseline justify-between gap-2 text-xs">
                   <span className="text-warm-gray">
-                    {t('Presupuesto')} {data.budget.year}
+                    {t('Presupuesto')} {data.budget.year}<InfoTip k="presupuesto" />
                     {data.period !== 'ytd' && <> · {MONTHS_LONG[lang][Number(data.range.start.slice(5, 7)) - 1]}</>}
                     : <b className="text-dark tabular-nums">{money(data.budget.periodTarget)}</b>
                   </span>
@@ -354,6 +359,7 @@ function KpisInner() {
           {!gcMode && <div className="grid grid-cols-2 gap-3">
             <ExpandableStat
               label={t('Ticket promedio')}
+              info="ticket"
               value={money(data.sales.avgTicket)}
               chip={<DeltaChip delta={deltaPct(data.sales.avgTicket, data.sales.lyAvgTicket)} suffix={vsLabel} />}
               goal={goalLine(data.goals ? money(data.goals.avgTicket) : null)}
@@ -367,6 +373,7 @@ function KpisInner() {
             />
             <ExpandableStat
               label={t('Visitas')}
+              info="visitas_tile"
               value={data.visits.count.toLocaleString('en-US')}
               sub={`${data.treatments.count.toLocaleString('en-US')} ${t('tratamientos')}`}
               chip={<DeltaChip delta={deltaPct(data.visits.count, data.visits.lyCount)} suffix={vsLabel} />}
@@ -381,6 +388,7 @@ function KpisInner() {
             />
             <ExpandableStat
               label={t('Primeras visitas')}
+              info="primeras"
               value={String(data.newClients.count)}
               chip={<DeltaChip delta={deltaPct(data.newClients.count, data.newClients.lyCount)} suffix={vsLabel} />}
               goal={goalLine(data.goals ? String(data.goals.newClients) : null)}
@@ -394,6 +402,7 @@ function KpisInner() {
             />
             <ExpandableStat
               label={t('No-shows + canc. tardías')}
+              info="noshows"
               value={pct(data.noShow.rate)}
               chip={
                 <DeltaChip
@@ -416,7 +425,7 @@ function KpisInner() {
           {/* Retention / pre-booked / acquisition don't apply to gift-card usage */}
           {!gcMode && <>
           <CardBox>
-            <Label>{t('Retención · clientes nuevos')}</Label>
+            <Label info="retencion">{t('Retención · clientes nuevos')}</Label>
             {data.retention.cohortSize > 0 ? (
               <>
                 <p className="text-sm text-dark mt-2">
@@ -443,7 +452,7 @@ function KpisInner() {
 
           {/* Pre-booked */}
           <CardBox>
-            <Label>{t('Ya reagendados')}</Label>
+            <Label info="prebooked">{t('Ya reagendados')}</Label>
             <div className="flex items-center gap-4 mt-2">
               <span className="font-display font-semibold text-5xl text-spa-green leading-none">{pct(data.prebooked.rate)}</span>
               <span className="text-xs text-warm-gray leading-relaxed">
@@ -457,7 +466,7 @@ function KpisInner() {
 
           {/* Acquisition: monthly bars, both years */}
           <CardBox>
-            <Label>{t('Adquisición · primeras visitas por mes')}</Label>
+            <Label info="adquisicion">{t('Adquisición · primeras visitas por mes')}</Label>
             <YearBars cur={data.monthly.newClients.cur} prev={data.monthly.newClients.prev} labels={data.monthly.labels} />
             <Legend curLabel={String(data.monthly.curYear)} prevLabel={String(data.monthly.prevYear)} />
           </CardBox>
@@ -465,7 +474,7 @@ function KpisInner() {
 
           {/* Revenue mix */}
           <CardBox>
-            <Label>{t('Mezcla de ingresos')}</Label>
+            <Label info="mezcla">{t('Mezcla de ingresos')}</Label>
             {(() => {
               const { service, retail, giftcard } = data.sales.mix
               const total = service + retail + giftcard
@@ -499,7 +508,7 @@ function KpisInner() {
           {/* Location split */}
           {data.locationSplit && (
             <CardBox>
-              <Label>{t('Por sucursal')}</Label>
+              <Label info="sucursal">{t('Por sucursal')}</Label>
               <div className="space-y-3 mt-3">
                 {data.locationSplit.map(s => (
                   <div key={s.locationId}>
@@ -530,7 +539,7 @@ function KpisInner() {
 
           {/* Top services */}
           <CardBox>
-            <Label>{t(gcMode ? 'Top servicios pagados con gift card' : 'Top servicios · neto del período')}</Label>
+            <Label info="top_servicios">{t(gcMode ? 'Top servicios pagados con gift card' : 'Top servicios · neto del período')}</Label>
             <div className="mt-2 divide-y divide-dashed divide-beige-400">
               {data.topServices.length === 0 && <p className="text-sm text-warm-gray py-2">{t('Sin servicios en el período.')}</p>}
               {data.topServices.slice(0, showAllServices ? 25 : 5).map(s => (
@@ -553,7 +562,7 @@ function KpisInner() {
 
           {/* Top clients */}
           <CardBox>
-            <Label>{t(gcMode ? 'Top clientes · gift cards redimidas' : 'Top clientes · neto del período')}</Label>
+            <Label info="top_clientes">{t(gcMode ? 'Top clientes · gift cards redimidas' : 'Top clientes · neto del período')}</Label>
             {data.topClients.length === 0 ? (
               <p className="text-sm text-warm-gray py-2 mt-2">{t('Sin clientes en el período.')}</p>
             ) : (
@@ -593,7 +602,7 @@ function KpisInner() {
 
           {/* Staff */}
           {!gcMode && <CardBox>
-            <Label>{t('Top 10 terapeutas · neto atribuido')}</Label>
+            <Label info="top_terapeutas">{t('Top 10 terapeutas · neto atribuido')}</Label>
             {data.staff.length === 0 ? (
               <p className="text-sm text-warm-gray py-2 mt-2">{t('Sin visitas en el período.')}</p>
             ) : (

@@ -7,6 +7,7 @@ import type { KpiPeriod } from '@/lib/kpis/queries'
 import { CardBox, DeltaChip, Label, LoadingCard, deltaPct, money, pct } from '../shared'
 import { LangProvider, LangToggle, formatDateLang, useLang, useT } from '../i18n'
 import { readStaffCache, writeStaffCache } from '../prefetch'
+import { InfoTip, DictionaryLink } from '../explain'
 
 // ===========================================
 // Staff performance — hours, revenue, tips, requested %, client loyalty.
@@ -121,6 +122,7 @@ function StaffInner() {
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-display font-semibold text-dark">Staff</h1>
           <LangToggle />
+          <DictionaryLink />
         </div>
         <p className="text-sm text-warm-gray mt-1">{t('Rendimiento por terapeuta · neto sin ITBMS, método de caja')}</p>
         {data && (
@@ -176,7 +178,7 @@ function StaffInner() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="rounded-2xl border border-gold-200 bg-gold-50 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-gold-700">
-                  <Award className="h-3.5 w-3.5" />{t('Más solicitada')}
+                  <Award className="h-3.5 w-3.5" />{t('Más solicitada')}<InfoTip k="podium" />
                 </div>
                 <p className="text-sm font-bold text-dark mt-1 leading-tight">{podium.requested.name.split(' ')[0]}</p>
                 <p className="text-xs text-warm-gray tabular-nums">{pct(podium.requested.requestedPct)} {t('de sus tratamientos')}</p>
@@ -209,7 +211,7 @@ function StaffInner() {
 
           {/* Team summary */}
           <CardBox>
-            <Label>{t('Equipo')}</Label>
+            <Label info="equipo">{t('Equipo')}</Label>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-4 gap-y-3 mt-3">
               {[
                 { v: String(data.members.length), l: t('terapeutas') },
@@ -264,6 +266,7 @@ function StaffInner() {
               </table>
             </div>
             <p className="text-[10px] text-warm-gray px-4 py-2 border-t border-beige-200">
+              <InfoTip k="staff_tabla" />{' '}
               {t('Neto y propinas atribuidos por la cita del mismo día del cliente · Cabina = extras de la categoría “ventas en Cabina” vendidos durante el servicio · Solicitada = el cliente pidió a esa terapeuta · Fidelidad = clientes de hace 3–6 meses que volvieron con ella en 90 días (mín. 5)')}
             </p>
           </CardBox>

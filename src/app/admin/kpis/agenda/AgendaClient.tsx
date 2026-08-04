@@ -6,6 +6,7 @@ import type { AgendaAppointment, AgendaMonth, StaffAvailability } from '@/lib/kp
 import { BlackSpinner, CardBox, DeltaChip, Label, LoadingCard, deltaPct, money } from '../shared'
 import { LangProvider, LangToggle, MONTHS_LONG, WEEKDAY_LETTERS, formatDateLang, useLang, useT } from '../i18n'
 import { prefetchStaffKpis } from '../prefetch'
+import { InfoTip, DictionaryLink } from '../explain'
 
 // ===========================================
 // Agenda — calendario mensual con citas por día; al tocar un día se abre
@@ -419,6 +420,7 @@ function AgendaInner() {
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-display font-semibold text-dark">{t('Agenda')}</h1>
           <LangToggle />
+          <DictionaryLink />
         </div>
         <p className="text-sm text-warm-gray mt-1">{t('Toca un día para ver el horario por terapeuta')}</p>
       </div>
@@ -459,7 +461,7 @@ function AgendaInner() {
         <div className="space-y-4">
           {/* Month total — compared over the same dates, with the full LY month as goal */}
           <div className="rounded-2xl border border-gold-200 bg-gold-50 p-4">
-            <Label>{t('Citas del mes')}</Label>
+            <Label info="agenda_hero">{t('Citas del mes')}</Label>
             <div className="flex items-baseline gap-3 flex-wrap mt-1">
               <span className="text-3xl font-bold text-dark tabular-nums">{data.totals.activeToDate.toLocaleString('en-US')}</span>
               <DeltaChip delta={deltaPct(data.totals.activeToDate, data.totals.lySameDates)} suffix={`vs ${lyYear}`} />
@@ -529,7 +531,7 @@ function AgendaInner() {
               })}
             </div>
             <div className="flex justify-between text-[10px] text-warm-gray mt-3">
-              <span>■ {t('más intenso = más citas')}</span>
+              <span>■ {t('más intenso = más citas')}<InfoTip k="agenda_grid" /></span>
               <span><span className="text-spa-green font-bold">{t('verde')}</span> {t('= reservas futuras')}</span>
             </div>
           </CardBox>

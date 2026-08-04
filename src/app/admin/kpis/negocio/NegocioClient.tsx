@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, FileUp, Loader2, Upload } from 'lucide-rea
 import type { BizPayload } from '@/lib/biz/kpis'
 import { CardBox, Label, LoadingCard, money, pct, pct1 } from '../shared'
 import { LangProvider, LangToggle, MONTHS_LONG, useLang, useT } from '../i18n'
+import { DictionaryLink } from '../explain'
 import { prefetchStaffKpis } from '../prefetch'
 
 // ===========================================
@@ -122,6 +123,7 @@ function NegocioInner() {
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-display font-semibold text-dark">{t('Negocio')}</h1>
           <LangToggle />
+          <DictionaryLink />
         </div>
         <p className="text-sm text-warm-gray mt-1">
           {t('KPIs del negocio a partir del paquete contable mensual · ingresos, gastos, ratios vs industria')}
@@ -245,7 +247,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
 
   return (
     <CardBox className="mb-4">
-      <Label>{t('Importar paquete mensual')}</Label>
+      <Label info="importar">{t('Importar paquete mensual')}</Label>
       <div
         onDragOver={e => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
@@ -316,7 +318,7 @@ function Dashboard({ data }: { data: BizPayload }) {
     <div className="space-y-4">
       {/* Revenue vs budget */}
       <CardBox>
-        <Label>{t('Ingresos del mes · neto sin ITBMS')}</Label>
+        <Label info="ingresos_negocio">{t('Ingresos del mes · neto sin ITBMS')}</Label>
         <p className="text-3xl font-bold text-dark tabular-nums mt-1">{money(rev.total)}</p>
         <div className="flex flex-wrap gap-x-5 gap-y-0.5 text-xs text-warm-gray tabular-nums mt-1">
           {Object.entries(rev.byLocation).map(([loc, v]) => (
@@ -341,14 +343,14 @@ function Dashboard({ data }: { data: BizPayload }) {
       {/* Expense + margin tiles */}
       <div className="grid grid-cols-2 gap-3">
         <CardBox>
-          <Label>{t('Gastos del mes')}</Label>
+          <Label info="gastos">{t('Gastos del mes')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.expenses.total)}</p>
           {data.expenses.unclassified > 0 && (
             <p className="text-xs text-warm-gray tabular-nums">{money(data.expenses.unclassified)} {t('sin clasificar')}</p>
           )}
         </CardBox>
         <CardBox>
-          <Label>{t('Margen operativo')}</Label>
+          <Label info="margen">{t('Margen operativo')}</Label>
           <p className={`text-2xl font-bold tabular-nums mt-1 ${data.ratios.marginPct !== null && data.ratios.marginPct < 0 ? 'text-red-600' : 'text-dark'}`}>
             {pct1(data.ratios.marginPct)}
           </p>
@@ -358,7 +360,7 @@ function Dashboard({ data }: { data: BizPayload }) {
 
       {/* Ratios vs industry */}
       <CardBox>
-        <Label>{t('Ratios vs industria de spas')}</Label>
+        <Label info="ratios">{t('Ratios vs industria de spas')}</Label>
         <div className="mt-3 space-y-3">
           <RatioBand label={t('Planilla + CSS')} value={data.ratios.payrollPct} band={data.benchmarks.payroll} lowIsGood />
           <RatioBand label={t('Alquiler')} value={data.ratios.rentPct} band={data.benchmarks.rent} lowIsGood />
@@ -372,7 +374,7 @@ function Dashboard({ data }: { data: BizPayload }) {
 
       {/* Expenses by category */}
       <CardBox>
-        <Label>{t('Gastos por categoría')}</Label>
+        <Label info="categorias">{t('Gastos por categoría')}</Label>
         <div className="mt-2 space-y-1.5">
           {data.expenses.byCategory.map(c => (
             <div key={c.category}>
@@ -404,28 +406,28 @@ function Dashboard({ data }: { data: BizPayload }) {
       {/* Tips / GC / ITBMS / commissions */}
       <div className="grid grid-cols-2 gap-3">
         <CardBox>
-          <Label>{t('Propinas · tarjeta')}</Label>
+          <Label info="propinas_negocio">{t('Propinas · tarjeta')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.tips.total)}</p>
           <p className="text-xs text-warm-gray tabular-nums">
             {Object.entries(data.tips.byLocation).map(([l, v]) => `${LOC_NAMES[l]?.split(' ')[0] ?? l}: ${money(v)}`).join(' · ')}
           </p>
         </CardBox>
         <CardBox>
-          <Label>{t('Gift cards · flujo del mes')}</Label>
+          <Label info="gc_flujo">{t('Gift cards · flujo del mes')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.giftCards.net)}</p>
           <p className="text-xs text-warm-gray tabular-nums">
             {t('vendidas')} {money(data.giftCards.sold)} − {t('redimidas')} {money(data.giftCards.redeemed)}
           </p>
         </CardBox>
         <CardBox>
-          <Label>{t('Posición ITBMS')}</Label>
+          <Label info="itbms_pos">{t('Posición ITBMS')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.itbms.position)}</p>
           <p className="text-xs text-warm-gray tabular-nums">
             {t('cobrado')} {money(data.itbms.collected)} − {t('retenido')} {money(data.itbms.withheld)} − {t('crédito')} {money(data.itbms.socioCredit)}
           </p>
         </CardBox>
         <CardBox>
-          <Label>{t('Comisiones bancarias')}</Label>
+          <Label info="comisiones">{t('Comisiones bancarias')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.commissions.bank)}</p>
           <p className="text-xs text-warm-gray tabular-nums">
             {data.commissions.pctOfCardSales !== null && <>{pct1(data.commissions.pctOfCardSales)} {t('de ventas con tarjeta')}</>}
@@ -436,7 +438,7 @@ function Dashboard({ data }: { data: BizPayload }) {
       {/* Bank balances */}
       {data.balances.length > 0 && (
         <CardBox>
-          <Label>{t('Saldos bancarios · fin de mes')}</Label>
+          <Label info="saldos">{t('Saldos bancarios · fin de mes')}</Label>
           <div className="mt-2 space-y-1 text-sm tabular-nums">
             {data.balances.map(b => (
               <div key={b.accountKey} className="flex justify-between">
@@ -455,7 +457,7 @@ function Dashboard({ data }: { data: BizPayload }) {
       {/* Cross-checks */}
       {data.checks.length > 0 && (
         <CardBox>
-          <Label>{t('Verificaciones cruzadas')}</Label>
+          <Label info="verificaciones">{t('Verificaciones cruzadas')}</Label>
           <div className="mt-2 space-y-2">
             {data.checks.map(c => (
               <div key={c.key} className="flex items-start gap-2 text-xs">
