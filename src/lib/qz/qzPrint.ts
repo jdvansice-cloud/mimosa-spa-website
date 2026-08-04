@@ -18,7 +18,9 @@ import {
 } from '@/components/admin/giftcards/labels/types'
 import { renderLabelCanvas } from '@/components/admin/giftcards/labels/renderLabelCanvas'
 
-const PRINTER_STORAGE_KEY = 'giftcard-qz-printer'
+// v2: key bumped when the D520 replaced the Star so stale saved printers
+// don't shadow the new default resolution order.
+const PRINTER_STORAGE_KEY = 'giftcard-qz-printer-v2'
 
 export class QzError extends Error {
   kind: 'connect' | 'printer' | 'print'
