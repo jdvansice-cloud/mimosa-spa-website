@@ -213,7 +213,7 @@ export default function GiftCardPrintPage() {
 
       {/* Browser-print fallback copy at 1:1 — offscreen until @media print. */}
       <div className="print-label print-only">
-        <GiftCardLabelPreview card={card} scale={1} />
+        <GiftCardLabelPreview card={card} scale={1} physical />
       </div>
 
       {/* Printer settings reminder */}

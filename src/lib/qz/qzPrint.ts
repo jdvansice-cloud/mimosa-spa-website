@@ -146,6 +146,19 @@ async function resolvePrinter(qz: Qz): Promise<{ name: string; profile: LabelPri
   )
 }
 
+/** Lossless 90° CCW rotation — a pixel permutation, no resampling. */
+function rotateCCW(src: HTMLCanvasElement): HTMLCanvasElement {
+  const out = document.createElement('canvas')
+  out.width = src.height
+  out.height = src.width
+  const ctx = out.getContext('2d')!
+  ctx.imageSmoothingEnabled = false
+  ctx.translate(out.width / 2, out.height / 2)
+  ctx.rotate(-Math.PI / 2)
+  ctx.drawImage(src, -src.width / 2, -src.height / 2)
+  return out
+}
+
 /**
  * Render the label for the resolved printer and print it 1:1.
  * Returns the printer name.
@@ -155,10 +168,15 @@ export async function printGiftCardLabel(card: LabelCard): Promise<string> {
   await connect(qz)
   const { name, profile } = await resolvePrinter(qz)
 
-  const canvas = await renderLabelCanvas(card, profile.widthIn)
+  let canvas = await renderLabelCanvas(card, profile.widthIn)
+  let size = { width: profile.widthIn, height: profile.pageHeightIn }
+  if (profile.rotateBitmap) {
+    canvas = rotateCCW(canvas)
+    size = { width: profile.pageHeightIn, height: profile.widthIn }
+  }
   const config = qz.configs.create(name, {
     units: 'in',
-    size: { width: profile.widthIn, height: profile.pageHeightIn },
+    size,
     margins: 0,
     density: 203,
     colorType: 'blackwhite',

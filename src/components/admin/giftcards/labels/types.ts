@@ -27,12 +27,19 @@ export interface LabelPrinterProfile {
   widthIn: number
   /** Page height: label height (sensor registers) or pitch (blind feed). */
   pageHeightIn: number
+  /**
+   * Rotate the bitmap 90° CCW and print on a portrait (h > w) page. The
+   * D520 driver auto-rotates landscape pages with a blurry resample; a
+   * pre-rotated portrait job avoids that entirely (verified 2026-08-04).
+   */
+  rotateBitmap?: boolean
 }
 
 export const D520_PROFILE: LabelPrinterProfile = {
   hint: 'D520',
   widthIn: 3,
   pageHeightIn: 2,
+  rotateBitmap: true,
 }
 
 export const TSP143_PROFILE: LabelPrinterProfile = {
