@@ -170,7 +170,13 @@ function renderBarcode(serial: string): HTMLCanvasElement {
  */
 export async function renderLabelCanvas(
   card: LabelCard,
-  widthIn: number = LABEL_WIDTH_IN
+  widthIn: number = LABEL_WIDTH_IN,
+  /**
+   * Render at a multiple of 203 dpi. 1 (default) = the exact bitmap the
+   * printer receives; 2 = supersampled for smooth on-screen previews.
+   * Layout is identical at any factor — everything draws in dot space.
+   */
+  supersample = 1
 ): Promise<HTMLCanvasElement> {
   await Promise.all([
     document.fonts.load(`700 ${PRICE_SIZE}px ${LATO}`),
@@ -182,9 +188,11 @@ export async function renderLabelCanvas(
 
   const W = Math.round(widthIn * DPI)
   const canvas = document.createElement('canvas')
-  canvas.width = W
-  canvas.height = LABEL_DOTS_H
+  canvas.width = W * supersample
+  canvas.height = LABEL_DOTS_H * supersample
   const ctx = canvas.getContext('2d')!
+  ctx.scale(supersample, supersample)
+  ctx.imageSmoothingEnabled = false // barcode drawImage must stay dot-sharp
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, LABEL_DOTS_H)
   ctx.fillStyle = '#000000'

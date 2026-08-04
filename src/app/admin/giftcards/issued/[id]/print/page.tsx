@@ -26,7 +26,7 @@ interface GiftCard extends LabelCard {
   mindbody_synced_at: string | null
 }
 
-const PREVIEW_SCALE = 2
+const PREVIEW_SCALE = 1 // 1 logical px per dot ≈ 2× physical size on screen
 
 export default function GiftCardPrintPage() {
   const params = useParams<{ id: string }>()
@@ -202,7 +202,7 @@ export default function GiftCardPrintPage() {
       {/* Preview heading */}
       <div className="mb-3 no-print">
         <div className="text-xs uppercase tracking-widest text-warm-gray">
-          Vista previa ({PREVIEW_SCALE}× tamaño real · etiqueta 3&quot; × 2&quot; con línea negra) — se imprime exactamente esta imagen
+          Vista previa (≈2× tamaño real · etiqueta 3&quot; × 2&quot; con línea negra) — así se imprime
         </div>
       </div>
 

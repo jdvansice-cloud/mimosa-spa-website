@@ -10,7 +10,7 @@ import {
   LabelCard,
 } from '@/components/admin/giftcards/labels'
 
-const PREVIEW_SCALE = 2
+const PREVIEW_SCALE = 1 // 1 logical px per dot ≈ 2× physical size on screen
 
 const samplePlain: LabelCard = {
   serial: 'MG000123',
@@ -48,7 +48,7 @@ function Preview({ title, subtitle, card }: { title: string; subtitle: string; c
           <h2 className="text-lg font-semibold text-dark">{title}</h2>
           <p className="text-xs text-warm-gray mt-1">{subtitle}</p>
           <p className="text-xs text-warm-gray mt-1">
-            Vista previa a {PREVIEW_SCALE}× tamaño real ({LABEL_WIDTH_IN}&quot; × {LABEL_HEIGHT_IN}&quot;)
+            Vista previa a ≈2× tamaño real ({LABEL_WIDTH_IN}&quot; × {LABEL_HEIGHT_IN}&quot;)
           </p>
         </div>
         <div className="inline-block" style={{ border: '1px dashed #c8b78c' }}>

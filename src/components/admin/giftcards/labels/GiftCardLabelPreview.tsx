@@ -5,10 +5,11 @@ import { renderLabelCanvas } from './renderLabelCanvas'
 import { LabelCard } from './types'
 
 /**
- * On-screen preview of the label bitmap — the exact 203 dpi canvas that QZ
- * Tray sends to the printer. Displayed at an INTEGER pixel multiple of the
- * canvas (1 canvas dot → `scale` screen px) with smoothing disabled, so the
- * preview is always crisp; fractional CSS-inch scaling blurred it.
+ * On-screen preview of the label. Rendered at 2× supersampling and displayed
+ * at the logical dot size, so it looks smooth (retina screens get real
+ * detail) while staying layout-identical to the exact bitmap QZ prints.
+ * `physical` sizes it in real inches instead — for the browser-print
+ * fallback copy, which must land on paper at label size.
  */
 export function GiftCardLabelPreview({
   card,
@@ -17,9 +18,9 @@ export function GiftCardLabelPreview({
   className,
 }: {
   card: LabelCard
-  /** Integer screen pixels per printer dot (1 ≈ 2× physical size on a 96dpi screen). */
+  /** Logical screen px per printer dot (1 → 609px wide, ≈2× physical size). */
   scale?: number
-  /** Size in physical inches instead of pixels — for the browser-print fallback copy. */
+  /** Size in physical inches instead of pixels. */
   physical?: boolean
   className?: string
 }) {
@@ -27,9 +28,10 @@ export function GiftCardLabelPreview({
 
   useEffect(() => {
     let cancelled = false
-    renderLabelCanvas(card).then((canvas) => {
+    renderLabelCanvas(card, undefined, 2).then((canvas) => {
       if (!cancelled) {
-        setImg({ src: canvas.toDataURL('image/png'), w: canvas.width, h: canvas.height })
+        // Logical (dot) dimensions — the canvas itself is 2× supersampled.
+        setImg({ src: canvas.toDataURL('image/png'), w: canvas.width / 2, h: canvas.height / 2 })
       }
     })
     return () => {
@@ -37,11 +39,10 @@ export function GiftCardLabelPreview({
     }
   }, [card])
 
-  const k = Math.max(1, Math.round(scale))
   const size = img
     ? physical
       ? { width: `${(img.w / 203) * scale}in`, height: `${(img.h / 203) * scale}in` }
-      : { width: `${img.w * k}px`, height: `${img.h * k}px` }
+      : { width: `${Math.round(img.w * scale)}px`, height: `${Math.round(img.h * scale)}px` }
     : {}
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -51,9 +52,9 @@ export function GiftCardLabelPreview({
       className={className}
       style={{
         ...size,
+        maxWidth: 'none',
         display: 'block',
         background: 'white',
-        imageRendering: physical ? 'auto' : 'pixelated',
       }}
     />
   )
