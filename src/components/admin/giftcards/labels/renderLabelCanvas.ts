@@ -1,20 +1,19 @@
 'use client'
 
 import JsBarcode from 'jsbarcode'
-import { LabelCard, formatLabelMoney } from './types'
+import { LabelCard, formatLabelMoney, LABEL_WIDTH_IN, LABEL_HEIGHT_IN } from './types'
 
-// The label is rasterized at the Star TSP143's native resolution so the
-// printed dots match the canvas pixels 1:1 — no browser/driver scaling in
-// the path. 2.835in × 2in at 203 dpi:
-export const LABEL_DOTS_W = 576
-export const LABEL_DOTS_H = 406
+// The label is rasterized at the printers' native 203 dpi so the printed
+// dots match the canvas pixels 1:1 — no browser/driver scaling in the path.
+// Width varies per printer profile (D520 3in / TSP143 2.835in).
 const DPI = 203
+export const LABEL_DOTS_H = Math.round(LABEL_HEIGHT_IN * DPI) // 406
 
 // pt → dots (203/72). Sizes mirror the approved label design.
 const pt = (n: number) => Math.round((n * DPI) / 72)
 
 const PAD_TOP = pt(6.5)
-const PAD_X = pt(10)
+const PAD_X = pt(11.5) // ≈4 mm — die-cut position tolerance on the D520
 const PAD_BOTTOM = pt(7)
 
 const EYEBROW_SIZE = pt(6.5)
@@ -116,11 +115,14 @@ function renderBarcode(serial: string): HTMLCanvasElement {
 }
 
 /**
- * Rasterize a gift card label at 203 dpi (576 × 406 dots). The same bitmap
- * feeds the on-screen preview and the QZ Tray print job, so the preview is
- * exactly what prints.
+ * Rasterize a gift card label at 203 dpi. The same bitmap feeds the
+ * on-screen preview and the QZ Tray print job, so the preview is exactly
+ * what prints. `widthIn` comes from the printer profile (default D520 3in).
  */
-export async function renderLabelCanvas(card: LabelCard): Promise<HTMLCanvasElement> {
+export async function renderLabelCanvas(
+  card: LabelCard,
+  widthIn: number = LABEL_WIDTH_IN
+): Promise<HTMLCanvasElement> {
   await Promise.all([
     document.fonts.load(`700 ${EYEBROW_SIZE}px ${LATO}`),
     document.fonts.load(`900 ${AMOUNT_SIZE}px ${LATO}`),
@@ -129,17 +131,18 @@ export async function renderLabelCanvas(card: LabelCard): Promise<HTMLCanvasElem
     document.fonts.load(`italic 400 ${MSG_SIZE}px ${LATO}`),
   ])
 
+  const W = Math.round(widthIn * DPI)
   const canvas = document.createElement('canvas')
-  canvas.width = LABEL_DOTS_W
+  canvas.width = W
   canvas.height = LABEL_DOTS_H
   const ctx = canvas.getContext('2d')!
   ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, LABEL_DOTS_W, LABEL_DOTS_H)
+  ctx.fillRect(0, 0, W, LABEL_DOTS_H)
   ctx.fillStyle = '#000000'
 
-  const contentW = LABEL_DOTS_W - PAD_X * 2
-  const centerX = LABEL_DOTS_W / 2
-  const rightX = LABEL_DOTS_W - PAD_X
+  const contentW = W - PAD_X * 2
+  const centerX = W / 2
+  const rightX = W - PAD_X
 
   // Amount block — top right.
   let bandTop = PAD_TOP
@@ -163,7 +166,7 @@ export async function renderLabelCanvas(card: LabelCard): Promise<HTMLCanvasElem
   const bars = renderBarcode(card.serial)
   const serialTop = LABEL_DOTS_H - PAD_BOTTOM - SERIAL_SIZE
   const barsTop = serialTop - SERIAL_GAP - BARS_H
-  ctx.drawImage(bars, Math.round((LABEL_DOTS_W - bars.width) / 2), barsTop)
+  ctx.drawImage(bars, Math.round((W - bars.width) / 2), barsTop)
   ctx.font = `600 ${SERIAL_SIZE}px ${MONO}`
   if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = `${pt(1.6)}px`
   ctx.textAlign = 'center'

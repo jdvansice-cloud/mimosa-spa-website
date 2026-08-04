@@ -76,8 +76,8 @@ export default function AdminGiftCardTemplatesPage() {
           <h1 className="text-3xl font-display font-semibold text-dark">Plantilla de Etiqueta</h1>
         </div>
         <p className="text-warm-gray">
-          Plantilla única para etiquetas de 3&quot; × 2&quot; con marca negra — Star Micronics TSP143 vía QZ Tray
-          (bitmap a 203 dpi, área imprimible 72 mm). Datos de muestra.
+          Plantilla única para etiquetas de 3&quot; × 2&quot; con línea negra — Omezizy D520 vía QZ Tray
+          (bitmap a 203 dpi, ancho completo de 3&quot;). Datos de muestra.
         </p>
       </div>
 

@@ -5,13 +5,20 @@
 // bitmap already rasterized at 203 dpi so no scaling happens anywhere.
 //
 // Signing: if /api/admin/qz/cert + /sign are configured (env keys present),
-// requests are signed and QZ prints silently. Without them QZ shows its
-// "Allow" prompt once — staff checks "Remember this decision".
+// requests are signed and QZ prints silently (the public cert must be
+// installed as QZ Tray's override.crt on each machine). Without them QZ
+// shows its "Allow" prompt.
 
-import { LABEL_WIDTH_IN, LABEL_PITCH_IN } from '@/components/admin/giftcards/labels/types'
+import {
+  LabelCard,
+  LabelPrinterProfile,
+  PRINTER_PROFILES,
+  D520_PROFILE,
+  LABEL_HEIGHT_IN,
+} from '@/components/admin/giftcards/labels/types'
+import { renderLabelCanvas } from '@/components/admin/giftcards/labels/renderLabelCanvas'
 
 const PRINTER_STORAGE_KEY = 'giftcard-qz-printer'
-const DEFAULT_PRINTER_HINT = 'TSP143'
 
 export class QzError extends Error {
   kind: 'connect' | 'printer' | 'print'
@@ -62,7 +69,7 @@ async function connect(qz: Qz) {
   } catch {
     throw new QzError(
       'connect',
-      'No se pudo conectar con QZ Tray. Verifica que esté instalado y ejecutándose (icono verde junto al reloj).'
+      'No se pudo conectar con QZ Tray. Verifica que esté instalado y ejecutándose (icono junto al reloj).'
     )
   }
 }
@@ -90,56 +97,66 @@ export async function listPrinters(): Promise<string[]> {
   return Array.isArray(found) ? found : [found]
 }
 
-/** Resolve the target printer: saved choice first, then a TSP143 search. */
-async function resolvePrinter(qz: Qz): Promise<string> {
+/** Geometry profile for a resolved printer name (D520 assumed if unknown). */
+function profileFor(name: string): LabelPrinterProfile {
+  return (
+    PRINTER_PROFILES.find((p) => name.toUpperCase().includes(p.hint.toUpperCase())) ??
+    D520_PROFILE
+  )
+}
+
+/** Resolve the target printer: saved choice first, then profile hints, then default. */
+async function resolvePrinter(qz: Qz): Promise<{ name: string; profile: LabelPrinterProfile }> {
   const saved = getSavedPrinter()
   if (saved) {
     try {
-      return (await qz.printers.find(saved)) as string
+      const name = (await qz.printers.find(saved)) as string
+      return { name, profile: profileFor(name) }
     } catch {
       // saved printer gone — fall through to search
     }
   }
-  try {
-    return (await qz.printers.find(DEFAULT_PRINTER_HINT)) as string
-  } catch {
-    // The Star is the system default at the front desk — same fallback the
-    // wash-fold-oms POS uses before giving up.
+  for (const profile of PRINTER_PROFILES) {
     try {
-      const def = (await qz.printers.getDefault()) as string
-      if (def) return def
+      const name = (await qz.printers.find(profile.hint)) as string
+      return { name, profile }
     } catch {
-      // no default printer either — fall through to the picker
+      // try the next known printer
     }
-    let all: string[] = []
-    try {
-      const found = await qz.printers.find()
-      all = Array.isArray(found) ? found : [found]
-    } catch {
-      // even enumeration failed — report with an empty list
-    }
-    throw new QzError(
-      'printer',
-      'No se encontró la impresora Star TSP143. Selecciona la impresora de etiquetas.',
-      all
-    )
   }
+  try {
+    const def = (await qz.printers.getDefault()) as string
+    if (def) return { name: def, profile: profileFor(def) }
+  } catch {
+    // no default printer either — fall through to the picker
+  }
+  let all: string[] = []
+  try {
+    const found = await qz.printers.find()
+    all = Array.isArray(found) ? found : [found]
+  } catch {
+    // even enumeration failed — report with an empty list
+  }
+  throw new QzError(
+    'printer',
+    'No se encontró la impresora de etiquetas (D520 / TSP143). Selecciona la impresora.',
+    all
+  )
 }
 
 /**
- * Print the 203 dpi label canvas 1:1 on the Star TSP143.
- * Returns the resolved printer name.
+ * Render the label for the resolved printer and print it 1:1.
+ * Returns the printer name.
  */
-export async function printLabelCanvas(canvas: HTMLCanvasElement): Promise<string> {
+export async function printGiftCardLabel(card: LabelCard): Promise<string> {
   const qz = await getQz()
   await connect(qz)
-  const printer = await resolvePrinter(qz)
+  const { name, profile } = await resolvePrinter(qz)
 
-  // Page height = label PITCH (52.5 mm), not label height: the TSP143III has
-  // no mark sensor, so the page length is what advances the roll one label.
-  const config = qz.configs.create(printer, {
+  const canvas = await renderLabelCanvas(card, profile.widthIn)
+  const config = qz.configs.create(name, {
     units: 'in',
-    size: { width: LABEL_WIDTH_IN, height: LABEL_PITCH_IN },
+    size: { width: profile.widthIn, height: profile.pageHeightIn },
     margins: 0,
     density: 203,
     colorType: 'blackwhite',
@@ -153,6 +170,9 @@ export async function printLabelCanvas(canvas: HTMLCanvasElement): Promise<strin
   } catch (e) {
     throw new QzError('print', e instanceof Error ? e.message : 'Error al imprimir con QZ Tray.')
   }
-  savePrinter(printer)
-  return printer
+  savePrinter(name)
+  return name
 }
+
+// Re-export for callers that size UI around the label.
+export { LABEL_HEIGHT_IN }

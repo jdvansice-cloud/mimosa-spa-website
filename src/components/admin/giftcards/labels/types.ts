@@ -10,13 +10,38 @@
 // Keep templates as pure functions of `LabelCard` so tweaking copy / layout
 // is a single-file edit.
 
-export const LABEL_WIDTH_IN = 2.835 // 72 mm — TSP143 printable width
+export const LABEL_WIDTH_IN = 3 // full 3" label width (D520 prints edge to edge)
 export const LABEL_HEIGHT_IN = 2 // 50.8 mm — die-cut label height (printed area)
-// Label pitch: top of one label to top of the next (label + gap), measured
-// on the roll. The TSP143III has NO black-mark sensor, so each print must
-// advance exactly one pitch; the print page height uses this, not the
-// label height. Staff aligns the roll once when loading.
-export const LABEL_PITCH_IN = 52.5 / 25.4 // 52.5 mm measured 2026-07-10
+
+/**
+ * Per-printer print geometry. The Omezizy/Phomemo D520 is the primary
+ * printer: its black-line sensor registers each label, so the page height
+ * equals the label height. The Star TSP143III (fallback, second location)
+ * has no mark sensor — its page height is the measured 52.5 mm label pitch
+ * so each print advances exactly one label, and its head only covers 72 mm.
+ */
+export interface LabelPrinterProfile {
+  /** Substring matched against QZ printer names. */
+  hint: string
+  /** Drawn canvas width == page width sent to the driver. */
+  widthIn: number
+  /** Page height: label height (sensor registers) or pitch (blind feed). */
+  pageHeightIn: number
+}
+
+export const D520_PROFILE: LabelPrinterProfile = {
+  hint: 'D520',
+  widthIn: 3,
+  pageHeightIn: 2,
+}
+
+export const TSP143_PROFILE: LabelPrinterProfile = {
+  hint: 'TSP143',
+  widthIn: 2.835, // 72 mm printable width
+  pageHeightIn: 52.5 / 25.4, // pitch measured 2026-07-10
+}
+
+export const PRINTER_PROFILES: LabelPrinterProfile[] = [D520_PROFILE, TSP143_PROFILE]
 
 export interface LabelCard {
   serial: string

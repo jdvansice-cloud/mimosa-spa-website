@@ -7,13 +7,12 @@ import { ArrowLeft, Printer, Loader2, RefreshCw, FileText } from 'lucide-react'
 import { Button } from '@/components/ui'
 import {
   GiftCardLabelPreview,
-  renderLabelCanvas,
   LABEL_WIDTH_IN,
-  LABEL_PITCH_IN,
+  LABEL_HEIGHT_IN,
   LabelCard,
   formatLabelMoney,
 } from '@/components/admin/giftcards/labels'
-import { printLabelCanvas, savePrinter, QzError } from '@/lib/qz/qzPrint'
+import { printGiftCardLabel, savePrinter, QzError } from '@/lib/qz/qzPrint'
 
 interface GiftCard extends LabelCard {
   id: string
@@ -82,8 +81,7 @@ export default function GiftCardPrintPage() {
     setPrintMessage(null)
     setPrinterChoices(null)
     try {
-      const canvas = await renderLabelCanvas(card)
-      const printer = await printLabelCanvas(canvas)
+      const printer = await printGiftCardLabel(card)
       setPrintMessage(`Etiqueta enviada a ${printer}.`)
     } catch (e) {
       if (e instanceof QzError) {
@@ -204,7 +202,7 @@ export default function GiftCardPrintPage() {
       {/* Preview heading */}
       <div className="mb-3 no-print">
         <div className="text-xs uppercase tracking-widest text-warm-gray">
-          Vista previa ({PREVIEW_SCALE}× tamaño real · etiqueta 3&quot; × 2&quot; con marca negra) — se imprime exactamente esta imagen
+          Vista previa ({PREVIEW_SCALE}× tamaño real · etiqueta 3&quot; × 2&quot; con línea negra) — se imprime exactamente esta imagen
         </div>
       </div>
 
@@ -220,18 +218,18 @@ export default function GiftCardPrintPage() {
 
       {/* Printer settings reminder */}
       <div className="mt-5 no-print max-w-xl rounded-lg border border-beige-300 bg-beige-50 p-4 text-xs text-warm-gray leading-relaxed">
-        <div className="font-semibold text-dark mb-1">Impresión directa (QZ Tray · Star TSP143)</div>
+        <div className="font-semibold text-dark mb-1">Impresión directa (QZ Tray · Omezizy D520)</div>
         <ul className="list-disc pl-4 space-y-0.5">
-          <li><span className="font-medium text-dark">QZ Tray</span> debe estar instalado y ejecutándose en esta computadora (qz.io/download). La primera vez, acepta el aviso de QZ marcando &quot;Remember this decision&quot;.</li>
-          <li>En el driver de la Star TSP143: Paper Type <span className="font-medium text-dark">Black Mark</span> · Cortador: <span className="font-medium text-dark">No Cut</span> — la impresora avanza hasta la marca negra de cada etiqueta.</li>
-          <li>&quot;Imprimir Etiqueta&quot; envía la imagen a 203 dpi directo a la impresora, sin diálogo. &quot;Diálogo del navegador&quot; es el respaldo: usa tamaño 72 × 50.8 mm, márgenes 0 y escala 100%.</li>
-          <li>Si el código de barras no escanea, verifica que el material sea térmico y sube la densidad de impresión en la utilidad de Star.</li>
+          <li><span className="font-medium text-dark">QZ Tray</span> debe estar instalado y ejecutándose en esta computadora (qz.io/download). La D520 va conectada por <span className="font-medium text-dark">USB</span>.</li>
+          <li>La D520 detecta la <span className="font-medium text-dark">línea negra</span> del liner y cuadra cada etiqueta sola — al cargar un rollo nuevo presiona feed una vez para calibrar.</li>
+          <li>&quot;Imprimir Etiqueta&quot; envía la imagen a 203 dpi directo a la impresora, sin diálogo. &quot;Diálogo del navegador&quot; es el respaldo: tamaño 3&quot; × 2&quot;, márgenes 0, escala 100%.</li>
+          <li>Si la impresión sale clara, sube <span className="font-medium text-dark">Darkness</span> en las opciones de la impresora D520.</li>
         </ul>
       </div>
 
       <style jsx global>{`
         @page {
-          size: ${LABEL_WIDTH_IN}in ${LABEL_PITCH_IN}in;
+          size: ${LABEL_WIDTH_IN}in ${LABEL_HEIGHT_IN}in;
           margin: 0;
         }
         .print-only {
