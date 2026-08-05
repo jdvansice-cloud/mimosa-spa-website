@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, Printer, Loader2, RefreshCw, FileText } from 'lucide-react'
+import { ArrowLeft, Printer, Loader2, RefreshCw, FileText, Crosshair } from 'lucide-react'
 import { Button } from '@/components/ui'
 import {
   GiftCardLabelPreview,
@@ -12,7 +12,7 @@ import {
   LabelCard,
   formatLabelMoney,
 } from '@/components/admin/giftcards/labels'
-import { printGiftCardLabel, savePrinter, QzError } from '@/lib/qz/qzPrint'
+import { printGiftCardLabel, printTestLabel, savePrinter, QzError } from '@/lib/qz/qzPrint'
 
 interface GiftCard extends LabelCard {
   id: string
@@ -75,14 +75,18 @@ export default function GiftCardPrintPage() {
     }
   }
 
-  const handleQzPrint = async () => {
-    if (!card || printing) return
+  // Remembered so the printer picker retries the job that actually failed
+  // (label vs. test pattern).
+  const lastJobRef = useRef<(() => void) | null>(null)
+
+  const runPrintJob = async (job: () => Promise<string>, done: (printer: string) => string) => {
+    if (printing) return
     setPrinting(true)
     setPrintMessage(null)
     setPrinterChoices(null)
     try {
-      const printer = await printGiftCardLabel(card)
-      setPrintMessage(`Etiqueta enviada a ${printer}.`)
+      const printer = await job()
+      setPrintMessage(done(printer))
     } catch (e) {
       if (e instanceof QzError) {
         setPrintMessage(e.message)
@@ -95,10 +99,21 @@ export default function GiftCardPrintPage() {
     }
   }
 
+  const handleQzPrint = () => {
+    if (!card) return
+    lastJobRef.current = handleQzPrint
+    void runPrintJob(() => printGiftCardLabel(card), (p) => `Etiqueta enviada a ${p}.`)
+  }
+
+  const handleTestPrint = () => {
+    lastJobRef.current = handleTestPrint
+    void runPrintJob(() => printTestLabel(), (p) => `Prueba de calibración enviada a ${p}.`)
+  }
+
   const handlePickPrinter = (name: string) => {
     savePrinter(name)
     setPrinterChoices(null)
-    void handleQzPrint()
+    lastJobRef.current?.()
   }
 
   if (error) {
@@ -168,6 +183,14 @@ export default function GiftCardPrintPage() {
             Diálogo del navegador
           </Button>
           <Button
+            variant="outline"
+            onClick={handleTestPrint}
+            isLoading={printing}
+            leftIcon={<Crosshair className="h-4 w-4" />}
+          >
+            Prueba
+          </Button>
+          <Button
             onClick={handleQzPrint}
             isLoading={printing}
             leftIcon={printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
@@ -221,9 +244,9 @@ export default function GiftCardPrintPage() {
         <div className="font-semibold text-dark mb-1">Impresión directa (QZ Tray · Omezizy D520)</div>
         <ul className="list-disc pl-4 space-y-0.5">
           <li><span className="font-medium text-dark">QZ Tray</span> debe estar instalado y ejecutándose en esta computadora (qz.io/download). La D520 va conectada por <span className="font-medium text-dark">USB</span>.</li>
-          <li>La D520 detecta la <span className="font-medium text-dark">línea negra</span> del liner y cuadra cada etiqueta sola — al cargar un rollo nuevo presiona feed una vez para calibrar.</li>
+          <li>Al cargar un rollo nuevo presiona <span className="font-medium text-dark">feed</span> una vez para que la impresora calibre la etiqueta, y luego usa &quot;Prueba&quot; — el marco impreso debe coincidir con el borde de la etiqueta.</li>
           <li>&quot;Imprimir Etiqueta&quot; envía la imagen a 203 dpi directo a la impresora, sin diálogo. &quot;Diálogo del navegador&quot; es el respaldo: tamaño 3&quot; × 2&quot;, márgenes 0, escala 100%.</li>
-          <li>Si la impresión sale clara, sube <span className="font-medium text-dark">Darkness</span> en las opciones de la impresora D520.</li>
+          <li>Las etiquetas <span className="font-medium text-dark">transparentes</span> necesitan más calor que el papel: si la impresión sale clara, sube <span className="font-medium text-dark">Darkness</span> (los parches 100/50/25% de la prueba sirven de referencia).</li>
         </ul>
       </div>
 
