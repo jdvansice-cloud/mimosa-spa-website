@@ -15,8 +15,8 @@ export interface ExplainEntry { es: string; en: string }
 export const EXPLAIN: Record<string, ExplainEntry> = {
   // core concepts
   visita: {
-    es: 'Una visita = un cliente que viene un día, sin importar cuántos servicios reciba. Masaje + facial el mismo día = 1 visita, 2 tratamientos. Cancelaciones y no-shows no cuentan.',
-    en: 'A visit = one client coming in on one day, no matter how many services they receive. Massage + facial the same day = 1 visit, 2 treatments. Cancellations and no-shows don\'t count.',
+    es: 'Una visita = un ID de cliente con tratamientos CONTINUOS con UNA terapeuta en el día. Si el mismo ID atiende con 2+ terapeutas (pareja bajo una cuenta) o regresa con más de 1 h de separación, son visitas separadas. Cancelaciones y no-shows no cuentan.',
+    en: 'A visit = one client ID with a CONTINUOUS block of treatments with ONE therapist that day. If the same ID is served by 2+ therapists (a couple under one account) or returns after a gap of over 1 h, those are separate visits. Cancellations and no-shows don\'t count.',
   },
   tratamiento: {
     es: 'Un tratamiento = una cita en el calendario (un servicio realizado). Una visita promedia ~1.5–2 tratamientos porque los paquetes agendan cada servicio por separado.',
@@ -35,12 +35,12 @@ export const EXPLAIN: Record<string, ExplainEntry> = {
     en: 'Real 2026 monthly budgets per location ("Budget Mimosa 2026"). The gold marker shows where the month should be at budget pace.',
   },
   ticket: {
-    es: 'Ventas netas ÷ tickets de caja (transacciones, no visitas). Baja cuando crecen los descuentos o dominan servicios cortos; sube con los extras.',
-    en: 'Net sales ÷ register tickets (transactions, not visits). Falls when discounts grow or short services dominate; rises with add-ons.',
+    es: 'Ventas netas del período ÷ visitas (no tratamientos): cuánto gasta en promedio cada visita al spa. Sube con extras y venta en cabina; baja con descuentos.',
+    en: 'Period net sales ÷ visits (not treatments): how much an average visit to the spa spends. Rises with add-ons and cabin sales; falls with discounts.',
   },
   visitas_tile: {
-    es: 'Clientes distintos que vinieron en el período (una visita = un cliente un día). Debajo, los tratamientos: servicios realizados. Sin cancelaciones ni no-shows.',
-    en: 'Distinct clients who came in during the period (a visit = one client on one day). Underneath, treatments: services performed. Excludes cancellations and no-shows.',
+    es: 'Visitas del período: bloques continuos de tratamientos de un ID con una terapeuta. Un mismo ID con 2 terapeutas a la vez (pareja) o que regresa horas después cuenta visitas separadas. Debajo, los tratamientos: servicios realizados.',
+    en: 'Period visits: continuous treatment blocks of one client ID with one therapist. The same ID with 2 therapists at once (a couple) or returning hours later counts as separate visits. Underneath, treatments: services performed.',
   },
   primeras: {
     es: 'Citas que Mindbody marca como la primera visita del cliente a Mimosa (cualquier sucursal). Es la base de adquisición y de las cohortes de retención.',
@@ -75,8 +75,8 @@ export const EXPLAIN: Record<string, ExplainEntry> = {
     en: 'Services with the highest net this period, with units sold. Useful for deciding what to promote or reinforce.',
   },
   top_clientes: {
-    es: 'Los clientes que más gastaron en el período (por ID de cliente, no por nombre). Visitas = días que vinieron.',
-    en: 'The clients who spent the most this period (by client ID, not name). Visits = days they came in.',
+    es: 'Los clientes que más gastaron en el período (por ID de cliente, no por nombre). Visitas = sus sesiones de visita en el período.',
+    en: 'The clients who spent the most this period (by client ID, not name). Visits = their visit sessions in the period.',
   },
   top_terapeutas: {
     es: 'Neto atribuido por la cita del mismo día del cliente. Si el cliente vio a varias terapeutas ese día, el ticket se reparte proporcional a los minutos de cada una.',
@@ -88,8 +88,8 @@ export const EXPLAIN: Record<string, ExplainEntry> = {
     en: 'Net sales by day (cash method) compared with the same dates last year. Tap the chart to read exact values.',
   },
   ventas_dias: {
-    es: 'Cada fila es un día: visitas (clientes distintos) y neto del día, con el mismo día de 2025 debajo. Toca para ver las transacciones con nombre de cliente.',
-    en: 'Each row is a day: visits (distinct clients) and the day\'s net, with the same 2025 day underneath. Tap to see the transactions with client names.',
+    es: 'Cada fila es un día: visitas (sesiones de cliente) y neto del día, con el mismo día de 2025 debajo. Toca para ver las transacciones con nombre de cliente.',
+    en: 'Each row is a day: visits (client sessions) and the day\'s net, with the same 2025 day underneath. Tap to see the transactions with client names.',
   },
   // staff
   equipo: {

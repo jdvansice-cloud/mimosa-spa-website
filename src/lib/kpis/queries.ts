@@ -383,6 +383,58 @@ function aggregateSales(items: ItemRow[], mode: MoneyMode = 'cash'): SalesAgg {
   return agg
 }
 
+/**
+ * Visit sessions: one client ID's CONTINUOUS block of treatments with ONE
+ * therapist in a day. Therapist change (couple under one account) or a gap
+ * > 60 min (same ID returning later) = a separate visit. Mirrors the
+ * kpi_daily_client_visits SQL view exactly.
+ */
+const VISIT_GAP_MS = 60 * 60_000
+
+interface SessionAppt {
+  client_id: string | null
+  location_id: number
+  start_datetime: string
+  duration_min: number | null
+  staff_id: number | null
+  staff_name?: string | null
+}
+
+function visitSessionsByClient(appts: SessionAppt[]): { total: number; byClient: Map<string, number> } {
+  const byClient = new Map<string, number>()
+  let anonymous = 0
+  const groups = new Map<string, Array<{ s: number; e: number }>>()
+  for (const a of appts) {
+    if (!a.client_id) { anonymous++; continue }
+    const day = a.start_datetime.slice(0, 10)
+    const staffKey = a.staff_id ?? a.staff_name ?? 'x'
+    const key = `${a.client_id}|${day}|${a.location_id}|${staffKey}`
+    const s = Date.parse(a.start_datetime.replace(' ', 'T'))
+    if (!Number.isFinite(s)) continue
+    const list = groups.get(key) ?? []
+    list.push({ s, e: s + (a.duration_min ?? 60) * 60_000 })
+    groups.set(key, list)
+  }
+  let total = anonymous
+  for (const [key, list] of groups) {
+    const clientId = key.slice(0, key.indexOf('|'))
+    list.sort((a, b) => a.s - b.s)
+    let prevEnd = -Infinity
+    for (const iv of list) {
+      if (iv.s > prevEnd + VISIT_GAP_MS) {
+        total++
+        byClient.set(clientId, (byClient.get(clientId) ?? 0) + 1)
+      }
+      prevEnd = Math.max(prevEnd, iv.e)
+    }
+  }
+  return { total, byClient }
+}
+
+export function countVisitSessions(appts: SessionAppt[]): number {
+  return visitSessionsByClient(appts).total
+}
+
 function visitStats(appts: ApptRow[]) {
   const visits = appts.filter(a => !CANCELLED_STATUSES.has(a.status))
   const missed = appts.filter(a => MISSED_STATUSES.has(a.status)).length
@@ -390,17 +442,10 @@ function visitStats(appts: ApptRow[]) {
   const newClientIds = new Set(
     visits.filter(a => a.first_appointment && a.client_id).map(a => a.client_id as string)
   )
-  // client visits: one client on one day (per location) = 1 visit
-  const clientDays = new Set<string>()
-  let anonymous = 0
-  for (const a of visits) {
-    if (a.client_id) clientDays.add(`${a.client_id}|${a.start_datetime.slice(0, 10)}|${a.location_id}`)
-    else anonymous++
-  }
   return {
     visits,
     visitCount: visits.length,
-    clientVisitCount: clientDays.size + anonymous,
+    clientVisitCount: countVisitSessions(visits),
     missed,
     noShowRate: attempted > 0 ? missed / attempted : null,
     newClients: newClientIds.size,
@@ -594,7 +639,10 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
     curYear,
     prevYear,
     net: { cur: nullFuture(mNet.cur.map(round2), curMonthIdx), prev: mNet.prev.map(round2) },
-    avgTicket: { cur: nullFuture(ticketOf(mNet.cur, mCount.cur), curMonthIdx), prev: ticketOf(mNet.prev, mCount.prev) },
+    avgTicket: {
+      cur: nullFuture(ticketOf(mNet.cur, gcMode ? mCount.cur : mCV.cur), curMonthIdx),
+      prev: ticketOf(mNet.prev, gcMode ? mCount.prev : mCV.prev),
+    },
     visits: { cur: nullFuture(mCV.cur, curMonthIdx), prev: mCV.prev.map(v => v) },
     newClients: { cur: nullFuture(mNew.cur, curMonthIdx), prev: mNew.prev.map(v => v) },
     noShowRate: { cur: nullFuture(rateOf(mMissed.cur, mVisits.cur), curMonthIdx), prev: rateOf(mMissed.prev, mVisits.prev) },
@@ -607,12 +655,15 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
       period === 'mtd' ? arr[curMonthIdx] ?? 0 : arr.reduce((s, v) => s + v, 0)
     const gNet = pick(mNet.prev)
     const gCount = pick(mCount.prev)
+    const gCV = pick(mCV.prev)
     const gVisits = pick(mVisits.prev)
     const gMissed = pick(mMissed.prev)
     goals = {
       net: round2(gNet),
-      avgTicket: gCount > 0 ? round2(gNet / gCount) : 0,
-      visits: pick(mCV.prev),
+      avgTicket: gcMode
+        ? (gCount > 0 ? round2(gNet / gCount) : 0)
+        : (gCV > 0 ? round2(gNet / gCV) : 0),
+      visits: gCV,
       newClients: pick(mNew.prev),
       noShowRate: gVisits + gMissed > 0 ? gMissed / (gVisits + gMissed) : 0,
     }
@@ -773,16 +824,8 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
       if (name) clientNameById.set(c.id, name)
     }
   }
-  // client visits = distinct days, not appointment count
-  const visitsByClient = new Map<string, number>()
-  const seenClientDays = new Set<string>()
-  for (const a of curVisits.visits) {
-    if (!a.client_id) continue
-    const key = `${a.client_id}|${a.start_datetime.slice(0, 10)}`
-    if (seenClientDays.has(key)) continue
-    seenClientDays.add(key)
-    visitsByClient.set(a.client_id, (visitsByClient.get(a.client_id) ?? 0) + 1)
-  }
+  // client visits = sessions (continuous block with one therapist), not appointments
+  const visitsByClient = visitSessionsByClient(curVisits.visits).byClient
   const topClients = topSpenders.map(([id, net]) => ({
     name: clientNameById.get(id) ?? `Cliente ${id}`,
     visits: visitsByClient.get(id) ?? 0,
@@ -819,8 +862,14 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
       lyNet: round2(lyNet),
       lyPeriodTotal,
       saleCount: cur.saleCount,
-      avgTicket: cur.saleCount > 0 ? round2(cur.net / cur.saleCount) : 0,
-      lyAvgTicket: lySaleCount > 0 ? round2(lyNet / lySaleCount) : 0,
+      // Avg ticket = net ÷ VISITS (spend per visit). Gift-card view keeps
+      // per-redemption (visits don't apply there).
+      avgTicket: gcMode
+        ? (cur.saleCount > 0 ? round2(cur.net / cur.saleCount) : 0)
+        : (curVisits.clientVisitCount > 0 ? round2(cur.net / curVisits.clientVisitCount) : 0),
+      lyAvgTicket: gcMode
+        ? (lySaleCount > 0 ? round2(lyNet / lySaleCount) : 0)
+        : (lyClientVisits > 0 ? round2(lyNet / lyClientVisits) : 0),
       mix: {
         service: round2(cur.mixNet.service),
         retail: round2(cur.mixNet.retail),

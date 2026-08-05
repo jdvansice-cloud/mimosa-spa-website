@@ -1,6 +1,7 @@
 import { getScheduleItems, getStaff } from '@/lib/booking/mindbody'
 import { addDays, panamaToday } from './sync'
 import {
+  countVisitSessions,
   fetchAll,
   minusOneYear,
   rangeFor,
@@ -310,8 +311,8 @@ export async function getStaffKpis(
   }
 
   // Per-staff aggregates for the period
-  interface Agg { hours: number; visits: number; missed: number; requested: number; firstVisits: number; clientDays: Set<string>; anonymous: number }
-  const mk = (): Agg => ({ hours: 0, visits: 0, missed: 0, requested: 0, firstVisits: 0, clientDays: new Set<string>(), anonymous: 0 })
+  interface Agg { hours: number; visits: number; missed: number; requested: number; firstVisits: number; sessionAppts: ApptRow[] }
+  const mk = (): Agg => ({ hours: 0, visits: 0, missed: 0, requested: 0, firstVisits: 0, sessionAppts: [] })
   const agg = new Map<string, Agg>()
   const lyAgg = new Map<string, { hours: number; visits: number }>()
   for (const a of curAppts) {
@@ -323,9 +324,7 @@ export async function getStaffKpis(
       e.hours += (a.duration_min ?? 0) / 60
       if (a.staff_requested) e.requested++
       if (a.first_appointment) e.firstVisits++
-      // client visits: one client-day counts once per therapist
-      if (a.client_id) e.clientDays.add(`${a.client_id}|${a.start_datetime.slice(0, 10)}`)
-      else e.anonymous++
+      e.sessionAppts.push(a) // her visit sessions computed below
     }
     agg.set(name, e)
   }
@@ -352,7 +351,7 @@ export async function getStaffKpis(
         lyHours: round1(lyAgg.get(name)?.hours ?? 0),
         visits: e.visits,
         lyVisits: lyAgg.get(name)?.visits ?? 0,
-        clientVisits: e.clientDays.size + e.anonymous,
+        clientVisits: countVisitSessions(e.sessionAppts),
         net: round2(net),
         lyNet: round2(ly.net.get(name) ?? 0),
         avgPerVisit: e.visits > 0 ? round2(net / e.visits) : 0,

@@ -134,8 +134,8 @@ function DiccionarioInner() {
         ))}
         <p className="text-center text-xs text-warm-gray pb-4">
           {lang === 'es'
-            ? 'Resumen: una visita es un cliente-día, un tratamiento es una cita, los clientes se identifican por ID, el dinero es neto sin ITBMS en método de caja y toda comparación es contra las mismas fechas del año pasado.'
-            : 'Summary: a visit is a client-day, a treatment is an appointment, clients are identified by ID, money is net of ITBMS on a cash basis, and every comparison is against the same dates last year.'}
+            ? 'Resumen: una visita es un bloque continuo de tratamientos de un ID con una terapeuta, un tratamiento es una cita, el ticket promedio es neto ÷ visitas, el dinero es neto sin ITBMS en método de caja y toda comparación es contra las mismas fechas del año pasado.'
+            : 'Summary: a visit is one ID\'s continuous treatment block with one therapist, a treatment is an appointment, average ticket is net ÷ visits, money is net of ITBMS on a cash basis, and every comparison is against the same dates last year.'}
         </p>
       </div>
     </div>
