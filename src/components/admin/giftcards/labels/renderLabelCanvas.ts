@@ -17,20 +17,16 @@ export const LABEL_DOTS_H = Math.round(LABEL_HEIGHT_IN * DPI) // 406
 // pt → dots (203/72).
 const pt = (n: number) => Math.round((n * DPI) / 72)
 
-// Print area derived from the physical GIFT CARD the transparent label is
-// applied to (owner spec 2026-08-05): card 3.3 × 2.13 in with the label
-// centered on it; content 2.9 in wide, clear 0.2 in from the CARD's top
-// edge and 0.4 in from its bottom edge (the card's own design shows
-// through the clear film there). Converted to label coordinates below —
-// this supersedes the earlier ad-hoc 4 mm raise.
-const CARD_H_IN = 2.13
-const CARD_TOP_CLEAR_IN = 0.2
-const CARD_BOTTOM_CLEAR_IN = 0.4
-const PRINT_W_IN = 2.9
-const LABEL_OFF_Y_IN = (CARD_H_IN - LABEL_HEIGHT_IN) / 2 // 0.065 — label centered
-
-const PAD_TOP = Math.round((CARD_TOP_CLEAR_IN - LABEL_OFF_Y_IN) * DPI) // 27 dots
-const PAD_BOTTOM = Math.round((CARD_BOTTOM_CLEAR_IN - LABEL_OFF_Y_IN) * DPI) // 68 dots
+// Owner spec 2026-08-05 v2, measured off the LABEL (3 × 2 in): all text
+// stays within a 4 mm border of the label edges; the price additionally
+// sits 2 mm lower and 4 mm further left than that top-right corner.
+// (Supersedes the earlier card-derived print area.)
+const mm = (n: number) => Math.round((n / 25.4) * DPI)
+const PAD = mm(4) // 32 dots — text border, all four sides
+const PAD_TOP = PAD
+const PAD_BOTTOM = PAD
+const PRICE_DROP = mm(2) // price nudge below the border
+const PRICE_INSET = mm(4) // price nudge left of the border
 
 // One knob for the whole content block (type + barcode height — never the
 // barcode module width, which must stay exact printer dots). 0.85 = the
@@ -214,9 +210,7 @@ export async function renderLabelCanvas(
   ctx.fillRect(0, 0, W, LABEL_DOTS_H)
   ctx.fillStyle = '#000000'
 
-  // Side padding centers the 2.9 in print width on whatever the drawn
-  // width is (D520 3 in → 10 dots/side; clamped for narrower printers).
-  const padX = Math.max(pt(2), Math.round((W - PRINT_W_IN * DPI) / 2))
+  const padX = PAD
   const contentW = W - padX * 2
   const centerX = W / 2
   const rightX = W - padX
@@ -224,8 +218,9 @@ export async function renderLabelCanvas(
   // Price — top right. When hidden, the middle band owns the whole top.
   let bandTop = PAD_TOP
   if (card.print_amount) {
-    const h = drawPrice(ctx, card.amount_cents, rightX, PAD_TOP)
-    bandTop = PAD_TOP + h + pt(2)
+    const priceTop = PAD_TOP + PRICE_DROP
+    const h = drawPrice(ctx, card.amount_cents, rightX - PRICE_INSET, priceTop)
+    bandTop = priceTop + h + pt(2)
   }
 
   // Barcode + serial — centered, bottom.
