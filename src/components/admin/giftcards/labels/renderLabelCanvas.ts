@@ -32,16 +32,22 @@ const LABEL_OFF_Y_IN = (CARD_H_IN - LABEL_HEIGHT_IN) / 2 // 0.065 — label cent
 const PAD_TOP = Math.round((CARD_TOP_CLEAR_IN - LABEL_OFF_Y_IN) * DPI) // 27 dots
 const PAD_BOTTOM = Math.round((CARD_BOTTOM_CLEAR_IN - LABEL_OFF_Y_IN) * DPI) // 68 dots
 
-const PRICE_SIZE = pt(17) // −35% from the original 26 pt (owner 2026-08-05)
-const PRICE_SUP = Math.round(PRICE_SIZE * 0.52) // $ and cents, top-aligned
-const EYEBROW_SIZE = pt(6.5) // "INCLUYE"
-const TREAT_SIZE = pt(9.5)
-const TREAT_LINE = Math.round(TREAT_SIZE * 1.35)
-const MSG_SIZE = pt(11)
-const MSG_LINE = Math.round(MSG_SIZE * 1.3)
-const SERIAL_SIZE = pt(9)
+// One knob for the whole content block (type + barcode height — never the
+// barcode module width, which must stay exact printer dots). 0.85 = the
+// "everything smaller" pass of 2026-08-05, on top of the sizes below.
+const SCALE = 0.85
+const sz = (n: number) => pt(n * SCALE)
 
-const BARS_H = Math.round(0.216 * DPI) // 0.27 in − 20% (owner 2026-08-05)
+const PRICE_SIZE = sz(17) // 17 pt was already −35% from the original 26 pt
+const PRICE_SUP = Math.round(PRICE_SIZE * 0.52) // $ and cents, top-aligned
+const EYEBROW_SIZE = sz(6.5) // "INCLUYE"
+const TREAT_SIZE = sz(9.5)
+const TREAT_LINE = Math.round(TREAT_SIZE * 1.35)
+const MSG_SIZE = sz(11)
+const MSG_LINE = Math.round(MSG_SIZE * 1.3)
+const SERIAL_SIZE = sz(9)
+
+const BARS_H = Math.round(0.216 * SCALE * DPI) // 0.27 in − 20%, × SCALE
 const BARS_MAX_W = Math.round(2.4 * DPI)
 const SERIAL_GAP = pt(2)
 
