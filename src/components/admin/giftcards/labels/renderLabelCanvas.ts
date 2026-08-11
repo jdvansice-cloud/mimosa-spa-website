@@ -22,9 +22,9 @@ const pt = (n: number) => Math.round((n * DPI) / 72)
 // sits 2 mm lower and 4 mm further left than that top-right corner.
 // (Supersedes the earlier card-derived print area.)
 const mm = (n: number) => Math.round((n / 25.4) * DPI)
-const PAD = mm(4) // 32 dots — text border, all four sides
+const PAD = mm(4) // 32 dots — text border: top and sides
 const PAD_TOP = PAD
-const PAD_BOTTOM = PAD
+const PAD_BOTTOM = mm(11) // deeper bottom border (owner 2026-08-05)
 const PRICE_DROP = mm(2) // price nudge below the border
 const PRICE_INSET = mm(4) // price nudge left of the border
 
