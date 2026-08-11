@@ -17,14 +17,22 @@ export const LABEL_DOTS_H = Math.round(LABEL_HEIGHT_IN * DPI) // 406
 // pt → dots (203/72).
 const pt = (n: number) => Math.round((n * DPI) / 72)
 
-const PAD_TOP = pt(7)
-const PAD_X = pt(11.5) // ≈4 mm — die-cut position tolerance
-const PAD_BOTTOM = pt(7)
-// Owner 2026-08-05: everything below the price sits ~4 mm higher on the
-// die-cut label (the middle band re-centers above the raised barcode).
-const RAISE = Math.round((4 / 25.4) * DPI) // 4 mm ≈ 32 dots
+// Print area derived from the physical GIFT CARD the transparent label is
+// applied to (owner spec 2026-08-05): card 3.3 × 2.13 in with the label
+// centered on it; content 2.9 in wide, clear 0.2 in from the CARD's top
+// edge and 0.4 in from its bottom edge (the card's own design shows
+// through the clear film there). Converted to label coordinates below —
+// this supersedes the earlier ad-hoc 4 mm raise.
+const CARD_H_IN = 2.13
+const CARD_TOP_CLEAR_IN = 0.2
+const CARD_BOTTOM_CLEAR_IN = 0.4
+const PRINT_W_IN = 2.9
+const LABEL_OFF_Y_IN = (CARD_H_IN - LABEL_HEIGHT_IN) / 2 // 0.065 — label centered
 
-const PRICE_SIZE = pt(19.5) // the number (−25% from 26pt, owner 2026-08-05)
+const PAD_TOP = Math.round((CARD_TOP_CLEAR_IN - LABEL_OFF_Y_IN) * DPI) // 27 dots
+const PAD_BOTTOM = Math.round((CARD_BOTTOM_CLEAR_IN - LABEL_OFF_Y_IN) * DPI) // 68 dots
+
+const PRICE_SIZE = pt(17) // −35% from the original 26 pt (owner 2026-08-05)
 const PRICE_SUP = Math.round(PRICE_SIZE * 0.52) // $ and cents, top-aligned
 const EYEBROW_SIZE = pt(6.5) // "INCLUYE"
 const TREAT_SIZE = pt(9.5)
@@ -33,7 +41,7 @@ const MSG_SIZE = pt(11)
 const MSG_LINE = Math.round(MSG_SIZE * 1.3)
 const SERIAL_SIZE = pt(9)
 
-const BARS_H = Math.round(0.27 * DPI)
+const BARS_H = Math.round(0.216 * DPI) // 0.27 in − 20% (owner 2026-08-05)
 const BARS_MAX_W = Math.round(2.4 * DPI)
 const SERIAL_GAP = pt(2)
 
@@ -200,9 +208,12 @@ export async function renderLabelCanvas(
   ctx.fillRect(0, 0, W, LABEL_DOTS_H)
   ctx.fillStyle = '#000000'
 
-  const contentW = W - PAD_X * 2
+  // Side padding centers the 2.9 in print width on whatever the drawn
+  // width is (D520 3 in → 10 dots/side; clamped for narrower printers).
+  const padX = Math.max(pt(2), Math.round((W - PRINT_W_IN * DPI) / 2))
+  const contentW = W - padX * 2
   const centerX = W / 2
-  const rightX = W - PAD_X
+  const rightX = W - padX
 
   // Price — top right. When hidden, the middle band owns the whole top.
   let bandTop = PAD_TOP
@@ -213,7 +224,7 @@ export async function renderLabelCanvas(
 
   // Barcode + serial — centered, bottom.
   const bars = renderBarcode(card.serial)
-  const serialTop = LABEL_DOTS_H - PAD_BOTTOM - RAISE - SERIAL_SIZE
+  const serialTop = LABEL_DOTS_H - PAD_BOTTOM - SERIAL_SIZE
   const barsTop = serialTop - SERIAL_GAP - BARS_H
   ctx.drawImage(bars, Math.round((W - bars.width) / 2), barsTop)
   ctx.font = `400 ${SERIAL_SIZE}px ${MONO}`
