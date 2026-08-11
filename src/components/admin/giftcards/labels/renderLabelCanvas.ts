@@ -20,8 +20,11 @@ const pt = (n: number) => Math.round((n * DPI) / 72)
 const PAD_TOP = pt(7)
 const PAD_X = pt(11.5) // ≈4 mm — die-cut position tolerance
 const PAD_BOTTOM = pt(7)
+// Owner 2026-08-05: everything below the price sits ~4 mm higher on the
+// die-cut label (the middle band re-centers above the raised barcode).
+const RAISE = Math.round((4 / 25.4) * DPI) // 4 mm ≈ 32 dots
 
-const PRICE_SIZE = pt(26) // the number
+const PRICE_SIZE = pt(19.5) // the number (−25% from 26pt, owner 2026-08-05)
 const PRICE_SUP = Math.round(PRICE_SIZE * 0.52) // $ and cents, top-aligned
 const EYEBROW_SIZE = pt(6.5) // "INCLUYE"
 const TREAT_SIZE = pt(9.5)
@@ -210,7 +213,7 @@ export async function renderLabelCanvas(
 
   // Barcode + serial — centered, bottom.
   const bars = renderBarcode(card.serial)
-  const serialTop = LABEL_DOTS_H - PAD_BOTTOM - SERIAL_SIZE
+  const serialTop = LABEL_DOTS_H - PAD_BOTTOM - RAISE - SERIAL_SIZE
   const barsTop = serialTop - SERIAL_GAP - BARS_H
   ctx.drawImage(bars, Math.round((W - bars.width) / 2), barsTop)
   ctx.font = `400 ${SERIAL_SIZE}px ${MONO}`
