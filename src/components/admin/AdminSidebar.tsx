@@ -142,8 +142,8 @@ export function AdminSidebar({
         </p>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
+      {/* Navigation — scrolls when the menu is taller than the screen */}
+      <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1">
         {navItems.map((item, i) => {
           const Icon = item.icon
           const active = isActive(item.href)
