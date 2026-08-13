@@ -3130,6 +3130,7 @@ function AuthStepContent() {
     const { setClientInfo, nextStep, setStep, addService, loadPromotion, setLoading, setError, isLoading, error } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useBookingStore"])();
     const supabaseRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const [credential, setCredential] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('');
+    const [countryCode, setCountryCode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('+507');
     const [authState, setAuthState] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('credential');
     const [isVerifying, setIsVerifying] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [availableClients, setAvailableClients] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
@@ -3141,6 +3142,11 @@ function AuthStepContent() {
         email: '',
         phone: ''
     });
+    // Guardrail: when a registration matches an EXISTING Mindbody account whose
+    // name differs from what was typed, we pause and ask "is this you?" instead
+    // of silently booking under the other name (real case: someone typed "Josue
+    // Chavez" but the email belonged to another client's account).
+    const [existingAccount, setExistingAccount] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const getSupabase = ()=>{
         if (!supabaseRef.current) {
             const { getClient } = __turbopack_context__.r("[project]/src/lib/supabase/client.ts [app-ssr] (ecmascript)");
@@ -3202,18 +3208,17 @@ function AuthStepContent() {
         searchParams
     ]);
     const handleCredentialSubmit = async ()=>{
-        let trimmed = credential.trim().replace(/\D/g, '');
-        if (!trimmed) {
+        const cc = countryCode.replace(/\D/g, '');
+        const local = credential.trim().replace(/\D/g, '');
+        if (!local) {
             setError('Ingresa tu número de teléfono');
             return;
         }
-        // Panamanian numbers are 8 digits (mobiles start with 6) — most clients
-        // type them without the country code, so we add 507 for them.
-        if (trimmed.length === 8) {
-            trimmed = `507${trimmed}`;
-        }
+        // WATI format: country code + number, NO + sign (e.g. 50766124546).
+        // If the user typed their country code again, don't double-prefix it.
+        const trimmed = local.startsWith(cc) && local.length > 9 ? local : `${cc}${local}`;
         if (trimmed.length < 10) {
-            setError('Escribe tu número completo (ej: Panamá 66124546 · desde otro país con código: 12125551234)');
+            setError('Escribe tu número completo (ej: 6612 3456)');
             return;
         }
         setAuthState('sending');
@@ -3453,12 +3458,27 @@ function AuthStepContent() {
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Error al registrar');
-            setSelectedClient({
+            const accountName = `${data.client.FirstName || ''} ${data.client.LastName || ''}`.trim();
+            const typedName = `${firstName} ${lastName}`.trim();
+            const foundClient = {
                 clientId: data.client.Id,
-                clientName: `${firstName} ${lastName}`.trim(),
-                email: regEmail,
-                phone
-            });
+                clientName: accountName || typedName,
+                email: data.client.Email || regEmail,
+                phone: data.client.MobilePhone || phone
+            };
+            // The email/phone matched an existing account under a DIFFERENT name:
+            // stop and confirm identity instead of booking under the wrong person.
+            const norm = (s)=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+            const sameFirstName = norm(accountName).split(' ')[0] === norm(typedName).split(' ')[0];
+            if (data.existingClient && accountName && !sameFirstName) {
+                setExistingAccount({
+                    client: foundClient,
+                    typedName
+                });
+                setAuthState('confirm-identity');
+                return;
+            }
+            setSelectedClient(foundClient);
             setAuthState('channel-choice');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error de conexión');
@@ -3477,13 +3497,13 @@ function AuthStepContent() {
             className: "w-7 h-7 text-gold"
         }, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 413,
+            lineNumber: 436,
             columnNumber: 9
         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$message$2d$circle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__MessageCircle$3e$__["MessageCircle"], {
             className: "w-7 h-7 text-green-600"
         }, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 414,
+            lineNumber: 437,
             columnNumber: 9
         }, this);
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3498,7 +3518,7 @@ function AuthStepContent() {
                             children: ChannelIcon
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 420,
+                            lineNumber: 443,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -3506,7 +3526,7 @@ function AuthStepContent() {
                             children: "Ingresa tu código"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 424,
+                            lineNumber: 447,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3515,7 +3535,7 @@ function AuthStepContent() {
                                 otpChannel === 'email' ? 'Enviamos un código de 6 dígitos a' : 'Enviamos un código por WhatsApp a',
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 427,
+                                    lineNumber: 450,
                                     columnNumber: 115
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3523,13 +3543,13 @@ function AuthStepContent() {
                                     children: channelLabel
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 428,
+                                    lineNumber: 451,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 426,
+                            lineNumber: 449,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$OtpInput$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["OtpInput"], {
@@ -3538,7 +3558,7 @@ function AuthStepContent() {
                             error: !!error
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 431,
+                            lineNumber: 454,
                             columnNumber: 13
                         }, this),
                         isVerifying && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3548,7 +3568,7 @@ function AuthStepContent() {
                                     className: "w-4 h-4 animate-spin"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 435,
+                                    lineNumber: 458,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3556,13 +3576,13 @@ function AuthStepContent() {
                                     children: "Verificando..."
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 436,
+                                    lineNumber: 459,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 434,
+                            lineNumber: 457,
                             columnNumber: 15
                         }, this),
                         error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3570,7 +3590,7 @@ function AuthStepContent() {
                             children: error
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 441,
+                            lineNumber: 464,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3585,14 +3605,14 @@ function AuthStepContent() {
                                             className: "w-3.5 h-3.5"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 452,
+                                            lineNumber: 475,
                                             columnNumber: 17
                                         }, this),
                                         "Reenviar código"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 447,
+                                    lineNumber: 470,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3606,29 +3626,29 @@ function AuthStepContent() {
                                     children: "← Cambiar canal"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 455,
+                                    lineNumber: 478,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 446,
+                            lineNumber: 469,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                    lineNumber: 419,
+                    lineNumber: 442,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                lineNumber: 418,
+                lineNumber: 441,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 417,
+            lineNumber: 440,
             columnNumber: 7
         }, this);
     }
@@ -3650,12 +3670,12 @@ function AuthStepContent() {
                                         className: "w-5 h-5 text-white"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 482,
+                                        lineNumber: 505,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 480,
+                                    lineNumber: 503,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -3663,7 +3683,7 @@ function AuthStepContent() {
                                     children: "Verificar identidad"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 484,
+                                    lineNumber: 507,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3675,19 +3695,19 @@ function AuthStepContent() {
                                             children: selectedClient.clientName
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 486,
+                                            lineNumber: 509,
                                             columnNumber: 22
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 485,
+                                    lineNumber: 508,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 479,
+                            lineNumber: 502,
                             columnNumber: 13
                         }, this),
                         error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3695,7 +3715,7 @@ function AuthStepContent() {
                             children: error
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 491,
+                            lineNumber: 514,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$auth$2f$OtpChannelChoice$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["OtpChannelChoice"], {
@@ -3706,7 +3726,7 @@ function AuthStepContent() {
                             onChooseWhatsApp: handleChooseWhatsApp
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 496,
+                            lineNumber: 519,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3719,23 +3739,23 @@ function AuthStepContent() {
                             children: "← Usar otro correo o teléfono"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 504,
+                            lineNumber: 527,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                    lineNumber: 478,
+                    lineNumber: 501,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                lineNumber: 477,
+                lineNumber: 500,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 476,
+            lineNumber: 499,
             columnNumber: 7
         }, this);
     }
@@ -3757,12 +3777,12 @@ function AuthStepContent() {
                                         className: "w-5 h-5 text-white"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 529,
+                                        lineNumber: 552,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 527,
+                                    lineNumber: 550,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -3770,7 +3790,7 @@ function AuthStepContent() {
                                     children: "Selecciona tu Perfil"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 531,
+                                    lineNumber: 554,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3778,13 +3798,13 @@ function AuthStepContent() {
                                     children: "Encontramos varias cuentas asociadas a este dato"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 532,
+                                    lineNumber: 555,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 526,
+                            lineNumber: 549,
                             columnNumber: 13
                         }, this),
                         error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3792,7 +3812,7 @@ function AuthStepContent() {
                             children: error
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 536,
+                            lineNumber: 559,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3808,12 +3828,12 @@ function AuthStepContent() {
                                                 className: "w-5 h-5 text-gold"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                lineNumber: 551,
+                                                lineNumber: 574,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 550,
+                                            lineNumber: 573,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3823,7 +3843,7 @@ function AuthStepContent() {
                                                     children: client.displayName
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 554,
+                                                    lineNumber: 577,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3831,24 +3851,24 @@ function AuthStepContent() {
                                                     children: client.Email || client.MobilePhone || '—'
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 555,
+                                                    lineNumber: 578,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 553,
+                                            lineNumber: 576,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, client.Id, true, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 543,
+                                    lineNumber: 566,
                                     columnNumber: 17
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 541,
+                            lineNumber: 564,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3861,23 +3881,155 @@ function AuthStepContent() {
                             children: "← Usar otro correo o teléfono"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 561,
+                            lineNumber: 584,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                    lineNumber: 525,
+                    lineNumber: 548,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                lineNumber: 524,
+                lineNumber: 547,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 523,
+            lineNumber: 546,
+            columnNumber: 7
+        }, this);
+    }
+    // Identity guardrail: the typed email/phone belongs to an existing account
+    // with a different name — confirm before booking under it.
+    if (authState === 'confirm-identity' && existingAccount) {
+        const parts = existingAccount.client.clientName.split(/\s+/);
+        const maskedName = `${parts[0]} ${(parts[1]?.[0] || '').toUpperCase()}.`.trim();
+        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "auth-step flex flex-col h-full",
+            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex-1 overflow-y-auto pb-4",
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "max-w-md mx-auto text-center",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "w-14 h-14 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__User$3e$__["User"], {
+                                className: "w-7 h-7 text-gold"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                lineNumber: 610,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                            lineNumber: 609,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                            className: "text-lg font-bold text-dark mb-2",
+                            children: "Ya existe una cuenta"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                            lineNumber: 612,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-sm text-warm-gray mb-5",
+                            children: [
+                                "El correo o teléfono que ingresaste pertenece a una cuenta a nombre de",
+                                ' ',
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: "font-semibold text-dark",
+                                    children: maskedName
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                    lineNumber: 615,
+                                    columnNumber: 15
+                                }, this),
+                                ", no de",
+                                ' ',
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: "font-semibold text-dark",
+                                    children: existingAccount.typedName
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                    lineNumber: 616,
+                                    columnNumber: 15
+                                }, this),
+                                "."
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                            lineNumber: 613,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "space-y-3",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                    onClick: ()=>{
+                                        setSelectedClient(existingAccount.client);
+                                        setExistingAccount(null);
+                                        setAuthState('channel-choice');
+                                    },
+                                    className: "w-full py-3 bg-gradient-to-r from-gold to-gold/90 text-dark font-semibold rounded-xl hover:shadow-lg transition-all text-sm",
+                                    children: [
+                                        "Sí, soy ",
+                                        maskedName,
+                                        " — continuar con mi cuenta"
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                    lineNumber: 619,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                    onClick: ()=>{
+                                        setExistingAccount(null);
+                                        setRegistrationData((prev)=>({
+                                                ...prev,
+                                                email: '',
+                                                phone: ''
+                                            }));
+                                        setAuthState('register');
+                                    },
+                                    className: "w-full py-3 border-2 border-beige-200 text-dark font-medium rounded-xl hover:border-gold/50 transition-all text-sm",
+                                    children: "No soy yo — usar otro correo y teléfono"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                    lineNumber: 630,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                            lineNumber: 618,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "mt-4 text-xs text-warm-gray",
+                            children: "Si reservas para otra persona, usa tu propia cuenta y menciona el nombre del invitado por WhatsApp."
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                            lineNumber: 642,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                    lineNumber: 608,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                lineNumber: 607,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+            lineNumber: 606,
             columnNumber: 7
         }, this);
     }
@@ -3899,12 +4051,12 @@ function AuthStepContent() {
                                         className: "w-5 h-5 text-white"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 586,
+                                        lineNumber: 660,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 584,
+                                    lineNumber: 658,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -3912,7 +4064,7 @@ function AuthStepContent() {
                                     children: "Crear Cuenta"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 588,
+                                    lineNumber: 662,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3920,13 +4072,13 @@ function AuthStepContent() {
                                     children: "Número no registrado. Completa tus datos para crear una cuenta."
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 589,
+                                    lineNumber: 663,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 583,
+                            lineNumber: 657,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3942,7 +4094,7 @@ function AuthStepContent() {
                                                     children: "Nombre"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 595,
+                                                    lineNumber: 669,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3956,13 +4108,13 @@ function AuthStepContent() {
                                                     placeholder: "Tu nombre"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 596,
+                                                    lineNumber: 670,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 594,
+                                            lineNumber: 668,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3972,7 +4124,7 @@ function AuthStepContent() {
                                                     children: "Apellido"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 605,
+                                                    lineNumber: 679,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3986,19 +4138,19 @@ function AuthStepContent() {
                                                     placeholder: "Tu apellido"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 606,
+                                                    lineNumber: 680,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 604,
+                                            lineNumber: 678,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 593,
+                                    lineNumber: 667,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4008,7 +4160,7 @@ function AuthStepContent() {
                                             children: "Correo Electrónico"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 617,
+                                            lineNumber: 691,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4018,7 +4170,7 @@ function AuthStepContent() {
                                                     className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 619,
+                                                    lineNumber: 693,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -4032,19 +4184,19 @@ function AuthStepContent() {
                                                     placeholder: "correo@ejemplo.com"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 620,
+                                                    lineNumber: 694,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 618,
+                                            lineNumber: 692,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 616,
+                                    lineNumber: 690,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4054,7 +4206,7 @@ function AuthStepContent() {
                                             children: "Teléfono / WhatsApp"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 631,
+                                            lineNumber: 705,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4064,7 +4216,7 @@ function AuthStepContent() {
                                                     className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 633,
+                                                    lineNumber: 707,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -4078,25 +4230,25 @@ function AuthStepContent() {
                                                     placeholder: "66124546"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                    lineNumber: 634,
+                                                    lineNumber: 708,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                            lineNumber: 632,
+                                            lineNumber: 706,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 630,
+                                    lineNumber: 704,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 592,
+                            lineNumber: 666,
                             columnNumber: 13
                         }, this),
                         error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4104,7 +4256,7 @@ function AuthStepContent() {
                             children: error
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 646,
+                            lineNumber: 720,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4120,7 +4272,7 @@ function AuthStepContent() {
                                                 className: "w-4 h-4 animate-spin"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                lineNumber: 661,
+                                                lineNumber: 735,
                                                 columnNumber: 21
                                             }, this),
                                             "Creando cuenta..."
@@ -4132,14 +4284,14 @@ function AuthStepContent() {
                                                 className: "w-4 h-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                                lineNumber: 663,
+                                                lineNumber: 737,
                                                 columnNumber: 45
                                             }, this)
                                         ]
                                     }, void 0, true)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 652,
+                                    lineNumber: 726,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4151,29 +4303,29 @@ function AuthStepContent() {
                                     children: "← Volver"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 667,
+                                    lineNumber: 741,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 651,
+                            lineNumber: 725,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                    lineNumber: 582,
+                    lineNumber: 656,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                lineNumber: 581,
+                lineNumber: 655,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 580,
+            lineNumber: 654,
             columnNumber: 7
         }, this);
     }
@@ -4194,12 +4346,12 @@ function AuthStepContent() {
                                     className: "w-5 h-5 text-white"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 691,
+                                    lineNumber: 765,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                lineNumber: 689,
+                                lineNumber: 763,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -4207,7 +4359,7 @@ function AuthStepContent() {
                                 children: "Último paso"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                lineNumber: 693,
+                                lineNumber: 767,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4215,13 +4367,13 @@ function AuthStepContent() {
                                 children: "Confirma tu número de teléfono para completar tu reserva"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                lineNumber: 694,
+                                lineNumber: 768,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 688,
+                        lineNumber: 762,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4232,7 +4384,7 @@ function AuthStepContent() {
                                 children: "Al iniciar sesión podrás:"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                lineNumber: 700,
+                                lineNumber: 774,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -4242,40 +4394,40 @@ function AuthStepContent() {
                                         children: "• Ver tu historial de citas y compras"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 702,
+                                        lineNumber: 776,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                         children: "• Gestionar tus próximas reservaciones"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 703,
+                                        lineNumber: 777,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                         children: "• Recibir ofertas exclusivas"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 704,
+                                        lineNumber: 778,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                         children: "• Agilizar futuras reservas"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 705,
+                                        lineNumber: 779,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                lineNumber: 701,
+                                lineNumber: 775,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 699,
+                        lineNumber: 773,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4285,51 +4437,144 @@ function AuthStepContent() {
                                 children: "Número de teléfono"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                lineNumber: 710,
+                                lineNumber: 784,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "relative",
+                                className: "flex gap-2",
                                 children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$phone$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Phone$3e$__["Phone"], {
-                                        className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray"
-                                    }, void 0, false, {
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                        value: countryCode,
+                                        onChange: (e)=>setCountryCode(e.target.value),
+                                        disabled: authState === 'sending',
+                                        className: "w-24 px-2 py-3 border-2 border-beige-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all bg-white disabled:opacity-50",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+507",
+                                                children: "+507"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 796,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+1",
+                                                children: "+1"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 797,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+52",
+                                                children: "+52"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 798,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+57",
+                                                children: "+57"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 799,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+506",
+                                                children: "+506"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 800,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+593",
+                                                children: "+593"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 801,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+51",
+                                                children: "+51"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 802,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+58",
+                                                children: "+58"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 803,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                value: "+34",
+                                                children: "+34"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 804,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 714,
+                                        lineNumber: 788,
                                         columnNumber: 15
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                        type: "tel",
-                                        value: credential,
-                                        onChange: (e)=>setCredential(e.target.value),
-                                        onKeyPress: handleKeyPress,
-                                        disabled: authState === 'sending',
-                                        className: "w-full pl-10 pr-3 py-3 border-2 border-beige-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all disabled:opacity-50",
-                                        placeholder: "66124546",
-                                        autoFocus: true
-                                    }, void 0, false, {
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "relative flex-1",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$phone$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Phone$3e$__["Phone"], {
+                                                className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 807,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                type: "tel",
+                                                value: credential,
+                                                onChange: (e)=>setCredential(e.target.value),
+                                                onKeyPress: handleKeyPress,
+                                                disabled: authState === 'sending',
+                                                className: "w-full pl-10 pr-3 py-3 border-2 border-beige-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all disabled:opacity-50",
+                                                placeholder: "6612 3456",
+                                                autoFocus: true
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
+                                                lineNumber: 808,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                        lineNumber: 715,
+                                        lineNumber: 806,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                lineNumber: 713,
+                                lineNumber: 787,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 className: "mt-1 text-xs text-warm-gray",
-                                children: "Panamá: solo tu número (66124546) · Otros países: con código, sin el + (12125551234)"
+                                children: "Selecciona tu código de país e ingresa tu número (sin el código)."
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                lineNumber: 728,
+                                lineNumber: 822,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 709,
+                        lineNumber: 783,
                         columnNumber: 11
                     }, this),
                     error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4337,7 +4582,7 @@ function AuthStepContent() {
                         children: error
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 732,
+                        lineNumber: 826,
                         columnNumber: 13
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4350,7 +4595,7 @@ function AuthStepContent() {
                                     className: "w-4 h-4 animate-spin"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 746,
+                                    lineNumber: 840,
                                     columnNumber: 17
                                 }, this),
                                 "Buscando..."
@@ -4362,14 +4607,14 @@ function AuthStepContent() {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                                    lineNumber: 748,
+                                    lineNumber: 842,
                                     columnNumber: 26
                                 }, this)
                             ]
                         }, void 0, true)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 737,
+                        lineNumber: 831,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4377,7 +4622,7 @@ function AuthStepContent() {
                         children: "Te enviaremos un código de verificación"
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 752,
+                        lineNumber: 846,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4387,28 +4632,28 @@ function AuthStepContent() {
                             variant: "link"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                            lineNumber: 758,
+                            lineNumber: 852,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 757,
+                        lineNumber: 851,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                lineNumber: 687,
+                lineNumber: 761,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 686,
+            lineNumber: 760,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-        lineNumber: 685,
+        lineNumber: 759,
         columnNumber: 5
     }, this);
 }
@@ -4424,7 +4669,7 @@ function AuthStepLoading() {
                         className: "w-6 h-6 animate-spin text-gold mx-auto mb-3"
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 771,
+                        lineNumber: 865,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4432,23 +4677,23 @@ function AuthStepLoading() {
                         children: "Cargando..."
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                        lineNumber: 772,
+                        lineNumber: 866,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-                lineNumber: 770,
+                lineNumber: 864,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 769,
+            lineNumber: 863,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-        lineNumber: 768,
+        lineNumber: 862,
         columnNumber: 5
     }, this);
 }
@@ -4456,17 +4701,17 @@ function AuthStep() {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Suspense"], {
         fallback: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(AuthStepLoading, {}, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 781,
+            lineNumber: 875,
             columnNumber: 25
         }, void 0),
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(AuthStepContent, {}, void 0, false, {
             fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-            lineNumber: 782,
+            lineNumber: 876,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/booking/steps/AuthStep.tsx",
-        lineNumber: 781,
+        lineNumber: 875,
         columnNumber: 5
     }, this);
 }
@@ -6673,10 +6918,11 @@ function StaffStep() {
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         async function fetchStaff() {
             if (!selectedLocation) return;
-            // If no time selected or no available staff, don't fetch
+            // If no time selected or no available staff, don't fetch. Only clear the
+            // local list — resetting the store cache here creates a fresh [] every
+            // pass and, with `staff` as an effect dep, loops the effect forever.
             if (availableStaffIds.length === 0) {
                 setLocalStaff([]);
-                setStaffList([]);
                 return;
             }
             // Use cached staff if available and matches the available IDs
@@ -6763,12 +7009,12 @@ function StaffStep() {
                                 className: "w-5 h-5 text-white"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                lineNumber: 108,
+                                lineNumber: 109,
                                 columnNumber: 11
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 106,
+                            lineNumber: 107,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -6776,7 +7022,7 @@ function StaffStep() {
                             children: "Selecciona tu Terapeuta"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 110,
+                            lineNumber: 111,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6791,20 +7037,20 @@ function StaffStep() {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                    lineNumber: 115,
+                                    lineNumber: 116,
                                     columnNumber: 13
                                 }, this),
                                 "Elige quién te atenderá o deja que asignemos al mejor disponible"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 113,
+                            lineNumber: 114,
                             columnNumber: 9
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                    lineNumber: 105,
+                    lineNumber: 106,
                     columnNumber: 7
                 }, this),
                 isLoadingStaff && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6814,7 +7060,7 @@ function StaffStep() {
                             className: "w-10 h-10 text-gold animate-spin mb-4"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 126,
+                            lineNumber: 127,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6822,13 +7068,13 @@ function StaffStep() {
                             children: "Cargando terapeutas disponibles..."
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 127,
+                            lineNumber: 128,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                    lineNumber: 125,
+                    lineNumber: 126,
                     columnNumber: 9
                 }, this),
                 staffError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6836,7 +7082,7 @@ function StaffStep() {
                     children: staffError
                 }, void 0, false, {
                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                    lineNumber: 133,
+                    lineNumber: 134,
                     columnNumber: 9
                 }, this),
                 !isLoadingStaff && localStaff.length === 0 && availableStaffIds.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6846,7 +7092,7 @@ function StaffStep() {
                             className: "w-12 h-12 text-beige-300 mx-auto mb-3"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 141,
+                            lineNumber: 142,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6854,7 +7100,7 @@ function StaffStep() {
                             children: "No hay terapeutas disponibles para este horario"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 142,
+                            lineNumber: 143,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6863,13 +7109,13 @@ function StaffStep() {
                             children: "← Seleccionar otro horario"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 143,
+                            lineNumber: 144,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                    lineNumber: 140,
+                    lineNumber: 141,
                     columnNumber: 9
                 }, this),
                 !isLoadingStaff && (availableStaffIds.length > 0 || localStaff.length > 0) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6902,12 +7148,12 @@ function StaffStep() {
                                             className: "w-7 h-7"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                            lineNumber: 178,
+                                            lineNumber: 179,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                        lineNumber: 171,
+                                        lineNumber: 172,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6918,7 +7164,7 @@ function StaffStep() {
                                                 children: "Cualquier Terapeuta"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                                lineNumber: 183,
+                                                lineNumber: 184,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6936,19 +7182,19 @@ function StaffStep() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                                        lineNumber: 189,
+                                                        lineNumber: 190,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                                lineNumber: 186,
+                                                lineNumber: 187,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                        lineNumber: 182,
+                                        lineNumber: 183,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6959,18 +7205,18 @@ function StaffStep() {
                                         children: selectedStaff === null ? '✓ Seleccionado' : 'Disponible'
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                        lineNumber: 195,
+                                        lineNumber: 196,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                lineNumber: 169,
+                                lineNumber: 170,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 156,
+                            lineNumber: 157,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7006,7 +7252,7 @@ function StaffStep() {
                                                     className: "w-14 h-14 rounded-full object-cover"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                                    lineNumber: 232,
+                                                    lineNumber: 233,
                                                     columnNumber: 23
                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     className: `
@@ -7017,7 +7263,7 @@ function StaffStep() {
                                                     children: initials
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                                    lineNumber: 238,
+                                                    lineNumber: 239,
                                                     columnNumber: 23
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7028,7 +7274,7 @@ function StaffStep() {
                                                             children: staffMember.DisplayName || `${staffMember.FirstName} ${staffMember.LastName}`
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                                            lineNumber: 252,
+                                                            lineNumber: 253,
                                                             columnNumber: 23
                                                         }, this),
                                                         staffMember.Bio && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7036,19 +7282,19 @@ function StaffStep() {
                                                             children: staffMember.Bio
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                                            lineNumber: 256,
+                                                            lineNumber: 257,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                                    lineNumber: 251,
+                                                    lineNumber: 252,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                            lineNumber: 229,
+                                            lineNumber: 230,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7059,36 +7305,36 @@ function StaffStep() {
                                             children: isSelected ? '✓ Seleccionado' : 'Seleccionar'
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                            lineNumber: 264,
+                                            lineNumber: 265,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, staffMember.Id, true, {
                                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                                    lineNumber: 214,
+                                    lineNumber: 215,
                                     columnNumber: 17
                                 }, this);
                             })
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                            lineNumber: 208,
+                            lineNumber: 209,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-                    lineNumber: 154,
+                    lineNumber: 155,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-            lineNumber: 103,
+            lineNumber: 104,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/booking/steps/StaffStep.tsx",
-        lineNumber: 101,
+        lineNumber: 102,
         columnNumber: 5
     }, this);
 }
@@ -7815,6 +8061,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__User$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/user.js [app-ssr] (ecmascript) <export default as User>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$calendar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Calendar$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/calendar.js [app-ssr] (ecmascript) <export default as Calendar>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$clock$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Clock$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/clock.js [app-ssr] (ecmascript) <export default as Clock>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader-circle.js [app-ssr] (ecmascript) <export default as Loader2>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$triangle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertTriangle$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/triangle-alert.js [app-ssr] (ecmascript) <export default as AlertTriangle>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$star$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Star$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/star.js [app-ssr] (ecmascript) <export default as Star>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$arrow$2d$down$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__ArrowDown$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/arrow-down.js [app-ssr] (ecmascript) <export default as ArrowDown>");
@@ -8071,6 +8318,45 @@ function ConfirmStep() {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "confirm-step flex flex-col h-full",
         children: [
+            isSubmitting && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "fixed inset-0 z-[80] bg-white/80 backdrop-blur-sm flex items-center justify-center",
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "text-center px-6",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__["Loader2"], {
+                            className: "w-14 h-14 text-gold animate-spin mx-auto mb-4"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
+                            lineNumber: 283,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "font-semibold text-dark",
+                            children: "Confirmando tu reserva…"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
+                            lineNumber: 284,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-sm text-warm-gray mt-1",
+                            children: "Estamos reservando tu espacio, esto toma unos segundos."
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
+                            lineNumber: 285,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
+                    lineNumber: 282,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
+                lineNumber: 281,
+                columnNumber: 9
+            }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "flex-1 overflow-y-auto pb-4",
                 children: [
@@ -8083,12 +8369,12 @@ function ConfirmStep() {
                                     className: "w-5 h-5 text-white"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                    lineNumber: 284,
+                                    lineNumber: 298,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 282,
+                                lineNumber: 296,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -8096,7 +8382,7 @@ function ConfirmStep() {
                                 children: "Confirmar Reserva"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 286,
+                                lineNumber: 300,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8104,13 +8390,13 @@ function ConfirmStep() {
                                 children: "Revisa y confirma tu cita"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 289,
+                                lineNumber: 303,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                        lineNumber: 281,
+                        lineNumber: 295,
                         columnNumber: 9
                     }, this),
                     error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8122,7 +8408,7 @@ function ConfirmStep() {
                                     className: "w-4 h-4 flex-shrink-0 mt-0.5"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                    lineNumber: 298,
+                                    lineNumber: 312,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8130,18 +8416,18 @@ function ConfirmStep() {
                                     children: error
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                    lineNumber: 299,
+                                    lineNumber: 313,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                            lineNumber: 297,
+                            lineNumber: 311,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                        lineNumber: 296,
+                        lineNumber: 310,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8159,7 +8445,7 @@ function ConfirmStep() {
                                                     className: "w-4 h-4 text-gold"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 311,
+                                                    lineNumber: 325,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8167,7 +8453,7 @@ function ConfirmStep() {
                                                     children: selectedDate && formatDateShort(selectedDate)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 312,
+                                                    lineNumber: 326,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8175,7 +8461,7 @@ function ConfirmStep() {
                                                     children: "•"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 315,
+                                                    lineNumber: 329,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8183,13 +8469,13 @@ function ConfirmStep() {
                                                     children: selectedTime && formatTime(selectedTime)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 316,
+                                                    lineNumber: 330,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                            lineNumber: 310,
+                                            lineNumber: 324,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8199,7 +8485,7 @@ function ConfirmStep() {
                                                     className: "w-3 h-3"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 321,
+                                                    lineNumber: 335,
                                                     columnNumber: 17
                                                 }, this),
                                                 totalDuration,
@@ -8207,18 +8493,18 @@ function ConfirmStep() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                            lineNumber: 320,
+                                            lineNumber: 334,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                    lineNumber: 309,
+                                    lineNumber: 323,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 308,
+                                lineNumber: 322,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8231,7 +8517,7 @@ function ConfirmStep() {
                                                 children: "Ubicación"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 330,
+                                                lineNumber: 344,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8241,20 +8527,20 @@ function ConfirmStep() {
                                                         className: "w-3 h-3 text-gold"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 332,
+                                                        lineNumber: 346,
                                                         columnNumber: 17
                                                     }, this),
                                                     selectedLocation?.Name
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 331,
+                                                lineNumber: 345,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 329,
+                                        lineNumber: 343,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8264,7 +8550,7 @@ function ConfirmStep() {
                                                 children: "Terapeuta"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 337,
+                                                lineNumber: 351,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8274,32 +8560,32 @@ function ConfirmStep() {
                                                         className: "w-3 h-3 text-gold"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 339,
+                                                        lineNumber: 353,
                                                         columnNumber: 17
                                                     }, this),
                                                     therapistName
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 338,
+                                                lineNumber: 352,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 336,
+                                        lineNumber: 350,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 328,
+                                lineNumber: 342,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                        lineNumber: 306,
+                        lineNumber: 320,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8310,7 +8596,7 @@ function ConfirmStep() {
                                 children: "Servicios"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 348,
+                                lineNumber: 362,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8328,14 +8614,14 @@ function ConfirmStep() {
                                                                 className: "w-3.5 h-3.5 text-gold flex-shrink-0 mt-0.5"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                                lineNumber: 357,
+                                                                lineNumber: 371,
                                                                 columnNumber: 21
                                                             }, this),
                                                             pricing.promotionName
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 356,
+                                                        lineNumber: 370,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8349,7 +8635,7 @@ function ConfirmStep() {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                                lineNumber: 361,
+                                                                lineNumber: 375,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8360,19 +8646,19 @@ function ConfirmStep() {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                                lineNumber: 362,
+                                                                lineNumber: 376,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 360,
+                                                        lineNumber: 374,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 355,
+                                                lineNumber: 369,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8382,12 +8668,12 @@ function ConfirmStep() {
                                                         children: service.Name
                                                     }, service.Id, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 368,
+                                                        lineNumber: 382,
                                                         columnNumber: 21
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 366,
+                                                lineNumber: 380,
                                                 columnNumber: 17
                                             }, this),
                                             pricing.extraServices.map((service)=>{
@@ -8400,7 +8686,7 @@ function ConfirmStep() {
                                                             children: service.Name
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                            lineNumber: 380,
+                                                            lineNumber: 394,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8414,7 +8700,7 @@ function ConfirmStep() {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                                    lineNumber: 383,
+                                                                    lineNumber: 397,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8425,19 +8711,19 @@ function ConfirmStep() {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                                    lineNumber: 385,
+                                                                    lineNumber: 399,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                            lineNumber: 381,
+                                                            lineNumber: 395,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, service.Id, true, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 379,
+                                                    lineNumber: 393,
                                                     columnNumber: 21
                                                 }, this);
                                             })
@@ -8452,7 +8738,7 @@ function ConfirmStep() {
                                                     children: service.Name
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 399,
+                                                    lineNumber: 413,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8466,7 +8752,7 @@ function ConfirmStep() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                            lineNumber: 402,
+                                                            lineNumber: 416,
                                                             columnNumber: 25
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8477,19 +8763,19 @@ function ConfirmStep() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                            lineNumber: 404,
+                                                            lineNumber: 418,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 400,
+                                                    lineNumber: 414,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, service.Id, true, {
                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                            lineNumber: 398,
+                                            lineNumber: 412,
                                             columnNumber: 19
                                         }, this);
                                     }),
@@ -8506,7 +8792,7 @@ function ConfirmStep() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 418,
+                                                    lineNumber: 432,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8520,7 +8806,7 @@ function ConfirmStep() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                            lineNumber: 421,
+                                                            lineNumber: 435,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8531,26 +8817,26 @@ function ConfirmStep() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                            lineNumber: 423,
+                                                            lineNumber: 437,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                    lineNumber: 419,
+                                                    lineNumber: 433,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, addon.Id, true, {
                                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                            lineNumber: 417,
+                                            lineNumber: 431,
                                             columnNumber: 17
                                         }, this);
                                     })
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 351,
+                                lineNumber: 365,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8564,7 +8850,7 @@ function ConfirmStep() {
                                                 children: "Subtotal"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 433,
+                                                lineNumber: 447,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8575,13 +8861,13 @@ function ConfirmStep() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 434,
+                                                lineNumber: 448,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 432,
+                                        lineNumber: 446,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8592,7 +8878,7 @@ function ConfirmStep() {
                                                 children: "ITBM (7%)"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 437,
+                                                lineNumber: 451,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8603,13 +8889,13 @@ function ConfirmStep() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 438,
+                                                lineNumber: 452,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 436,
+                                        lineNumber: 450,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8620,7 +8906,7 @@ function ConfirmStep() {
                                                 children: "Total"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 441,
+                                                lineNumber: 455,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8631,25 +8917,25 @@ function ConfirmStep() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 442,
+                                                lineNumber: 456,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 440,
+                                        lineNumber: 454,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 431,
+                                lineNumber: 445,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                        lineNumber: 347,
+                        lineNumber: 361,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8661,13 +8947,13 @@ function ConfirmStep() {
                                 children: displayClientName || 'Cargando...'
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 449,
+                                lineNumber: 463,
                                 columnNumber: 31
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                        lineNumber: 448,
+                        lineNumber: 462,
                         columnNumber: 9
                     }, this),
                     replaceAppointmentId && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8678,7 +8964,7 @@ function ConfirmStep() {
                                 children: "Cambio de cita"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 455,
+                                lineNumber: 469,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8689,7 +8975,7 @@ function ConfirmStep() {
                                         children: "Cita actual · será cancelada"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 461,
+                                        lineNumber: 475,
                                         columnNumber: 15
                                     }, this),
                                     replaceBookingDetails ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8702,7 +8988,7 @@ function ConfirmStep() {
                                                         className: "w-3.5 h-3.5 flex-shrink-0"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 467,
+                                                        lineNumber: 481,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8713,13 +8999,13 @@ function ConfirmStep() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 468,
+                                                        lineNumber: 482,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 466,
+                                                lineNumber: 480,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8729,20 +9015,20 @@ function ConfirmStep() {
                                                         className: "w-3.5 h-3.5 flex-shrink-0"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 471,
+                                                        lineNumber: 485,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         children: replaceBookingDetails.locationName
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 472,
+                                                        lineNumber: 486,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 470,
+                                                lineNumber: 484,
                                                 columnNumber: 19
                                             }, this),
                                             replaceBookingDetails.services.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8750,26 +9036,26 @@ function ConfirmStep() {
                                                 children: replaceBookingDetails.services.join(', ')
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 475,
+                                                lineNumber: 489,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 465,
+                                        lineNumber: 479,
                                         columnNumber: 17
                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "text-xs text-red-600 italic",
                                         children: "Cargando detalles..."
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 481,
+                                        lineNumber: 495,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 460,
+                                lineNumber: 474,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8778,12 +9064,12 @@ function ConfirmStep() {
                                     className: "w-4 h-4 text-warm-gray"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                    lineNumber: 487,
+                                    lineNumber: 501,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 486,
+                                lineNumber: 500,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8794,7 +9080,7 @@ function ConfirmStep() {
                                         children: "Nueva cita · confirmada arriba"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 492,
+                                        lineNumber: 506,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8807,7 +9093,7 @@ function ConfirmStep() {
                                                         className: "w-3.5 h-3.5 flex-shrink-0"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 497,
+                                                        lineNumber: 511,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8817,13 +9103,13 @@ function ConfirmStep() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 498,
+                                                        lineNumber: 512,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 496,
+                                                lineNumber: 510,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8833,20 +9119,20 @@ function ConfirmStep() {
                                                         className: "w-3.5 h-3.5 flex-shrink-0"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 504,
+                                                        lineNumber: 518,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         children: selectedLocation?.Name
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                        lineNumber: 505,
+                                                        lineNumber: 519,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 503,
+                                                lineNumber: 517,
                                                 columnNumber: 17
                                             }, this),
                                             selectedServices.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8854,19 +9140,19 @@ function ConfirmStep() {
                                                 children: selectedServices.map((s)=>s.Name).join(', ')
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                                lineNumber: 508,
+                                                lineNumber: 522,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                        lineNumber: 495,
+                                        lineNumber: 509,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 491,
+                                lineNumber: 505,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8874,13 +9160,13 @@ function ConfirmStep() {
                                 children: "Al confirmar, recibirás un mensaje de cancelación para la cita anterior y una confirmación para la nueva."
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                                lineNumber: 515,
+                                lineNumber: 529,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                        lineNumber: 454,
+                        lineNumber: 468,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8890,18 +9176,18 @@ function ConfirmStep() {
                             children: "El pago se realiza en el spa al momento de tu visita"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                            lineNumber: 523,
+                            lineNumber: 537,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                        lineNumber: 522,
+                        lineNumber: 536,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                lineNumber: 279,
+                lineNumber: 293,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -8911,7 +9197,7 @@ function ConfirmStep() {
                 id: "mobile-confirm-btn"
             }, void 0, false, {
                 fileName: "[project]/src/components/booking/steps/ConfirmStep.tsx",
-                lineNumber: 530,
+                lineNumber: 544,
                 columnNumber: 7
             }, this)
         ]

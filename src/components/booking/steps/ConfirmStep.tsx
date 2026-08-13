@@ -275,6 +275,20 @@ export function ConfirmStep() {
 
   return (
     <div className="confirm-step flex flex-col h-full">
+      {/* Processing overlay: the Mindbody booking call takes a few seconds,
+          so give clear full-screen feedback while it runs */}
+      {isSubmitting && (
+        <div className="fixed inset-0 z-[80] bg-white/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center px-6">
+            <Loader2 className="w-14 h-14 text-gold animate-spin mx-auto mb-4" />
+            <p className="font-semibold text-dark">Confirmando tu reserva…</p>
+            <p className="text-sm text-warm-gray mt-1">
+              Estamos reservando tu espacio, esto toma unos segundos.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto pb-4">
         {/* Header - Compact */}

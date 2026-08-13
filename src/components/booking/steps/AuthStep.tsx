@@ -17,6 +17,7 @@ type AuthState =
   | 'otp'
   | 'verifying'
   | 'register'
+  | 'confirm-identity'
 
 type OtpChannel = 'email' | 'whatsapp'
 
@@ -57,6 +58,7 @@ function AuthStepContent() {
   const supabaseRef = useRef<SupabaseClient | null>(null)
 
   const [credential, setCredential] = useState('')
+  const [countryCode, setCountryCode] = useState('+507')
   const [authState, setAuthState] = useState<AuthState>('credential')
   const [isVerifying, setIsVerifying] = useState(false)
   const [availableClients, setAvailableClients] = useState<ClientOption[]>([])
@@ -68,6 +70,14 @@ function AuthStepContent() {
     email: '',
     phone: '',
   })
+  // Guardrail: when a registration matches an EXISTING Mindbody account whose
+  // name differs from what was typed, we pause and ask "is this you?" instead
+  // of silently booking under the other name (real case: someone typed "Josue
+  // Chavez" but the email belonged to another client's account).
+  const [existingAccount, setExistingAccount] = useState<{
+    client: SelectedClient
+    typedName: string
+  } | null>(null)
 
   const getSupabase = (): SupabaseClient => {
     if (!supabaseRef.current) {
@@ -132,18 +142,17 @@ function AuthStepContent() {
   }, [setClientInfo, nextStep, setStep, addService, loadPromotion, searchParams])
 
   const handleCredentialSubmit = async () => {
-    let trimmed = credential.trim().replace(/\D/g, '')
-    if (!trimmed) {
+    const cc = countryCode.replace(/\D/g, '')
+    const local = credential.trim().replace(/\D/g, '')
+    if (!local) {
       setError('Ingresa tu número de teléfono')
       return
     }
-    // Panamanian numbers are 8 digits (mobiles start with 6) — most clients
-    // type them without the country code, so we add 507 for them.
-    if (trimmed.length === 8) {
-      trimmed = `507${trimmed}`
-    }
+    // WATI format: country code + number, NO + sign (e.g. 50766124546).
+    // If the user typed their country code again, don't double-prefix it.
+    const trimmed = local.startsWith(cc) && local.length > 9 ? local : `${cc}${local}`
     if (trimmed.length < 10) {
-      setError('Escribe tu número completo (ej: Panamá 66124546 · desde otro país con código: 12125551234)')
+      setError('Escribe tu número completo (ej: 6612 3456)')
       return
     }
 
@@ -386,12 +395,26 @@ function AuthStepContent() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Error al registrar')
 
-      setSelectedClient({
+      const accountName = `${data.client.FirstName || ''} ${data.client.LastName || ''}`.trim()
+      const typedName = `${firstName} ${lastName}`.trim()
+      const foundClient: SelectedClient = {
         clientId: data.client.Id,
-        clientName: `${firstName} ${lastName}`.trim(),
-        email: regEmail,
-        phone,
-      })
+        clientName: accountName || typedName,
+        email: data.client.Email || regEmail,
+        phone: data.client.MobilePhone || phone,
+      }
+
+      // The email/phone matched an existing account under a DIFFERENT name:
+      // stop and confirm identity instead of booking under the wrong person.
+      const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim()
+      const sameFirstName = norm(accountName).split(' ')[0] === norm(typedName).split(' ')[0]
+      if (data.existingClient && accountName && !sameFirstName) {
+        setExistingAccount({ client: foundClient, typedName })
+        setAuthState('confirm-identity')
+        return
+      }
+
+      setSelectedClient(foundClient)
       setAuthState('channel-choice')
 
     } catch (err) {
@@ -574,6 +597,57 @@ function AuthStepContent() {
     )
   }
 
+  // Identity guardrail: the typed email/phone belongs to an existing account
+  // with a different name — confirm before booking under it.
+  if (authState === 'confirm-identity' && existingAccount) {
+    const parts = existingAccount.client.clientName.split(/\s+/)
+    const maskedName = `${parts[0]} ${(parts[1]?.[0] || '').toUpperCase()}.`.trim()
+    return (
+      <div className="auth-step flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto pb-4">
+          <div className="max-w-md mx-auto text-center">
+            <div className="w-14 h-14 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <User className="w-7 h-7 text-gold" />
+            </div>
+            <h2 className="text-lg font-bold text-dark mb-2">Ya existe una cuenta</h2>
+            <p className="text-sm text-warm-gray mb-5">
+              El correo o teléfono que ingresaste pertenece a una cuenta a nombre de{' '}
+              <span className="font-semibold text-dark">{maskedName}</span>, no de{' '}
+              <span className="font-semibold text-dark">{existingAccount.typedName}</span>.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setSelectedClient(existingAccount.client)
+                  setExistingAccount(null)
+                  setAuthState('channel-choice')
+                }}
+                className="w-full py-3 bg-gradient-to-r from-gold to-gold/90 text-dark font-semibold
+                         rounded-xl hover:shadow-lg transition-all text-sm"
+              >
+                Sí, soy {maskedName} — continuar con mi cuenta
+              </button>
+              <button
+                onClick={() => {
+                  setExistingAccount(null)
+                  setRegistrationData(prev => ({ ...prev, email: '', phone: '' }))
+                  setAuthState('register')
+                }}
+                className="w-full py-3 border-2 border-beige-200 text-dark font-medium rounded-xl
+                         hover:border-gold/50 transition-all text-sm"
+              >
+                No soy yo — usar otro correo y teléfono
+              </button>
+            </div>
+            <p className="mt-4 text-xs text-warm-gray">
+              Si reservas para otra persona, usa tu propia cuenta y menciona el nombre del invitado por WhatsApp.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Registration form
   if (authState === 'register') {
     return (
@@ -710,22 +784,42 @@ function AuthStepContent() {
             <label className="block text-xs font-medium text-dark mb-1.5">
               Número de teléfono
             </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray" />
-              <input
-                type="tel"
-                value={credential}
-                onChange={(e) => setCredential(e.target.value)}
-                onKeyPress={handleKeyPress}
+            <div className="flex gap-2">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
                 disabled={authState === 'sending'}
-                className="w-full pl-10 pr-3 py-3 border-2 border-beige-200 rounded-xl
-                         text-sm focus:outline-none focus:ring-2 focus:ring-gold/50
-                         focus:border-gold transition-all disabled:opacity-50"
-                placeholder="66124546"
-                autoFocus
-              />
+                className="w-24 px-2 py-3 border-2 border-beige-200 rounded-xl text-sm
+                         focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold
+                         transition-all bg-white disabled:opacity-50"
+              >
+                <option value="+507">+507</option>
+                <option value="+1">+1</option>
+                <option value="+52">+52</option>
+                <option value="+57">+57</option>
+                <option value="+506">+506</option>
+                <option value="+593">+593</option>
+                <option value="+51">+51</option>
+                <option value="+58">+58</option>
+                <option value="+34">+34</option>
+              </select>
+              <div className="relative flex-1">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray" />
+                <input
+                  type="tel"
+                  value={credential}
+                  onChange={(e) => setCredential(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={authState === 'sending'}
+                  className="w-full pl-10 pr-3 py-3 border-2 border-beige-200 rounded-xl
+                           text-sm focus:outline-none focus:ring-2 focus:ring-gold/50
+                           focus:border-gold transition-all disabled:opacity-50"
+                  placeholder="6612 3456"
+                  autoFocus
+                />
+              </div>
             </div>
-            <p className="mt-1 text-xs text-warm-gray">Panamá: solo tu número (66124546) · Otros países: con código, sin el + (12125551234)</p>
+            <p className="mt-1 text-xs text-warm-gray">Selecciona tu código de país e ingresa tu número (sin el código).</p>
           </div>
 
           {error && (

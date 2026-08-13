@@ -38,10 +38,11 @@ export function StaffStep() {
     async function fetchStaff() {
       if (!selectedLocation) return
 
-      // If no time selected or no available staff, don't fetch
+      // If no time selected or no available staff, don't fetch. Only clear the
+      // local list — resetting the store cache here creates a fresh [] every
+      // pass and, with `staff` as an effect dep, loops the effect forever.
       if (availableStaffIds.length === 0) {
         setLocalStaff([])
-        setStaffList([])
         return
       }
 
