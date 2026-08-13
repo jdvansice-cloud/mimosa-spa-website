@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { getAllServices } from '@/lib/booking/mindbody'
 import { requireAdmin } from '@/lib/auth/require-admin'
+import { revalidateTag } from 'next/cache'
+import { TREATMENTS_TAG } from '@/lib/treatments'
 
 // Lazy-initialized Supabase client to avoid build-time errors
 let supabaseAdmin: SupabaseClient | null = null
@@ -35,6 +37,9 @@ export interface TreatmentSetting {
 
 // GET - Fetch all treatments with their settings
 export async function GET() {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   try {
     // Fetch ALL services from Mindbody (including non-online bookable for admin view)
     const allServices = await getAllServices()
@@ -76,6 +81,9 @@ export async function GET() {
         .delete()
         .in('mindbody_service_id', orphanedIds)
 
+      if (!deleteError) {
+        revalidateTag(TREATMENTS_TAG, 'max')
+      }
       if (deleteError) {
         console.error('Error deleting orphaned settings:', deleteError)
         // Continue anyway - not a critical error
@@ -204,6 +212,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    revalidateTag(TREATMENTS_TAG, 'max')
     return NextResponse.json({ success: true, data })
   } catch (error) {
     console.error('Error updating treatments:', error)
@@ -277,6 +286,7 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
+    revalidateTag(TREATMENTS_TAG, 'max')
     return NextResponse.json({ success: true, data: result.data })
   } catch (error) {
     console.error('Error updating treatment:', error)

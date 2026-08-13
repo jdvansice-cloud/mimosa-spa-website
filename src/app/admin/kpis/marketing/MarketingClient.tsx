@@ -28,7 +28,8 @@ const LOCATIONS: Array<{ key: LocationKey; label: string }> = [
 ]
 
 const STEP_LABELS: Record<string, string> = {
-  booking_step_auth: 'Abren la reserva',
+  booking_start: 'Abren la reserva',
+  booking_step_auth: 'Inician sesión',
   booking_step_location: 'Eligen sucursal',
   booking_step_services: 'Eligen servicio',
   booking_step_addons: 'Extras',

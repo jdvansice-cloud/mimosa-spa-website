@@ -2,8 +2,10 @@ import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Cormorant_Garamond, Lato } from 'next/font/google'
-import { Header, Footer, MobileBottomNav } from '@/components/layout'
+import { Header, Footer, MobileBottomNav, WhatsAppWidget } from '@/components/layout'
+import { getServerSettings } from '@/lib/settings'
 import { GoogleTagManager, PageViewTracker } from '@/components/analytics'
+import { SITE_URL } from '@/lib/nav'
 import '@/app/globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -36,6 +38,7 @@ export async function generateMetadata({
   const meta = (messages as Record<string, Record<string, string>>).metadata
 
   return {
+    metadataBase: new URL(SITE_URL),
     title: {
       default: meta?.title || 'Mimosa Spa Retreat',
       template: '%s | Mimosa Spa Retreat',
@@ -49,15 +52,17 @@ export async function generateMetadata({
     openGraph: {
       title: meta?.title || 'Mimosa Spa Retreat',
       description: meta?.description || 'Tu refugio de paz y bienestar',
-      url: 'https://mimosaretreat.com',
+      url: `${SITE_URL}/${locale}`,
       siteName: 'Mimosa Spa Retreat',
       locale: locale === 'es' ? 'es_PA' : 'en_US',
       type: 'website',
+      images: ['/og-default.jpg'],
     },
     twitter: {
       card: 'summary_large_image',
       title: meta?.title || 'Mimosa Spa Retreat',
       description: meta?.description || 'Tu refugio de paz y bienestar',
+      images: ['/og-default.jpg'],
     },
     robots: {
       index: true,
@@ -83,6 +88,7 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages()
+  const settings = await getServerSettings()
 
   return (
     <html lang={locale} className={`${cormorant.variable} ${lato.variable}`}>
@@ -108,6 +114,10 @@ export default async function LocaleLayout({
             </main>
             <Footer />
             <MobileBottomNav />
+            <WhatsAppWidget
+              phoneNumber={settings.whatsapp_number}
+              message={settings.whatsapp_message}
+            />
           </div>
         </NextIntlClientProvider>
       </body>

@@ -87,7 +87,6 @@ export function DateTimeStep() {
         const response = await fetch(`/api/mindbody/availability?${params}`)
         const data = await response.json()
 
-        console.log('Availability response:', data)
 
         if (!response.ok) {
           throw new Error(data.error || 'Error al cargar disponibilidad')

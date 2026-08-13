@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
-import { Home, BookOpen, Tag, Calendar, User } from 'lucide-react'
+import { Home, BookOpen, Gift, Calendar, User } from 'lucide-react'
+import { GIFT_CARDS_PATH } from '@/lib/nav'
 import { cn } from '@/lib/utils'
 import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
 
@@ -26,8 +27,8 @@ export function MobileBottomNav() {
     { href: `/${locale}`, label: t('home'), icon: Home },
     { href: `/${locale}/menu`, label: t('menu'), icon: BookOpen },
     { href: `/${locale}/reservar`, label: t('book'), icon: Calendar, primary: true },
-    { href: `/${locale}/promociones`, label: t('promotions'), icon: Tag },
-    { href: `/portal`, label: 'Mi Portal', icon: User, isPortal: true },
+    { href: `/${locale}${GIFT_CARDS_PATH}`, label: t('giftcards'), icon: Gift },
+    { href: `/portal`, label: t('portal'), icon: User, isPortal: true },
   ]
 
   const isActive = (href: string) => {

@@ -33,6 +33,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Gift-card view page (linked from delivery emails/WhatsApp): no locale
+  // prefix so the URL stays stable for WATI template buttons
+  if (pathname.startsWith('/gift/')) {
+    return NextResponse.next()
+  }
+
   // Protect admin routes: require a valid session with role=admin
   if (pathname.startsWith('/admin')) {
     let response = NextResponse.next({ request })

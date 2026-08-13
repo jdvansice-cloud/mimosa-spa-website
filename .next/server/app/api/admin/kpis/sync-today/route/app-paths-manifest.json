@@ -1,0 +1,3 @@
+{
+  "/api/admin/kpis/sync-today/route": "app/api/admin/kpis/sync-today/route.js"
+}

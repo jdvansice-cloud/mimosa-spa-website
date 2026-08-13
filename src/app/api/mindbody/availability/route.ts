@@ -2,11 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getBookableItems, getStaffAppointmentAvailability, getScheduleItems, getStaff } from '@/lib/booking/mindbody'
 import { sanitizeError, ERROR_MESSAGES } from '@/lib/booking/constants'
 import { getV1EligibleResourcesPerService } from '@/lib/booking/eligibility'
+import {
+  checkRateLimit,
+  getClientIdentifier,
+  RATE_LIMIT_STANDARD,
+} from '@/lib/booking/rate-limit'
 
 // GET /api/mindbody/availability?locationId=1&serviceIds=1,2,3&startDate=2026-01-15&endDate=2026-01-29&duration=90
 // Returns available time slots in 15-min increments where at least one therapist
 // has continuous availability for the total treatment duration
 export async function GET(request: NextRequest) {
+  const rl = checkRateLimit(`availability:${getClientIdentifier(request)}`, RATE_LIMIT_STANDARD)
+  if (!rl.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
   try {
     const { searchParams } = new URL(request.url)
     const locationId = searchParams.get('locationId')
@@ -57,12 +66,6 @@ export async function GET(request: NextRequest) {
     // See docs/PRD_ROOM_RESOURCE_BOOKING.md §6.1.
     const ROOMS_AWARE_AVAILABILITY = process.env.ROOMS_AWARE_AVAILABILITY === 'true'
 
-    console.log('=== AVAILABILITY REQUEST ===')
-    console.log('Location ID:', parsedLocationId)
-    console.log('Session Type IDs:', serviceIdArray)
-    console.log('Date range:', startDate, 'to', endDate)
-    console.log('Required duration:', duration, 'minutes')
-    console.log('ROOMS_AWARE_AVAILABILITY:', ROOMS_AWARE_AVAILABILITY)
 
     // When ROOMS_AWARE_AVAILABILITY is on, fetch the v1-eligible resources for
     // the requested service(s) at this location. Slots will be filtered to
@@ -77,7 +80,6 @@ export async function GET(request: NextRequest) {
           locationId: parsedLocationId,
         })
         v1EligibleResourceIds = eligibilityMap.get(serviceIdArray[0]) || new Set()
-        console.log(`v1-eligible resources for service ${serviceIdArray[0]} at location ${parsedLocationId}:`, v1EligibleResourceIds.size)
         if (v1EligibleResourceIds.size === 0) {
           console.warn(`No v1-eligible resources configured for service ${serviceIdArray[0]} at location ${parsedLocationId} — slot grid will be empty`)
         }
@@ -115,7 +117,6 @@ export async function GET(request: NextRequest) {
       .filter(s => s.Id > 0 && s.AppointmentTrn !== false)
       .map(s => s.Id)
 
-    console.log('Found', validStaffIds.length, 'valid staff members at location')
 
     // Primary approach: Build availability from schedule items
     // This gives us full availability windows (staff working hours minus appointments/blocks)
@@ -137,7 +138,6 @@ export async function GET(request: NextRequest) {
           endDate,
         })
 
-        console.log('Schedule items returned:', scheduleItems.length, 'staff members')
 
         // Debug: collect per-staff info for response
         const staffDebugInfoLocal: Array<{
@@ -201,7 +201,6 @@ export async function GET(request: NextRequest) {
 
           // Build availability: take working hours and subtract blocked periods
           if (staff.Availabilities && staff.Availabilities.length > 0) {
-            console.log(`Staff ${staff.FirstName} ${staff.LastName}: ${staff.Availabilities.length} availability blocks, ${blockedPeriods.length} blocked periods`)
 
             for (const avail of staff.Availabilities) {
               if (!avail.StartDateTime || !avail.EndDateTime) continue
@@ -262,7 +261,6 @@ export async function GET(request: NextRequest) {
           })
         }
 
-        console.log('Schedule-based availability:', availableItems.length, 'effective blocks')
         // Store for response
         staffDebugInfo = staffDebugInfo.concat(staffDebugInfoLocal)
       } catch (err) {
@@ -272,7 +270,6 @@ export async function GET(request: NextRequest) {
 
     // Fallback: try getBookableItems if schedule items gave no results
     if (availableItems.length === 0 && serviceIdArray.length > 0) {
-      console.log('=== SCHEDULE ITEMS EMPTY - TRYING BOOKABLE ITEMS ===')
       try {
         // Pass only the first session type ID. Mindbody's bookableitems endpoint
         // interprets multiple sessionTypeIds as "must satisfy ALL simultaneously",
@@ -284,7 +281,6 @@ export async function GET(request: NextRequest) {
           startDate,
           endDate,
         })
-        console.log('Bookable items returned:', rawBookableItems.length)
 
         for (const item of rawBookableItems) {
           if (!item.Staff?.Id || !item.StartDateTime || !item.EndDateTime) continue
@@ -306,7 +302,6 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        console.log('After filtering:', availableItems.length, 'bookable items')
       } catch (error) {
         console.error('Error fetching bookable items:', error)
       }
@@ -314,7 +309,6 @@ export async function GET(request: NextRequest) {
 
     // Last fallback: try staff appointment availability
     if (availableItems.length === 0) {
-      console.log('=== TRYING STAFF APPOINTMENT AVAILABILITY ===')
       try {
         const staffAvailability = await getStaffAppointmentAvailability({
           locationId: parsedLocationId,
@@ -360,16 +354,13 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        console.log('Staff appointment availability:', availableItems.length, 'items')
       } catch (err) {
         console.error('Error fetching staff availability:', err)
       }
     }
 
     if (availableItems.length === 0) {
-      console.log('=== NO AVAILABILITY FOUND ===')
     } else {
-      console.log('=== AVAILABILITY FOUND:', availableItems.length, 'effective blocks ===')
     }
 
     // Validate API response
@@ -381,7 +372,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log('Total bookable items from Mindbody:', availableItems.length)
 
     // Group availability by date -> staff -> time blocks
     // We need to find continuous time blocks for each staff member
@@ -483,7 +473,6 @@ export async function GET(request: NextRequest) {
       const panamaTime = new Date(now.getTime() + (localOffset + panamaOffset) * 60 * 1000)
       const minimumBookingTime = panamaTime // No buffer - show all future slots
 
-      console.log(`Current Panama time: ${panamaTime.toISOString()}, minimum booking time: ${minimumBookingTime.toISOString()}`)
 
       // Round dayStart down to nearest 30 minutes
       const slotStart = new Date(dayStart)
@@ -570,7 +559,6 @@ export async function GET(request: NextRequest) {
     // Sort dates
     availableDates.sort((a, b) => a.date.localeCompare(b.date))
 
-    console.log('Available dates found:', availableDates.length)
 
     return NextResponse.json({
       availableDates,

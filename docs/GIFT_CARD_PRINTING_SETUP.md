@@ -27,15 +27,16 @@ Everything is pixel-exact end to end: the bitmap is rendered at the printer's na
 
 1. Connect the D520 to power and to the Mac **by USB**. Power it on.
 2. Open the lid and load the label roll, labels feeding out from the top, adhesive side down. Adjust the side guides snug against the roll.
-3. Close the lid and **press the feed button once**. The printer feeds and self-calibrates to the label. It should stop with a label edge at the tear bar. If it feeds continuously or stops mid-label, see [Calibration](#calibration--the-transparent-labels).
+3. Close the lid and **calibrate — a single feed press only feeds, it does NOT calibrate.** The real automatic label identification: **unplug the USB cable**, then with the printer on and idle **press and hold the feed button 3–6 seconds** until it starts shuttling the label back and forth measuring it; let it finish, then reconnect USB. (Holding ~10 s = factory reset — blue light flashes 4× — release before that.) Do this after **every media change**.
 
 ### Calibration & the transparent labels
 
 The D520 registers labels with a sensor. Clear film is invisible to the transmissive **gap** sensor, so transparent labels rely on the **black marks** printed on the back of the liner:
 
-- **Flip the roll and check the liner's back for black rectangles** at each label boundary. The Amazon transparent 3×2 rolls normally have them (that's how clear thermal labels are made usable at all).
+- **Flip the roll and check the liner's back for black rectangles** at each label boundary, and **measure their height** — ours are 2 mm, and the driver's `GapHeight` must match (step 3).
 - With marks present, the queue option `zeMediaTracking=BLine` (set in step 3) makes the printer align every single label — position drift is impossible.
-- After **every roll change**, press feed once so the printer re-finds the mark.
+- After **every roll change**, run the auto-identification (USB unplugged, hold feed 3–6 s).
+- The sensor reads near-infrared reflection, not visual blackness: the mark must physically pass **over the sensor window** in the paper path, and must be printed with IR-absorbing (carbon-based) ink. A roll whose marks the sensor can't see behaves exactly like a roll with no marks.
 - If a roll ever arrives with **no marks and no detectable gap**, the printer cannot register it — don't fight it; use marked media.
 
 Transparent film also needs **more heat than paper**: the darkness setting in step 3 is already raised (11), and print speed is set low (2 ips). If prints come out faint, raise Darkness further (max 15).
@@ -64,15 +65,17 @@ There are **two layers of printer defaults**, and QZ jobs only see one of them (
 **Step A — server-side defaults (the ones QZ obeys).** Paste into Terminal (asks for your Mac password):
 
 ```bash
-sudo sed -i '' -e 's/^\*DefaultzeMediaTracking:.*/*DefaultzeMediaTracking: BLine/' -e 's/^\*DefaultDarkness:.*/*DefaultDarkness: 11/' -e 's/^\*DefaultzePrintRate:.*/*DefaultzePrintRate: 2/' /etc/cups/ppd/D520.ppd && grep -E '^\*Default(zeMediaTracking|Darkness|zePrintRate|Rotate):' /etc/cups/ppd/D520.ppd
+sudo sed -i '' -e 's/^\*DefaultzeMediaTracking:.*/*DefaultzeMediaTracking: BLine/' -e 's/^\*DefaultGapHeight:.*/*DefaultGapHeight: 2/' -e 's/^\*DefaultDarkness:.*/*DefaultDarkness: 11/' -e 's/^\*DefaultzePrintRate:.*/*DefaultzePrintRate: 2/' /etc/cups/ppd/D520.ppd && grep -E '^\*Default(zeMediaTracking|GapHeight|Darkness|zePrintRate|Rotate):' /etc/cups/ppd/D520.ppd
 ```
 
-The `grep` at the end should print `BLine`, `11`, `2` — and `Rotate: 1`, which is correct: **do NOT change `*DefaultRotate` in the PPD.** The app pre-rotates its bitmaps assuming the driver default of 1; changing it flips every QZ print sideways.
+The `grep` at the end should print `BLine`, `GapHeight: 2`, `11`, `2` — and `Rotate: 1`, which is correct: **do NOT change `*DefaultRotate` in the PPD.** The app pre-rotates its bitmaps assuming the driver default of 1 (= 180° in this PPD's odd coding: 0→0°, 1→180°, 2→90°, 3→270°); changing it flips every QZ print.
+
+> **GapHeight must match the measured mark on your roll.** Flip the liner and measure the black mark's height with a ruler — our transparent rolls measure **2 mm**, hence `GapHeight: 2`. A mismatch (e.g. telling the driver 3 mm for a 2 mm mark) can make the printer reject the real mark and blind-feed.
 
 **Step B — user-level defaults (for the browser-dialog fallback and `lp`):**
 
 ```bash
-lpoptions -p D520 -o PageSize=w216h144 -o zeMediaTracking=BLine -o Darkness=11 -o zePrintRate=2 -o Rotate=0
+lpoptions -p D520 -o PageSize=w216h144 -o zeMediaTracking=BLine -o GapHeight=2 -o Darkness=11 -o zePrintRate=2 -o Rotate=0
 ```
 
 (Here `Rotate=0` **is** wanted — the browser fallback sends an unrotated 3×2 page.)
@@ -142,7 +145,7 @@ No Chrome settings are needed — the site talks to QZ Tray over a local websock
 
 The **Prueba** button prints a calibration pattern. On a good print:
 
-- **Frame** — the outer double frame lands on the label's edges, evenly. A shifted frame = registration offset → press feed once to recalibrate; still off → check `zeMediaTracking=BLine`.
+- **Frame** — the outer double frame lands on the label's edges, evenly. A shifted frame = registration offset → run the auto-identification (USB unplugged, hold feed 3–6 s); still off → check `zeMediaTracking=BLine` and `GapHeight`.
 - **ARRIBA triangle** points at the top of the label as it exits the printer. Sideways = `Rotate=0` missing or driver misconfigured.
 - **Darkness patches** — 100% is solid black with no gray voids; 50% and 25% still look clearly different. All faint → raise Darkness. 50% smeared into solid → lower it.
 - **Barcode** — crisp vertical bars, no gray edges. Scan `PRUEBA123` with the barcode scanner; it must read on the first pass.
@@ -150,7 +153,7 @@ The **Prueba** button prints a calibration pattern. On a good print:
 ## 6. Done — daily operation
 
 - Staff just click **Imprimir Etiqueta**. No dialogs, no settings.
-- New roll loaded → press feed once → optionally hit **Prueba**.
+- New roll loaded → auto-identification (USB unplugged, hold feed 3–6 s) → hit **Prueba** to confirm registration.
 - Faint prints → raise Darkness (Terminal: rerun the step-3 command with `Darkness=13`, up to 15).
 
 ---
@@ -163,10 +166,10 @@ The **Prueba** button prints a calibration pattern. On a good print:
 | QZ "Allow" dialog on every print | `override.crt` missing | Step 4 cert install, restart QZ Tray |
 | Label prints sideways | Driver rotation | `lpoptions -p D520 -o Rotate=0` (and note the app already pre-rotates — never "fix" rotation in the app) |
 | Blurry text / unscannable barcode | Driver scaling | Rerun the full step-3 `lpoptions` line (PageSize is the usual culprit) |
-| Each print lands lower than the last (progressive drift) | QZ jobs use the PPD defaults, and the factory default is `Gap` tracking — blind on clear film → fixed-length feeding | Run **step 3A** (the `sudo sed` PPD edit); confirm the liner back has black marks; press feed once |
-| Labels drift / print across the gap | Sensor not tracking marks | Press feed once; confirm liner has black marks; check step 3 (both A and B) |
+| Each print lands lower than the last (progressive drift) | QZ jobs use the PPD defaults, and the factory default is `Gap` tracking — blind on clear film → fixed-length feeding | Run **step 3A** (the `sudo sed` PPD edit); confirm the liner back has black marks and `GapHeight` matches their height; run auto-identification |
+| Labels drift / print across the gap | Sensor not tracking marks | Auto-identification (USB unplugged, hold feed 3–6 s); confirm marks + `GapHeight`; check step 3 (both A and B); clean the sensor with an alcohol pad |
 | Faint print | Clear film needs heat | Raise `Darkness` (max 15); keep `zePrintRate=2` |
-| Continuous feeding after power-on | Never calibrated on this roll | Press feed once; if still lost, power-cycle with lid closed and feed again |
+| Continuous feeding after power-on | Never calibrated on this roll | Auto-identification (USB unplugged, hold feed 3–6 s); if still lost, power-cycle with lid closed and repeat |
 | Wrong printer receiving jobs | Stale saved choice in the browser | On the print page, trigger a print, click the correct printer when listed (it re-saves), or clear the site's localStorage key `giftcard-qz-printer-v2` |
 | Prints fine via test but website fails only in production | Vercel env vars | `QZ_TRAY_CERTIFICATE` / `QZ_TRAY_PRIVATE_KEY` must be set in the Vercel project |
 

@@ -1,3 +1,0 @@
-module.exports=[6268,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(25971);a.n(d("[project]/.claude-worktrees/mimosa-spa-website/vigilant-rubin/node_modules/next/dist/client/components/builtin/global-error.js <module evaluation>"))},64430,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(25971);a.n(d("[project]/.claude-worktrees/mimosa-spa-website/vigilant-rubin/node_modules/next/dist/client/components/builtin/global-error.js"))},44139,a=>{"use strict";a.i(6268);var b=a.i(64430);a.n(b)}];
-
-//# sourceMappingURL=98928_next_dist_client_components_builtin_global-error_bf5d7dd3.js.map

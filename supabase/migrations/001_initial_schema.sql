@@ -200,7 +200,7 @@ CREATE TRIGGER on_auth_user_created
 -- Insert default site settings
 INSERT INTO public.site_settings (key, value) VALUES
   ('whatsapp', '{"number": "507XXXXXXXX", "message": "Hola, me gustaría obtener información sobre sus servicios."}'),
-  ('social', '{"instagram": "https://instagram.com/mimosasparetreat", "facebook": "https://facebook.com/mimosasparetreat"}'),
+  ('social', '{"instagram": "https://instagram.com/mimosaretreat", "facebook": "https://facebook.com/mimosaretreat"}'),
   ('contact', '{"email": "info@mimosaretreat.com", "phone": "+507 6000-0000"}')
 ON CONFLICT (key) DO NOTHING;
 

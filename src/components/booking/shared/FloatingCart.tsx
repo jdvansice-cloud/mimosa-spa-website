@@ -4,9 +4,8 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { ShoppingBag, X, Trash2, Clock, Tag, Star, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
+import { calculateCartPricing } from '@/lib/booking/pricing'
 
-// Tax rate constant - ITBM is 7% in Panama
-const ITBM_RATE = 0.07
 
 export function FloatingCart() {
   const {
@@ -46,52 +45,17 @@ export function FloatingCart() {
   }, [selectedServices, activePromotion])
 
   // Calculate pricing with useMemo - now handling separate sections
-  const pricing = useMemo(() => {
-    const hasPromotion = activePromotion !== null && promotionServices.length > 0
-
-    // Promotion pricing
-    const promotionServicesSubtotal = promotionServices.reduce((sum, s) => sum + s.Price, 0)
-    const promotionPrice = hasPromotion ? activePromotion!.price : 0
-    const promotionDiscount = hasPromotion ? promotionServicesSubtotal - promotionPrice : 0
-
-    // Regular items pricing (extra services + addons)
-    const regularServicesSubtotal = regularServices.reduce((sum, s) => sum + s.Price, 0)
-    const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
-
-    // Apply global discount to extra services and addons (not promo-included services)
-    const effectiveRegularServicesSubtotal = showGlobalDiscount
-      ? Math.round(regularServicesSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
-      : regularServicesSubtotal
-    const effectiveAddonsSubtotal = showGlobalDiscount
-      ? Math.round(addonsSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
-      : addonsSubtotal
-    const regularItemsTotal = effectiveRegularServicesSubtotal + effectiveAddonsSubtotal
-
-    // Combined subtotal before tax
-    const subtotalBeforeTax = promotionPrice + regularItemsTotal
-
-    const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
-    const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
-
-    const totalDuration = selectedServices.reduce((sum, s) => sum + (s.Duration || 0), 0) +
-                          selectedAddons.reduce((sum, a) => sum + (a.Duration || 0), 0)
-
-    return {
-      hasPromotion,
-      promotionName: activePromotion?.title_es || null,
-      promotionServicesSubtotal,
-      promotionPrice,
-      promotionDiscount,
-      regularServicesSubtotal,
-      addonsSubtotal,
-      regularItemsTotal,
-      subtotalBeforeTax,
-      itbmRate: ITBM_RATE,
-      itbmAmount,
-      totalWithTax,
-      totalDuration,
-    }
-  }, [selectedServices, selectedAddons, activePromotion, promotionServices, regularServices, showGlobalDiscount, globalDiscountPercent])
+  const pricing = useMemo(
+    () =>
+      calculateCartPricing({
+        services: selectedServices,
+        addons: selectedAddons,
+        promotion: activePromotion,
+        globalDiscountActive,
+        globalDiscountPercent,
+      }),
+    [selectedServices, selectedAddons, activePromotion, globalDiscountActive, globalDiscountPercent]
+  )
 
   const hasRegularItems = regularServices.length > 0 || selectedAddons.length > 0
   

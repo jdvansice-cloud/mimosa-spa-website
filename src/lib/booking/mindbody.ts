@@ -1974,3 +1974,86 @@ export async function getGiftCardBalance(
   }
 }
 
+
+export interface GiftCardProduct {
+  Id: number
+  ProductId?: number
+  Name?: string
+  CardValue?: number
+  SalePrice?: number
+  SoldOnline?: boolean
+  Layouts?: Array<{ Id: number; Name?: string }>
+}
+
+/** GC products configured in Mindbody (feeds the shop catalog mapping). */
+export async function getGiftCardProducts(): Promise<GiftCardProduct[]> {
+  const response = await mindbodyRequest<{ GiftCards?: GiftCardProduct[] }>(
+    '/sale/giftcards',
+    { params: { soldOnline: false } }
+  )
+  return response?.GiftCards ?? []
+}
+
+export interface CustomPaymentMethod {
+  Id: number
+  Name: string
+  Type?: string
+}
+
+/** Custom payment methods (to find the "Cortesía Web (Tilopay)" tender id). */
+export async function getCustomPaymentMethods(): Promise<CustomPaymentMethod[]> {
+  const response = await mindbodyRequest<{ PaymentMethods?: CustomPaymentMethod[] }>(
+    '/sale/custompaymentmethods',
+    {}
+  )
+  return response?.PaymentMethods ?? []
+}
+
+export interface PurchaseGiftCardInput {
+  test?: boolean
+  locationId: number
+  giftCardId: number
+  layoutId?: number
+  purchaserClientId: string | number
+  recipientName?: string
+  recipientEmail?: string
+  giftMessage?: string
+  title?: string
+  /** Tender: money was already collected by Tilopay, so this is a comp/custom tender. */
+  paymentInfo: { Type: string; Metadata?: Record<string, unknown> }
+}
+
+export interface PurchaseGiftCardResult {
+  BarcodeId?: string
+  Value?: number
+  AmountPaid?: number
+  PurchaserClientId?: string | number
+  RecipientEmail?: string
+}
+
+/**
+ * Register an online gift-card sale in Mindbody so POS redemption and the
+ * balance sync work exactly like admin-issued cards. NOTE: Mindbody mints the
+ * BarcodeId — we cannot supply our own serial; callers must store the returned
+ * BarcodeId on the gift_cards row.
+ */
+export async function purchaseGiftCard(
+  input: PurchaseGiftCardInput
+): Promise<PurchaseGiftCardResult> {
+  return mindbodyRequest<PurchaseGiftCardResult>('/sale/purchasegiftcard', {
+    method: 'POST',
+    body: {
+      Test: input.test ?? false,
+      LocationId: input.locationId,
+      GiftCardId: input.giftCardId,
+      ...(input.layoutId ? { LayoutId: input.layoutId } : {}),
+      PurchaserClientId: input.purchaserClientId,
+      SendEmailReceipt: false,
+      ...(input.recipientName ? { RecipientName: input.recipientName } : {}),
+      ...(input.recipientEmail ? { RecipientEmail: input.recipientEmail } : {}),
+      ...(input.giftMessage ? { GiftMessage: input.giftMessage } : {}),
+      ...(input.title ? { Title: input.title } : {}),
+      PaymentInfo: input.paymentInfo,
+    },
+  })
+}

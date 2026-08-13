@@ -1,15 +1,24 @@
 import { getTranslations } from 'next-intl/server'
+import { ServicesListServer } from '@/components/menu/ServicesListServer'
+import { PROGRAM_IDS } from '@/lib/booking/constants'
+import { buildPageMetadata } from '@/lib/seo'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getSiteImage } from '@/lib/site-images'
 
+// Revalidate hourly; tagged caches (site-images/settings/treatments) refresh sooner on admin edits.
+export const revalidate = 3600
+
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'menuPages.paquetes' })
-  return {
+  return buildPageMetadata({
+    locale,
+    path: '/menu/paquetes',
     title: t('title'),
     description: t('intro'),
-  }
+  })
 }
 
 // Hardcoded package data from the Mimosa Spa pricing
@@ -84,12 +93,13 @@ export default async function PaquetesPage({ params }: { params: Promise<{ local
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'menuPages.paquetes' })
   const tCommon = await getTranslations({ locale, namespace: 'common' })
+  const tHeaders = await getTranslations({ locale, namespace: 'menuPages.paquetes.tableHeaders' })
   const bannerImage = await getSiteImage('menu_paquetes_banner')
 
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero Section with Image - Compact on mobile */}
-      <section className="relative h-[12vh] md:h-[30vh] overflow-hidden">
+      <section className="relative min-h-[160px] md:min-h-[280px] flex items-center overflow-hidden">
         <Image
           src={bannerImage}
           alt={t('title')}
@@ -97,8 +107,8 @@ export default async function PaquetesPage({ params }: { params: Promise<{ local
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-dark/50" />
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-dark/60 via-dark/45 to-dark/60" />
+        <div className="relative w-full flex items-center justify-center py-8">
           <div className="text-center text-white px-4">
             <h1 className="text-xl md:text-5xl font-display font-semibold tracking-wide mb-0 md:mb-4">
               {t('title')}
@@ -122,9 +132,9 @@ export default async function PaquetesPage({ params }: { params: Promise<{ local
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             {/* Table Header - Desktop only */}
             <div className="hidden md:grid md:grid-cols-[1fr_auto_auto] gap-4 px-6 py-4 bg-beige-100 border-b border-beige-200">
-              <span className="font-semibold text-dark">Tratamiento</span>
-              <span className="font-semibold text-dark text-center w-32">Sesiones</span>
-              <span className="font-semibold text-dark text-right w-24">Precio</span>
+              <span className="font-semibold text-dark">{tHeaders('treatment')}</span>
+              <span className="font-semibold text-dark text-center w-32">{tHeaders('sessions')}</span>
+              <span className="font-semibold text-dark text-right w-24">{tHeaders('price')}</span>
             </div>
 
             {/* Package Items */}
@@ -164,6 +174,18 @@ export default async function PaquetesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
+      {/* Individual session bookings for massage packs (when seeded in admin) */}
+      <section className="py-3 md:py-12">
+        <div className="container-spa px-3 md:px-4">
+          <ServicesListServer
+            programIds={[PROGRAM_IDS.PAQUETES_MASAJES]}
+            locale={locale}
+            showTopPicks={false}
+            hideEmptyFallback
+          />
+        </div>
+      </section>
+
       {/* Back to Menu */}
       <section className="pb-12">
         <div className="container-spa text-center">
@@ -174,7 +196,7 @@ export default async function PaquetesPage({ params }: { params: Promise<{ local
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            {tCommon('back')} al Menú
+            {tCommon('backToMenu')}
           </Link>
         </div>
       </section>

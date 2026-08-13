@@ -1,0 +1,3 @@
+{
+  "/api/giftcards/checkout/callback/route": "app/api/giftcards/checkout/callback/route.js"
+}

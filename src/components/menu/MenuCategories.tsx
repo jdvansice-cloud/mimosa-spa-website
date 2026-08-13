@@ -10,14 +10,16 @@ interface MenuCategoriesProps {
   categoryImages: Record<string, string>
 }
 
-// Default fallback images
+import { DEFAULT_IMAGES as SHARED_DEFAULTS } from '@/lib/default-images'
+
+// Short-key view over the shared fallback map
 const DEFAULT_IMAGES = {
-  body: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
-  facial: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
-  packages: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
-  membership: 'https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=800',
-  giftcards: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=800',
-  promotions: 'https://images.unsplash.com/photo-1607006344380-b6775a0824a7?q=80&w=800',
+  body: SHARED_DEFAULTS.category_body_treatments,
+  facial: SHARED_DEFAULTS.category_facial_treatments,
+  packages: SHARED_DEFAULTS.category_packages,
+  membership: SHARED_DEFAULTS.category_membership,
+  giftcards: SHARED_DEFAULTS.category_giftcards,
+  promotions: SHARED_DEFAULTS.category_promotions,
 }
 
 export function MenuCategories({ locale, categoryImages }: MenuCategoriesProps) {
@@ -34,6 +36,12 @@ export function MenuCategories({ locale, categoryImages }: MenuCategoriesProps) 
       titleKey: 'facial',
       image: categoryImages.category_facial_treatments || DEFAULT_IMAGES.facial,
       href: '/menu/faciales',
+    },
+    {
+      id: 'couples',
+      titleKey: 'couples',
+      image: categoryImages.category_parejas || SHARED_DEFAULTS.category_parejas,
+      href: '/parejas',
     },
     {
       id: 'packages',
@@ -63,6 +71,8 @@ export function MenuCategories({ locale, categoryImages }: MenuCategoriesProps) 
   ]
   const t = useTranslations('menu.categories')
   const tNav = useTranslations('navigation')
+  const tExtra = useTranslations('menu.categoriesExtra')
+  const tCommon = useTranslations('common')
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -93,14 +103,14 @@ export function MenuCategories({ locale, categoryImages }: MenuCategoriesProps) 
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6">
               {category.special && (
                 <span className="text-sm font-light italic mb-2 text-gold-100">
-                  Descuentos del MES
+                  {tExtra('promotionsTagline')}
                 </span>
               )}
               <h3 className="text-xl md:text-2xl font-display font-semibold text-center mb-4 tracking-wide">
-                {category.special ? 'PROMOCIONES' : t(category.titleKey).toUpperCase()}
+                {category.special ? tExtra('promotionsTitle') : t(category.titleKey).toUpperCase()}
               </h3>
               <span className="inline-flex items-center px-6 py-2 bg-warm-gray-500/80 hover:bg-gold hover:text-dark rounded text-sm font-medium transition-all">
-                VER
+                {tCommon('view').toUpperCase()}
               </span>
             </div>
           </Link>

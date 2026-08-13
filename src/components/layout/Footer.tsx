@@ -1,27 +1,9 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
-import { useParams } from 'next/navigation'
-import { MapPin, Phone, Mail, Clock, Instagram, Facebook, MessageCircle } from 'lucide-react'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { MapPin, Phone, Mail, Clock, Instagram, Facebook, MessageCircle, Star } from 'lucide-react'
 import { Logo } from './Logo'
-
-interface SiteSettings {
-  phone_costa_del_este: string
-  email: string
-  instagram_url: string
-  facebook_url: string
-  whatsapp_number: string
-}
-
-const defaultSettings: SiteSettings = {
-  phone_costa_del_este: '398-5295',
-  email: 'info@mimosaretreat.com',
-  instagram_url: 'https://instagram.com/mimosasparetreat',
-  facebook_url: 'https://facebook.com/mimosasparetreat',
-  whatsapp_number: '50764049464',
-}
+import { getServerSettings, aggregateRating } from '@/lib/settings'
+import { GIFT_CARDS_PATH } from '@/lib/nav'
 
 // Format phone number for display
 function formatPhoneDisplay(phone: string): string {
@@ -34,39 +16,17 @@ function formatPhoneDisplay(phone: string): string {
   return phone
 }
 
-export function Footer() {
-  const t = useTranslations('footer')
-  const tNav = useTranslations('navigation')
-  const tContact = useTranslations('contact')
-  const tHome = useTranslations('home.locations')
-  const params = useParams()
-  const locale = params.locale as string
+export async function Footer() {
+  const locale = await getLocale()
+  const [t, tNav, tContact, tHome, settings] = await Promise.all([
+    getTranslations('footer'),
+    getTranslations('navigation'),
+    getTranslations('contact'),
+    getTranslations('home.locations'),
+    getServerSettings(),
+  ])
 
-  const [settings, setSettings] = useState<SiteSettings>(defaultSettings)
-
-  useEffect(() => {
-    async function fetchSettings() {
-      try {
-        const response = await fetch('/api/settings')
-        if (response.ok) {
-          const { data } = await response.json()
-          if (data) {
-            setSettings({
-              phone_costa_del_este: data.phone_costa_del_este || defaultSettings.phone_costa_del_este,
-              email: data.email || defaultSettings.email,
-              instagram_url: data.instagram_url || defaultSettings.instagram_url,
-              facebook_url: data.facebook_url || defaultSettings.facebook_url,
-              whatsapp_number: data.whatsapp_number || defaultSettings.whatsapp_number,
-            })
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching settings:', error)
-      }
-    }
-    fetchSettings()
-  }, [])
-
+  const agg = aggregateRating(settings)
   const currentYear = new Date().getFullYear()
   const phoneDisplay = formatPhoneDisplay(settings.phone_costa_del_este)
   const phoneLink = `tel:+507${settings.phone_costa_del_este.replace(/\D/g, '')}`
@@ -74,7 +34,12 @@ export function Footer() {
   const navLinks = [
     { href: `/${locale}`, label: tNav('home') },
     { href: `/${locale}/menu`, label: tNav('menu') },
+    { href: `/${locale}/parejas`, label: tNav('couples') },
+    { href: `/${locale}${GIFT_CARDS_PATH}`, label: tNav('giftcards') },
     { href: `/${locale}/promociones`, label: tNav('promotions') },
+    { href: `/${locale}/empresas`, label: 'Empresas' },
+    { href: `/${locale}/club-mimosa`, label: 'Club Mimosa' },
+    { href: `/${locale}/primera-visita`, label: locale === 'en' ? 'First Visit' : 'Primera Visita' },
     { href: `/${locale}/nosotros`, label: tNav('about') },
     { href: `/${locale}/galeria`, label: tNav('gallery') },
     { href: `/${locale}/reservar`, label: tNav('book') },
@@ -150,6 +115,17 @@ export function Footer() {
                 <div>
                   <p className="font-medium">{tHome('costaDelEste.name')}</p>
                   <p className="text-cream/70 text-sm">{tHome('costaDelEste.address')}</p>
+                  {agg.cde && agg.cde.count > 0 && (
+                    <a
+                      href={agg.cde.url || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-cream/60 hover:text-gold transition-colors mt-0.5"
+                    >
+                      <Star className="h-3 w-3 fill-gold text-gold" />
+                      {agg.cde.rating.toFixed(1)} · {agg.cde.count} Google
+                    </a>
+                  )}
                 </div>
               </li>
               <li className="flex gap-3">
@@ -157,6 +133,17 @@ export function Footer() {
                 <div>
                   <p className="font-medium">{tHome('sanFrancisco.name')}</p>
                   <p className="text-cream/70 text-sm">{tHome('sanFrancisco.address')}</p>
+                  {agg.sfc && agg.sfc.count > 0 && (
+                    <a
+                      href={agg.sfc.url || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-cream/60 hover:text-gold transition-colors mt-0.5"
+                    >
+                      <Star className="h-3 w-3 fill-gold text-gold" />
+                      {agg.sfc.rating.toFixed(1)} · {agg.sfc.count} Google
+                    </a>
+                  )}
                 </div>
               </li>
             </ul>
@@ -223,6 +210,12 @@ export function Footer() {
               className="text-cream/50 hover:text-gold transition-colors"
             >
               {t('terms')}
+            </Link>
+            <Link
+              href={`/${locale}/politica-de-cancelacion`}
+              className="text-cream/50 hover:text-gold transition-colors"
+            >
+              {t('cancellation')}
             </Link>
           </div>
         </div>

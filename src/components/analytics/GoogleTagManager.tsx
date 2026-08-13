@@ -1,6 +1,8 @@
 import Script from 'next/script'
 
-const GT_ID = 'GT-55N858PH'
+// NEXT_PUBLIC_GA_ID = gtag id (GT-/G-). Not NEXT_PUBLIC_GTM_ID — that's a
+// GTM container id, a different tag type.
+const GT_ID = process.env.NEXT_PUBLIC_GA_ID || 'GT-55N858PH'
 
 export function GoogleTagManager() {
   return (

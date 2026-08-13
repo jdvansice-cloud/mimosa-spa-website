@@ -6,6 +6,7 @@ import { Mail, MessageCircle, ArrowRight, Loader2, User, UserPlus, Phone, Refres
 import { OtpInput } from '@/components/ui'
 import { OtpChannelChoice } from '@/components/auth'
 import { useBookingStore } from '@/lib/booking/store'
+import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
 import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
 
 type AuthState =
@@ -168,13 +169,18 @@ function AuthStepContent() {
   }, [setClientInfo, nextStep, setStep, addService, loadPromotion, searchParams])
 
   const handleCredentialSubmit = async () => {
-    const trimmed = credential.trim().replace(/\D/g, '')
+    let trimmed = credential.trim().replace(/\D/g, '')
     if (!trimmed) {
       setError('Ingresa tu número de teléfono')
       return
     }
+    // Panamanian numbers are 8 digits (mobiles start with 6) — most clients
+    // type them without the country code, so we add 507 for them.
+    if (trimmed.length === 8) {
+      trimmed = `507${trimmed}`
+    }
     if (trimmed.length < 10) {
-      setError('Escribe el número completo con código de país sin el + (ej: Panamá 50766124546 · EE.UU. 12125551234)')
+      setError('Escribe tu número completo (ej: Panamá 66124546 · desde otro país con código: 12125551234)')
       return
     }
 
@@ -667,7 +673,7 @@ function AuthStepContent() {
                     value={registrationData.phone}
                     onChange={(e) => setRegistrationData(prev => ({ ...prev, phone: e.target.value }))}
                     className="w-full pl-10 pr-3 py-2.5 border border-beige-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all"
-                    placeholder="50766124546"
+                    placeholder="66124546"
                   />
                 </div>
               </div>
@@ -739,7 +745,7 @@ function AuthStepContent() {
 
           <div>
             <label className="block text-xs font-medium text-dark mb-1.5">
-              Número de teléfono con código de país
+              Número de teléfono
             </label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray" />
@@ -752,11 +758,11 @@ function AuthStepContent() {
                 className="w-full pl-10 pr-3 py-3 border-2 border-beige-200 rounded-xl
                          text-sm focus:outline-none focus:ring-2 focus:ring-gold/50
                          focus:border-gold transition-all disabled:opacity-50"
-                placeholder="50766124546"
+                placeholder="66124546"
                 autoFocus
               />
             </div>
-            <p className="mt-1 text-xs text-warm-gray">Sin el signo + · Panamá: 50766124546 · EE.UU.: 12125551234</p>
+            <p className="mt-1 text-xs text-warm-gray">Panamá: solo tu número (66124546) · Otros países: con código, sin el + (12125551234)</p>
           </div>
 
           {error && (
@@ -783,6 +789,11 @@ function AuthStepContent() {
           <p className="mt-3 text-center text-xs text-warm-gray">
             Te enviaremos un código de verificación
           </p>
+
+          {/* WhatsApp escape hatch: book without creating an account */}
+          <div className="mt-6 pt-4 border-t border-beige-200 text-center">
+            <WhatsAppBookingLink cta="booking_auth_step" variant="link" />
+          </div>
         </div>
       </div>
     </div>

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { removeAppointment } from '@/lib/booking/mindbody'
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 // GET /api/cita/cancelar?id=12345
-// Cancels an appointment in Mindbody
+// Cancels an appointment in Mindbody.
+// UUID ids are Nura (the new platform) appointments — the approved WhatsApp
+// template's URL buttons point at this domain, so we forward those to Nura.
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -11,6 +15,12 @@ export async function GET(request: NextRequest) {
     if (!appointmentId) {
       return NextResponse.redirect(
         new URL('/cita/resultado?status=error&message=ID de cita no proporcionado', request.url)
+      )
+    }
+
+    if (UUID_RE.test(appointmentId) && process.env.NURA_PLATFORM_URL) {
+      return NextResponse.redirect(
+        `${process.env.NURA_PLATFORM_URL}/cita/cancelar?id=${appointmentId}`
       )
     }
 

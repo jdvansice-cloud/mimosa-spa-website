@@ -19,6 +19,15 @@ interface SiteSettings {
   whatsapp_dual_channel: boolean
   online_discount_active: boolean
   online_discount_percent: number
+  google_rating?: number
+  google_review_count?: number
+  google_reviews_url?: string
+  google_rating_cde?: number | null
+  google_review_count_cde?: number | null
+  google_reviews_url_cde?: string | null
+  google_rating_sfc?: number | null
+  google_review_count_sfc?: number | null
+  google_reviews_url_sfc?: string | null
 }
 
 const defaultSettings: SiteSettings = {
@@ -31,11 +40,20 @@ const defaultSettings: SiteSettings = {
   weekday_close: '20:00',
   weekend_open: '09:00',
   weekend_close: '18:00',
-  instagram_url: 'https://instagram.com/mimosasparetreat',
-  facebook_url: 'https://facebook.com/mimosasparetreat',
+  instagram_url: 'https://instagram.com/mimosaretreat',
+  facebook_url: 'https://facebook.com/mimosaretreat',
   whatsapp_dual_channel: true,
   online_discount_active: false,
   online_discount_percent: 0,
+  google_rating: 4.8,
+  google_review_count: 96,
+  google_reviews_url: '',
+  google_rating_cde: null,
+  google_review_count_cde: null,
+  google_reviews_url_cde: null,
+  google_rating_sfc: null,
+  google_review_count_sfc: null,
+  google_reviews_url_sfc: null,
 }
 
 export default function AdminConfigPage() {
@@ -64,7 +82,7 @@ export default function AdminConfigPage() {
     fetchSettings()
   }, [])
 
-  const handleChange = (field: keyof SiteSettings, value: string) => {
+  const handleChange = (field: keyof SiteSettings, value: string | number) => {
     setSettings(prev => ({ ...prev, [field]: value }))
     setSaveStatus('idle')
   }
@@ -257,7 +275,7 @@ export default function AdminConfigPage() {
               <input
                 type="url"
                 className="input"
-                placeholder="https://instagram.com/mimosasparetreat"
+                placeholder="https://instagram.com/mimosaretreat"
                 value={settings.instagram_url}
                 onChange={(e) => handleChange('instagram_url', e.target.value)}
               />
@@ -267,11 +285,114 @@ export default function AdminConfigPage() {
               <input
                 type="url"
                 className="input"
-                placeholder="https://facebook.com/mimosasparetreat"
+                placeholder="https://facebook.com/mimosaretreat"
                 value={settings.facebook_url}
                 onChange={(e) => handleChange('facebook_url', e.target.value)}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Google Reviews (proof shown on the public site) */}
+        <Card variant="default" padding="md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-gold" />
+              Reseñas de Google (por ubicación)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-xs text-warm-gray -mt-2">
+              El sitio muestra el total combinado de ambas ubicaciones; cada
+              tarjeta de ubicación muestra su propio rating.
+            </p>
+            {([
+              ['Costa del Este', 'google_rating_cde', 'google_review_count_cde', 'google_reviews_url_cde'],
+              ['San Francisco', 'google_rating_sfc', 'google_review_count_sfc', 'google_reviews_url_sfc'],
+            ] as const).map(([label, rKey, cKey, uKey]) => (
+              <div key={label} className="border border-beige rounded-xl p-4 space-y-3">
+                <p className="font-medium text-sm text-dark">{label}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Rating</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="1"
+                      max="5"
+                      className="input"
+                      value={settings[rKey] ?? ''}
+                      onChange={(e) =>
+                        handleChange(rKey, e.target.value === '' ? '' : Number(e.target.value))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="label"># de reseñas</label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="input"
+                      value={settings[cKey] ?? ''}
+                      onChange={(e) =>
+                        handleChange(cKey, e.target.value === '' ? '' : Number(e.target.value))
+                      }
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="label">Enlace a reseñas de Google</label>
+                  <input
+                    type="url"
+                    className="input"
+                    placeholder="https://g.page/r/..."
+                    value={settings[uKey] ?? ''}
+                    onChange={(e) => handleChange(uKey, e.target.value)}
+                  />
+                </div>
+              </div>
+            ))}
+            <details>
+              <summary className="text-xs text-warm-gray cursor-pointer">
+                Valores globales (respaldo si faltan los de ubicación)
+              </summary>
+              <div className="mt-3 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">Rating (ej. 4.8)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="1"
+                  max="5"
+                  className="input"
+                  value={settings.google_rating ?? 4.8}
+                  onChange={(e) => handleChange('google_rating', Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="label"># de reseñas</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="input"
+                  value={settings.google_review_count ?? 96}
+                  onChange={(e) => handleChange('google_review_count', Number(e.target.value))}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="label">Enlace a las reseñas en Google</label>
+              <input
+                type="url"
+                className="input"
+                placeholder="https://g.page/r/..."
+                value={settings.google_reviews_url ?? ''}
+                onChange={(e) => handleChange('google_reviews_url', e.target.value)}
+              />
+            </div>
+              </div>
+            </details>
           </CardContent>
         </Card>
 

@@ -490,6 +490,17 @@ export function ServiceStep() {
 
       const { data: promotionWithServices } = await response.json() as { data: PromotionWithServices }
 
+      // loadPromotion replaces the whole cart — never silently discard
+      // services the client already picked by hand.
+      if (
+        selectedServices.length > 0 &&
+        !window.confirm(
+          'Elegir esta promoción reemplaza los servicios que ya seleccionaste. ¿Continuar?'
+        )
+      ) {
+        return
+      }
+
       // Load promotion into cart (this will set selectedServices and activePromotion)
       loadPromotion(promotionWithServices)
 

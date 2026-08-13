@@ -1,11 +1,1 @@
-{
-  "version": 4,
-  "routes": {},
-  "dynamicRoutes": {},
-  "notFoundRoutes": [],
-  "preview": {
-    "previewModeId": "570b4be7325f4e9718ab39e24a727a3d",
-    "previewModeSigningKey": "70739ed1dfd6073024b2dc986da9434d9c18244fad001385996578364b308b59",
-    "previewModeEncryptionKey": "4117774d4e4ca0cd15eea8d39f893fc83fcf6209afd7884330ede3726f4657dd"
-  }
-}
+{"version":4,"routes":{"/es":{},"/en":{},"/es/reservar":{},"/en/reservar":{}},"dynamicRoutes":{"/[locale]":{"dataRoute":null,"dataRouteRegex":null,"fallback":null,"fallbackRevalidate":false,"fallbackSourceRoute":"/[locale]","routeRegex":"^\\/([^/]+?)(?:\\/)?$","allowHeader":[]},"/[locale]/reservar":{"dataRoute":null,"dataRouteRegex":null,"fallback":null,"fallbackRevalidate":false,"fallbackSourceRoute":"/[locale]/reservar","routeRegex":"^\\/([^/]+?)\\/reservar(?:\\/)?$","allowHeader":[]}},"notFoundRoutes":[],"preview":{"previewModeId":"5317fc4eca3cc24c62086aeecef8bc89","previewModeSigningKey":"6c30e66f422f2b773e6b63c21c7d0388548e5852de86bf0d2cbdcca4a9978f0d","previewModeEncryptionKey":"b5ab1cd977f25d778669b173e12d296a373f1ec9d1f97d3960f2c681ed6d1c3a"}}

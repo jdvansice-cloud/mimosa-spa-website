@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { revalidateTag } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/require-admin'
+import { SITE_IMAGES_TAG } from '@/lib/site-images'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -89,6 +91,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    revalidateTag(SITE_IMAGES_TAG, 'max')
     return NextResponse.json({
       data: updateData,
       url: publicUrl

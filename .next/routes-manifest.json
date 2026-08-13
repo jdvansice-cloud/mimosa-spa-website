@@ -12,6 +12,24 @@
       "priority": true,
       "statusCode": 308,
       "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    },
+    {
+      "source": "/ig",
+      "destination": "/?utm_source=instagram&utm_medium=bio",
+      "statusCode": 307,
+      "regex": "^(?!/_next)/ig(?:/)?$"
+    },
+    {
+      "source": "/fb",
+      "destination": "/?utm_source=facebook&utm_medium=bio",
+      "statusCode": 307,
+      "regex": "^(?!/_next)/fb(?:/)?$"
+    },
+    {
+      "source": "/wa",
+      "destination": "/?utm_source=whatsapp&utm_medium=chat",
+      "statusCode": 307,
+      "regex": "^(?!/_next)/wa(?:/)?$"
     }
   ],
   "headers": [],
@@ -21,6 +39,46 @@
     "fallback": []
   },
   "dynamicRoutes": [
+    {
+      "page": "/admin/giftcards/issued/[id]/print",
+      "regex": "^/admin/giftcards/issued/([^/]+?)/print(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/admin/giftcards/issued/(?<nxtPid>[^/]+?)/print(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/config/[id]",
+      "regex": "^/api/admin/giftcards/config/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/admin/giftcards/config/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/issued/[id]",
+      "regex": "^/api/admin/giftcards/issued/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/admin/giftcards/issued/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/issued/[id]/sync",
+      "regex": "^/api/admin/giftcards/issued/([^/]+?)/sync(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/admin/giftcards/issued/(?<nxtPid>[^/]+?)/sync(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/orders/[id]",
+      "regex": "^/api/admin/giftcards/orders/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/admin/giftcards/orders/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
     {
       "page": "/api/gallery/[id]",
       "regex": "^/api/gallery/([^/]+?)(?:/)?$",
@@ -38,6 +96,14 @@
       "namedRegex": "^/api/promotions/(?<nxtPid>[^/]+?)/with\\-services(?:/)?$"
     },
     {
+      "page": "/gift/[token]",
+      "regex": "^/gift/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPtoken": "nxtPtoken"
+      },
+      "namedRegex": "^/gift/(?<nxtPtoken>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/[locale]",
       "regex": "^/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -46,12 +112,76 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)(?:/)?$"
     },
     {
+      "page": "/[locale]/club-mimosa",
+      "regex": "^/([^/]+?)/club\\-mimosa(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/club\\-mimosa(?:/)?$"
+    },
+    {
+      "page": "/[locale]/drenaje-linfatico-panama",
+      "regex": "^/([^/]+?)/drenaje\\-linfatico\\-panama(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/drenaje\\-linfatico\\-panama(?:/)?$"
+    },
+    {
+      "page": "/[locale]/empresas",
+      "regex": "^/([^/]+?)/empresas(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/empresas(?:/)?$"
+    },
+    {
       "page": "/[locale]/galeria",
       "regex": "^/([^/]+?)/galeria(?:/)?$",
       "routeKeys": {
         "nxtPlocale": "nxtPlocale"
       },
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/galeria(?:/)?$"
+    },
+    {
+      "page": "/[locale]/giftcards",
+      "regex": "^/([^/]+?)/giftcards(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/giftcards(?:/)?$"
+    },
+    {
+      "page": "/[locale]/giftcards/error",
+      "regex": "^/([^/]+?)/giftcards/error(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/giftcards/error(?:/)?$"
+    },
+    {
+      "page": "/[locale]/giftcards/gracias",
+      "regex": "^/([^/]+?)/giftcards/gracias(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/giftcards/gracias(?:/)?$"
+    },
+    {
+      "page": "/[locale]/masaje-de-parejas-panama",
+      "regex": "^/([^/]+?)/masaje\\-de\\-parejas\\-panama(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/masaje\\-de\\-parejas\\-panama(?:/)?$"
+    },
+    {
+      "page": "/[locale]/masajes-costa-del-este",
+      "regex": "^/([^/]+?)/masajes\\-costa\\-del\\-este(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/masajes\\-costa\\-del\\-este(?:/)?$"
     },
     {
       "page": "/[locale]/menu",
@@ -110,6 +240,22 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/nosotros(?:/)?$"
     },
     {
+      "page": "/[locale]/parejas",
+      "regex": "^/([^/]+?)/parejas(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/parejas(?:/)?$"
+    },
+    {
+      "page": "/[locale]/politica-de-cancelacion",
+      "regex": "^/([^/]+?)/politica\\-de\\-cancelacion(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/politica\\-de\\-cancelacion(?:/)?$"
+    },
+    {
       "page": "/[locale]/portal",
       "regex": "^/([^/]+?)/portal(?:/)?$",
       "routeKeys": {
@@ -150,6 +296,22 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/portal/profile(?:/)?$"
     },
     {
+      "page": "/[locale]/primera-visita",
+      "regex": "^/([^/]+?)/primera\\-visita(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/primera\\-visita(?:/)?$"
+    },
+    {
+      "page": "/[locale]/privacidad",
+      "regex": "^/([^/]+?)/privacidad(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/privacidad(?:/)?$"
+    },
+    {
       "page": "/[locale]/promociones",
       "regex": "^/([^/]+?)/promociones(?:/)?$",
       "routeKeys": {
@@ -158,12 +320,36 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/promociones(?:/)?$"
     },
     {
+      "page": "/[locale]/referidos",
+      "regex": "^/([^/]+?)/referidos(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/referidos(?:/)?$"
+    },
+    {
       "page": "/[locale]/reservar",
       "regex": "^/([^/]+?)/reservar(?:/)?$",
       "routeKeys": {
         "nxtPlocale": "nxtPlocale"
       },
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/reservar(?:/)?$"
+    },
+    {
+      "page": "/[locale]/spa-san-francisco",
+      "regex": "^/([^/]+?)/spa\\-san\\-francisco(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/spa\\-san\\-francisco(?:/)?$"
+    },
+    {
+      "page": "/[locale]/terminos",
+      "regex": "^/([^/]+?)/terminos(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/terminos(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -210,10 +396,106 @@
       "namedRegex": "^/admin/giftcards(?:/)?$"
     },
     {
+      "page": "/admin/giftcards/config",
+      "regex": "^/admin/giftcards/config(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/giftcards/config(?:/)?$"
+    },
+    {
+      "page": "/admin/giftcards/issue",
+      "regex": "^/admin/giftcards/issue(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/giftcards/issue(?:/)?$"
+    },
+    {
+      "page": "/admin/giftcards/issued",
+      "regex": "^/admin/giftcards/issued(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/giftcards/issued(?:/)?$"
+    },
+    {
+      "page": "/admin/giftcards/orders",
+      "regex": "^/admin/giftcards/orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/giftcards/orders(?:/)?$"
+    },
+    {
+      "page": "/admin/giftcards/settings",
+      "regex": "^/admin/giftcards/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/giftcards/settings(?:/)?$"
+    },
+    {
+      "page": "/admin/giftcards/shop",
+      "regex": "^/admin/giftcards/shop(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/giftcards/shop(?:/)?$"
+    },
+    {
+      "page": "/admin/giftcards/templates",
+      "regex": "^/admin/giftcards/templates(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/giftcards/templates(?:/)?$"
+    },
+    {
       "page": "/admin/imagenes",
       "regex": "^/admin/imagenes(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/imagenes(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis",
+      "regex": "^/admin/kpis(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis/agenda",
+      "regex": "^/admin/kpis/agenda(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis/agenda(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis/asistencia",
+      "regex": "^/admin/kpis/asistencia(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis/asistencia(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis/capacidad",
+      "regex": "^/admin/kpis/capacidad(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis/capacidad(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis/diccionario",
+      "regex": "^/admin/kpis/diccionario(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis/diccionario(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis/marketing",
+      "regex": "^/admin/kpis/marketing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis/marketing(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis/negocio",
+      "regex": "^/admin/kpis/negocio(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis/negocio(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis/staff",
+      "regex": "^/admin/kpis/staff(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis/staff(?:/)?$"
+    },
+    {
+      "page": "/admin/kpis/ventas",
+      "regex": "^/admin/kpis/ventas(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/kpis/ventas(?:/)?$"
     },
     {
       "page": "/admin/login",
@@ -228,16 +510,184 @@
       "namedRegex": "^/admin/membresia(?:/)?$"
     },
     {
+      "page": "/admin/ofertas",
+      "regex": "^/admin/ofertas(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/ofertas(?:/)?$"
+    },
+    {
       "page": "/admin/promociones",
       "regex": "^/admin/promociones(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/promociones(?:/)?$"
     },
     {
+      "page": "/admin/resenas",
+      "regex": "^/admin/resenas(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/resenas(?:/)?$"
+    },
+    {
       "page": "/admin/tratamientos",
       "regex": "^/admin/tratamientos(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/tratamientos(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/config",
+      "regex": "^/api/admin/giftcards/config(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/giftcards/config(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/issue",
+      "regex": "^/api/admin/giftcards/issue(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/giftcards/issue(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/issued",
+      "regex": "^/api/admin/giftcards/issued(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/giftcards/issued(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/me",
+      "regex": "^/api/admin/giftcards/me(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/giftcards/me(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/orders",
+      "regex": "^/api/admin/giftcards/orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/giftcards/orders(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/shop",
+      "regex": "^/api/admin/giftcards/shop(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/giftcards/shop(?:/)?$"
+    },
+    {
+      "page": "/api/admin/giftcards/treatments",
+      "regex": "^/api/admin/giftcards/treatments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/giftcards/treatments(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis",
+      "regex": "^/api/admin/kpis(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/agenda",
+      "regex": "^/api/admin/kpis/agenda(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/agenda(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/agenda/day",
+      "regex": "^/api/admin/kpis/agenda/day(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/agenda/day(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/asistencia",
+      "regex": "^/api/admin/kpis/asistencia(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/asistencia(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/asistencia/export",
+      "regex": "^/api/admin/kpis/asistencia/export(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/asistencia/export(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/asistencia/import",
+      "regex": "^/api/admin/kpis/asistencia/import(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/asistencia/import(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/capacidad",
+      "regex": "^/api/admin/kpis/capacidad(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/capacidad(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/marketing",
+      "regex": "^/api/admin/kpis/marketing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/marketing(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/negocio",
+      "regex": "^/api/admin/kpis/negocio(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/negocio(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/negocio/import",
+      "regex": "^/api/admin/kpis/negocio/import(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/negocio/import(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/sales-report",
+      "regex": "^/api/admin/kpis/sales\\-report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/sales\\-report(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/sales-report/day",
+      "regex": "^/api/admin/kpis/sales\\-report/day(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/sales\\-report/day(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/staff",
+      "regex": "^/api/admin/kpis/staff(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/staff(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/sync",
+      "regex": "^/api/admin/kpis/sync(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/sync(?:/)?$"
+    },
+    {
+      "page": "/api/admin/kpis/sync-today",
+      "regex": "^/api/admin/kpis/sync\\-today(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/kpis/sync\\-today(?:/)?$"
+    },
+    {
+      "page": "/api/admin/offers",
+      "regex": "^/api/admin/offers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/offers(?:/)?$"
+    },
+    {
+      "page": "/api/admin/qz/cert",
+      "regex": "^/api/admin/qz/cert(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/qz/cert(?:/)?$"
+    },
+    {
+      "page": "/api/admin/qz/sign",
+      "regex": "^/api/admin/qz/sign(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/qz/sign(?:/)?$"
+    },
+    {
+      "page": "/api/admin/reviews",
+      "regex": "^/api/admin/reviews(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/reviews(?:/)?$"
     },
     {
       "page": "/api/admin/settings",
@@ -258,10 +708,22 @@
       "namedRegex": "^/api/admin/site\\-images/upload(?:/)?$"
     },
     {
+      "page": "/api/admin/site-images/variants",
+      "regex": "^/api/admin/site\\-images/variants(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/site\\-images/variants(?:/)?$"
+    },
+    {
       "page": "/api/admin/treatments",
       "regex": "^/api/admin/treatments(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/admin/treatments(?:/)?$"
+    },
+    {
+      "page": "/api/booking/by-appointment",
+      "regex": "^/api/booking/by\\-appointment(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/booking/by\\-appointment(?:/)?$"
     },
     {
       "page": "/api/cita/cancelar",
@@ -274,6 +736,42 @@
       "regex": "^/api/cita/confirmar(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/cita/confirmar(?:/)?$"
+    },
+    {
+      "page": "/api/cron/attendance-email",
+      "regex": "^/api/cron/attendance\\-email(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/attendance\\-email(?:/)?$"
+    },
+    {
+      "page": "/api/cron/giftcard-orders",
+      "regex": "^/api/cron/giftcard\\-orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/giftcard\\-orders(?:/)?$"
+    },
+    {
+      "page": "/api/cron/reminders",
+      "regex": "^/api/cron/reminders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/reminders(?:/)?$"
+    },
+    {
+      "page": "/api/cron/sync-appointments",
+      "regex": "^/api/cron/sync\\-appointments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/sync\\-appointments(?:/)?$"
+    },
+    {
+      "page": "/api/cron/sync-giftcards",
+      "regex": "^/api/cron/sync\\-giftcards(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/sync\\-giftcards(?:/)?$"
+    },
+    {
+      "page": "/api/cron/sync-kpis",
+      "regex": "^/api/cron/sync\\-kpis(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/sync\\-kpis(?:/)?$"
     },
     {
       "page": "/api/gallery",
@@ -294,16 +792,52 @@
       "namedRegex": "^/api/giftcards(?:/)?$"
     },
     {
+      "page": "/api/giftcards/catalog",
+      "regex": "^/api/giftcards/catalog(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/giftcards/catalog(?:/)?$"
+    },
+    {
+      "page": "/api/giftcards/checkout",
+      "regex": "^/api/giftcards/checkout(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/giftcards/checkout(?:/)?$"
+    },
+    {
+      "page": "/api/giftcards/checkout/callback",
+      "regex": "^/api/giftcards/checkout/callback(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/giftcards/checkout/callback(?:/)?$"
+    },
+    {
       "page": "/api/health",
       "regex": "^/api/health(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/health(?:/)?$"
     },
     {
+      "page": "/api/leads",
+      "regex": "^/api/leads(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/leads(?:/)?$"
+    },
+    {
       "page": "/api/membership",
       "regex": "^/api/membership(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/membership(?:/)?$"
+    },
+    {
+      "page": "/api/mindbody/admin/eligibility-import",
+      "regex": "^/api/mindbody/admin/eligibility\\-import(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/mindbody/admin/eligibility\\-import(?:/)?$"
+    },
+    {
+      "page": "/api/mindbody/admin/resources-audit",
+      "regex": "^/api/mindbody/admin/resources\\-audit(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/mindbody/admin/resources\\-audit(?:/)?$"
     },
     {
       "page": "/api/mindbody/auth",
@@ -322,12 +856,6 @@
       "regex": "^/api/mindbody/book(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/mindbody/book(?:/)?$"
-    },
-    {
-      "page": "/api/mindbody/debug",
-      "regex": "^/api/mindbody/debug(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/mindbody/debug(?:/)?$"
     },
     {
       "page": "/api/mindbody/locations",
@@ -352,12 +880,6 @@
       "regex": "^/api/mindbody/staff(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/mindbody/staff(?:/)?$"
-    },
-    {
-      "page": "/api/mindbody/test",
-      "regex": "^/api/mindbody/test(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/mindbody/test(?:/)?$"
     },
     {
       "page": "/api/portal/auth/link-account",
@@ -450,6 +972,12 @@
       "namedRegex": "^/api/site\\-images(?:/)?$"
     },
     {
+      "page": "/api/track",
+      "regex": "^/api/track(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/track(?:/)?$"
+    },
+    {
       "page": "/api/treatments/settings",
       "regex": "^/api/treatments/settings(?:/)?$",
       "routeKeys": {},
@@ -484,6 +1012,18 @@
       "regex": "^/portal/profile(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/portal/profile(?:/)?$"
+    },
+    {
+      "page": "/robots.txt",
+      "regex": "^/robots\\.txt(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/robots\\.txt(?:/)?$"
+    },
+    {
+      "page": "/sitemap.xml",
+      "regex": "^/sitemap\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sitemap\\.xml(?:/)?$"
     }
   ],
   "dataRoutes": [],

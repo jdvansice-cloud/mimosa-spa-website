@@ -1,8 +1,20 @@
 import Link from 'next/link'
-import { Gift, Plus, List, Settings, LayoutTemplate, Hash } from 'lucide-react'
+import { Gift, Plus, List, Settings, LayoutTemplate, Hash, ShoppingBag, Store } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
 
 const tiles = [
+  {
+    href: '/admin/giftcards/orders',
+    icon: ShoppingBag,
+    title: 'Pedidos Online',
+    description: 'Ventas de la tienda en línea: estado de pago, entrega y registro en Mindbody.',
+  },
+  {
+    href: '/admin/giftcards/shop',
+    icon: Store,
+    title: 'Tienda Online',
+    description: 'Catálogo, precios, campañas de temporada y ajustes de la tienda.',
+  },
   {
     href: '/admin/giftcards/issue',
     icon: Plus,

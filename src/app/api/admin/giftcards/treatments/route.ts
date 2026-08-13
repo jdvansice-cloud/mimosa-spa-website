@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { PROGRAM_IDS } from '@/lib/booking/constants'
+import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -35,6 +36,9 @@ function groupOf(program_id: number | null): TreatmentGroup {
  *                           (defaults to visible-only)
  */
 export async function GET(request: NextRequest) {
+  const ctx = await getGiftCardAdminContext()
+  if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const { searchParams } = new URL(request.url)
   const includeHidden = searchParams.get('includeHidden') === 'true'
 

@@ -1,7 +1,7 @@
 {
   "pages": {},
   "app": {
-    "[project]/.claude-worktrees/mimosa-spa-website/vigilant-rubin/src/app/admin/giftcards/page": [
+    "[project]/src/app/admin/giftcards/page": [
       "static/media/01e4147cff8141ee-s.p.7787e134.woff2",
       "static/media/f30fd2e485acf1bc-s.p.3d1b066d.woff2",
       "static/media/8e451580e5e95631-s.p.0e564e6e.woff2",

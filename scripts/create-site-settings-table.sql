@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS site_settings (
   weekday_close TIME DEFAULT '20:00',
   weekend_open TIME DEFAULT '09:00',
   weekend_close TIME DEFAULT '18:00',
-  instagram_url TEXT DEFAULT 'https://instagram.com/mimosasparetreat',
-  facebook_url TEXT DEFAULT 'https://facebook.com/mimosasparetreat',
+  instagram_url TEXT DEFAULT 'https://instagram.com/mimosaretreat',
+  facebook_url TEXT DEFAULT 'https://facebook.com/mimosaretreat',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -39,8 +39,8 @@ INSERT INTO site_settings (
   '20:00',
   '09:00',
   '18:00',
-  'https://instagram.com/mimosasparetreat',
-  'https://facebook.com/mimosasparetreat'
+  'https://instagram.com/mimosaretreat',
+  'https://facebook.com/mimosaretreat'
 );
 
 -- Enable RLS (Row Level Security)

@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
 
   const { data: cards, error: queryError } = await supabase
     .from('gift_cards')
-    .select('id, serial, sold_at, mindbody_remaining_balance_cents, redeemed_at')
+    .select('id, serial, sold_at, mindbody_remaining_balance_cents, redeemed_at, mindbody_barcode_id')
+    .is('voided_at', null)
     .or('sold_at.is.null,mindbody_remaining_balance_cents.is.null,mindbody_remaining_balance_cents.gt.0')
     .is('redeemed_at', null)
     .order('mindbody_synced_at', { ascending: true, nullsFirst: true })
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     let balance
     try {
-      balance = await getGiftCardBalance(card.serial)
+      balance = await getGiftCardBalance(card.mindbody_barcode_id ?? card.serial)
     } catch (e) {
       errors++
       console.error(`sync-giftcards: ${card.serial} fetch failed:`, e)

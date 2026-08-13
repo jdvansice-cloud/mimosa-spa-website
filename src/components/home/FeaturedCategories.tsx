@@ -5,11 +5,13 @@ import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
 import { motion } from 'framer-motion'
 
-// Default fallback images
+import { DEFAULT_IMAGES as SHARED_DEFAULTS } from '@/lib/default-images'
+
+// Short-key view over the shared fallback map
 const DEFAULT_IMAGES = {
-  body: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800',
-  facial: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800',
-  packages: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=800',
+  body: SHARED_DEFAULTS.category_body_treatments,
+  facial: SHARED_DEFAULTS.category_facial_treatments,
+  packages: SHARED_DEFAULTS.category_packages,
 }
 
 interface FeaturedCategoriesProps {
@@ -23,6 +25,7 @@ interface FeaturedCategoriesProps {
 export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
   const t = useTranslations('home.featured')
   const tMenu = useTranslations('menu.categories')
+  const tCommon = useTranslations('common')
   const locale = useLocale()
 
   const categories = [
@@ -30,27 +33,31 @@ export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
       id: 'body',
       image: images?.body || DEFAULT_IMAGES.body,
       titleKey: 'body',
+      href: '/menu/corporales',
     },
     {
       id: 'facial',
       image: images?.facial || DEFAULT_IMAGES.facial,
       titleKey: 'facial',
+      href: '/menu/faciales',
     },
     {
       id: 'packages',
       image: images?.packages || DEFAULT_IMAGES.packages,
       titleKey: 'packages',
+      href: '/menu/paquetes',
     },
   ]
 
   return (
     <div>
       {/* Section Header */}
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-display font-semibold mb-4">
+      <div className="text-center mb-10 md:mb-14">
+        <h2 className="font-display text-3xl md:text-4xl font-semibold text-dark text-balance">
           {t('title')}
         </h2>
-        <p className="text-warm-gray max-w-2xl mx-auto">
+        <span className="block h-[2px] w-12 bg-gold mt-5 mx-auto" aria-hidden />
+        <p className="text-warm-gray max-w-2xl mx-auto mt-5 leading-relaxed">
           {t('subtitle')}
         </p>
       </div>
@@ -66,7 +73,7 @@ export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
             <Link
-              href={`/${locale}/menu?category=${category.id}`}
+              href={`/${locale}${category.href}`}
               className="group block relative aspect-[4/5] rounded-2xl overflow-hidden"
             >
               {/* Image */}
@@ -89,7 +96,7 @@ export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
                   {tMenu(category.titleKey).toUpperCase()}
                 </h3>
                 <span className="inline-flex items-center px-6 py-2 border-2 border-white rounded-full text-sm font-medium transition-colors group-hover:bg-white group-hover:text-dark">
-                  VER
+                  {tCommon('view').toUpperCase()}
                 </span>
               </div>
             </Link>

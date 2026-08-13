@@ -23,6 +23,7 @@ import {
   List,
   Megaphone,
   BedDouble,
+  MessageSquareQuote,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/layout/Logo'
@@ -51,6 +52,8 @@ const fullNavItems: NavItem[] = [
   { href: '/admin/giftcards', label: 'Gift Cards', icon: Gift },
   { href: '/admin/membresia', label: 'Membresía', icon: Award },
   { href: '/admin/galeria', label: 'Galería', icon: Image },
+  { href: '/admin/resenas', label: 'Reseñas', icon: MessageSquareQuote },
+  { href: '/admin/ofertas', label: 'Ofertas y Precios', icon: Tag },
   { href: '/admin/imagenes', label: 'Imágenes del Sitio', icon: ImagePlus },
   { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
 ]

@@ -191,3 +191,19 @@ NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
    - **Access Token** → `WATI_ACCESS_TOKEN`
 
 > **Important:** The Access Token is a long JWT string. Copy the entire token including the `eyJhbGci...` prefix.
+
+## Gift-card shop (added Aug 2026)
+
+| Variable | Description |
+|---|---|
+| `TILOPAY_API_KEY` | Tilopay integration key (portal → Checkout) |
+| `TILOPAY_API_USER` | Tilopay API user |
+| `TILOPAY_PASSWORD` | Tilopay API password |
+| `RESEND_API_KEY` | Resend transactional email key |
+| `GIFTCARD_EMAIL_FROM` | e.g. `Mimosa Spa Retreat <regalos@mimosaretreat.com>` |
+| `GIFTCARD_TEST_MODE` | `1` = Mindbody Test:true + [TEST] email prefix (remove for launch) |
+| `NEXT_PUBLIC_GA_ID` | gtag id (defaults to GT-55N858PH if unset) |
+
+The shop stays offline (checkout returns 503, page shows the WhatsApp
+fallback) until the three `TILOPAY_*` vars exist AND the admin enables the
+shop in /admin/giftcards/shop.

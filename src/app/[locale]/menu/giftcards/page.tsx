@@ -102,6 +102,13 @@ export default function GiftCardsPage() {
                 <p className="text-warm-gray-700 leading-relaxed text-justify">
                   {description}
                 </p>
+                {/* Online shop entry */}
+                <Link
+                  href={`/${locale}/giftcards`}
+                  className="btn-primary inline-flex"
+                >
+                  {locale === 'en' ? 'Buy a Gift Card' : 'Comprar Gift Card'}
+                </Link>
               </div>
 
               {/* Image */}

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getWhatsAppUrl } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
+import { track } from '@/lib/track'
 
 interface WhatsAppWidgetProps {
   phoneNumber?: string
@@ -11,27 +13,42 @@ interface WhatsAppWidgetProps {
 }
 
 export function WhatsAppWidget({
-  phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '507XXXXXXXX',
+  phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '50764049464',
   message = 'Hola, me gustaría obtener información sobre sus servicios.',
 }: WhatsAppWidgetProps) {
+  const t = useTranslations('whatsapp')
   const [isVisible, setIsVisible] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
 
   useEffect(() => {
     // Show widget after a short delay
     const timer = setTimeout(() => setIsVisible(true), 1000)
-    
-    // Show tooltip after 3 seconds
-    const tooltipTimer = setTimeout(() => setShowTooltip(true), 3000)
-    
+
+    // Show the tooltip once per session — repeating it on every page covers
+    // content and reads as nagging.
+    let tooltipTimer: ReturnType<typeof setTimeout> | undefined
+    try {
+      if (!sessionStorage.getItem('mm_wa_tip')) {
+        tooltipTimer = setTimeout(() => {
+          setShowTooltip(true)
+          try {
+            sessionStorage.setItem('mm_wa_tip', '1')
+          } catch {}
+        }, 3000)
+      }
+    } catch {
+      // sessionStorage unavailable → skip the tooltip rather than nag
+    }
+
     return () => {
       clearTimeout(timer)
-      clearTimeout(tooltipTimer)
+      if (tooltipTimer) clearTimeout(tooltipTimer)
     }
   }, [])
 
   const handleClick = () => {
     setShowTooltip(false)
+    track('whatsapp_click', { meta: { cta: 'floating_widget' } })
     window.open(getWhatsAppUrl(phoneNumber, message), '_blank', 'noopener,noreferrer')
   }
 
@@ -43,7 +60,7 @@ export function WhatsAppWidget({
   return (
     <div
       className={cn(
-        'fixed bottom-6 right-6 z-50 flex items-end gap-3',
+        'fixed bottom-24 lg:bottom-6 right-6 z-50 flex items-end gap-3',
         'transition-all duration-500',
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       )}
@@ -64,8 +81,8 @@ export function WhatsAppWidget({
             <X className="h-3 w-3 text-warm-gray" />
           </button>
           <p className="text-sm text-dark">
-            ¿Tienes preguntas? <br />
-            <span className="font-medium">¡Escríbenos por WhatsApp!</span>
+            {t('tooltipQuestion')} <br />
+            <span className="font-medium">{t('tooltipCta')}</span>
           </p>
           {/* Arrow */}
           <div className="absolute right-4 -bottom-2 w-4 h-4 bg-white rotate-45 shadow-md" />

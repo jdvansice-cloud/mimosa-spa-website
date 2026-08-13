@@ -4,6 +4,11 @@ import { useTranslations } from 'next-intl'
 import { Sparkles, Award, Heart } from 'lucide-react'
 import { LocationsSection } from '@/components/home/LocationsSection'
 import { getSiteImages } from '@/lib/site-images'
+import { getServerSettings, aggregateRating } from '@/lib/settings'
+
+// Revalidate hourly; tagged caches (site-images/settings/treatments) refresh sooner on admin edits.
+export const revalidate = 3600
+
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -24,6 +29,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
     'location_costa_del_este',
     'location_san_francisco',
   ])
+  const agg = aggregateRating(await getServerSettings())
 
   return (
     <div className="min-h-screen bg-cream">
@@ -84,10 +90,16 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       {/* Locations Section */}
       <section className="section bg-cream">
         <div className="container-spa">
-          <LocationsSection images={{
-            costaDelEste: images.location_costa_del_este,
-            sanFrancisco: images.location_san_francisco,
-          }} />
+          <LocationsSection
+            images={{
+              costaDelEste: images.location_costa_del_este,
+              sanFrancisco: images.location_san_francisco,
+            }}
+            ratings={{
+              costaDelEste: agg.cde,
+              sanFrancisco: agg.sfc,
+            }}
+          />
         </div>
       </section>
     </div>

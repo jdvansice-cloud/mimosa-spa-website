@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { CheckCircle, Calendar, MapPin, Clock, User, Home, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
+import { calculateCartPricing } from '@/lib/booking/pricing'
 import Link from 'next/link'
 
 declare global {
@@ -22,10 +23,21 @@ export function SuccessStep() {
     selectedDate,
     selectedTime,
     activePromotion,
-    pricing,
+    globalDiscountActive,
+    globalDiscountPercent,
     replaceAppointmentId,
     resetForNewBooking
   } = useBookingStore()
+
+  // Same pricing math as ConfirmStep/FloatingCart (the old store `pricing`
+  // field was always null, so the total never rendered here).
+  const pricing = calculateCartPricing({
+    services: selectedServices,
+    addons: selectedAddons,
+    promotion: activePromotion,
+    globalDiscountActive,
+    globalDiscountPercent,
+  })
 
   const isReplacement = !!replaceAppointmentId
 
@@ -180,7 +192,7 @@ export function SuccessStep() {
           </div>
 
           {/* Total */}
-          {pricing && (
+          {pricing.totalWithTax > 0 && (
             <div className="border-t border-beige-200 pt-3 mt-3">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-dark text-sm">Total a pagar:</span>

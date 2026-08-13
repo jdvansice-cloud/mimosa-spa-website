@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { MapPin, Clock, Phone, MessageCircle } from 'lucide-react'
+import { MapPin, Clock, Phone, MessageCircle, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui'
 
@@ -24,10 +24,21 @@ const DEFAULT_IMAGES = {
   sanFrancisco: 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?q=80&w=800',
 }
 
+export interface LocationRatingInfo {
+  rating: number
+  count: number
+  url: string
+}
+
 interface LocationsSectionProps {
   images?: {
     costaDelEste?: string
     sanFrancisco?: string
+  }
+  /** Per-location Google ratings (from site_settings, passed by the server page) */
+  ratings?: {
+    costaDelEste?: LocationRatingInfo | null
+    sanFrancisco?: LocationRatingInfo | null
   }
 }
 
@@ -70,8 +81,9 @@ function formatWhatsAppDisplay(number: string): string {
   return number
 }
 
-export function LocationsSection({ images }: LocationsSectionProps) {
+export function LocationsSection({ images, ratings }: LocationsSectionProps) {
   const t = useTranslations('home.locations')
+  const tContact = useTranslations('contact')
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings)
 
   useEffect(() => {
@@ -102,10 +114,11 @@ export function LocationsSection({ images }: LocationsSectionProps) {
   return (
     <div>
       {/* Section Header */}
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-display font-semibold mb-4">
+      <div className="text-center mb-10 md:mb-14">
+        <h2 className="font-display text-3xl md:text-4xl font-semibold text-dark text-balance">
           {t('title')}
         </h2>
+        <span className="block h-[2px] w-12 bg-gold mt-5 mx-auto" aria-hidden />
       </div>
 
       {/* Locations Grid */}
@@ -114,6 +127,8 @@ export function LocationsSection({ images }: LocationsSectionProps) {
           const phoneNumber = settings[location.phoneKey]
           const phoneDisplay = formatPhoneDisplay(phoneNumber)
           const phoneLink = `tel:+507${phoneNumber.replace(/\D/g, '')}`
+          const rating =
+            location.nameKey === 'costaDelEste' ? ratings?.costaDelEste : ratings?.sanFrancisco
 
           return (
             <motion.div
@@ -142,6 +157,27 @@ export function LocationsSection({ images }: LocationsSectionProps) {
                     <h3 className="text-2xl font-display font-semibold">
                       {t(`${location.nameKey}.name`)}
                     </h3>
+                    {rating && rating.count > 0 && (
+                      <a
+                        href={rating.url || location.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-flex items-center gap-1.5 text-sm text-cream/90 hover:text-gold transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span className="flex" aria-hidden>
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <Star
+                              key={i}
+                              className={`h-3.5 w-3.5 ${i <= Math.round(rating.rating) ? 'fill-gold text-gold' : 'text-cream/40'}`}
+                            />
+                          ))}
+                        </span>
+                        <span className="font-medium">
+                          {rating.rating.toFixed(1)} ({rating.count})
+                        </span>
+                      </a>
+                    )}
                   </div>
                 </div>
 
@@ -164,8 +200,8 @@ export function LocationsSection({ images }: LocationsSectionProps) {
                   <div className="flex items-start gap-3">
                     <Clock className="h-5 w-5 text-gold flex-shrink-0 mt-0.5" />
                     <div className="text-warm-gray text-sm">
-                      <p>Lun - Vie: 9:00 AM - 8:00 PM</p>
-                      <p>Sáb - Dom: 9:00 AM - 6:00 PM</p>
+                      <p>{tContact('weekdays')}</p>
+                      <p>{tContact('weekends')}</p>
                     </div>
                   </div>
 

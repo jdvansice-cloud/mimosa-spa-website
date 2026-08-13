@@ -41,8 +41,11 @@ export function PromotionsPreview() {
   return (
     <div>
       {/* Section Header */}
-      <div className="text-center mb-12">
-        <h2 className="title-decorated">{t('title').toUpperCase()}</h2>
+      <div className="text-center mb-10 md:mb-14">
+        <h2 className="font-display text-3xl md:text-4xl font-semibold text-dark text-balance">
+          {t('title')}
+        </h2>
+        <span className="block h-[2px] w-12 bg-gold mt-5 mx-auto" aria-hidden />
       </div>
 
       {/* Promotions Grid */}

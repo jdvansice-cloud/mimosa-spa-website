@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { revalidateTag } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/require-admin'
+import { SETTINGS_TAG } from '@/lib/settings'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -21,6 +23,15 @@ export interface SiteSettings {
   whatsapp_dual_channel: boolean
   online_discount_active: boolean
   online_discount_percent: number
+  google_rating?: number
+  google_review_count?: number
+  google_reviews_url?: string
+  google_rating_cde?: number | null
+  google_review_count_cde?: number | null
+  google_reviews_url_cde?: string | null
+  google_rating_sfc?: number | null
+  google_review_count_sfc?: number | null
+  google_reviews_url_sfc?: string | null
   updated_at?: string
 }
 
@@ -53,8 +64,8 @@ export async function GET() {
           weekday_close: '20:00',
           weekend_open: '09:00',
           weekend_close: '18:00',
-          instagram_url: 'https://instagram.com/mimosasparetreat',
-          facebook_url: 'https://facebook.com/mimosasparetreat',
+          instagram_url: 'https://instagram.com/mimosaretreat',
+          facebook_url: 'https://facebook.com/mimosaretreat',
           whatsapp_dual_channel: true,
           online_discount_active: false,
           online_discount_percent: 0,
@@ -111,6 +122,15 @@ export async function PUT(request: NextRequest) {
       whatsapp_dual_channel: body.whatsapp_dual_channel ?? true,
       online_discount_active: body.online_discount_active ?? false,
       online_discount_percent: body.online_discount_percent ?? 0,
+      google_rating: body.google_rating ?? 4.8,
+      google_review_count: body.google_review_count ?? 96,
+      google_reviews_url: body.google_reviews_url ?? '',
+      google_rating_cde: body.google_rating_cde ?? null,
+      google_review_count_cde: body.google_review_count_cde ?? null,
+      google_reviews_url_cde: body.google_reviews_url_cde ?? null,
+      google_rating_sfc: body.google_rating_sfc ?? null,
+      google_review_count_sfc: body.google_review_count_sfc ?? null,
+      google_reviews_url_sfc: body.google_reviews_url_sfc ?? null,
       updated_at: new Date().toISOString(),
     }
 
@@ -141,6 +161,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: result.error.message }, { status: 500 })
     }
 
+    revalidateTag(SETTINGS_TAG, 'max')
     return NextResponse.json({ data: result.data })
   } catch (error) {
     console.error('Error in site settings API:', error)

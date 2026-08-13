@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { Menu, X, Calendar, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { GIFT_CARDS_PATH } from '@/lib/nav'
 import { LanguageSwitcher } from '@/components/ui'
 import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
 
@@ -39,6 +40,8 @@ export function Header() {
   const navItems = [
     { href: `/${locale}`, label: t('home') },
     { href: `/${locale}/menu`, label: t('menu') },
+    { href: `/${locale}/parejas`, label: t('couples') },
+    { href: `/${locale}${GIFT_CARDS_PATH}`, label: t('giftcards') },
     { href: `/${locale}/promociones`, label: t('promotions') },
     { href: `/${locale}/nosotros`, label: t('about') },
     { href: `/${locale}/galeria`, label: t('gallery') },
@@ -87,7 +90,7 @@ export function Header() {
             <Link
               href={`/${locale}/portal`}
               className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
-              title="Mi Portal"
+              title={t('portal')}
             >
               <User className="h-5 w-5" />
             </Link>
@@ -141,7 +144,7 @@ export function Header() {
             className="block py-3 text-lg font-medium text-cream/90 hover:text-gold transition-colors border-b border-cream/10"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            Mi Portal
+            {t('portal')}
           </Link>
 
           <div className="pt-4 flex items-center justify-between">

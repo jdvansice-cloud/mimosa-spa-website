@@ -93,7 +93,7 @@ export function HeroSection({ heroImage }: HeroSectionProps) {
                 size="lg"
                 className="w-full sm:w-auto border-2 border-white text-white hover:bg-white hover:text-dark shadow-lg"
               >
-                Ver Tratamientos
+                {t('secondaryCta')}
               </Button>
             </Link>
           </div>

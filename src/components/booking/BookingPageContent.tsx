@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { useBookingStore } from '@/lib/booking/store'
 import { BookingWidget } from './BookingWidget'
@@ -11,6 +12,8 @@ import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
 
 function BookingPageInner() {
   const searchParams = useSearchParams()
+  const tBooking = useTranslations('booking')
+  const tCommon = useTranslations('common')
   const currentStep = useBookingStore(state => state.currentStep)
   const clientInfo = useBookingStore(state => state.clientInfo)
   const setClientInfo = useBookingStore(state => state.setClientInfo)
@@ -221,7 +224,7 @@ function BookingPageInner() {
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
-          <p className="text-warm-gray">Cargando...</p>
+          <p className="text-warm-gray">{tCommon('loading')}</p>
         </div>
       </div>
     )
@@ -240,9 +243,9 @@ function BookingPageInner() {
           >
             <div className="container-spa">
               <h1 className="text-2xl md:text-3xl font-display font-semibold mb-1">
-                Reservar Cita
+                {tBooking('pageTitle')}
               </h1>
-              <p className="text-sm text-warm-gray">Agenda tu próxima visita</p>
+              <p className="text-sm text-warm-gray">{tBooking('pageSubtitle')}</p>
             </div>
           </motion.section>
         )}
@@ -272,11 +275,12 @@ function BookingPageInner() {
 
 // Loading fallback for Suspense
 function BookingPageLoading() {
+  const tCommon = useTranslations('common')
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
-        <p className="text-warm-gray">Cargando...</p>
+        <p className="text-warm-gray">{tCommon('loading')}</p>
       </div>
     </div>
   )

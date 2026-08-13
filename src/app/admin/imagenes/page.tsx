@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Image as ImageIcon, Upload, Check, X, Loader2, AlertCircle } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Image as ImageIcon, Upload,
+  Trash2,
+  Images, Check, X, Loader2, AlertCircle , ChevronDown, ChevronUp} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
 import Image from 'next/image'
 
@@ -64,6 +66,47 @@ function ImageCard({
         fileInputRef.current.value = ''
       }
     }
+  }
+
+  const [showVariants, setShowVariants] = useState(false)
+  const [variants, setVariants] = useState<{ id: string; image_url: string }[] | null>(null)
+  const [variantBusy, setVariantBusy] = useState(false)
+  const variantInputRef = useRef<HTMLInputElement>(null)
+
+  const loadVariants = useCallback(async () => {
+    const res = await fetch(`/api/admin/site-images/variants?key=${image.key}`)
+    if (res.ok) {
+      const { data } = await res.json()
+      setVariants(data || [])
+    }
+  }, [image.key])
+
+  const toggleVariants = async () => {
+    const next = !showVariants
+    setShowVariants(next)
+    if (next && variants === null) await loadVariants()
+  }
+
+  const handleVariantUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setVariantBusy(true)
+    try {
+      const fd = new FormData()
+      fd.append('key', image.key)
+      fd.append('file', file)
+      const res = await fetch('/api/admin/site-images/variants', { method: 'POST', body: fd })
+      if (res.ok) await loadVariants()
+    } finally {
+      setVariantBusy(false)
+      if (variantInputRef.current) variantInputRef.current.value = ''
+    }
+  }
+
+  const handleVariantDelete = async (id: string) => {
+    if (!confirm('¿Eliminar esta variante?')) return
+    await fetch(`/api/admin/site-images/variants?id=${id}`, { method: 'DELETE' })
+    await loadVariants()
   }
 
   const sizeText = image.recommended_width && image.recommended_height
@@ -139,6 +182,56 @@ function ImageCard({
             </span>
           </div>
         </label>
+
+        {/* Rotation variants: extra photos this slot alternates between daily */}
+        <button
+          onClick={toggleVariants}
+          className="mt-3 w-full flex items-center justify-between text-xs text-warm-gray hover:text-dark transition-colors"
+        >
+          <span className="inline-flex items-center gap-1.5">
+            <Images className="w-3.5 h-3.5" />
+            Variantes de rotación{variants !== null ? ` (${variants.length})` : ''}
+          </span>
+          {showVariants ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+        </button>
+        {showVariants && (
+          <div className="mt-2 space-y-2">
+            <p className="text-[11px] text-warm-gray leading-snug">
+              Si agregas fotos aquí, el sitio alterna entre la principal y estas
+              variantes (cambia cada día automáticamente).
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              {(variants || []).map((v) => (
+                <div key={v.id} className="relative group aspect-square rounded overflow-hidden bg-beige-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={v.image_url} alt="" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => handleVariantDelete(v.id)}
+                    className="absolute inset-0 bg-dark/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                    title="Eliminar variante"
+                  >
+                    <Trash2 className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              ))}
+              <label className="aspect-square rounded border-2 border-dashed border-beige-300 flex items-center justify-center cursor-pointer hover:border-gold text-warm-gray hover:text-gold transition-colors">
+                <input
+                  ref={variantInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleVariantUpload}
+                  className="hidden"
+                  disabled={variantBusy}
+                />
+                {variantBusy ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+              </label>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

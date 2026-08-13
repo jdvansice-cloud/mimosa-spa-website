@@ -72,10 +72,18 @@ function isGiftCardPayment(type: string): boolean {
   return t.includes('gift')
 }
 
-// "Cortesía/Invitado" — comped, no money received
+// Tenders that carry no new cash at the register: comps ("Cortesía/Invitado")
+// and the online-sale tenders ("Yappy Web", "Visa/MC Web", "AMEX Web",
+// anything Tilopay) — that money already arrived via the Tilopay settlement
+// in the bank, so counting it here would double it.
 function isCompPayment(type: string): boolean {
-  const t = type.toLowerCase()
-  return t.includes('cortes') || t.includes('invitado')
+  const t = type.toLowerCase().trim()
+  return (
+    t.includes('cortes') ||
+    t.includes('invitado') ||
+    t.includes('tilopay') ||
+    t.endsWith(' web')
+  )
 }
 
 interface SalesResponse {

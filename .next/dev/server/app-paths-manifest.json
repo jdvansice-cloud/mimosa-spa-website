@@ -1,3 +1,8 @@
 {
-  "/api/mindbody/services/route": "app/api/mindbody/services/route.js"
+  "/[locale]/page": "app/[locale]/page.js",
+  "/[locale]/reservar/page": "app/[locale]/reservar/page.js",
+  "/api/admin/settings/route": "app/api/admin/settings/route.js",
+  "/api/promotions/route": "app/api/promotions/route.js",
+  "/api/settings/route": "app/api/settings/route.js",
+  "/api/track/route": "app/api/track/route.js"
 }

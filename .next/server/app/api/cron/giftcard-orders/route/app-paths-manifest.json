@@ -1,0 +1,3 @@
+{
+  "/api/cron/giftcard-orders/route": "app/api/cron/giftcard-orders/route.js"
+}

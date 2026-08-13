@@ -11,13 +11,17 @@
     "about": "About Us",
     "gallery": "Gallery",
     "book": "Book Now",
-    "contact": "Contact"
+    "contact": "Contact",
+    "portal": "My Portal",
+    "couples": "Couples",
+    "giftcards": "Gift Cards"
   },
   "home": {
     "hero": {
       "title": "Your sanctuary of peace and wellness",
       "subtitle": "Discover the Mimosa experience",
-      "cta": "Book Now"
+      "cta": "Book Now",
+      "secondaryCta": "View Treatments"
     },
     "featured": {
       "title": "Our Services",
@@ -53,7 +57,8 @@
       "facial": "Facial Treatments",
       "packages": "Treatment Packages",
       "membership": "Privilege Membership",
-      "giftcards": "Gift Cards"
+      "giftcards": "Gift Cards",
+      "couples": "Couples & Occasions"
     },
     "duration": "min",
     "bookNow": "Book",
@@ -64,7 +69,12 @@
     "topPicks": "Our Recommendations",
     "allServices": "All Services",
     "seeMore": "see more",
-    "seeLess": "see less"
+    "seeLess": "see less",
+    "priceOnRequest": "Ask us",
+    "categoriesExtra": {
+      "promotionsTagline": "Deals of the MONTH",
+      "promotionsTitle": "PROMOTIONS"
+    }
   },
   "menuPages": {
     "corporales": {
@@ -81,7 +91,12 @@
     },
     "paquetes": {
       "title": "Treatment Packages",
-      "intro": "Maximize your spa experience with our specially designed packages. Perfect combinations of treatments that allow you to enjoy multiple benefits in a single visit. Ideal for those seeking a complete relaxation and rejuvenation experience at exceptional value."
+      "intro": "Maximize your spa experience with our specially designed packages. Perfect combinations of treatments that allow you to enjoy multiple benefits in a single visit. Ideal for those seeking a complete relaxation and rejuvenation experience at exceptional value.",
+      "tableHeaders": {
+        "treatment": "Treatment",
+        "sessions": "Sessions",
+        "price": "Price"
+      }
     },
     "giftcards": {
       "title": "Gift Cards",
@@ -106,7 +121,8 @@
     "priceNote": "Price does not include ITBM",
     "bookNow": "Book Now",
     "noPromotions": "No promotions available at this time.",
-    "loading": "Loading promotions..."
+    "loading": "Loading promotions...",
+    "metaDescription": "Discover our special promotions of the month"
   },
   "about": {
     "title": "About Us",
@@ -141,7 +157,9 @@
     "subtitle": "Schedule your next visit",
     "widget": {
       "loading": "Loading booking system..."
-    }
+    },
+    "pageTitle": "Book Appointment",
+    "pageSubtitle": "Schedule your next visit"
   },
   "contact": {
     "title": "Contact Us",
@@ -159,7 +177,8 @@
     "followUs": "Follow Us",
     "rights": "All rights reserved",
     "privacy": "Privacy Policy",
-    "terms": "Terms and Conditions"
+    "terms": "Terms and Conditions",
+    "cancellation": "Cancellation Policy"
   },
   "common": {
     "loading": "Loading...",
@@ -179,12 +198,61 @@
     "all": "All",
     "minutes": "minutes",
     "hours": "hours",
-    "price": "Price"
+    "price": "Price",
+    "backToMenu": "Back to Menu"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "network": "Connection error. Check your internet.",
     "notFound": "Not found",
     "unauthorized": "Unauthorized"
+  },
+  "whatsapp": {
+    "tooltipQuestion": "Questions?",
+    "tooltipCta": "Message us on WhatsApp!",
+    "bookPrompt": "Prefer to book via WhatsApp?",
+    "bookAction": "Book via WhatsApp"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or was moved.",
+    "backHome": "Back to home"
+  },
+  "leadForm": {
+    "name": "Name",
+    "phone": "Phone (WhatsApp)",
+    "email": "Email",
+    "company": "Company",
+    "message": "Tell us what you need",
+    "submit": "Send",
+    "error": "We could not send your details. Try again or message us on WhatsApp.",
+    "successTitle": "Done! We received your details.",
+    "successBody": "We will contact you very soon via WhatsApp.",
+    "whatsappNow": "Message us on WhatsApp now"
+  },
+  "giftShop": {
+    "title": "Gift Cards",
+    "subtitle": "Gift a Mimosa experience in 3 steps: choose, personalize and pay by card or Yappy. Delivered by email or WhatsApp.",
+    "step1": "Choose",
+    "step2": "Personalize",
+    "step3": "Pay",
+    "back": "Back",
+    "monetary": "By amount",
+    "experiences": "Experiences",
+    "recipientName": "Recipient's name *",
+    "recipientEmail": "Recipient's email",
+    "recipientPhone": "Recipient's WhatsApp (optional)",
+    "message": "Card message (optional)",
+    "sendDate": "Send on a specific date (optional — sent right after payment by default)",
+    "continue": "Continue",
+    "buyerName": "Your name *",
+    "buyerEmail": "Your email *",
+    "buyerPhone": "Your phone",
+    "payCta": "Pay by card or Yappy",
+    "payNote": "Secure payment processed by Tilopay. You will receive your receipt and the digital gift card by email.",
+    "errRequired": "Please complete the fields marked with *",
+    "errCheckout": "We could not start the payment. Try again or message us on WhatsApp.",
+    "comingSoonTitle": "Coming soon: buy online",
+    "comingSoonBody": "We are polishing the final details of the shop. Meanwhile, buy your gift card via WhatsApp and we will deliver it the same day."
   }
 }

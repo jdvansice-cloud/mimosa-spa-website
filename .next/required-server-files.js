@@ -157,8 +157,8 @@ self.__SERVER_FILES_MANIFEST={
       "isExperimentalCompile": false
     }
   },
-  "appDir": "/Users/juanvansice/.claude-worktrees/mimosa-spa-website/vigilant-rubin",
-  "relativeAppDir": ".claude-worktrees/mimosa-spa-website/vigilant-rubin",
+  "appDir": "/Users/juanvansice/Documents/GitHub/mimosa-spa-website",
+  "relativeAppDir": "",
   "files": [
     ".next/routes-manifest.json",
     ".next/server/pages-manifest.json",

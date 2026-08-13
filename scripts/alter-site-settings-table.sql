@@ -9,6 +9,6 @@ ADD COLUMN IF NOT EXISTS weekday_open TEXT DEFAULT '09:00',
 ADD COLUMN IF NOT EXISTS weekday_close TEXT DEFAULT '20:00',
 ADD COLUMN IF NOT EXISTS weekend_open TEXT DEFAULT '09:00',
 ADD COLUMN IF NOT EXISTS weekend_close TEXT DEFAULT '18:00',
-ADD COLUMN IF NOT EXISTS instagram_url TEXT DEFAULT 'https://instagram.com/mimosasparetreat',
-ADD COLUMN IF NOT EXISTS facebook_url TEXT DEFAULT 'https://facebook.com/mimosasparetreat',
+ADD COLUMN IF NOT EXISTS instagram_url TEXT DEFAULT 'https://instagram.com/mimosaretreat',
+ADD COLUMN IF NOT EXISTS facebook_url TEXT DEFAULT 'https://facebook.com/mimosaretreat',
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();

@@ -133,7 +133,6 @@ export async function POST(request: NextRequest) {
       })
       try {
         await updateClient({ Id: mindbodyClient.Id, Active: true })
-        console.log('Client reactivated successfully:', mindbodyClient.Id)
       } catch (reactivateError) {
         console.error('Failed to reactivate client:', reactivateError)
         return NextResponse.json(
@@ -219,14 +218,6 @@ export async function POST(request: NextRequest) {
     }> = []
     let currentStartTime = new Date(startDateTime)
 
-    console.log('=== BOOKING API ===')
-    console.log('Client ID:', clientId, '(type:', typeof clientId, ')')
-    console.log('Client Name from request:', clientName)
-    console.log('Client Phone from request:', clientPhone)
-    console.log('Location ID:', locationId)
-    console.log('Staff ID:', staffId)
-    console.log('Start DateTime:', startDateTime)
-    console.log('Services:', JSON.stringify(services, null, 2))
 
     const promoServiceIdSet = new Set<number>(Array.isArray(promoServiceIds) ? promoServiceIds : [])
 
@@ -260,12 +251,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Appointments to create:', JSON.stringify(appointments, null, 2))
 
     // Submit all appointments (all-or-nothing: rolls back on failure)
     const result = await addMultipleAppointments(appointments)
 
-    console.log('Booking result:', JSON.stringify(result, null, 2))
 
     // If booking failed (any appointment couldn't be created), save to Supabase and return error
     if (!result.success) {
@@ -343,7 +332,6 @@ export async function POST(request: NextRequest) {
       date: string; time: string; services: string[]; totalDuration: number; therapistName: string
     } | null = null
 
-    console.log('WhatsApp pre-check:', { watiConfigured: isWatiConfigured(), clientPhone: !!clientPhone, clientName: !!clientName, finalTherapistName, isReplacement: !!replaceAppointmentId })
     if (isWatiConfigured() && clientPhone && clientName) {
       const hasOffset = /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
       const bookingDate = new Date(hasOffset ? startDateTime : `${startDateTime}-05:00`)
@@ -428,7 +416,6 @@ export async function POST(request: NextRequest) {
       if (insertError) {
         console.error('Failed to save booking to Supabase:', insertError)
       } else {
-        console.log('Booking saved to Supabase:', confirmationNumber)
       }
     } catch (supabaseError) {
       console.error('Error saving booking to Supabase:', supabaseError)

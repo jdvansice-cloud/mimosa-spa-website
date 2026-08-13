@@ -11,13 +11,17 @@
     "about": "Nosotros",
     "gallery": "Galería",
     "book": "Reservar",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "portal": "Mi Portal",
+    "couples": "Parejas",
+    "giftcards": "Gift Cards"
   },
   "home": {
     "hero": {
       "title": "Tu refugio de paz y bienestar",
       "subtitle": "Descubre la experiencia Mimosa",
-      "cta": "Reserva Ahora"
+      "cta": "Reserva Ahora",
+      "secondaryCta": "Ver Tratamientos"
     },
     "featured": {
       "title": "Nuestros Servicios",
@@ -53,7 +57,8 @@
       "facial": "Tratamientos Faciales",
       "packages": "Tratamientos en Paquetes",
       "membership": "Membresía Privilege",
-      "giftcards": "Gift Cards"
+      "giftcards": "Gift Cards",
+      "couples": "Parejas y Ocasiones"
     },
     "duration": "min",
     "bookNow": "Reservar",
@@ -64,7 +69,12 @@
     "topPicks": "Nuestras Recomendaciones",
     "allServices": "Todos los Servicios",
     "seeMore": "ver más",
-    "seeLess": "ver menos"
+    "seeLess": "ver menos",
+    "priceOnRequest": "Consultar",
+    "categoriesExtra": {
+      "promotionsTagline": "Descuentos del MES",
+      "promotionsTitle": "PROMOCIONES"
+    }
   },
   "menuPages": {
     "corporales": {
@@ -81,7 +91,12 @@
     },
     "paquetes": {
       "title": "Tratamientos en Paquetes",
-      "intro": "Maximiza tu experiencia de spa con nuestros paquetes especialmente diseñados. Combinaciones perfectas de tratamientos que te permiten disfrutar de múltiples beneficios en una sola visita. Ideal para quienes buscan una experiencia completa de relajación y rejuvenecimiento a un valor excepcional."
+      "intro": "Maximiza tu experiencia de spa con nuestros paquetes especialmente diseñados. Combinaciones perfectas de tratamientos que te permiten disfrutar de múltiples beneficios en una sola visita. Ideal para quienes buscan una experiencia completa de relajación y rejuvenecimiento a un valor excepcional.",
+      "tableHeaders": {
+        "treatment": "Tratamiento",
+        "sessions": "Sesiones",
+        "price": "Precio"
+      }
     },
     "giftcards": {
       "title": "Gift Cards",
@@ -106,7 +121,8 @@
     "priceNote": "Precio no incluye ITBM",
     "bookNow": "Reservar",
     "noPromotions": "No hay promociones disponibles en este momento.",
-    "loading": "Cargando promociones..."
+    "loading": "Cargando promociones...",
+    "metaDescription": "Descubre nuestras promociones especiales del mes"
   },
   "about": {
     "title": "Sobre Nosotros",
@@ -141,7 +157,9 @@
     "subtitle": "Agenda tu próxima visita",
     "widget": {
       "loading": "Cargando sistema de reservas..."
-    }
+    },
+    "pageTitle": "Reservar Cita",
+    "pageSubtitle": "Agenda tu próxima visita"
   },
   "contact": {
     "title": "Contáctanos",
@@ -159,7 +177,8 @@
     "followUs": "Síguenos",
     "rights": "Todos los derechos reservados",
     "privacy": "Política de Privacidad",
-    "terms": "Términos y Condiciones"
+    "terms": "Términos y Condiciones",
+    "cancellation": "Política de Cancelación"
   },
   "common": {
     "loading": "Cargando...",
@@ -179,12 +198,61 @@
     "all": "Todos",
     "minutes": "minutos",
     "hours": "horas",
-    "price": "Precio"
+    "price": "Precio",
+    "backToMenu": "Volver al Menú"
   },
   "errors": {
     "generic": "Algo salió mal. Por favor, intenta de nuevo.",
     "network": "Error de conexión. Verifica tu internet.",
     "notFound": "No encontrado",
     "unauthorized": "No autorizado"
+  },
+  "whatsapp": {
+    "tooltipQuestion": "¿Tienes preguntas?",
+    "tooltipCta": "¡Escríbenos por WhatsApp!",
+    "bookPrompt": "¿Prefieres reservar por WhatsApp?",
+    "bookAction": "Reservar por WhatsApp"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "description": "La página que buscas no existe o fue movida.",
+    "backHome": "Volver al inicio"
+  },
+  "leadForm": {
+    "name": "Nombre",
+    "phone": "Teléfono (WhatsApp)",
+    "email": "Correo electrónico",
+    "company": "Empresa",
+    "message": "Cuéntanos qué necesitas",
+    "submit": "Enviar",
+    "error": "No pudimos enviar tus datos. Intenta de nuevo o escríbenos por WhatsApp.",
+    "successTitle": "¡Listo! Recibimos tus datos.",
+    "successBody": "Te contactaremos muy pronto por WhatsApp.",
+    "whatsappNow": "Escribir por WhatsApp ahora"
+  },
+  "giftShop": {
+    "title": "Gift Cards",
+    "subtitle": "Regala una experiencia Mimosa en 3 pasos: elige, personaliza y paga con tarjeta o Yappy. Entrega por correo o WhatsApp.",
+    "step1": "Elige",
+    "step2": "Personaliza",
+    "step3": "Paga",
+    "back": "Volver",
+    "monetary": "Por monto",
+    "experiences": "Experiencias",
+    "recipientName": "Nombre de quien recibe *",
+    "recipientEmail": "Correo de quien recibe",
+    "recipientPhone": "WhatsApp de quien recibe (opcional)",
+    "message": "Mensaje para la tarjeta (opcional)",
+    "sendDate": "Enviar en una fecha específica (opcional — por defecto se envía al pagar)",
+    "continue": "Continuar",
+    "buyerName": "Tu nombre *",
+    "buyerEmail": "Tu correo *",
+    "buyerPhone": "Tu teléfono",
+    "payCta": "Pagar con tarjeta o Yappy",
+    "payNote": "Pago seguro procesado por Tilopay. Recibirás tu comprobante y la gift card digital por correo.",
+    "errRequired": "Completa los campos marcados con *",
+    "errCheckout": "No pudimos iniciar el pago. Intenta de nuevo o escríbenos por WhatsApp.",
+    "comingSoonTitle": "Muy pronto: compra en línea",
+    "comingSoonBody": "Estamos afinando los últimos detalles de la tienda. Mientras tanto, compra tu gift card por WhatsApp y te la entregamos el mismo día."
   }
 }

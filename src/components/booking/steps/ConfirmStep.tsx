@@ -3,9 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { CheckCircle, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star, ArrowDown } from 'lucide-react'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
-
-// Tax rate constant
-const ITBM_RATE = 0.07
+import { calculateCartPricing } from '@/lib/booking/pricing'
 
 export function ConfirmStep() {
   const {
@@ -81,78 +79,17 @@ export function ConfirmStep() {
   }, [clientInfo?.FirstName, clientInfo?.LastName, setClientInfo])
 
   // Calculate pricing with useMemo
-  const pricing = useMemo(() => {
-    const hasPromotion = activePromotion !== null
-
-    // Split services: promo-included vs user-added extras
-    const promoServiceIds = new Set((activePromotion?.services || []).map(s => s.Id))
-    const promoServices = hasPromotion
-      ? selectedServices.filter(s => promoServiceIds.has(s.Id))
-      : selectedServices
-    const extraServices = hasPromotion
-      ? selectedServices.filter(s => !promoServiceIds.has(s.Id))
-      : []
-
-    const promoServicesSubtotal = promoServices.reduce((sum, s) => sum + s.Price, 0)
-    const extraServicesSubtotal = extraServices.reduce((sum, s) => sum + s.Price, 0)
-    const addonsSubtotal = selectedAddons.reduce((sum, a) => sum + a.Price, 0)
-
-    let finalServicesPrice = promoServicesSubtotal + extraServicesSubtotal
-    let promotionDiscount = 0
-
-    if (hasPromotion && activePromotion) {
-      // Promotion covers only its included services at a flat price; extras are full price
-      finalServicesPrice = activePromotion.price + extraServicesSubtotal
-      promotionDiscount = promoServicesSubtotal - activePromotion.price
-    }
-
-    const hasGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
-    let globalDiscountAmount = 0
-    const effectiveAddonsSubtotal = hasGlobalDiscount
-      ? Math.round(addonsSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
-      : addonsSubtotal
-    if (hasGlobalDiscount) {
-      if (hasPromotion && activePromotion) {
-        // Only discount extra services (not the promotion price); addons discounted separately above
-        const discountedExtra = Math.round(extraServicesSubtotal * (1 - globalDiscountPercent / 100) * 100) / 100
-        globalDiscountAmount = (extraServicesSubtotal - discountedExtra) + (addonsSubtotal - effectiveAddonsSubtotal)
-        finalServicesPrice = activePromotion.price + discountedExtra
-      } else {
-        globalDiscountAmount = Math.round(finalServicesPrice * (globalDiscountPercent / 100) * 100) / 100
-        finalServicesPrice = Math.round((finalServicesPrice - globalDiscountAmount) * 100) / 100
-        globalDiscountAmount += addonsSubtotal - effectiveAddonsSubtotal
-      }
-    }
-
-    const subtotalBeforeTax = finalServicesPrice + effectiveAddonsSubtotal
-    const itbmAmount = Math.round(subtotalBeforeTax * ITBM_RATE * 100) / 100
-    const totalWithTax = Math.round((subtotalBeforeTax + itbmAmount) * 100) / 100
-
-    return {
-      // Required by CartPricing type
-      services: selectedServices,
-      addons: selectedAddons,
-      servicesSubtotal: promoServicesSubtotal + extraServicesSubtotal,
-      // Split for display
-      promoServices,
-      extraServices,
-      promoServicesSubtotal,
-      extraServicesSubtotal,
-      addonsSubtotal,
-      hasPromotion,
-      promotionName: activePromotion?.title_es || null,
-      promotionPrice: activePromotion?.price || null,
-      promotionDiscount,
-      hasGlobalDiscount,
-      globalDiscountPercent,
-      globalDiscountAmount,
-      subtotalBeforeTax,
-      itbmRate: ITBM_RATE,
-      itbmAmount,
-      totalWithTax,
-      totalDuration,
-    }
-  }, [selectedServices, selectedAddons, activePromotion, totalDuration, globalDiscountPercent, globalDiscountActive])
+  const pricing = useMemo(
+    () =>
+      calculateCartPricing({
+        services: selectedServices,
+        addons: selectedAddons,
+        promotion: activePromotion,
+        globalDiscountActive,
+        globalDiscountPercent,
+      }),
+    [selectedServices, selectedAddons, activePromotion, globalDiscountActive, globalDiscountPercent]
+  )
 
   // Format date for display (shorter format)
   const formatDateShort = (dateStr: string) => {

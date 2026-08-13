@@ -1,0 +1,3 @@
+{
+  "/api/admin/giftcards/issue/route": "app/api/admin/giftcards/issue/route.js"
+}

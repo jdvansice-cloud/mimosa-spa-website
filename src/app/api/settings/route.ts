@@ -28,8 +28,8 @@ const defaultSettings: PublicSiteSettings = {
   weekday_close: '20:00',
   weekend_open: '09:00',
   weekend_close: '18:00',
-  instagram_url: 'https://instagram.com/mimosasparetreat',
-  facebook_url: 'https://facebook.com/mimosasparetreat',
+  instagram_url: 'https://instagram.com/mimosaretreat',
+  facebook_url: 'https://facebook.com/mimosaretreat',
 }
 
 // GET - Fetch public site settings (cached)

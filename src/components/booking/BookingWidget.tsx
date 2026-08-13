@@ -51,6 +51,13 @@ export function BookingWidget() {
   const selectedServices = useBookingStore(state => state.selectedServices)
   const trackedSteps = useRef(new Set<string>())
   useEffect(() => {
+    // Funnel top: fired once per widget mount, whatever the entry step is
+    // (authenticated users skip the auth step, so booking_step_auth alone
+    // undercounts starts and inflates conversion).
+    if (!trackedSteps.current.has('__start')) {
+      trackedSteps.current.add('__start')
+      track('booking_start', { locationId: selectedLocation?.Id })
+    }
     if (trackedSteps.current.has(currentStep)) return
     trackedSteps.current.add(currentStep)
     const event = currentStep === 'success' ? 'booking_completed' : `booking_step_${currentStep}`

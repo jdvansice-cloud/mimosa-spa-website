@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 
 const ALLOWED_EVENTS = new Set([
   'page_view',
+  'booking_start',
   'booking_step_auth',
   'booking_step_location',
   'booking_step_services',
@@ -17,6 +18,11 @@ const ALLOWED_EVENTS = new Set([
   'booking_step_datetime',
   'booking_step_confirm',
   'booking_completed',
+  'whatsapp_click',
+  'lead_submit',
+  'giftshop_view',
+  'giftshop_checkout',
+  'giftshop_paid',
 ])
 
 const str = (v: unknown, max: number): string | null =>
