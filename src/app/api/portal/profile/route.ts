@@ -7,6 +7,7 @@ import {
   type UpdateClientData
 } from '@/lib/booking/mindbody'
 import { sanitizeError } from '@/lib/booking/constants'
+import { createClient as createServerSupabase } from '@/lib/supabase/server'
 
 // GET /api/portal/profile - Get client profile information with custom fields
 export async function GET(request: NextRequest) {
@@ -81,10 +82,32 @@ export async function GET(request: NextRequest) {
 }
 
 // PUT /api/portal/profile - Update client profile
+// Requires a session, and only for the caller's own Mindbody client.
 export async function PUT(request: NextRequest) {
   try {
+    const supabase = await createServerSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { clientId, updates } = body
+
+    // The caller may only update their own Mindbody client (metadata first,
+    // profiles row as fallback — metadata isn't updated for existing users).
+    let ownClientId = Number(user.user_metadata?.mindbody_client_id) || null
+    if (!ownClientId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('mindbody_client_id')
+        .eq('id', user.id)
+        .single<{ mindbody_client_id: number | null }>()
+      ownClientId = profile?.mindbody_client_id ?? null
+    }
+    if (!ownClientId || Number(clientId) !== Number(ownClientId)) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    }
 
     if (!clientId) {
       return NextResponse.json(

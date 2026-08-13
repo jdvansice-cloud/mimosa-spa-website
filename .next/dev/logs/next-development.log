@@ -23,3 +23,20 @@
 [00:10:44.015] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
 [00:11:56.018] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?searchText=drcaballero%40idokon.com" ""
 [00:11:56.478] Server  LOG     Found existing client by email: "100015128" "drcaballero@idokon.com"
+[00:22:45.494] Server  LOG     ✓ Compiled in 174ms
+[00:22:57.559] Server  LOG     ✓ Compiled in 76ms
+[00:23:06.485] Server  LOG     ✓ Compiled in 81ms
+[00:23:16.409] Server  LOG     ✓ Compiled in 194ms
+[00:23:27.464] Server  LOG     ✓ Compiled in 71ms
+[00:23:40.420] Server  LOG     ✓ Compiled in 120ms
+[00:23:48.693] Server  LOG     ✓ Compiled in 65ms
+[00:25:00.767] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:25:00.917] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:25:00.917] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:26:24.658] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?searchText=drcaballero%40idokon.com" ""
+[00:26:25.459] Server  LOG     Found existing client by email: "100015128" "drcaballero@idokon.com"
+[00:30:19.108] Browser ERROR   uncaughtError: Error: An unexpected Turbopack error occurred. Please see the output of `next dev` for more details.
+[00:32:14.538] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:32:54.271] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:37:07.328] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:37:07.328] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes

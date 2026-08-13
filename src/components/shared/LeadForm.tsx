@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Loader2, Check } from 'lucide-react'
 import { getSessionId, captureAttribution, track } from '@/lib/track'
 import { getWhatsAppUrl } from '@/lib/utils'
+import { PhoneInput } from '@/components/shared/PhoneInput'
 
 interface LeadFormProps {
   source: 'primera-visita' | 'empresas' | 'club-waitlist' | 'parejas-grupo' | 'referidos'
@@ -121,13 +122,13 @@ export function LeadForm({
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           required
         />
-        <input
-          className={inputCls}
-          type="tel"
-          placeholder={t('phone')}
+        <PhoneInput
           value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          onChange={(phone) => setForm({ ...form, phone })}
           required
+          showIcon={false}
+          inputClassName={inputCls}
+          selectClassName={`${inputCls} w-20 px-2`}
         />
       </div>
       {corporate && (

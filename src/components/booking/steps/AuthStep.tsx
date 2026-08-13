@@ -7,6 +7,7 @@ import { OtpInput } from '@/components/ui'
 import { OtpChannelChoice } from '@/components/auth'
 import { useBookingStore } from '@/lib/booking/store'
 import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
+import { PhoneInput } from '@/components/shared/PhoneInput'
 import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
 
 type AuthState =
@@ -77,6 +78,16 @@ function AuthStepContent() {
   const [existingAccount, setExistingAccount] = useState<{
     client: SelectedClient
     typedName: string
+  } | null>(null)
+  // Dual verification for claiming an existing account with new data: the
+  // person must confirm BOTH the email and the WhatsApp number they typed
+  // before we update the Mindbody record. null = normal single-channel OTP.
+  const [dualStage, setDualStage] = useState<'email' | 'whatsapp' | null>(null)
+  const [pendingUpdate, setPendingUpdate] = useState<{
+    firstName: string
+    lastName: string
+    email: string
+    phone: string
   } | null>(null)
 
   const getSupabase = (): SupabaseClient => {
@@ -263,6 +274,35 @@ function AuthStepContent() {
     }
   }
 
+  // Claiming an existing account with changed data: verify the typed email
+  // first, then the typed WhatsApp number, then apply the update.
+  const startDualVerification = async () => {
+    if (!existingAccount || !pendingUpdate) return
+    setLoading(true)
+    setError(null)
+    try {
+      const supabase = getSupabase()
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email: pendingUpdate.email,
+        options: { data: { mindbody_client_id: existingAccount.client.clientId } },
+      })
+      if (authError) throw new Error(authError.message)
+      setSelectedClient({
+        clientId: existingAccount.client.clientId,
+        clientName: existingAccount.client.clientName,
+        email: pendingUpdate.email,
+        phone: pendingUpdate.phone,
+      })
+      setDualStage('email')
+      setOtpChannel('email')
+      setAuthState('otp')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al enviar código')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleVerifyOtp = async (code: string) => {
     if (!selectedClient) return
     setIsVerifying(true)
@@ -277,6 +317,26 @@ function AuthStepContent() {
           type: 'email',
         })
         if (verifyError) throw new Error(verifyError.message)
+
+        // Dual verification, step 1 done: now confirm the WhatsApp number
+        // before touching the account.
+        if (dualStage === 'email') {
+          const response = await fetch('/api/portal/auth/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              phone: selectedClient.phone,
+              clientId: selectedClient.clientId,
+              clientName: selectedClient.clientName,
+            }),
+          })
+          const data = await response.json()
+          if (!response.ok) throw new Error(data.error || 'Error al enviar código por WhatsApp')
+          setDualStage('whatsapp')
+          setOtpChannel('whatsapp')
+          setIsVerifying(false)
+          return
+        }
 
         // Save profile and link (fire-and-forget)
         Promise.all([
@@ -312,12 +372,39 @@ function AuthStepContent() {
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || 'Código incorrecto')
 
-        const supabase = getSupabase()
-        const { error: sessionError } = await supabase.auth.verifyOtp({
-          token_hash: data.token_hash,
-          type: 'magiclink',
+        // In dual verification the email step already created the session;
+        // this step only proves ownership of the WhatsApp number.
+        if (dualStage !== 'whatsapp') {
+          const supabase = getSupabase()
+          const { error: sessionError } = await supabase.auth.verifyOtp({
+            token_hash: data.token_hash,
+            type: 'magiclink',
+          })
+          if (sessionError) throw new Error(sessionError.message)
+        }
+      }
+
+      // Both channels confirmed: apply the typed data to the Mindbody account
+      if (dualStage === 'whatsapp' && pendingUpdate) {
+        const updateRes = await fetch('/api/portal/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId: selectedClient.clientId,
+            updates: {
+              FirstName: pendingUpdate.firstName,
+              LastName: pendingUpdate.lastName,
+              Email: pendingUpdate.email,
+              MobilePhone: pendingUpdate.phone,
+            },
+          }),
         })
-        if (sessionError) throw new Error(sessionError.message)
+        if (!updateRes.ok) {
+          const body = await updateRes.json().catch(() => null)
+          throw new Error(body?.error || 'No se pudo actualizar tu perfil')
+        }
+        setDualStage(null)
+        setPendingUpdate(null)
       }
 
       // Fetch client info and proceed
@@ -410,6 +497,7 @@ function AuthStepContent() {
       const sameFirstName = norm(accountName).split(' ')[0] === norm(typedName).split(' ')[0]
       if (data.existingClient && accountName && !sameFirstName) {
         setExistingAccount({ client: foundClient, typedName })
+        setPendingUpdate({ firstName, lastName, email: regEmail, phone })
         setAuthState('confirm-identity')
         return
       }
@@ -444,7 +532,9 @@ function AuthStepContent() {
               {ChannelIcon}
             </div>
 
-            <h2 className="text-lg font-bold text-dark mb-2">Ingresa tu código</h2>
+            <h2 className="text-lg font-bold text-dark mb-2">
+              {dualStage ? `Ingresa tu código (paso ${dualStage === 'email' ? '1' : '2'} de 2)` : 'Ingresa tu código'}
+            </h2>
 
             <p className="text-sm text-warm-gray mb-4">
               {otpChannel === 'email' ? 'Enviamos un código de 6 dígitos a' : 'Enviamos un código por WhatsApp a'}<br />
@@ -617,30 +707,41 @@ function AuthStepContent() {
             </p>
             <div className="space-y-3">
               <button
+                onClick={startDualVerification}
+                disabled={isLoading}
+                className="w-full py-3 bg-gradient-to-r from-gold to-gold/90 text-dark font-semibold
+                         rounded-xl hover:shadow-lg transition-all text-sm disabled:opacity-50"
+              >
+                {isLoading ? 'Enviando código…' : 'Es mi cuenta — actualizar mis datos'}
+              </button>
+              <button
                 onClick={() => {
                   setSelectedClient(existingAccount.client)
                   setExistingAccount(null)
+                  setPendingUpdate(null)
                   setAuthState('channel-choice')
                 }}
-                className="w-full py-3 bg-gradient-to-r from-gold to-gold/90 text-dark font-semibold
-                         rounded-xl hover:shadow-lg transition-all text-sm"
+                className="w-full py-3 border-2 border-beige-200 text-dark font-medium rounded-xl
+                         hover:border-gold/50 transition-all text-sm"
               >
-                Sí, soy {maskedName} — continuar con mi cuenta
+                Continuar como {maskedName} sin cambios
               </button>
               <button
                 onClick={() => {
                   setExistingAccount(null)
+                  setPendingUpdate(null)
                   setRegistrationData(prev => ({ ...prev, email: '', phone: '' }))
                   setAuthState('register')
                 }}
-                className="w-full py-3 border-2 border-beige-200 text-dark font-medium rounded-xl
-                         hover:border-gold/50 transition-all text-sm"
+                className="w-full py-3 text-warm-gray font-medium rounded-xl hover:text-dark
+                         transition-all text-sm"
               >
                 No soy yo — usar otro correo y teléfono
               </button>
             </div>
             <p className="mt-4 text-xs text-warm-gray">
-              Si reservas para otra persona, usa tu propia cuenta y menciona el nombre del invitado por WhatsApp.
+              Para actualizar los datos te enviaremos un código a tu correo y otro a tu WhatsApp —
+              así confirmamos que ambos te pertenecen.
             </p>
           </div>
         </div>
@@ -703,16 +804,10 @@ function AuthStepContent() {
 
               <div>
                 <label className="block text-xs font-medium text-dark mb-1">Teléfono / WhatsApp</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warm-gray" />
-                  <input
-                    type="tel"
-                    value={registrationData.phone}
-                    onChange={(e) => setRegistrationData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-2.5 border border-beige-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all"
-                    placeholder="66124546"
-                  />
-                </div>
+                <PhoneInput
+                  value={registrationData.phone}
+                  onChange={(phone) => setRegistrationData(prev => ({ ...prev, phone }))}
+                />
               </div>
             </div>
 

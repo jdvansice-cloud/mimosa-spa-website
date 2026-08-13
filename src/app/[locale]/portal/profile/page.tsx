@@ -16,6 +16,7 @@ import {
   CheckCircle
 } from 'lucide-react'
 import { usePortalStore } from '@/lib/portal/store'
+import { PhoneInput } from '@/components/shared/PhoneInput'
 
 // Client profile data from API
 interface ClientProfile {
@@ -416,19 +417,11 @@ export default function ProfileEditPage() {
                     <label className="block text-sm font-medium text-dark mb-1">
                       Teléfono Móvil / WhatsApp *
                     </label>
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warm-gray" />
-                      <input
-                        type="tel"
-                        name="MobilePhone"
-                        value={formData.MobilePhone}
-                        onChange={handleChange}
-                        required
-                        placeholder="50766124546"
-                        className="w-full pl-12 pr-4 py-3 border border-beige-200 rounded-xl
-                                 focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold"
-                      />
-                    </div>
+                    <PhoneInput
+                      value={formData.MobilePhone}
+                      onChange={(MobilePhone) => setFormData(prev => ({ ...prev, MobilePhone }))}
+                      required
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-dark mb-1">

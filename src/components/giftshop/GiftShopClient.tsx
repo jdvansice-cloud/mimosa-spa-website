@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Loader2, Gift, ChevronLeft } from 'lucide-react'
 import { track } from '@/lib/track'
 import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
+import { PhoneInput } from '@/components/shared/PhoneInput'
 
 interface CatalogItem {
   id: string
@@ -203,7 +204,14 @@ export function GiftShopClient({ locale }: { locale: string }) {
             <input className={inputCls} placeholder={t('recipientName')} value={form.recipientName} onChange={(e) => setForm({ ...form, recipientName: e.target.value })} required />
             <input className={inputCls} type="email" placeholder={t('recipientEmail')} value={form.recipientEmail} onChange={(e) => setForm({ ...form, recipientEmail: e.target.value })} />
           </div>
-          <input className={inputCls} type="tel" placeholder={t('recipientPhone')} value={form.recipientPhone} onChange={(e) => setForm({ ...form, recipientPhone: e.target.value })} />
+          <PhoneInput
+            value={form.recipientPhone}
+            onChange={(recipientPhone) => setForm({ ...form, recipientPhone })}
+            placeholder={t('recipientPhone')}
+            showIcon={false}
+            inputClassName={inputCls}
+            selectClassName={`${inputCls} w-20 px-2`}
+          />
           <textarea className={inputCls} rows={2} maxLength={300} placeholder={t('message')} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
           <div>
             <label className="text-xs text-warm-gray block mb-1">{t('sendDate')}</label>
@@ -222,7 +230,14 @@ export function GiftShopClient({ locale }: { locale: string }) {
             <input className={inputCls} placeholder={t('buyerName')} value={form.buyerName} onChange={(e) => setForm({ ...form, buyerName: e.target.value })} required />
             <input className={inputCls} type="email" placeholder={t('buyerEmail')} value={form.buyerEmail} onChange={(e) => setForm({ ...form, buyerEmail: e.target.value })} required />
           </div>
-          <input className={inputCls} type="tel" placeholder={t('buyerPhone')} value={form.buyerPhone} onChange={(e) => setForm({ ...form, buyerPhone: e.target.value })} />
+          <PhoneInput
+            value={form.buyerPhone}
+            onChange={(buyerPhone) => setForm({ ...form, buyerPhone })}
+            placeholder={t('buyerPhone')}
+            showIcon={false}
+            inputClassName={inputCls}
+            selectClassName={`${inputCls} w-20 px-2`}
+          />
 
           <div className="bg-beige/60 rounded-xl p-4 text-sm space-y-1">
             <div className="flex justify-between">
