@@ -63,7 +63,7 @@ export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
       </div>
 
       {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:gap-8">
         {categories.map((category, index) => (
           <motion.div
             key={category.id}

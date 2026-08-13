@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { MapPin, Clock, Phone, MessageCircle, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui'
@@ -83,6 +83,7 @@ function formatWhatsAppDisplay(number: string): string {
 
 export function LocationsSection({ images, ratings }: LocationsSectionProps) {
   const t = useTranslations('home.locations')
+  const locale = useLocale()
   const tContact = useTranslations('contact')
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings)
 
@@ -181,8 +182,16 @@ export function LocationsSection({ images, ratings }: LocationsSectionProps) {
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 space-y-4">
+                {/* Content — collapsed by default, expands on demand */}
+                <details className="group/details">
+                  <summary className="list-none cursor-pointer p-4 flex items-center justify-between text-sm font-medium text-dark hover:text-gold-700 transition-colors [&::-webkit-details-marker]:hidden">
+                    <span className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-gold" />
+                      {locale === 'en' ? 'View info & map' : 'Ver información y mapa'}
+                    </span>
+                    <span className="text-warm-gray transition-transform group-open/details:rotate-180">▾</span>
+                  </summary>
+                <div className="px-6 pb-6 space-y-4">
                   {/* Address */}
                   <div className="flex items-start gap-3">
                     <MapPin className="h-5 w-5 text-gold flex-shrink-0 mt-0.5" />
@@ -243,6 +252,7 @@ export function LocationsSection({ images, ratings }: LocationsSectionProps) {
                     />
                   </div>
                 </div>
+                </details>
               </Card>
             </motion.div>
           )

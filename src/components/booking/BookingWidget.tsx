@@ -123,7 +123,7 @@ export function BookingWidget() {
         )}
 
         {/* Main Content Area - Fixed height container that fills to bottom nav */}
-        <div className="p-4 sm:p-6 h-[calc(100vh-200px)] sm:h-[calc(100vh-220px)] flex flex-col">
+        <div className="p-4 sm:p-6 h-[calc(100dvh-150px)] sm:h-[calc(100vh-220px)] flex flex-col">
           <AnimatePresence mode="wait" custom={stepNumber}>
             <motion.div
               key={currentStep}

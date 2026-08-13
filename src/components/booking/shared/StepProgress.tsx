@@ -22,88 +22,77 @@ export function StepProgress({ currentStep, totalSteps }: StepProgressProps) {
   
   return (
     <div className="step-progress">
-      {/* Desktop View */}
-      <div className="hidden sm:flex items-center justify-between">
-        {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
-          <div key={step} className="flex items-center">
-            {/* Step Circle */}
-            <div className="flex flex-col items-center">
-              <div
-                className={`
-                  w-10 h-10 rounded-full flex items-center justify-center
-                  font-semibold text-sm transition-all duration-300
-                  ${step < currentStep 
-                    ? 'bg-gold text-dark' 
-                    : step === currentStep 
-                      ? 'bg-dark text-white ring-4 ring-gold/30' 
-                      : 'bg-beige-200 text-warm-gray'
-                  }
-                `}
-              >
-                {step < currentStep ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  step
-                )}
-              </div>
-              <span className={`
-                mt-2 text-xs font-medium whitespace-nowrap
-                ${step === currentStep ? 'text-dark' : 'text-warm-gray'}
-              `}>
-                {stepLabels[step]}
-              </span>
-            </div>
-            
-            {/* Connector Line */}
-            {step < totalSteps && (
-              <div className="w-full h-0.5 mx-2 flex-1 min-w-[20px]">
+      {/* Desktop View — compact centered cluster, cart pinned right */}
+      <div className="hidden sm:flex items-center relative">
+        <div className="flex-1 flex items-center justify-center">
+          {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
+            <div key={step} className="flex items-center">
+              <div className="flex flex-col items-center">
                 <div
-                  className={`h-full transition-all duration-500 ${
+                  className={`
+                    w-8 h-8 rounded-full flex items-center justify-center
+                    font-semibold text-xs transition-all duration-300
+                    ${step < currentStep
+                      ? 'bg-gold text-dark'
+                      : step === currentStep
+                        ? 'bg-dark text-white ring-[3px] ring-gold/30'
+                        : 'bg-beige-200 text-warm-gray'
+                    }
+                  `}
+                >
+                  {step < currentStep ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    step
+                  )}
+                </div>
+                <span className={`
+                  mt-1 text-[11px] font-medium whitespace-nowrap
+                  ${step === currentStep ? 'text-dark' : 'text-warm-gray'}
+                `}>
+                  {stepLabels[step]}
+                </span>
+              </div>
+
+              {/* Short fixed connector keeps the cluster tight on wide screens */}
+              {step < totalSteps && (
+                <div
+                  className={`w-10 h-px mx-2 mb-4 transition-all duration-500 ${
                     step < currentStep ? 'bg-gold' : 'bg-beige-200'
                   }`}
                 />
-              </div>
-            )}
-          </div>
-        ))}
-        
-        {/* Cart Icon - After last step */}
-        <div className="flex items-center ml-4">
-          <div className="w-full h-0.5 mx-2 flex-1 min-w-[20px]">
-            <div className="h-full bg-beige-200" />
-          </div>
-          <button
-            onClick={toggleCart}
-            className="relative flex flex-col items-center group"
-            aria-label={`Carrito: ${itemCount} items`}
-          >
-            <div className={`
-              w-12 h-12 rounded-xl flex items-center justify-center
-              transition-all duration-300 border-2
-              ${itemCount > 0 
-                ? 'bg-gold/10 border-gold text-gold hover:bg-gold/20' 
-                : 'bg-beige-100 border-beige-200 text-warm-gray hover:border-gold/50'
-              }
-            `}>
-              <ShoppingBag className="w-5 h-5" />
-              
-              {/* Item Count Badge */}
-              {itemCount > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-gold text-dark text-xs 
-                           font-bold rounded-full flex items-center justify-center shadow-md"
-                >
-                  {itemCount}
-                </motion.span>
               )}
             </div>
-            <span className="mt-2 text-xs font-medium text-warm-gray group-hover:text-gold transition-colors">
-              Carrito
-            </span>
-          </button>
+          ))}
         </div>
+
+        {/* Cart pinned to the right edge */}
+        <button
+          onClick={toggleCart}
+          className="absolute right-0 top-1/2 -translate-y-1/2 group"
+          aria-label={`Carrito: ${itemCount} items`}
+        >
+          <div className={`
+            relative w-10 h-10 rounded-xl flex items-center justify-center
+            transition-all duration-300 border-2
+            ${itemCount > 0
+              ? 'bg-gold/10 border-gold text-gold hover:bg-gold/20'
+              : 'bg-beige-100 border-beige-200 text-warm-gray hover:border-gold/50'
+            }
+          `}>
+            <ShoppingBag className="w-4 h-4" />
+            {itemCount > 0 && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gold text-dark text-xs
+                         font-bold rounded-full flex items-center justify-center shadow-md"
+              >
+                {itemCount}
+              </motion.span>
+            )}
+          </div>
+        </button>
       </div>
       
       {/* Mobile View - Simplified with Cart */}

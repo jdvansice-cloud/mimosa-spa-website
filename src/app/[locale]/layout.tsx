@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Cormorant_Garamond, Lato } from 'next/font/google'
-import { Header, Footer, MobileBottomNav, WhatsAppWidget } from '@/components/layout'
+import { Header, Footer, MobileBottomNav } from '@/components/layout'
 import { getServerSettings } from '@/lib/settings'
 import { GoogleTagManager, PageViewTracker } from '@/components/analytics'
 import { SITE_URL } from '@/lib/nav'
@@ -114,10 +114,6 @@ export default async function LocaleLayout({
             </main>
             <Footer />
             <MobileBottomNav />
-            <WhatsAppWidget
-              phoneNumber={settings.whatsapp_number}
-              message={settings.whatsapp_message}
-            />
           </div>
         </NextIntlClientProvider>
       </body>

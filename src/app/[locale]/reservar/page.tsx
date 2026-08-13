@@ -22,7 +22,9 @@ export default async function BookingPage({ params }: { params: Promise<{ locale
 
   return (
     <>
-      <div className="container-spa pt-6 flex flex-col items-center gap-3">
+      {/* Proof + WhatsApp strip: desktop only — on mobile the steps bar sits
+          directly below the header so the widget gets the full viewport */}
+      <div className="hidden sm:flex container-spa pt-6 flex-col items-center gap-3">
         <RatingBadge />
         <div className="flex items-center gap-3 text-sm text-warm-gray">
           <span>{t('bookPrompt')}</span>

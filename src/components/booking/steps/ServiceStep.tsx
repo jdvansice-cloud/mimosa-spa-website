@@ -137,56 +137,61 @@ function PromotionTile({
   return (
     <div
       className={`
-        relative rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full
+        promo-card relative rounded-2xl transition-all duration-200 overflow-hidden text-left w-full h-full
+        bg-dark/85 text-cream
         ${isSelected
-          ? 'border-gold bg-gradient-to-br from-gold/20 to-gold/5 shadow-lg ring-2 ring-gold/30'
-          : 'border-gold/30 bg-gradient-to-br from-gold/10 to-beige-50 hover:border-gold/60 hover:shadow-md'
+          ? 'ring-2 ring-gold shadow-[0_8px_30px_rgba(252,207,8,0.35)]'
+          : 'shadow-lg hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)]'
         }
         ${isLoading ? 'opacity-70 cursor-wait' : ''}
       `}
     >
+      {/* Optional image vignette (admin-managed promotion image) */}
+      {promotion.image_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={promotion.image_url}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-25"
+        />
+      )}
+
       {/* Main content - clickable to select */}
       <button
         type="button"
         onClick={onSelect}
         disabled={isLoading}
-        className="w-full text-left p-4"
+        className="relative w-full text-left p-2.5 pb-2"
       >
-        {/* Selected Badge */}
+        {/* Selected badge */}
         {isSelected && (
-          <div className="absolute top-2 right-2 z-10">
-            <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
-              <Check className="w-4 h-4 text-dark" />
-            </div>
+          <div className="absolute top-1.5 right-1.5 z-10">
+            <span className="w-5 h-5 bg-gold rounded-full flex items-center justify-center shadow-sm">
+              <Check className="w-3.5 h-3.5 text-dark" />
+            </span>
           </div>
         )}
 
-        {/* Content */}
-        <div>
-          <div className="flex items-start gap-2 mb-2">
-            <Tag className="w-4 h-4 text-gold-600 mt-0.5 flex-shrink-0" />
-            <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug pr-8">
-              {promotion.title_es}
-            </h4>
-          </div>
+        <h4 className="font-display font-semibold text-cream !text-sm sm:!text-base leading-snug pr-6 mb-1.5 line-clamp-2">
+          {promotion.title_es}
+        </h4>
 
-          {/* Price Row - Only final price, no original price */}
-          <div className="flex items-center gap-3 ml-6">
-            <span className="text-lg font-bold text-gold-700">
-              ${promotion.price.toFixed(0)}
+        {/* Price row */}
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="text-base sm:text-lg font-bold text-white">
+            ${promotion.price.toFixed(0)}
+          </span>
+          {promotion.duration_minutes && (
+            <span className="flex items-center gap-0.5 text-[10px] sm:text-xs text-cream/70 bg-white/10 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+              <Clock className="w-3 h-3" />
+              {promotion.duration_minutes} min
             </span>
-            {promotion.duration_minutes && (
-              <span className="flex items-center gap-1 text-xs text-warm-gray bg-white/60 px-2 py-0.5 rounded-full">
-                <Clock className="w-3 h-3" />
-                {promotion.duration_minutes} min
-              </span>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Loading indicator */}
         {isLoading && (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-xl">
+          <div className="absolute inset-0 bg-dark/50 flex items-center justify-center rounded-2xl">
             <Loader2 className="w-6 h-6 text-gold animate-spin" />
           </div>
         )}
@@ -198,7 +203,7 @@ function PromotionTile({
           <button
             type="button"
             onClick={handleToggleExpand}
-            className="w-full px-4 py-2 border-t border-gold/20 flex items-center justify-between text-xs text-gold-700 hover:bg-gold/5 transition-colors"
+            className="relative w-full px-2.5 py-1.5 border-t border-white/15 flex items-center justify-between text-[11px] text-neutral-300 hover:bg-white/5 transition-colors"
           >
             <span>
               Ver {includedServices.length} servicio{includedServices.length !== 1 ? 's' : ''} incluido{includedServices.length !== 1 ? 's' : ''}
@@ -219,14 +224,14 @@ function PromotionTile({
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pb-3 pt-1 space-y-1.5 bg-white/50">
+                <div className="relative px-2.5 pb-2.5 pt-1 space-y-1.5">
                   {includedServices.map((service) => (
                     <div key={service.Id} className="flex items-start gap-2">
-                      <span className="text-gold-600 text-xs mt-0.5">✓</span>
+                      <span className="text-gold text-xs mt-0.5">✓</span>
                       <div>
-                        <p className="text-sm text-dark">{service.Name}</p>
+                        <p className="text-sm text-cream">{service.Name}</p>
                         {service.Duration > 0 && (
-                          <p className="text-xs text-warm-gray">{service.Duration} min</p>
+                          <p className="text-xs text-cream/60">{service.Duration} min</p>
                         )}
                       </div>
                     </div>
@@ -277,7 +282,7 @@ function ServiceTile({
   return (
     <div
       className={`
-        relative rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full
+        relative h-[112px] rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full
         ${isSelected
           ? 'border-gold bg-gold/5 shadow-md ring-2 ring-gold/20'
           : 'border-beige-200 bg-white hover:border-gold/50 hover:shadow-sm'
@@ -288,7 +293,7 @@ function ServiceTile({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full h-full text-left p-2.5 sm:p-3 flex flex-col"
+        className="w-full h-full text-left p-2.5 flex flex-col"
       >
         {/* Selected Badge */}
         {isSelected && (
@@ -300,8 +305,8 @@ function ServiceTile({
         )}
 
         {/* Service Name */}
-        <div className="pr-5 mb-1.5 flex-1">
-          <h4 className="font-semibold text-dark text-xs sm:text-sm leading-snug">
+        <div className="pr-5 mb-1.5 flex-1 min-h-0">
+          <h4 className="font-semibold text-dark text-xs sm:text-sm leading-snug line-clamp-2">
             {service.Name}
           </h4>
         </div>
@@ -605,11 +610,11 @@ export function ServiceStep() {
 
       {/* Active Promotions Section */}
       {!isLoadingServices && activePromotions.length > 0 && (
-        <div className="mb-4 rounded-2xl border-2 border-gold/40 overflow-hidden bg-gradient-to-br from-gold/15 via-gold/5 to-beige-50 shadow-sm">
+        <div className="mb-4 rounded-2xl border-2 border-gold/40 overflow-hidden bg-neutral-100 shadow-sm">
           {/* Promotions Header */}
           <button
             onClick={() => setIsPromotionsExpanded(!isPromotionsExpanded)}
-            className="w-full px-3.5 py-2.5 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200"
+            className="w-full px-3.5 py-2.5 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200 bg-gradient-to-br from-gold/15 via-gold/5 to-beige-50"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-gold to-gold/70 rounded-full flex items-center justify-center shadow-md">
@@ -649,10 +654,10 @@ export function ServiceStep() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="p-4 pt-0">
+                <div className="px-3 pb-4 pt-0">
                   {activePromotions.length <= 3 ? (
-                    /* Up to 3 promotions: three cards side by side */
-                    <div className="grid gap-3 sm:grid-cols-3 items-start">
+                    /* All offers visible — no interaction required to see any */
+                    <div className="grid grid-cols-2 gap-2.5 items-stretch">
                       {activePromotions.map((promotion) => (
                         <PromotionTile
                           key={promotion.id}
@@ -665,36 +670,33 @@ export function ServiceStep() {
                       ))}
                     </div>
                   ) : (
-                    /* More than 3: carousel showing 3 per view */
+                    /* 4+: overflow into a swipe row, nothing hidden behind dots */
                     <div className="relative">
                       <button
-                        onClick={() => promoScrollRef.current?.scrollBy({ left: -320, behavior: 'smooth' })}
-                        className="hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8
-                                 bg-white border border-beige-200 rounded-full shadow-md items-center justify-center
-                                 text-warm-gray hover:text-dark hover:border-gold/50 transition-colors"
+                        onClick={() => promoScrollRef.current?.scrollBy({ left: -300, behavior: 'smooth' })}
+                        className="hidden md:flex absolute -left-1 top-1/2 -translate-y-1/2 z-10 w-9 h-9
+                                 bg-white/95 border border-gold/40 rounded-full shadow-lg items-center justify-center
+                                 text-gold-700 hover:bg-gold hover:text-dark transition-colors"
                         aria-label="Promociones anteriores"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => promoScrollRef.current?.scrollBy({ left: 320, behavior: 'smooth' })}
-                        className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8
-                                 bg-white border border-beige-200 rounded-full shadow-md items-center justify-center
-                                 text-warm-gray hover:text-dark hover:border-gold/50 transition-colors"
+                        onClick={() => promoScrollRef.current?.scrollBy({ left: 300, behavior: 'smooth' })}
+                        className="hidden md:flex absolute -right-1 top-1/2 -translate-y-1/2 z-10 w-9 h-9
+                                 bg-white/95 border border-gold/40 rounded-full shadow-lg items-center justify-center
+                                 text-gold-700 hover:bg-gold hover:text-dark transition-colors"
                         aria-label="Más promociones"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
                       <div
                         ref={promoScrollRef}
-                        className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-hide items-start"
+                        className="flex items-stretch gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-1 py-1"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                       >
                         {activePromotions.map((promotion) => (
-                          <div
-                            key={promotion.id}
-                            className="flex-shrink-0 snap-start w-[85%] sm:w-[calc((100%-1.5rem)/3)]"
-                          >
+                          <div key={promotion.id} className="flex-shrink-0 snap-start w-[80%] sm:w-[calc((100%-1.5rem)/3)]">
                             <PromotionTile
                               promotion={promotion}
                               isSelected={activePromotion?.id === promotion.id}
@@ -756,7 +758,7 @@ export function ServiceStep() {
                 className="overflow-hidden"
               >
                 <div className="p-4 pt-0">
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(126px,1fr))] gap-2.5">
                     {topPickServices.map((service) => (
                       <ServiceTile
                         key={service.Id}
@@ -847,7 +849,7 @@ export function ServiceStep() {
                       className="overflow-hidden"
                     >
                       <div className="p-4 bg-beige-50/30">
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(126px,1fr))] gap-2.5">
                           {categoryServices.map((service) => (
                             <ServiceTile
                               key={service.Id}

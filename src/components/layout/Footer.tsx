@@ -49,8 +49,40 @@ export async function Footer() {
 
   return (
     <footer className="bg-dark text-cream">
-      <div className="container-spa py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+      <div className="container-spa py-7 md:py-16">
+        {/* Compact mobile footer */}
+        <div className="md:hidden flex flex-col items-center text-center gap-3">
+          <div className="flex items-center gap-2">
+            <Logo variant="icon" size="sm" />
+            <span className="font-display text-lg font-semibold text-cream">Mimosa Spa Retreat</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+               className="p-2 rounded-full bg-cream/10 hover:bg-gold hover:text-dark transition-colors">
+              <Instagram className="h-4 w-4" />
+            </a>
+            <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+               className="p-2 rounded-full bg-cream/10 hover:bg-gold hover:text-dark transition-colors">
+              <Facebook className="h-4 w-4" />
+            </a>
+            <a href={phoneLink} aria-label="Teléfono"
+               className="p-2 rounded-full bg-cream/10 hover:bg-gold hover:text-dark transition-colors">
+              <Phone className="h-4 w-4" />
+            </a>
+            <a href={`https://wa.me/${settings.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
+               className="p-2 rounded-full bg-cream/10 hover:bg-gold hover:text-dark transition-colors">
+              <MessageCircle className="h-4 w-4" />
+            </a>
+          </div>
+          <p className="text-cream/50 text-xs">
+            © {currentYear} Mimosa Spa Retreat ·{' '}
+            <Link href={`/${locale}/privacidad`} className="hover:text-gold">{t('privacy')}</Link> ·{' '}
+            <Link href={`/${locale}/terminos`} className="hover:text-gold">{t('terms')}</Link>
+          </p>
+        </div>
+
+        {/* Full footer — tablet/desktop */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3">
@@ -196,7 +228,7 @@ export async function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-cream/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="hidden md:flex mt-12 pt-8 border-t border-cream/10 flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-cream/50 text-sm">
             © {currentYear} Mimosa Spa Retreat. {t('rights')}.
           </p>

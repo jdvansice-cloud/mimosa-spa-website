@@ -47,9 +47,23 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
           </div>
         </div>
 
-        {/* Content Box */}
-        <div className="mx-4 mt-2">
-          <div className="bg-warm-gray-500 text-cream p-5 rounded-lg">
+        {/* Price row — always visible; details collapsed below */}
+        <details className="group/details mx-4 mt-2">
+          <summary className="list-none cursor-pointer flex items-center justify-between bg-warm-gray-500 text-cream px-5 py-3 rounded-lg [&::-webkit-details-marker]:hidden">
+            <span className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold">{formatPrice(promotion.price)}</span>
+              {promotion.duration_minutes && (
+                <span className="text-sm text-cream/70">
+                  /({promotion.duration_minutes}min)
+                </span>
+              )}
+            </span>
+            <span className="flex items-center gap-1 text-xs text-cream/80">
+              {locale === 'en' ? 'Details' : 'Ver detalles'}
+              <span className="transition-transform group-open/details:rotate-180">▾</span>
+            </span>
+          </summary>
+          <div className="bg-warm-gray-500 text-cream p-5 rounded-lg mt-1.5">
             {/* Services List */}
             <div className="space-y-1 text-center">
               {promotion.services.map((service, index) => (
@@ -61,28 +75,15 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
                 </div>
               ))}
             </div>
-
-            {/* Price and Duration */}
-            <div className="mt-4 pt-4 border-t border-cream/20 flex items-center justify-center gap-2">
-              <span className="text-2xl font-bold">{formatPrice(promotion.price)}</span>
-              {promotion.duration_minutes && (
-                <span className="text-sm text-cream/70">
-                  /({promotion.duration_minutes}min)
-                </span>
-              )}
-            </div>
+            {/* Validity Note */}
+            <p className="text-xs text-cream/60 mt-4 pt-3 border-t border-cream/20 text-center">
+              {t('validUntil')} {formatDate(promotion.valid_until, locale)}. {t('priceNote')}.
+            </p>
           </div>
-        </div>
+        </details>
 
         {/* Footer */}
         <div className="p-4 mt-auto">
-          {/* Validity Note */}
-          <p className="text-xs text-warm-gray mb-3">
-            {t('validUntil')} {formatDate(promotion.valid_until, locale)}.
-            <br />
-            {t('priceNote')}.
-          </p>
-
           {/* Book Button */}
           <PromotionBookingButton
             promotion={promotion}
