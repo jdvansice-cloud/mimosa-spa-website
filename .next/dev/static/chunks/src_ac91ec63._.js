@@ -1807,8 +1807,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$check$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Check$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/check.js [app-client] (ecmascript) <export default as Check>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$sparkles$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Sparkles$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/sparkles.js [app-client] (ecmascript) <export default as Sparkles>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$x$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__X$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/x.js [app-client] (ecmascript) <export default as X>");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$left$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronLeft$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-left.js [app-client] (ecmascript) <export default as ChevronLeft>");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$right$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronRight$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-right.js [app-client] (ecmascript) <export default as ChevronRight>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/framer-motion/dist/es/render/components/motion/proxy.mjs [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/booking/store.ts [app-client] (ecmascript)");
@@ -1828,7 +1826,7 @@ function AddonCard({ addon, isSelected, onToggle, discountPercent = 0, showDisco
         type: "button",
         onClick: onToggle,
         className: `
-        relative flex-shrink-0 w-56 snap-start rounded-2xl border-2 text-left
+        relative w-full rounded-2xl border-2 text-left
         transition-all duration-200 overflow-hidden
         ${isSelected ? 'border-gold bg-gold/5 shadow-md ring-2 ring-gold/20' : 'border-beige-200 bg-white hover:border-gold/50 hover:shadow-sm'}
       `,
@@ -1961,7 +1959,6 @@ function AddonsPrompt() {
     const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0;
     const [localAddons, setLocalAddons] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [isLoadingAddons, setIsLoadingAddons] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    const scrollRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     // Fetch when the popup opens; if there's nothing to offer, continue
     // silently so the customer never sees an empty modal.
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
@@ -2013,18 +2010,6 @@ function AddonsPrompt() {
         closeAddonsPrompt();
         nextStep();
     };
-    const handleSkip = ()=>{
-        // Skip means none: drop anything toggled inside the popup
-        selectedAddons.forEach((a)=>removeAddon(a.Id));
-        closeAddonsPrompt();
-        nextStep();
-    };
-    const scrollBy = (direction)=>{
-        scrollRef.current?.scrollBy({
-            left: direction === 'left' ? -240 : 240,
-            behavior: 'smooth'
-        });
-    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
         children: addonsPromptOpen && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "fixed inset-0 z-[90] flex items-end sm:items-center justify-center",
@@ -2043,7 +2028,7 @@ function AddonsPrompt() {
                     className: "absolute inset-0 bg-dark/50 backdrop-blur-sm"
                 }, void 0, false, {
                     fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                    lineNumber: 178,
+                    lineNumber: 163,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -2073,12 +2058,12 @@ function AddonsPrompt() {
                                 className: "w-5 h-5"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                lineNumber: 200,
+                                lineNumber: 185,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                            lineNumber: 195,
+                            lineNumber: 180,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2090,12 +2075,12 @@ function AddonsPrompt() {
                                         className: "w-5 h-5 text-white"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                        lineNumber: 206,
+                                        lineNumber: 191,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                    lineNumber: 205,
+                                    lineNumber: 190,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2105,7 +2090,7 @@ function AddonsPrompt() {
                                             children: "Mejora tu ritual"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                            lineNumber: 209,
+                                            lineNumber: 194,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2113,19 +2098,19 @@ function AddonsPrompt() {
                                             children: "Agrega un extra a tu visita — o continúa sin adicionales"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                            lineNumber: 210,
+                                            lineNumber: 195,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                    lineNumber: 208,
+                                    lineNumber: 193,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                            lineNumber: 204,
+                            lineNumber: 189,
                             columnNumber: 13
                         }, this),
                         isLoadingAddons ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2135,125 +2120,68 @@ function AddonsPrompt() {
                                     className: "w-5 h-5 animate-spin text-gold"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                    lineNumber: 218,
+                                    lineNumber: 203,
                                     columnNumber: 17
                                 }, this),
                                 "Cargando adicionales..."
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                            lineNumber: 217,
+                            lineNumber: 202,
                             columnNumber: 15
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "relative",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                    onClick: ()=>scrollBy('left'),
-                                    className: "hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white border border-beige-200 rounded-full shadow-md items-center justify-center text-warm-gray hover:text-dark hover:border-gold/50 transition-colors",
-                                    "aria-label": "Anterior",
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$left$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronLeft$3e$__["ChevronLeft"], {
-                                        className: "w-4 h-4"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                        lineNumber: 231,
-                                        columnNumber: 19
-                                    }, this)
-                                }, void 0, false, {
+                            className: "grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[28.5rem] overflow-y-auto pr-1",
+                            children: localAddons.map((addon)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(AddonCard, {
+                                    addon: addon,
+                                    isSelected: isAddonSelected(addon.Id),
+                                    onToggle: ()=>handleToggleAddon(addon),
+                                    discountPercent: globalDiscountPercent,
+                                    showDiscount: showGlobalDiscount
+                                }, addon.Id, false, {
                                     fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                    lineNumber: 224,
-                                    columnNumber: 17
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                    onClick: ()=>scrollBy('right'),
-                                    className: "hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white border border-beige-200 rounded-full shadow-md items-center justify-center text-warm-gray hover:text-dark hover:border-gold/50 transition-colors",
-                                    "aria-label": "Siguiente",
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$right$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronRight$3e$__["ChevronRight"], {
-                                        className: "w-4 h-4"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                        lineNumber: 240,
-                                        columnNumber: 19
-                                    }, this)
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                    lineNumber: 233,
-                                    columnNumber: 17
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    ref: scrollRef,
-                                    className: "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-hide",
-                                    style: {
-                                        scrollbarWidth: 'none',
-                                        msOverflowStyle: 'none'
-                                    },
-                                    children: localAddons.map((addon)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(AddonCard, {
-                                            addon: addon,
-                                            isSelected: isAddonSelected(addon.Id),
-                                            onToggle: ()=>handleToggleAddon(addon),
-                                            discountPercent: globalDiscountPercent,
-                                            showDiscount: showGlobalDiscount
-                                        }, addon.Id, false, {
-                                            fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                            lineNumber: 250,
-                                            columnNumber: 21
-                                        }, this))
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                    lineNumber: 244,
-                                    columnNumber: 17
-                                }, this)
-                            ]
-                        }, void 0, true, {
+                                    lineNumber: 209,
+                                    columnNumber: 19
+                                }, this))
+                        }, void 0, false, {
                             fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                            lineNumber: 222,
+                            lineNumber: 207,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "mt-5 flex items-center gap-3",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                    onClick: handleSkip,
-                                    className: "flex-1 py-3 border-2 border-beige-200 text-warm-gray font-medium rounded-xl hover:border-gold/40 hover:text-dark transition-all text-sm",
-                                    children: "Omitir"
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                    lineNumber: 265,
-                                    columnNumber: 15
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                    onClick: handleContinue,
-                                    className: "flex-[2] py-3 bg-gradient-to-r from-gold to-gold/90 text-dark font-semibold rounded-xl hover:shadow-lg transition-all text-sm",
-                                    children: selectedAddons.length > 0 ? `Agregar ${selectedAddons.length} y continuar` : 'Continuar'
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                                    lineNumber: 272,
-                                    columnNumber: 15
-                                }, this)
-                            ]
-                        }, void 0, true, {
+                            className: "mt-5",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                onClick: handleContinue,
+                                className: "w-full py-3 bg-gradient-to-r from-gold to-gold/90 text-dark font-semibold rounded-xl hover:shadow-lg transition-all text-sm",
+                                children: selectedAddons.length > 0 ? `Agregar ${selectedAddons.length} y continuar` : 'Continuar'
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
+                                lineNumber: 223,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
                             fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                            lineNumber: 264,
+                            lineNumber: 222,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-                    lineNumber: 187,
+                    lineNumber: 172,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-            lineNumber: 176,
+            lineNumber: 161,
             columnNumber: 9
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/booking/shared/AddonsPrompt.tsx",
-        lineNumber: 174,
+        lineNumber: 159,
         columnNumber: 5
     }, this);
 }
-_s(AddonsPrompt, "+MWAvJyKFoqHNdPjHO+3zmOC920=", false, function() {
+_s(AddonsPrompt, "vBuIi0ezKi1W++CxIbQTs2yl3Y4=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBookingStore"]
     ];

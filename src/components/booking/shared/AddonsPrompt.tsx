@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { Loader2, Clock, Check, Sparkles, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Loader2, Clock, Check, Sparkles, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyService } from '@/types/booking'
@@ -32,7 +32,7 @@ function AddonCard({
       type="button"
       onClick={onToggle}
       className={`
-        relative flex-shrink-0 w-56 snap-start rounded-2xl border-2 text-left
+        relative w-full rounded-2xl border-2 text-left
         transition-all duration-200 overflow-hidden
         ${isSelected
           ? 'border-gold bg-gold/5 shadow-md ring-2 ring-gold/20'
@@ -99,7 +99,6 @@ export function AddonsPrompt() {
   const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
   const [localAddons, setLocalAddons] = useState<MindbodyService[]>([])
   const [isLoadingAddons, setIsLoadingAddons] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
 
   // Fetch when the popup opens; if there's nothing to offer, continue
   // silently so the customer never sees an empty modal.
@@ -156,20 +155,6 @@ export function AddonsPrompt() {
     nextStep()
   }
 
-  const handleSkip = () => {
-    // Skip means none: drop anything toggled inside the popup
-    selectedAddons.forEach(a => removeAddon(a.Id))
-    closeAddonsPrompt()
-    nextStep()
-  }
-
-  const scrollBy = (direction: 'left' | 'right') => {
-    scrollRef.current?.scrollBy({
-      left: direction === 'left' ? -240 : 240,
-      behavior: 'smooth',
-    })
-  }
-
   return (
     <AnimatePresence>
       {addonsPromptOpen && (
@@ -219,59 +204,25 @@ export function AddonsPrompt() {
                 Cargando adicionales...
               </div>
             ) : (
-              <div className="relative">
-                {/* Desktop arrows */}
-                <button
-                  onClick={() => scrollBy('left')}
-                  className="hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8
-                           bg-white border border-beige-200 rounded-full shadow-md items-center justify-center
-                           text-warm-gray hover:text-dark hover:border-gold/50 transition-colors"
-                  aria-label="Anterior"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => scrollBy('right')}
-                  className="hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8
-                           bg-white border border-beige-200 rounded-full shadow-md items-center justify-center
-                           text-warm-gray hover:text-dark hover:border-gold/50 transition-colors"
-                  aria-label="Siguiente"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-
-                {/* Carousel */}
-                <div
-                  ref={scrollRef}
-                  className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-hide"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                  {localAddons.map((addon) => (
-                    <AddonCard
-                      key={addon.Id}
-                      addon={addon}
-                      isSelected={isAddonSelected(addon.Id)}
-                      onToggle={() => handleToggleAddon(addon)}
-                      discountPercent={globalDiscountPercent}
-                      showDiscount={showGlobalDiscount}
-                    />
-                  ))}
-                </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[28.5rem] overflow-y-auto pr-1">
+                {localAddons.map((addon) => (
+                  <AddonCard
+                    key={addon.Id}
+                    addon={addon}
+                    isSelected={isAddonSelected(addon.Id)}
+                    onToggle={() => handleToggleAddon(addon)}
+                    discountPercent={globalDiscountPercent}
+                    showDiscount={showGlobalDiscount}
+                  />
+                ))}
               </div>
             )}
 
             {/* Footer actions */}
-            <div className="mt-5 flex items-center gap-3">
-              <button
-                onClick={handleSkip}
-                className="flex-1 py-3 border-2 border-beige-200 text-warm-gray font-medium rounded-xl
-                         hover:border-gold/40 hover:text-dark transition-all text-sm"
-              >
-                Omitir
-              </button>
+            <div className="mt-5">
               <button
                 onClick={handleContinue}
-                className="flex-[2] py-3 bg-gradient-to-r from-gold to-gold/90 text-dark font-semibold
+                className="w-full py-3 bg-gradient-to-r from-gold to-gold/90 text-dark font-semibold
                          rounded-xl hover:shadow-lg transition-all text-sm"
               >
                 {selectedAddons.length > 0

@@ -3018,3 +3018,108 @@ https://nextjs.org/docs/messages/module-not-found
 [03:37:41.665] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [03:37:41.893] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
 [03:37:41.893] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[03:46:31.433] Server  LOG     ✓ Compiled in 195ms
+[03:46:42.802] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:46:42.950] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[03:46:42.953] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[03:46:42.954] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[03:46:42.954] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[03:46:43.827] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[03:46:43.829] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[03:46:43.830] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[03:46:43.861] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[03:46:43.862] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[03:46:44.079] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[03:46:44.106] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[03:46:44.360] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[03:46:44.610] Server  LOG     Total sale/services from Mindbody: 64
+[03:46:44.610] Server  LOG     Total online session types: 95
+[03:46:44.611] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[03:46:44.611] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[03:46:44.611] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[03:46:44.611] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[03:46:44.612] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[03:46:44.612] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[03:46:44.612] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[03:46:44.612] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[03:46:44.613] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[03:46:44.613] Server  LOG     All online bookable services for promotions (no filters): 64
+[03:46:44.613] Server  LOG     Total online services for promotions: 64
+[03:46:44.613] Server  LOG     Filtered services count: 64
+[03:46:44.631] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[03:46:44.631] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[03:46:44.632] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[03:46:44.634] Server  LOG     Total sale/services from Mindbody: 64
+[03:46:44.634] Server  LOG     Total online session types: 95
+[03:46:44.634] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[03:46:44.635] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[03:46:44.635] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[03:46:44.635] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[03:46:44.635] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[03:46:44.635] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[03:46:44.635] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[03:46:44.636] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[03:46:44.636] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[03:46:44.636] Server  LOG     Online bookable services (excluding Adicionales): 45
+[03:46:44.636] Server  LOG     Services with prices (tax removed): 45
+[03:46:44.636] Server  LOG     Total online services from Mindbody: 45
+[03:46:44.636] Server  LOG     Sample service: "{\"Id\":225,\"ProductId\":11248,\"Name\":\"Baño de Luna - 120 min\",\"Description\":\"\",\"Duration\":120,\"Price\":139,\"OnlinePrice\":139,\"TaxIncluded\":9.73,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[03:46:44.637] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
+[03:46:44.637] Server  LOG     ProgramIds found: [5,4,6]
+[03:46:44.637] Server  LOG     Filtered services count: 45
+[03:46:44.647] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[03:46:44.647] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[03:46:44.648] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[03:46:44.883] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[03:46:44.901] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[03:46:45.381] Server  LOG     Total sale/services from Mindbody: 64
+[03:46:45.381] Server  LOG     Total online session types: 95
+[03:46:45.382] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[03:46:45.382] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[03:46:45.382] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[03:46:45.382] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[03:46:45.383] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[03:46:45.383] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[03:46:45.383] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[03:46:45.383] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[03:46:45.384] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[03:46:45.384] Server  LOG     All online bookable services for promotions (no filters): 64
+[03:46:45.384] Server  LOG     Total online services for promotions: 64
+[03:46:45.384] Server  LOG     Filtered services count: 64
+[03:46:45.431] Server  LOG     Total sale/services from Mindbody: 64
+[03:46:45.432] Server  LOG     Total online session types: 95
+[03:46:45.432] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[03:46:45.432] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[03:46:45.433] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[03:46:45.433] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[03:46:45.433] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[03:46:45.434] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[03:46:45.434] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[03:46:45.434] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[03:46:45.434] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[03:46:45.435] Server  LOG     Online bookable services (excluding Adicionales): 45
+[03:46:45.435] Server  LOG     Services with prices (tax removed): 45
+[03:46:45.435] Server  LOG     Total online services from Mindbody: 45
+[03:46:45.435] Server  LOG     Sample service: "{\"Id\":225,\"ProductId\":11248,\"Name\":\"Baño de Luna - 120 min\",\"Description\":\"\",\"Duration\":120,\"Price\":139,\"OnlinePrice\":139,\"TaxIncluded\":9.73,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[03:46:45.436] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
+[03:46:45.436] Server  LOG     ProgramIds found: [5,4,6]
+[03:46:45.436] Server  LOG     Filtered services count: 45
+[03:47:05.376] Server  LOG     Fetching services for locationId: "1" "type:" "addons" "includeOffline:" false "forPromotions:" false
+[03:47:05.377] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[03:47:05.382] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[03:47:05.675] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[03:47:06.039] Server  LOG     Total sale/services from Mindbody: 64
+[03:47:06.040] Server  LOG     Total online session types: 95
+[03:47:06.040] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[03:47:06.041] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[03:47:06.041] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[03:47:06.042] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[03:47:06.043] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[03:47:06.043] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[03:47:06.043] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[03:47:06.044] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[03:47:06.044] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[03:47:06.044] Server  LOG     Online bookable addons (Adicionales only): 11
+[03:47:06.044] Server  LOG     Addons with prices (tax removed): 11
+[03:47:06.045] Server  LOG     Filtered services count: 11
+[03:48:34.425] Server  LOG     ✓ Compiled in 97ms
