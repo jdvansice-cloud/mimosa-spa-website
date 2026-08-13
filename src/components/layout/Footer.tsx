@@ -3,7 +3,7 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook, MessageCircle, Star } from 'lucide-react'
 import { Logo } from './Logo'
 import { getServerSettings, aggregateRating } from '@/lib/settings'
-import { GIFT_CARDS_PATH } from '@/lib/nav'
+import { GIFT_CARDS_PATH, FEATURES } from '@/lib/nav'
 
 // Format phone number for display
 function formatPhoneDisplay(phone: string): string {
@@ -34,8 +34,10 @@ export async function Footer() {
   const navLinks = [
     { href: `/${locale}`, label: tNav('home') },
     { href: `/${locale}/menu`, label: tNav('menu') },
-    { href: `/${locale}/parejas`, label: tNav('couples') },
-    { href: `/${locale}${GIFT_CARDS_PATH}`, label: tNav('giftcards') },
+    ...(FEATURES.parejas ? [{ href: `/${locale}/parejas`, label: tNav('couples') }] : []),
+    ...(FEATURES.giftShop
+      ? [{ href: `/${locale}${GIFT_CARDS_PATH}`, label: tNav('giftcards') }]
+      : []),
     { href: `/${locale}/promociones`, label: tNav('promotions') },
     { href: `/${locale}/empresas`, label: 'Empresas' },
     { href: `/${locale}/club-mimosa`, label: 'Club Mimosa' },

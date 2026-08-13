@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { Menu, X, Calendar, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { GIFT_CARDS_PATH } from '@/lib/nav'
+import { GIFT_CARDS_PATH, FEATURES } from '@/lib/nav'
 import { LanguageSwitcher } from '@/components/ui'
 import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
 
@@ -40,8 +40,10 @@ export function Header() {
   const navItems = [
     { href: `/${locale}`, label: t('home') },
     { href: `/${locale}/menu`, label: t('menu') },
-    { href: `/${locale}/parejas`, label: t('couples') },
-    { href: `/${locale}${GIFT_CARDS_PATH}`, label: t('giftcards') },
+    ...(FEATURES.parejas ? [{ href: `/${locale}/parejas`, label: t('couples') }] : []),
+    ...(FEATURES.giftShop
+      ? [{ href: `/${locale}${GIFT_CARDS_PATH}`, label: t('giftcards') }]
+      : []),
     { href: `/${locale}/promociones`, label: t('promotions') },
     { href: `/${locale}/nosotros`, label: t('about') },
     { href: `/${locale}/galeria`, label: t('gallery') },

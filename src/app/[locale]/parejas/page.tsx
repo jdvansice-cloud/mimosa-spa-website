@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+import { FEATURES } from '@/lib/nav'
 import Link from 'next/link'
 import { Gift } from 'lucide-react'
 import { PAREJAS_COPY, OCCASIONS } from '@/content/pages'
@@ -33,6 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function ParejasPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
+  if (!FEATURES.parejas) redirect(`/${locale}/menu`)
   const l = L(locale)
   const offers = await getOffersForPage('parejas')
   const images = await getSiteImages(offers.map((o) => o.image_key || '').filter(Boolean))

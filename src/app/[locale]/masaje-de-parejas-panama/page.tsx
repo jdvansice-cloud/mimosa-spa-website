@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+import { FEATURES } from '@/lib/nav'
 import { notFound } from 'next/navigation'
 import { LANDINGS } from '@/content/landings'
 import { LocalLandingPage } from '@/components/landing/LocalLandingPage'
@@ -22,6 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
+  if (!FEATURES.parejas) redirect(`/${locale}/menu`)
   if (!content) notFound()
   return <LocalLandingPage content={content} locale={locale} />
 }

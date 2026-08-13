@@ -8,6 +8,7 @@ import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
 import { RatingBadge, Stars } from '@/components/proof/RatingBadge'
 import { ReviewsStrip } from '@/components/proof/ReviewsStrip'
 import { getSiteImage } from '@/lib/site-images'
+import { FEATURES } from '@/lib/nav'
 import Image from 'next/image'
 import { SectionHeader } from '@/components/marketing/SectionHeader'
 
@@ -180,10 +181,14 @@ export async function LocalLandingPage({
           <Link href={`/${locale}/menu`} className="text-gold-600 hover:text-gold-700 font-medium">
             {tNav('menu')}
           </Link>
-          <span className="text-warm-gray">·</span>
-          <Link href={`/${locale}/parejas`} className="text-gold-600 hover:text-gold-700 font-medium">
-            {tNav('couples')}
-          </Link>
+          {FEATURES.parejas && (
+            <>
+              <span className="text-warm-gray">·</span>
+              <Link href={`/${locale}/parejas`} className="text-gold-600 hover:text-gold-700 font-medium">
+                {tNav('couples')}
+              </Link>
+            </>
+          )}
           <span className="text-warm-gray">·</span>
           <Link href={`/${locale}/promociones`} className="text-gold-600 hover:text-gold-700 font-medium">
             {tNav('promotions')}

@@ -14,6 +14,7 @@ import { ReviewsStrip } from '@/components/proof/ReviewsStrip'
 import { GiftingCouplesSection } from '@/components/home/GiftingCouplesSection'
 import { FirstVisitBanner } from '@/components/home/FirstVisitBanner'
 import { buildPageMetadata } from '@/lib/seo'
+import { FEATURES } from '@/lib/nav'
 
 // Revalidate hourly; tagged caches (site-images/settings/treatments) refresh sooner on admin edits.
 export const revalidate = 3600
@@ -73,12 +74,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* Gifting + Couples feature cards */}
-      <section className="section bg-cream pt-0">
-        <div className="container-spa">
-          <GiftingCouplesSection />
-        </div>
-      </section>
+      {/* Gifting + Couples feature cards (hidden until launch) */}
+      {(FEATURES.parejas || FEATURES.giftShop) && (
+        <section className="section bg-cream pt-0">
+          <div className="container-spa">
+            <GiftingCouplesSection />
+          </div>
+        </section>
+      )}
 
       {/* Promotions Preview */}
       <section className="section bg-beige">

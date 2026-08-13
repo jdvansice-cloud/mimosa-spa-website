@@ -1,8 +1,8 @@
 {
+  "/[locale]/giftcards/page": "app/[locale]/giftcards/page.js",
+  "/[locale]/masaje-de-parejas-panama/page": "app/[locale]/masaje-de-parejas-panama/page.js",
+  "/[locale]/menu/page": "app/[locale]/menu/page.js",
   "/[locale]/page": "app/[locale]/page.js",
-  "/[locale]/reservar/page": "app/[locale]/reservar/page.js",
-  "/api/admin/settings/route": "app/api/admin/settings/route.js",
-  "/api/promotions/route": "app/api/promotions/route.js",
-  "/api/settings/route": "app/api/settings/route.js",
-  "/api/track/route": "app/api/track/route.js"
+  "/[locale]/parejas/page": "app/[locale]/parejas/page.js",
+  "/sitemap.xml/route": "app/sitemap.xml/route.js"
 }

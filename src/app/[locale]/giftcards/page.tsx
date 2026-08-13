@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+import { FEATURES } from '@/lib/nav'
 import { getTranslations } from 'next-intl/server'
 import { buildPageMetadata } from '@/lib/seo'
 import { GiftShopClient } from '@/components/giftshop/GiftShopClient'
@@ -16,6 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function GiftShopPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
+  if (!FEATURES.giftShop) redirect(`/${locale}/menu/giftcards`)
   const t = await getTranslations({ locale, namespace: 'giftShop' })
 
   return (

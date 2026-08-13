@@ -11,6 +11,7 @@ interface MenuCategoriesProps {
 }
 
 import { DEFAULT_IMAGES as SHARED_DEFAULTS } from '@/lib/default-images'
+import { FEATURES } from '@/lib/nav'
 
 // Short-key view over the shared fallback map
 const DEFAULT_IMAGES = {
@@ -37,12 +38,16 @@ export function MenuCategories({ locale, categoryImages }: MenuCategoriesProps) 
       image: categoryImages.category_facial_treatments || DEFAULT_IMAGES.facial,
       href: '/menu/faciales',
     },
-    {
-      id: 'couples',
-      titleKey: 'couples',
-      image: categoryImages.category_parejas || SHARED_DEFAULTS.category_parejas,
-      href: '/parejas',
-    },
+    ...(FEATURES.parejas
+      ? [
+          {
+            id: 'couples',
+            titleKey: 'couples',
+            image: categoryImages.category_parejas || SHARED_DEFAULTS.category_parejas,
+            href: '/parejas',
+          },
+        ]
+      : []),
     {
       id: 'packages',
       titleKey: 'packages',
