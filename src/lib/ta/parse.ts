@@ -36,14 +36,20 @@ const s = (c: Cell): string => (c === null || c === undefined ? '' : String(c)).
 const norm = (c: Cell): string =>
   s(c).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()
 
-const NAME_HEADERS = ['name', 'employee', 'employee name', 'full name', 'nombre', 'empleado']
+const NAME_HEADERS = ['name', 'person name', 'employee', 'employee name', 'full name', 'nombre', 'empleado']
 const FIRST_HEADERS = ['first name', 'nombre']
 const LAST_HEADERS = ['last name', 'apellido']
 const CODE_HEADERS = ['id', 'employee id', 'person id', 'user id', 'no', 'emp id', 'codigo', 'attendance id']
 const DATE_HEADERS = ['date', 'att date', 'attendance date', 'work date', 'fecha', 'day']
 const IN_HEADERS = ['clock in', 'check in', 'in', 'time in', 'on duty', 'entrada', 'first punch', 'first in']
 const OUT_HEADERS = ['clock out', 'check out', 'out', 'time out', 'off duty', 'salida', 'last punch', 'last out']
-const HOURS_HEADERS = ['total', 'total hours', 'work hours', 'total time', 'worked', 'duration', 'horas', 'horas trabajadas', 'total work time', 'work time']
+// Ordered by preference: the real TC7 Timecard has both "Clock Time(h)"
+// (raw in→out) and "Total Work Time(h)" (net of the clock's break rule) —
+// payroll wants the net one, so it must win regardless of column order.
+const HOURS_HEADERS = [
+  'total work time h', 'total work time', 'total hours', 'work hours', 'horas trabajadas',
+  'clock time h', 'total time', 'work time', 'worked', 'duration', 'horas', 'total',
+]
 const DATETIME_HEADERS = ['time', 'date time', 'datetime', 'punch time', 'att time', 'hora']
 const STATE_HEADERS = ['status', 'state', 'punch state', 'attendance status', 'estado', 'in out']
 
@@ -56,7 +62,7 @@ function pad2(n: number): string {
 }
 
 /** Excel serial / Date / string → YYYY-MM-DD, or null. */
-function toDate(c: Cell): string | null {
+function toDate(c: Cell, dayFirst = true): string | null {
   if (c instanceof Date && !isNaN(c.getTime())) {
     return `${c.getFullYear()}-${pad2(c.getMonth() + 1)}-${pad2(c.getDate())}`
   }
@@ -69,8 +75,27 @@ function toDate(c: Cell): string | null {
   let m = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/)
   if (m) return `${m[1]}-${pad2(+m[2])}-${pad2(+m[3])}`
   m = str.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/)
-  if (m) return `${m[3]}-${pad2(+m[1])}-${pad2(+m[2])}` // US order (NGTeco app default)
-  return null
+  if (!m) return null
+  const [a, b, y] = [+m[1], +m[2], +m[3]]
+  const [day, month] = dayFirst ? [a, b] : [b, a]
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null
+  return `${y}-${pad2(month)}-${pad2(day)}`
+}
+
+/**
+ * Decide DD/MM vs MM/DD for x/x/yyyy strings by scanning the whole column:
+ * any first component >12 proves day-first, any second >12 proves
+ * month-first. Ambiguous files default to day-first — the clock is
+ * configured for Panama (verified against the real TC7 export).
+ */
+function detectDayFirst(rows: Row[], col: number, startRow: number): boolean {
+  for (let r = startRow; r < rows.length; r++) {
+    const m = s(rows[r]?.[col]).match(/^(\d{1,2})[-/.](\d{1,2})[-/.]\d{4}/)
+    if (!m) continue
+    if (+m[1] > 12) return true
+    if (+m[2] > 12) return false
+  }
+  return true
 }
 
 /** Excel fraction / Date / "9:03 AM" / "09:03" → HH:MM, or null. */
@@ -148,6 +173,7 @@ function findHeader(rows: Row[]): HeaderMap | null {
       row: r, name: null, first: null, last: null, code: null, date: null,
       ins: [], outs: [], hours: null, datetime: null, state: null,
     }
+    let hoursRank = Infinity
     row.forEach((cell, i) => {
       if (map.name === null && headerIs(cell, NAME_HEADERS)) map.name = i
       else if (map.first === null && headerIs(cell, FIRST_HEADERS)) map.first = i
@@ -156,7 +182,11 @@ function findHeader(rows: Row[]): HeaderMap | null {
       else if (map.date === null && headerIs(cell, DATE_HEADERS)) map.date = i
       else if (headerIs(cell, IN_HEADERS)) map.ins.push(i)
       else if (headerIs(cell, OUT_HEADERS)) map.outs.push(i)
-      else if (map.hours === null && headerIs(cell, HOURS_HEADERS)) map.hours = i
+      else if (HOURS_HEADERS.includes(norm(cell))) {
+        // HOURS_HEADERS is preference-ordered, not column-ordered
+        const rank = HOURS_HEADERS.indexOf(norm(cell))
+        if (rank < hoursRank) { hoursRank = rank; map.hours = i }
+      }
       else if (map.datetime === null && headerIs(cell, DATETIME_HEADERS)) map.datetime = i
       else if (map.state === null && headerIs(cell, STATE_HEADERS)) map.state = i
     })
@@ -193,13 +223,14 @@ export function parseNgtecoExport(buffer: Buffer): ParsedExport {
 
     if (h.ins.length > 0 && h.date !== null) {
       // ---- timecard format: one row per employee/day ----
+      const dayFirst = detectDayFirst(rows, h.date, h.row + 1)
       const pairs = h.ins.map((inCol, i) => ({ inCol, outCol: h.outs[i] ?? null }))
       let carry = ''
       const perDay = new Map<string, number>() // employee|date → next pair index
       for (let r = h.row + 1; r < rows.length; r++) {
         const row = rows[r] ?? []
         const name = employeeName(row, h, carry)
-        const date = toDate(row[h.date])
+        const date = toDate(row[h.date], dayFirst)
         if (!name || !date) continue
         carry = name
         const code = h.code !== null ? s(row[h.code]) || null : null
@@ -229,12 +260,13 @@ export function parseNgtecoExport(buffer: Buffer): ParsedExport {
       // ---- punch-log format: one row per punch ----
       const timeCol = h.datetime ?? h.date
       if (timeCol === null) continue
+      const dayFirst = detectDayFirst(rows, h.date ?? timeCol, h.row + 1)
       const log = new Map<string, Array<{ time: string; state: string | null; code: string | null }>>()
       let carry = ''
       for (let r = h.row + 1; r < rows.length; r++) {
         const row = rows[r] ?? []
         const name = employeeName(row, h, carry)
-        const date = toDate(h.date !== null ? row[h.date] : row[timeCol]) ?? toDate(row[timeCol])
+        const date = toDate(h.date !== null ? row[h.date] : row[timeCol], dayFirst) ?? toDate(row[timeCol], dayFirst)
         const time = toTime(row[timeCol])
         if (!name || !date || !time) continue
         carry = name
