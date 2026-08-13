@@ -82,36 +82,37 @@ export interface MindbodyAppointment {
 // BOOKING FLOW TYPES
 // ===========================================
 
+// P2 collapse: 4 visible screens (services with location pill + inline
+// add-ons, datetime with optional therapist picker, auth last, confirm).
+// 'location'/'addons'/'staff' remain in the union only so old persisted
+// carts and deep links can be normalized — they are never rendered.
 export type BookingStep =
   | 'auth'
-  | 'location'
+  | 'location'  // legacy — normalized to 'services'
   | 'services'
-  | 'addons'
-  | 'datetime'  // Now step 5 - select date and time first
-  | 'staff'     // Now step 6 - select therapist based on date/time
+  | 'addons'    // legacy — normalized to 'services'
+  | 'datetime'
+  | 'staff'     // legacy — normalized to 'datetime'
   | 'confirm'
   | 'success'
 
 export const BOOKING_STEPS: BookingStep[] = [
-  'location',
   'services',
-  'addons',
-  'datetime',  // Date/time before staff
-  'staff',     // Staff after date/time
+  'datetime',
   'auth',      // Identity last — only needed to confirm the booking
   'confirm',
   'success'
 ]
 
 export const STEP_NUMBERS: Record<BookingStep, number> = {
-  location: 1,
-  services: 2,
-  addons: 3,
-  datetime: 4,
-  staff: 5,
-  auth: 6,     // Identity last
-  confirm: 7,
-  success: 8
+  location: 1,  // legacy alias of services
+  services: 1,
+  addons: 1,    // legacy alias of services
+  datetime: 2,
+  staff: 2,     // legacy alias of datetime
+  auth: 3,
+  confirm: 4,
+  success: 5
 }
 
 // ===========================================

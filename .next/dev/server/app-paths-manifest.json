@@ -4,8 +4,13 @@
   "/[locale]/reservar/page": "app/[locale]/reservar/page.js",
   "/api/admin/settings/route": "app/api/admin/settings/route.js",
   "/api/mindbody/auth/route": "app/api/mindbody/auth/route.js",
+  "/api/mindbody/availability/route": "app/api/mindbody/availability/route.js",
+  "/api/mindbody/locations/route": "app/api/mindbody/locations/route.js",
+  "/api/mindbody/services/route": "app/api/mindbody/services/route.js",
+  "/api/mindbody/staff/route": "app/api/mindbody/staff/route.js",
   "/api/portal/auth/lookup/route": "app/api/portal/auth/lookup/route.js",
   "/api/promotions/route": "app/api/promotions/route.js",
   "/api/settings/route": "app/api/settings/route.js",
-  "/api/track/route": "app/api/track/route.js"
+  "/api/track/route": "app/api/track/route.js",
+  "/api/treatments/settings/route": "app/api/treatments/settings/route.js"
 }

@@ -19,14 +19,14 @@ import {
 // Real widget order (store STEP_ORDER): datetime comes BEFORE staff.
 // booking_start is the true funnel top (fired for every visitor, including
 // already-authenticated ones who skip the auth step).
+// P2 collapsed flow: services (location pill + inline add-ons) → datetime
+// (optional therapist) → auth → confirm. Legacy step events from before the
+// collapse simply won't appear in new sessions.
 const FUNNEL_STEPS = [
   'booking_start',
-  'booking_step_auth',
-  'booking_step_location',
   'booking_step_services',
-  'booking_step_addons',
   'booking_step_datetime',
-  'booking_step_staff',
+  'booking_step_auth',
   'booking_step_confirm',
   'booking_completed',
 ] as const

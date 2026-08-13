@@ -3,6 +3,7 @@
 import { useCallback, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePortalStore, selectIsAuthenticated } from '@/lib/portal/store'
+import { useBookingStore } from '@/lib/booking/store'
 
 interface HomeBookingButtonProps {
   locale: string
@@ -26,6 +27,13 @@ export function HomeBookingButton({ locale, children, className, onClick }: Home
   const handleClick = useCallback(() => {
     // Call optional onClick handler (e.g., close mobile menu)
     onClick?.()
+
+    // If a finished booking is still on screen, start a fresh one — otherwise
+    // clicking Reservar while on /reservar would just stay on the success page.
+    const { currentStep, resetForNewBooking } = useBookingStore.getState()
+    if (currentStep === 'success' || currentStep === 'confirm') {
+      resetForNewBooking()
+    }
 
     // Auth happens at the end of the flow now — everyone goes straight to
     // the widget and browses availability first.

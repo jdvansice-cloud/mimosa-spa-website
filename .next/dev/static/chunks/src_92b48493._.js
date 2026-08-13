@@ -1338,6 +1338,12 @@ function HomeBookingButton({ locale, children, className, onClick }) {
         "HomeBookingButton.useCallback[handleClick]": ()=>{
             // Call optional onClick handler (e.g., close mobile menu)
             onClick?.();
+            // If a finished booking is still on screen, start a fresh one — otherwise
+            // clicking Reservar while on /reservar would just stay on the success page.
+            const { currentStep, resetForNewBooking } = useBookingStore.getState();
+            if (currentStep === 'success' || currentStep === 'confirm') {
+                resetForNewBooking();
+            }
             // Auth happens at the end of the flow now — everyone goes straight to
             // the widget and browses availability first.
             router.push(`/${locale}/reservar`);
@@ -1355,7 +1361,7 @@ function HomeBookingButton({ locale, children, className, onClick }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/src/components/shared/HomeBookingButton.tsx",
-        lineNumber: 36,
+        lineNumber: 43,
         columnNumber: 5
     }, this);
 }

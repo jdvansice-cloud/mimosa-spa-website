@@ -223,6 +223,8 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 __turbopack_context__.s([
     "CART_TTL_HOURS",
     ()=>CART_TTL_HOURS,
+    "normalizeStep",
+    ()=>normalizeStep,
     "selectCanProceed",
     ()=>selectCanProceed,
     "selectCurrentStepNumber",
@@ -247,7 +249,7 @@ const ITBM_RATE = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$
 // ===========================================
 const initialState = {
     // Progress
-    currentStep: 'location',
+    currentStep: 'services',
     isLoading: false,
     error: null,
     slotConflictNotice: null,
@@ -292,19 +294,23 @@ const initialState = {
 // ===========================================
 // HELPER FUNCTIONS
 // ===========================================
-// Step order: auth -> location -> services -> addons -> datetime -> staff -> confirm -> success
-// Auth moved LAST (before confirm): identity is only needed at POST /book,
-// so visitors browse services and real availability before any login wall.
+// P2 collapse: 4 visible screens. Location is a pill inside services,
+// add-ons are an inline section there too, and the therapist picker lives on
+// the date/time screen. Auth stays LAST (identity only needed at POST /book).
+// The removed step names ('location'/'addons'/'staff') remain in the
+// BookingStep type for persisted-cart migration only.
 const STEP_ORDER = [
-    'location',
     'services',
-    'addons',
     'datetime',
-    'staff',
     'auth',
     'confirm',
     'success'
 ];
+function normalizeStep(step) {
+    if (step === 'location' || step === 'addons') return 'services';
+    if (step === 'staff') return 'datetime';
+    return step;
+}
 function getNextStep(currentStep) {
     const currentIndex = STEP_ORDER.indexOf(currentStep);
     return currentIndex < STEP_ORDER.length - 1 ? STEP_ORDER[currentIndex + 1] : currentStep;
@@ -314,7 +320,7 @@ function getPrevStep(currentStep) {
     return currentIndex > 0 ? STEP_ORDER[currentIndex - 1] : currentStep;
 }
 function getStepByNumber(stepNumber) {
-    return STEP_ORDER[stepNumber - 1] || 'location';
+    return STEP_ORDER[stepNumber - 1] || 'services';
 }
 function calculateTotalDuration(services, addons) {
     const serviceDuration = services.reduce((sum, s)=>sum + s.Duration, 0);
@@ -354,7 +360,7 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
         // NAVIGATION ACTIONS
         // ===========================================
         setStep: (step)=>set({
-                currentStep: step
+                currentStep: normalizeStep(step)
             }, false, 'setStep'),
         nextStep: ()=>set((state)=>({
                     currentStep: getNextStep(state.currentStep),
@@ -433,6 +439,8 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
             // Clear staff, dates, and slots when location changes (they're location-specific)
             set({
                 selectedLocation: location,
+                services: [],
+                addons: [],
                 staff: [],
                 selectedStaff: null,
                 availableDates: [],
@@ -552,8 +560,8 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                 selectedServices: promotionServices,
                 selectedAddons: [],
                 pricing: null,
-                // Skip to addons step if promotion is loaded
-                currentStep: 'addons'
+                // Stay on services — add-ons are an inline section there now
+                currentStep: 'services'
             }, false, 'loadPromotion');
         },
         clearPromotion: ()=>{
@@ -674,7 +682,7 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                     globalDiscountPercent: state.globalDiscountPercent,
                     globalDiscountActive: state.globalDiscountActive,
                     // Start at location step (auth already done)
-                    currentStep: 'location',
+                    currentStep: 'services',
                     isCartOpen: false
                 }), false, 'resetForNewBooking')
     }), {
@@ -684,12 +692,18 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
     // On top of that, carts expire after CART_TTL_HOURS even in a
     // long-lived tab (getItem returns null → rehydration is skipped).
     storage: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$middleware$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createJSONStorage"])(()=>expiringSessionStorage),
-    version: 1,
+    version: 2,
+    // v1 carts stored the old 7-step names; collapse them.
+    migrate: (persisted)=>{
+        const p = persisted;
+        if (p?.currentStep) p.currentStep = normalizeStep(p.currentStep);
+        return p;
+    },
     // Persist SELECTIONS only — never identity/PII (clientInfo), never
     // transient flags. Auth state is restored from the Supabase session.
     partialize: (state)=>({
             cartSavedAt: Date.now(),
-            currentStep: state.currentStep === 'success' || state.currentStep === 'confirm' ? 'location' : state.currentStep === 'auth' ? 'auth' : state.currentStep,
+            currentStep: state.currentStep === 'success' || state.currentStep === 'confirm' ? 'services' : state.currentStep,
             selectedLocation: state.selectedLocation,
             selectedServices: state.selectedServices,
             selectedAddons: state.selectedAddons,
@@ -703,11 +717,8 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
 }));
 const selectCurrentStepNumber = (state)=>{
     const steps = [
-        'location',
         'services',
-        'addons',
         'datetime',
-        'staff',
         'auth',
         'confirm',
         'success'
@@ -724,18 +735,10 @@ const selectCanProceed = (state)=>{
     switch(state.currentStep){
         case 'auth':
             return state.clientId !== null;
-        case 'location':
-            return state.selectedLocation !== null;
         case 'services':
-            return state.selectedServices.length > 0;
-        case 'addons':
-            return true // Addons are optional
-            ;
+            return state.selectedLocation !== null && state.selectedServices.length > 0;
         case 'datetime':
             return state.selectedDate !== null && state.selectedTime !== null;
-        case 'staff':
-            return true // "Any therapist" is valid
-            ;
         case 'confirm':
             return true;
         default:
@@ -765,13 +768,10 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 const stepLabels = {
-    1: 'Ubicación',
-    2: 'Servicios',
-    3: 'Adicionales',
-    4: 'Fecha y Hora',
-    5: 'Terapeuta',
-    6: 'Tu Cuenta',
-    7: 'Confirmar'
+    1: 'Servicios',
+    2: 'Fecha y Hora',
+    3: 'Tu Cuenta',
+    4: 'Confirmar'
 };
 function StepProgress({ currentStep, totalSteps }) {
     _s();
@@ -801,12 +801,12 @@ function StepProgress({ currentStep, totalSteps }) {
                                                 className: "w-5 h-5"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                                lineNumber: 47,
+                                                lineNumber: 44,
                                                 columnNumber: 19
                                             }, this) : step
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                            lineNumber: 34,
+                                            lineNumber: 31,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -817,13 +817,13 @@ function StepProgress({ currentStep, totalSteps }) {
                                             children: stepLabels[step]
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                            lineNumber: 52,
+                                            lineNumber: 49,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                    lineNumber: 33,
+                                    lineNumber: 30,
                                     columnNumber: 13
                                 }, this),
                                 step < totalSteps && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -832,18 +832,18 @@ function StepProgress({ currentStep, totalSteps }) {
                                         className: `h-full transition-all duration-500 ${step < currentStep ? 'bg-gold' : 'bg-beige-200'}`
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                        lineNumber: 63,
+                                        lineNumber: 60,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                    lineNumber: 62,
+                                    lineNumber: 59,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, step, true, {
                             fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                            lineNumber: 31,
+                            lineNumber: 28,
                             columnNumber: 11
                         }, this)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -855,12 +855,12 @@ function StepProgress({ currentStep, totalSteps }) {
                                     className: "h-full bg-beige-200"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                    lineNumber: 76,
+                                    lineNumber: 73,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                lineNumber: 75,
+                                lineNumber: 72,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -879,7 +879,7 @@ function StepProgress({ currentStep, totalSteps }) {
                                                 className: "w-5 h-5"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                                lineNumber: 91,
+                                                lineNumber: 88,
                                                 columnNumber: 15
                                             }, this),
                                             itemCount > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].span, {
@@ -893,13 +893,13 @@ function StepProgress({ currentStep, totalSteps }) {
                                                 children: itemCount
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                                lineNumber: 95,
+                                                lineNumber: 92,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                        lineNumber: 83,
+                                        lineNumber: 80,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -907,25 +907,25 @@ function StepProgress({ currentStep, totalSteps }) {
                                         children: "Carrito"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                        lineNumber: 105,
+                                        lineNumber: 102,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                lineNumber: 78,
+                                lineNumber: 75,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                        lineNumber: 74,
+                        lineNumber: 71,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                lineNumber: 29,
+                lineNumber: 26,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -944,7 +944,7 @@ function StepProgress({ currentStep, totalSteps }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                lineNumber: 115,
+                                lineNumber: 112,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -955,7 +955,7 @@ function StepProgress({ currentStep, totalSteps }) {
                                         children: stepLabels[currentStep]
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                        lineNumber: 119,
+                                        lineNumber: 116,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -970,7 +970,7 @@ function StepProgress({ currentStep, totalSteps }) {
                                                 className: "w-5 h-5"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                                lineNumber: 134,
+                                                lineNumber: 131,
                                                 columnNumber: 15
                                             }, this),
                                             itemCount > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].span, {
@@ -984,25 +984,25 @@ function StepProgress({ currentStep, totalSteps }) {
                                                 children: itemCount
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                                lineNumber: 136,
+                                                lineNumber: 133,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                        lineNumber: 123,
+                                        lineNumber: 120,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                                lineNumber: 118,
+                                lineNumber: 115,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                        lineNumber: 114,
+                        lineNumber: 111,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1014,24 +1014,24 @@ function StepProgress({ currentStep, totalSteps }) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                            lineNumber: 149,
+                            lineNumber: 146,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                        lineNumber: 148,
+                        lineNumber: 145,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-                lineNumber: 113,
+                lineNumber: 110,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/booking/shared/StepProgress.tsx",
-        lineNumber: 27,
+        lineNumber: 24,
         columnNumber: 5
     }, this);
 }
@@ -2425,7 +2425,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 function BookingNav() {
     _s();
-    const { currentStep, selectedAddons, selectedLocation, selectedDate, selectedTime, nextStep, prevStep, isLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBookingStore"])();
+    const { currentStep, selectedLocation, selectedDate, selectedTime, nextStep, prevStep, isLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBookingStore"])();
     const hasServices = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBookingStore"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["selectHasServices"]);
     // Don't show on auth step (first step) or success step (last step)
     if (currentStep === 'auth' || currentStep === 'success') {
@@ -2434,16 +2434,8 @@ function BookingNav() {
     // Determine if next/continue is enabled based on step requirements
     const canProceed = ()=>{
         switch(currentStep){
-            case 'location':
-                return !!selectedLocation;
             case 'services':
-                return hasServices;
-            case 'addons':
-                return true // Addons are optional
-                ;
-            case 'staff':
-                return true // Staff can be "any available"
-                ;
+                return !!selectedLocation && hasServices;
             case 'datetime':
                 return !!selectedDate && !!selectedTime;
             case 'confirm':
@@ -2452,16 +2444,8 @@ function BookingNav() {
                 return true;
         }
     };
-    // Get button label based on step
     const getButtonLabel = ()=>{
-        switch(currentStep){
-            case 'addons':
-                return selectedAddons.length > 0 ? 'Continuar' : 'Saltar';
-            case 'confirm':
-                return 'Confirmar';
-            default:
-                return 'Continuar';
-        }
+        return currentStep === 'confirm' ? 'Confirmar' : 'Continuar';
     };
     // Handle button click - for confirm step, trigger the hidden confirm button
     const handleNextClick = ()=>{
@@ -2475,8 +2459,9 @@ function BookingNav() {
             nextStep();
         }
     };
-    // For location step, selection auto-advances (no next button needed)
-    const showNextButton = currentStep !== 'location';
+    const showNextButton = true;
+    // No previous screen before services
+    const showBackButton = currentStep !== 'services';
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2484,7 +2469,7 @@ function BookingNav() {
             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "flex items-center justify-between",
                 children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                    showBackButton ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                         onClick: prevStep,
                         disabled: isLoading,
                         className: "flex items-center gap-1.5 px-4 py-2.5 text-sm text-warm-gray hover:text-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-lg hover:bg-beige-50",
@@ -2493,15 +2478,19 @@ function BookingNav() {
                                 className: "w-4 h-4"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-                                lineNumber: 83,
-                                columnNumber: 13
+                                lineNumber: 70,
+                                columnNumber: 15
                             }, this),
                             "Volver"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-                        lineNumber: 77,
-                        columnNumber: 11
+                        lineNumber: 64,
+                        columnNumber: 13
+                    }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {}, void 0, false, {
+                        fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
+                        lineNumber: 74,
+                        columnNumber: 13
                     }, this),
                     showNextButton && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                         onClick: handleNextClick,
@@ -2513,7 +2502,7 @@ function BookingNav() {
                                     className: "w-4 h-4 animate-spin"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-                                    lineNumber: 97,
+                                    lineNumber: 87,
                                     columnNumber: 19
                                 }, this),
                                 "Procesando..."
@@ -2524,7 +2513,7 @@ function BookingNav() {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-                                    lineNumber: 102,
+                                    lineNumber: 92,
                                     columnNumber: 19
                                 }, this),
                                 getButtonLabel()
@@ -2536,34 +2525,34 @@ function BookingNav() {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-                                    lineNumber: 108,
+                                    lineNumber: 98,
                                     columnNumber: 19
                                 }, this)
                             ]
                         }, void 0, true)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-                        lineNumber: 88,
+                        lineNumber: 78,
                         columnNumber: 13
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-                lineNumber: 76,
+                lineNumber: 62,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-            lineNumber: 75,
+            lineNumber: 61,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/booking/shared/BookingNav.tsx",
-        lineNumber: 74,
+        lineNumber: 60,
         columnNumber: 5
     }, this);
 }
-_s(BookingNav, "x3cVlonJxCDTwn3tspWcQakXnhU=", false, function() {
+_s(BookingNav, "QsBVXEJ8n93aYMaG8L+5xiY0Nt0=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBookingStore"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBookingStore"]

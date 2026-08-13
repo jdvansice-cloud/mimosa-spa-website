@@ -10,13 +10,10 @@ interface StepProgressProps {
 }
 
 const stepLabels: Record<number, string> = {
-  1: 'Ubicación',
-  2: 'Servicios',
-  3: 'Adicionales',
-  4: 'Fecha y Hora',
-  5: 'Terapeuta',
-  6: 'Tu Cuenta',
-  7: 'Confirmar'
+  1: 'Servicios',
+  2: 'Fecha y Hora',
+  3: 'Tu Cuenta',
+  4: 'Confirmar'
 }
 
 export function StepProgress({ currentStep, totalSteps }: StepProgressProps) {

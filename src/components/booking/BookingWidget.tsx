@@ -8,11 +8,9 @@ import { StepProgress } from './shared/StepProgress'
 import { FloatingCart } from './shared/FloatingCart'
 import { ClientSelector } from './shared/ClientSelector'
 import { BookingNav } from './shared/BookingNav'
+import { AddonsPrompt } from './shared/AddonsPrompt'
 import { AuthStep } from './steps/AuthStep'
-import { LocationStep } from './steps/LocationStep'
 import { ServiceStep } from './steps/ServiceStep'
-import { AddonsStep } from './steps/AddonsStep'
-import { StaffStep } from './steps/StaffStep'
 import { DateTimeStep } from './steps/DateTimeStep'
 import { ConfirmStep } from './steps/ConfirmStep'
 import { SuccessStep } from './steps/SuccessStep'
@@ -90,14 +88,6 @@ export function BookingWidget() {
     switch (currentStep) {
       case 'auth':
         return <AuthStep key="auth" />
-      case 'location':
-        return <LocationStep key="location" />
-      case 'services':
-        return <ServiceStep key="services" />
-      case 'addons':
-        return <AddonsStep key="addons" />
-      case 'staff':
-        return <StaffStep key="staff" />
       case 'datetime':
         return <DateTimeStep key="datetime" />
       case 'confirm':
@@ -105,7 +95,8 @@ export function BookingWidget() {
       case 'success':
         return <SuccessStep key="success" />
       default:
-        return <AuthStep key="auth" />
+        // 'services' plus normalized legacy names
+        return <ServiceStep key="services" />
     }
   }
 
@@ -118,7 +109,7 @@ export function BookingWidget() {
       {currentStep !== 'success' && isSticky && (
         <div className="fixed top-20 left-0 right-0 z-30 bg-white/95 backdrop-blur-sm shadow-md border-b border-beige-200">
           <div className="container-spa max-w-4xl px-4 py-2">
-            <StepProgress currentStep={stepNumber} totalSteps={7} />
+            <StepProgress currentStep={stepNumber} totalSteps={4} />
           </div>
         </div>
       )}
@@ -127,7 +118,7 @@ export function BookingWidget() {
         {/* Header with Progress - Normal position */}
         {currentStep !== 'success' && (
           <div className="bg-gradient-to-r from-gold/10 to-gold/5 px-4 py-3 border-b border-beige-200">
-            <StepProgress currentStep={stepNumber} totalSteps={7} />
+            <StepProgress currentStep={stepNumber} totalSteps={4} />
           </div>
         )}
 
@@ -163,6 +154,9 @@ export function BookingWidget() {
           <div className="h-20" />
         )}
       </div>
+
+      {/* Add-ons carousel popup (shown when leaving the services step) */}
+      <AddonsPrompt />
 
       {/* Floating Cart Overlay - triggered by cart icon in StepProgress */}
       <FloatingCart />

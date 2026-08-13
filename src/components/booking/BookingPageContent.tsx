@@ -74,9 +74,10 @@ function BookingPageInner() {
         }
       }
 
-      // Old persisted sessions may still sit on the retired auth-first step.
-      if (currentStep === 'auth') {
-        setStep('location')
+      // Old auth-FIRST persisted sessions have an empty cart at 'auth' — send
+      // those to services. A cart mid-flow at auth (auth-last) stays put.
+      if (currentStep === 'auth' && useBookingStore.getState().selectedServices.length === 0) {
+        setStep('services')
       }
 
       // Show the widget now — everything below runs in the background.

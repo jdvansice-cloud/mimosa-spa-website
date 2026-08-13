@@ -1,9 +1,142 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Calendar, Loader2, Clock, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar, Loader2, Clock, ChevronLeft, ChevronRight, User, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
+import type { MindbodyStaff } from '@/types/booking'
+
+// P2: the therapist choice is an optional inline picker on this screen —
+// default stays "Cualquier terapeuta" (null), no mandatory extra tap.
+function TherapistPicker({ availableStaffIds }: { availableStaffIds: number[] }) {
+  const {
+    selectedLocation,
+    staff,
+    setStaffList,
+    selectedStaff,
+    setStaff,
+  } = useBookingStore()
+
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [localStaff, setLocalStaff] = useState<MindbodyStaff[]>([])
+  const [isLoadingStaff, setIsLoadingStaff] = useState(false)
+
+  useEffect(() => {
+    async function fetchStaff() {
+      if (!selectedLocation || availableStaffIds.length === 0) {
+        setLocalStaff([])
+        return
+      }
+      if (staff.length > 0) {
+        setLocalStaff(staff.filter(s => availableStaffIds.includes(s.Id)))
+        return
+      }
+      setIsLoadingStaff(true)
+      try {
+        const response = await fetch(`/api/mindbody/staff?locationId=${selectedLocation.Id}`)
+        const data = await response.json()
+        if (response.ok) {
+          setStaffList(data.staff)
+          setLocalStaff((data.staff as MindbodyStaff[]).filter(s => availableStaffIds.includes(s.Id)))
+        }
+      } catch {
+        // Picker is optional — "Cualquier terapeuta" always works
+      } finally {
+        setIsLoadingStaff(false)
+      }
+    }
+    fetchStaff()
+  }, [selectedLocation, availableStaffIds, staff, setStaffList])
+
+  if (availableStaffIds.length === 0) return null
+
+  const staffName = (s: MindbodyStaff) =>
+    s.DisplayName || `${s.FirstName} ${s.LastName}`.trim()
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-beige-200 rounded-xl p-4"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-beige-100 rounded-lg flex items-center justify-center">
+            <User className="w-5 h-5 text-gold" />
+          </div>
+          <div>
+            <p className="text-xs text-warm-gray">Terapeuta</p>
+            <p className="text-dark font-semibold text-sm">
+              {selectedStaff ? staffName(selectedStaff) : 'Cualquier disponible'}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-sm text-gold-600 hover:text-gold-700 font-medium"
+        >
+          {isExpanded ? 'Cerrar' : selectedStaff ? 'Cambiar' : 'Elegir terapeuta'}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            {isLoadingStaff ? (
+              <div className="flex items-center gap-2 pt-4 text-warm-gray text-sm">
+                <Loader2 className="w-4 h-4 animate-spin text-gold" />
+                Cargando terapeutas...
+              </div>
+            ) : (
+              <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <button
+                  onClick={() => { setStaff(null); setIsExpanded(false) }}
+                  className={`
+                    px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all text-left
+                    flex items-center justify-between gap-1
+                    ${!selectedStaff
+                      ? 'border-gold bg-gold/5 text-dark'
+                      : 'border-beige-200 bg-white text-warm-gray hover:border-gold/50'
+                    }
+                  `}
+                >
+                  Cualquiera
+                  {!selectedStaff && <Check className="w-4 h-4 text-gold" />}
+                </button>
+                {localStaff.map((member) => {
+                  const isSelected = selectedStaff?.Id === member.Id
+                  return (
+                    <button
+                      key={member.Id}
+                      onClick={() => { setStaff(member); setIsExpanded(false) }}
+                      className={`
+                        px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all text-left
+                        flex items-center justify-between gap-1
+                        ${isSelected
+                          ? 'border-gold bg-gold/5 text-dark'
+                          : 'border-beige-200 bg-white text-warm-gray hover:border-gold/50'
+                        }
+                      `}
+                    >
+                      <span className="truncate">{staffName(member)}</span>
+                      {isSelected && <Check className="w-4 h-4 text-gold flex-shrink-0" />}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
 
 interface TimeSlot {
   time: string
@@ -367,6 +500,11 @@ export function DateTimeStep() {
                   <Clock className="w-5 h-5 text-gold" />
                 </div>
               </motion.div>
+            )}
+
+            {/* Optional therapist picker (P2 — no separate staff screen) */}
+            {selectedDate && selectedTime && selectedSlot && (
+              <TherapistPicker availableStaffIds={selectedSlot.availableStaffIds} />
             )}
           </div>
         )}

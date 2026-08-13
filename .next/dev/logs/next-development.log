@@ -40,3 +40,2246 @@
 [00:32:54.271] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [00:37:07.328] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
 [00:37:07.328] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:46:23.667] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:46:23.857] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:46:23.857] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:46:24.009] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:46:25.103] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:46:31.894] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:46:31.895] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:46:31.896] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:46:31.899] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:46:31.899] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:46:31.901] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:46:32.221] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:46:32.233] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:46:32.610] Server  LOG     Total sale/services from Mindbody: 62
+[00:46:32.610] Server  LOG     Total online session types: 95
+[00:46:32.611] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:46:32.611] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:46:32.611] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:46:32.611] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:46:32.612] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:46:32.612] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:46:32.612] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:46:32.612] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:46:32.612] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:46:32.612] Server  LOG     All online bookable services for promotions (no filters): 62
+[00:46:32.612] Server  LOG     Total online services for promotions: 62
+[00:46:32.612] Server  LOG     Filtered services count: 62
+[00:46:32.619] Server  LOG     Total sale/services from Mindbody: 62
+[00:46:32.619] Server  LOG     Total online session types: 95
+[00:46:32.619] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:46:32.619] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:46:32.619] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:46:32.620] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:46:32.620] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:46:32.620] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:46:32.620] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:46:32.620] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:46:32.620] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:46:32.620] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:46:32.620] Server  LOG     Services with prices (tax removed): 43
+[00:46:32.621] Server  LOG     Total online services from Mindbody: 43
+[00:46:32.621] Server  LOG     Sample service: "{\"Id\":61,\"ProductId\":10116,\"Name\":\"Escape al Cielo\",\"Description\":\"<p style=\\\"text-align: left\\\">Tu pasaporte hacia la serenidad absoluta. Elige entre el Masaje Orient-thai o el Escape Indú y combínalo con nuestro Oriental Foot Massage. Dos horas de tratamientos complementarios que refrescan, revitalizan y calman mente, cuerpo y alma. Una experiencia celestial de bienestar integral.</p>\",\"Duration\":120,\"Price\":149,\"OnlinePrice\":149,\"TaxIncluded\":10.43,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:46:32.622] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
+[00:46:32.622] Server  LOG     ProgramIds found: [5,4,6]
+[00:46:32.622] Server  LOG     Filtered services count: 43
+[00:47:14.800] Server  LOG     Fetching services for locationId: "1" "type:" "addons" "includeOffline:" false "forPromotions:" false
+[00:47:14.801] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:47:14.808] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:47:15.211] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:47:15.821] Server  LOG     Total sale/services from Mindbody: 62
+[00:47:15.821] Server  LOG     Total online session types: 95
+[00:47:15.822] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:47:15.822] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:47:15.822] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:47:15.822] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:47:15.822] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:47:15.822] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:47:15.822] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:47:15.822] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:47:15.822] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:47:15.823] Server  LOG     Online bookable addons (Adicionales only): 11
+[00:47:15.823] Server  LOG     Addons with prices (tax removed): 11
+[00:47:15.823] Server  LOG     Filtered services count: 11
+[00:47:15.831] Server  LOG     Fetching services for locationId: "1" "type:" "addons" "includeOffline:" false "forPromotions:" false
+[00:47:15.832] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:47:15.832] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:47:16.062] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:47:16.482] Server  LOG     Total sale/services from Mindbody: 62
+[00:47:16.482] Server  LOG     Total online session types: 95
+[00:47:16.483] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:47:16.483] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:47:16.483] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:47:16.483] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:47:16.484] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:47:16.484] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:47:16.484] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:47:16.485] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:47:16.485] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:47:16.485] Server  LOG     Online bookable addons (Adicionales only): 11
+[00:47:16.486] Server  LOG     Addons with prices (tax removed): 11
+[00:47:16.486] Server  LOG     Filtered services count: 11
+[00:48:06.077] Server  LOG     getStaff called with locationId: 1
+[00:48:06.077] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:48:06.079] Browser LOG     Fetching availability with params: {"addons":[{"id":210,"name":"Exfoliacion de pies (10min)"}],"duration":70,"locationId":1,"serviceIds":"49,210","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:48:06.079] Browser LOG     Fetching availability with params: {"addons":[{"id":210,"name":"Exfoliacion de pies (10min)"}],"duration":70,"locationId":1,"serviceIds":"49,210","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:48:06.762] Server  LOG     Total staff from Mindbody: 40
+[00:48:06.763] Server  LOG     Filtered staff (appointment providers): 40
+[00:48:06.765] Server  LOG     getScheduleItems called with: {}
+[00:48:06.766] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:48:09.227] Server  LOG     Schedule items response: 36 "staff members"
+[00:48:09.251] Server  LOG     getStaff called with locationId: 1
+[00:48:09.252] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:48:09.521] Server  LOG     Total staff from Mindbody: 40
+[00:48:09.521] Server  LOG     Filtered staff (appointment providers): 40
+[00:48:09.522] Server  LOG     getScheduleItems called with: {}
+[00:48:09.522] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:48:11.628] Server  LOG     Schedule items response: 36 "staff members"
+[00:48:32.712] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
+[00:48:32.712] Server  LOG     getStaff called with locationId: 1
+[00:48:32.713] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:48:33.085] Server  LOG     Total staff from Mindbody: 40
+[00:48:33.085] Server  LOG     Filtered staff (appointment providers): 40
+[00:48:33.085] Server  LOG     Staff members found: 40
+[00:48:33.099] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
+[00:48:33.099] Server  LOG     getStaff called with locationId: 1
+[00:48:33.099] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:48:33.345] Server  LOG     Total staff from Mindbody: 40
+[00:48:33.345] Server  LOG     Filtered staff (appointment providers): 40
+[00:48:33.345] Server  LOG     Staff members found: 40
+[00:49:27.721] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:49:27.894] Server  LOG     getStaff called with locationId: 1
+[00:49:27.894] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:49:27.954] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:49:27.954] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:49:27.954] Browser LOG     Fetching availability with params: {"addons":[{"id":210,"name":"Exfoliacion de pies (10min)"}],"duration":70,"locationId":1,"serviceIds":"49,210","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:49:27.954] Browser LOG     Fetching availability with params: {"addons":[{"id":210,"name":"Exfoliacion de pies (10min)"}],"duration":70,"locationId":1,"serviceIds":"49,210","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:49:28.216] Server  LOG     Total staff from Mindbody: 40
+[00:49:28.216] Server  LOG     Filtered staff (appointment providers): 40
+[00:49:28.217] Server  LOG     getScheduleItems called with: {}
+[00:49:28.217] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:49:31.009] Server  LOG     Schedule items response: 36 "staff members"
+[00:49:31.030] Server  LOG     getStaff called with locationId: 1
+[00:49:31.030] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:49:31.060] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
+[00:49:31.060] Server  LOG     getStaff called with locationId: 1
+[00:49:31.060] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:49:31.268] Server  LOG     Total staff from Mindbody: 40
+[00:49:31.268] Server  LOG     Filtered staff (appointment providers): 40
+[00:49:31.269] Server  LOG     getScheduleItems called with: {}
+[00:49:31.269] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:49:31.352] Server  LOG     Total staff from Mindbody: 40
+[00:49:31.353] Server  LOG     Filtered staff (appointment providers): 40
+[00:49:31.353] Server  LOG     Staff members found: 40
+[00:49:31.361] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
+[00:49:31.361] Server  LOG     getStaff called with locationId: 1
+[00:49:31.362] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:49:31.612] Server  LOG     Total staff from Mindbody: 40
+[00:49:31.612] Server  LOG     Filtered staff (appointment providers): 40
+[00:49:31.612] Server  LOG     Staff members found: 40
+[00:49:33.832] Server  LOG     Schedule items response: 36 "staff members"
+[00:51:27.613] Server  LOG     ✓ Compiled in 43ms
+[00:51:27.630] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
+[00:51:27.630] Server  LOG     getStaff called with locationId: 1
+[00:51:27.630] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:51:27.635] Server  LOG     getStaff called with locationId: 1
+[00:51:27.635] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:51:27.707] Browser LOG     Fetching availability with params: {"addons":[{"id":210,"name":"Exfoliacion de pies (10min)"}],"duration":70,"locationId":1,"serviceIds":"49,210","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:51:28.246] Server  LOG     Total staff from Mindbody: 40
+[00:51:28.246] Server  LOG     Filtered staff (appointment providers): 40
+[00:51:28.246] Server  LOG     getScheduleItems called with: {}
+[00:51:28.247] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:51:28.248] Server  LOG     Total staff from Mindbody: 40
+[00:51:28.248] Server  LOG     Filtered staff (appointment providers): 40
+[00:51:28.248] Server  LOG     Staff members found: 40
+[00:51:30.785] Server  LOG     Schedule items response: 36 "staff members"
+[00:51:34.515] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.519] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.522] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.525] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.529] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.531] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.534] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.536] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.539] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.541] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.544] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.546] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.549] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.551] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.553] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.555] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.558] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.560] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.563] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.564] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.569] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.571] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.573] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.577] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.580] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.582] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.584] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.586] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.590] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.591] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.593] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.595] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:51:34.597] Server  LOG     ✓ Compiled in 173ms
+[00:51:34.703] Browser ERROR   ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:52:11.107] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.115] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.118] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.131] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.139] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.145] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.149] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.152] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.158] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.163] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.166] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.169] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.172] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.176] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.180] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.183] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.190] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.193] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.195] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.197] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.200] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.202] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.205] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.207] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.212] Server  LOG     ✓ Compiled in 169ms
+[00:52:11.215] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.217] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.219] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.221] Server  ERROR   ⨯ ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:52:11.314] Browser ERROR   ./src/components/booking/steps/ServiceStep.tsx:10:1
+Module not found: Can't resolve '../shared/InlineAddons'
+   8 | import type { Promotion } from '@/types'
+   9 | import { LocationPills } from '../shared/LocationPills'
+> 10 | import { InlineAddons } from '../shared/InlineAddons'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  11 |
+  12 | // Description Modal Component
+  13 | function DescriptionModal({
+
+Import traces:
+  Client Component Browser:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component Browser]
+    ./src/components/booking/BookingWidget.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Client Component Browser]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/booking/steps/ServiceStep.tsx [Client Component SSR]
+    ./src/components/booking/BookingWidget.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Client Component SSR]
+    ./src/components/booking/BookingPageContent.tsx [Server Component]
+    ./src/app/[locale]/reservar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[00:52:40.112] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:52:40.321] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:52:40.329] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:52:40.329] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:52:41.336] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:52:41.353] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:52:41.354] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:52:41.355] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:52:41.357] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:52:41.357] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:52:41.358] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:52:41.681] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:52:41.682] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:52:42.049] Server  LOG     Total sale/services from Mindbody: 62
+[00:52:42.050] Server  LOG     Total online session types: 95
+[00:52:42.050] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:52:42.051] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:52:42.051] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:52:42.051] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:52:42.052] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:52:42.052] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:52:42.052] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:52:42.052] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:52:42.053] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:52:42.053] Server  LOG     All online bookable services for promotions (no filters): 62
+[00:52:42.053] Server  LOG     Total online services for promotions: 62
+[00:52:42.053] Server  LOG     Filtered services count: 62
+[00:52:42.058] Server  LOG     Total sale/services from Mindbody: 62
+[00:52:42.058] Server  LOG     Total online session types: 95
+[00:52:42.058] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:52:42.059] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:52:42.059] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:52:42.059] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:52:42.059] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:52:42.059] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:52:42.059] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:52:42.059] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:52:42.060] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:52:42.060] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:52:42.060] Server  LOG     Services with prices (tax removed): 43
+[00:52:42.060] Server  LOG     Total online services from Mindbody: 43
+[00:52:42.060] Server  LOG     Sample service: "{\"Id\":61,\"ProductId\":10116,\"Name\":\"Escape al Cielo\",\"Description\":\"<p style=\\\"text-align: left\\\">Tu pasaporte hacia la serenidad absoluta. Elige entre el Masaje Orient-thai o el Escape Indú y combínalo con nuestro Oriental Foot Massage. Dos horas de tratamientos complementarios que refrescan, revitalizan y calman mente, cuerpo y alma. Una experiencia celestial de bienestar integral.</p>\",\"Duration\":120,\"Price\":149,\"OnlinePrice\":149,\"TaxIncluded\":10.43,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:52:42.061] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
+[00:52:42.061] Server  LOG     ProgramIds found: [5,4,6]
+[00:52:42.061] Server  LOG     Filtered services count: 43
+[00:52:58.894] Server  LOG     Fetching services for locationId: "1" "type:" "addons" "includeOffline:" false "forPromotions:" false
+[00:52:58.894] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:52:58.895] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:52:59.198] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:52:59.709] Server  LOG     Total sale/services from Mindbody: 62
+[00:52:59.709] Server  LOG     Total online session types: 95
+[00:52:59.710] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:52:59.711] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:52:59.714] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:52:59.714] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:52:59.714] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:52:59.715] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:52:59.715] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:52:59.715] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:52:59.715] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:52:59.716] Server  LOG     Online bookable addons (Adicionales only): 11
+[00:52:59.716] Server  LOG     Addons with prices (tax removed): 11
+[00:52:59.716] Server  LOG     Filtered services count: 11
+[00:53:17.394] Server  LOG     getStaff called with locationId: 1
+[00:53:17.395] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:53:17.490] Browser LOG     Fetching availability with params: {"addons":[{"id":210,"name":"Exfoliacion de pies (10min)"}],"duration":70,"locationId":1,"serviceIds":"49,210","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:53:17.490] Browser LOG     Fetching availability with params: {"addons":[{"id":210,"name":"Exfoliacion de pies (10min)"}],"duration":70,"locationId":1,"serviceIds":"49,210","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:53:17.760] Server  LOG     Total staff from Mindbody: 40
+[00:53:17.761] Server  LOG     Filtered staff (appointment providers): 40
+[00:53:17.761] Server  LOG     getScheduleItems called with: {}
+[00:53:17.762] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:53:20.242] Server  LOG     Schedule items response: 36 "staff members"
+[00:53:20.260] Server  LOG     getStaff called with locationId: 1
+[00:53:20.262] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:53:20.504] Server  LOG     Total staff from Mindbody: 40
+[00:53:20.504] Server  LOG     Filtered staff (appointment providers): 40
+[00:53:20.504] Server  LOG     getScheduleItems called with: {}
+[00:53:20.505] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:53:22.769] Server  LOG     Schedule items response: 36 "staff members"
+[00:54:10.670] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:54:10.800] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:54:10.803] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:54:10.804] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:54:10.805] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:54:10.808] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:54:10.809] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:54:10.810] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:54:10.816] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:54:10.816] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:54:11.529] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:54:11.557] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:54:11.727] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:54:11.926] Server  LOG     Total sale/services from Mindbody: 62
+[00:54:11.927] Server  LOG     Total online session types: 95
+[00:54:11.927] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:54:11.928] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:54:11.928] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:54:11.928] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:54:11.928] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:54:11.928] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:54:11.929] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:54:11.929] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:54:11.929] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:54:11.929] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:54:11.929] Server  LOG     Services with prices (tax removed): 43
+[00:54:11.930] Server  LOG     Total online services from Mindbody: 43
+[00:54:11.930] Server  LOG     Sample service: "{\"Id\":61,\"ProductId\":10116,\"Name\":\"Escape al Cielo\",\"Description\":\"<p style=\\\"text-align: left\\\">Tu pasaporte hacia la serenidad absoluta. Elige entre el Masaje Orient-thai o el Escape Indú y combínalo con nuestro Oriental Foot Massage. Dos horas de tratamientos complementarios que refrescan, revitalizan y calman mente, cuerpo y alma. Una experiencia celestial de bienestar integral.</p>\",\"Duration\":120,\"Price\":149,\"OnlinePrice\":149,\"TaxIncluded\":10.43,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:54:11.930] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
+[00:54:11.930] Server  LOG     ProgramIds found: [5,4,6]
+[00:54:11.930] Server  LOG     Filtered services count: 43
+[00:54:11.942] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:54:11.943] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:54:11.944] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:54:11.946] Server  LOG     Total sale/services from Mindbody: 62
+[00:54:11.947] Server  LOG     Total online session types: 95
+[00:54:11.947] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:54:11.947] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:54:11.947] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:54:11.948] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:54:11.948] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:54:11.948] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:54:11.948] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:54:11.948] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:54:11.949] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:54:11.949] Server  LOG     All online bookable services for promotions (no filters): 62
+[00:54:11.949] Server  LOG     Total online services for promotions: 62
+[00:54:11.949] Server  LOG     Filtered services count: 62
+[00:54:11.972] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:54:11.973] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:54:11.973] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:54:12.261] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:54:12.626] Server  LOG     Total sale/services from Mindbody: 62
+[00:54:12.626] Server  LOG     Total online session types: 95
+[00:54:12.627] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:54:12.627] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:54:12.627] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:54:12.628] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:54:12.628] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:54:12.628] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:54:12.628] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:54:12.628] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:54:12.629] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:54:12.629] Server  LOG     All online bookable services for promotions (no filters): 62
+[00:54:12.629] Server  LOG     Total online services for promotions: 62
+[00:54:12.629] Server  LOG     Filtered services count: 62
+[00:54:12.963] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:54:12.963] Server  LOG     Total sale/services from Mindbody: 62
+[00:54:12.964] Server  LOG     Total online session types: 95
+[00:54:12.964] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:54:12.964] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:54:12.965] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:54:12.965] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:54:12.965] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:54:12.965] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:54:12.966] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:54:12.966] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:54:12.966] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:54:12.966] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:54:12.967] Server  LOG     Services with prices (tax removed): 43
+[00:54:12.967] Server  LOG     Total online services from Mindbody: 43
+[00:54:12.967] Server  LOG     Sample service: "{\"Id\":61,\"ProductId\":10116,\"Name\":\"Escape al Cielo\",\"Description\":\"<p style=\\\"text-align: left\\\">Tu pasaporte hacia la serenidad absoluta. Elige entre el Masaje Orient-thai o el Escape Indú y combínalo con nuestro Oriental Foot Massage. Dos horas de tratamientos complementarios que refrescan, revitalizan y calman mente, cuerpo y alma. Una experiencia celestial de bienestar integral.</p>\",\"Duration\":120,\"Price\":149,\"OnlinePrice\":149,\"TaxIncluded\":10.43,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:54:12.967] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
+[00:54:12.968] Server  LOG     ProgramIds found: [5,4,6]
+[00:54:12.968] Server  LOG     Filtered services count: 43
+[00:54:33.739] Server  LOG     Fetching services for locationId: "1" "type:" "addons" "includeOffline:" false "forPromotions:" false
+[00:54:33.740] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:54:33.742] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:54:34.071] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:54:34.420] Server  LOG     Total sale/services from Mindbody: 62
+[00:54:34.420] Server  LOG     Total online session types: 95
+[00:54:34.421] Server  LOG     Filtered sale services (SellOnline, single session, has price): 62
+[00:54:34.421] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:54:34.421] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:54:34.422] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:54:34.422] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:54:34.422] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:54:34.423] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:54:34.423] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:54:34.423] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:54:34.423] Server  LOG     Online bookable addons (Adicionales only): 11
+[00:54:34.424] Server  LOG     Addons with prices (tax removed): 11
+[00:54:34.424] Server  LOG     Filtered services count: 11
+[00:54:43.000] Server  LOG     getStaff called with locationId: 1
+[00:54:43.000] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:54:43.095] Browser LOG     Fetching availability with params: {"addons":[],"duration":60,"locationId":1,"serviceIds":"49","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:54:43.095] Browser LOG     Fetching availability with params: {"addons":[],"duration":60,"locationId":1,"serviceIds":"49","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[00:54:43.309] Server  LOG     Total staff from Mindbody: 40
+[00:54:43.309] Server  LOG     Filtered staff (appointment providers): 40
+[00:54:43.310] Server  LOG     getScheduleItems called with: {}
+[00:54:43.311] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:54:45.901] Server  LOG     Schedule items response: 36 "staff members"
+[00:54:45.926] Server  LOG     getStaff called with locationId: 1
+[00:54:45.927] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:54:46.225] Server  LOG     Total staff from Mindbody: 40
+[00:54:46.225] Server  LOG     Filtered staff (appointment providers): 40
+[00:54:46.226] Server  LOG     getScheduleItems called with: {}
+[00:54:46.226] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:54:48.866] Server  LOG     Schedule items response: 36 "staff members"
+[01:16:59.822] Server  LOG     ✓ Compiled in 117ms
+[01:17:06.294] Server  LOG     ✓ Compiled in 227ms
+[01:17:06.905] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:17:07.135] Server  LOG     getStaff called with locationId: 1
+[01:17:07.166] Browser LOG     Fetching availability with params: {"addons":[],"duration":60,"locationId":1,"serviceIds":"49","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[01:17:07.166] Browser LOG     Fetching availability with params: {"addons":[],"duration":60,"locationId":1,"serviceIds":"49","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[01:17:07.830] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[01:17:08.116] Server  LOG     Total staff from Mindbody: 40
+[01:17:08.117] Server  LOG     Filtered staff (appointment providers): 40
+[01:17:08.117] Server  LOG     getScheduleItems called with: {}
+[01:17:08.118] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[01:17:10.643] Server  LOG     Schedule items response: 36 "staff members"
+[01:17:10.679] Server  LOG     getStaff called with locationId: 1
+[01:17:10.679] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[01:17:10.971] Server  LOG     Total staff from Mindbody: 40
+[01:17:10.972] Server  LOG     Filtered staff (appointment providers): 40
+[01:17:10.972] Server  LOG     getScheduleItems called with: {}
+[01:17:10.972] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[01:17:13.353] Server  LOG     Schedule items response: 36 "staff members"
+[01:17:15.126] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:17:15.299] Server  LOG     getStaff called with locationId: 1
+[01:17:15.299] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[01:17:15.526] Server  LOG     Total staff from Mindbody: 40
+[01:17:15.526] Server  LOG     Filtered staff (appointment providers): 40
+[01:17:15.526] Server  LOG     getScheduleItems called with: {}
+[01:17:15.527] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[01:17:16.167] Browser LOG     Fetching availability with params: {"addons":[],"duration":60,"locationId":1,"serviceIds":"49","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[01:17:16.167] Browser LOG     Fetching availability with params: {"addons":[],"duration":60,"locationId":1,"serviceIds":"49","services":[{"id":49,"name":"Mimosa Relax - 60 min"}]}
+[01:17:18.055] Server  LOG     Schedule items response: 36 "staff members"
+[01:17:18.067] Server  LOG     getStaff called with locationId: 1
+[01:17:18.068] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[01:17:18.309] Server  LOG     Total staff from Mindbody: 40
+[01:17:18.309] Server  LOG     Filtered staff (appointment providers): 40
+[01:17:18.310] Server  LOG     getScheduleItems called with: {}
+[01:17:18.310] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-13&endDate=2026-09-12&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[01:17:20.763] Server  LOG     Schedule items response: 36 "staff members"

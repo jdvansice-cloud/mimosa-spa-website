@@ -24,7 +24,7 @@ export function BookingButton({ service, locale, label, className }: BookingButt
     // go straight to the widget for everyone.
     reset()
     addService(service)
-    setStep('location')
+    setStep('services')
     router.push(`/${locale}/reservar?serviceId=${service.Id}`)
   }, [isAuthenticated, mindbodyClientId, service, locale, router, addService, setStep, reset])
 

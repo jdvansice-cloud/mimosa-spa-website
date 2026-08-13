@@ -708,6 +708,8 @@ function sanitizeError(error) {
 __turbopack_context__.s([
     "CART_TTL_HOURS",
     ()=>CART_TTL_HOURS,
+    "normalizeStep",
+    ()=>normalizeStep,
     "selectCanProceed",
     ()=>selectCanProceed,
     "selectCurrentStepNumber",
@@ -732,7 +734,7 @@ const ITBM_RATE = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$
 // ===========================================
 const initialState = {
     // Progress
-    currentStep: 'location',
+    currentStep: 'services',
     isLoading: false,
     error: null,
     slotConflictNotice: null,
@@ -772,24 +774,31 @@ const initialState = {
     // Pricing
     pricing: null,
     // Cart UI
-    isCartOpen: false
+    isCartOpen: false,
+    // Add-ons prompt
+    addonsPromptOpen: false,
+    addonsPromptDismissed: false
 };
 // ===========================================
 // HELPER FUNCTIONS
 // ===========================================
-// Step order: auth -> location -> services -> addons -> datetime -> staff -> confirm -> success
-// Auth moved LAST (before confirm): identity is only needed at POST /book,
-// so visitors browse services and real availability before any login wall.
+// P2 collapse: 4 visible screens. Location is a pill inside services,
+// add-ons are an inline section there too, and the therapist picker lives on
+// the date/time screen. Auth stays LAST (identity only needed at POST /book).
+// The removed step names ('location'/'addons'/'staff') remain in the
+// BookingStep type for persisted-cart migration only.
 const STEP_ORDER = [
-    'location',
     'services',
-    'addons',
     'datetime',
-    'staff',
     'auth',
     'confirm',
     'success'
 ];
+function normalizeStep(step) {
+    if (step === 'location' || step === 'addons') return 'services';
+    if (step === 'staff') return 'datetime';
+    return step;
+}
 function getNextStep(currentStep) {
     const currentIndex = STEP_ORDER.indexOf(currentStep);
     return currentIndex < STEP_ORDER.length - 1 ? STEP_ORDER[currentIndex + 1] : currentStep;
@@ -799,7 +808,7 @@ function getPrevStep(currentStep) {
     return currentIndex > 0 ? STEP_ORDER[currentIndex - 1] : currentStep;
 }
 function getStepByNumber(stepNumber) {
-    return STEP_ORDER[stepNumber - 1] || 'location';
+    return STEP_ORDER[stepNumber - 1] || 'services';
 }
 function calculateTotalDuration(services, addons) {
     const serviceDuration = services.reduce((sum, s)=>sum + s.Duration, 0);
@@ -839,7 +848,7 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
         // NAVIGATION ACTIONS
         // ===========================================
         setStep: (step)=>set({
-                currentStep: step
+                currentStep: normalizeStep(step)
             }, false, 'setStep'),
         nextStep: ()=>set((state)=>({
                     currentStep: getNextStep(state.currentStep),
@@ -918,6 +927,8 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
             // Clear staff, dates, and slots when location changes (they're location-specific)
             set({
                 selectedLocation: location,
+                services: [],
+                addons: [],
                 staff: [],
                 selectedStaff: null,
                 availableDates: [],
@@ -1037,8 +1048,8 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                 selectedServices: promotionServices,
                 selectedAddons: [],
                 pricing: null,
-                // Skip to addons step if promotion is loaded
-                currentStep: 'addons'
+                // Stay on services — add-ons are an inline section there now
+                currentStep: 'services'
             }, false, 'loadPromotion');
         },
         clearPromotion: ()=>{
@@ -1134,6 +1145,15 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
         toggleCart: ()=>set((state)=>({
                     isCartOpen: !state.isCartOpen
                 }), false, 'toggleCart'),
+        openAddonsPrompt: ()=>set({
+                addonsPromptOpen: true
+            }, false, 'openAddonsPrompt'),
+        // Closing counts as "asked and answered" — don't re-prompt when the
+        // customer navigates back through the services step later.
+        closeAddonsPrompt: ()=>set({
+                addonsPromptOpen: false,
+                addonsPromptDismissed: true
+            }, false, 'closeAddonsPrompt'),
         // ===========================================
         // RESET ACTIONS
         // ===========================================
@@ -1159,7 +1179,7 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                     globalDiscountPercent: state.globalDiscountPercent,
                     globalDiscountActive: state.globalDiscountActive,
                     // Start at location step (auth already done)
-                    currentStep: 'location',
+                    currentStep: 'services',
                     isCartOpen: false
                 }), false, 'resetForNewBooking')
     }), {
@@ -1169,12 +1189,18 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
     // On top of that, carts expire after CART_TTL_HOURS even in a
     // long-lived tab (getItem returns null → rehydration is skipped).
     storage: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$middleware$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createJSONStorage"])(()=>expiringSessionStorage),
-    version: 1,
+    version: 2,
+    // v1 carts stored the old 7-step names; collapse them.
+    migrate: (persisted)=>{
+        const p = persisted;
+        if (p?.currentStep) p.currentStep = normalizeStep(p.currentStep);
+        return p;
+    },
     // Persist SELECTIONS only — never identity/PII (clientInfo), never
     // transient flags. Auth state is restored from the Supabase session.
     partialize: (state)=>({
             cartSavedAt: Date.now(),
-            currentStep: state.currentStep === 'success' || state.currentStep === 'confirm' ? 'location' : state.currentStep === 'auth' ? 'auth' : state.currentStep,
+            currentStep: state.currentStep === 'success' || state.currentStep === 'confirm' ? 'services' : state.currentStep,
             selectedLocation: state.selectedLocation,
             selectedServices: state.selectedServices,
             selectedAddons: state.selectedAddons,
@@ -1188,11 +1214,8 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
 }));
 const selectCurrentStepNumber = (state)=>{
     const steps = [
-        'location',
         'services',
-        'addons',
         'datetime',
-        'staff',
         'auth',
         'confirm',
         'success'
@@ -1209,18 +1232,10 @@ const selectCanProceed = (state)=>{
     switch(state.currentStep){
         case 'auth':
             return state.clientId !== null;
-        case 'location':
-            return state.selectedLocation !== null;
         case 'services':
-            return state.selectedServices.length > 0;
-        case 'addons':
-            return true // Addons are optional
-            ;
+            return state.selectedLocation !== null && state.selectedServices.length > 0;
         case 'datetime':
             return state.selectedDate !== null && state.selectedTime !== null;
-        case 'staff':
-            return true // "Any therapist" is valid
-            ;
         case 'confirm':
             return true;
         default:

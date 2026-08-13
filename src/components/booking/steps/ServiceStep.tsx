@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 import type { MindbodyService, PromotionWithServices } from '@/types/booking'
 import type { Promotion } from '@/types'
+import { LocationPills } from '../shared/LocationPills'
 
 // Description Modal Component
 function DescriptionModal({
@@ -457,9 +458,9 @@ export function ServiceStep() {
           setActivePromotions(promotionsWithServices)
         }
 
-        // Start with all categories collapsed (empty set)
-        // Recommendations and promotions sections start expanded
-        setExpandedCategories(new Set())
+        // P2: categories expanded by default — a hidden service used to cost
+        // 2 extra taps
+        setExpandedCategories(new Set(Object.keys(filteredGrouped)))
       } catch (err) {
         setServicesError(err instanceof Error ? err.message : 'Error de conexión')
       } finally {
@@ -562,6 +563,9 @@ export function ServiceStep() {
           Explora las categorías y agrega servicios a tu carrito
         </p>
       </div>
+
+      {/* Location pill selector (P2 — no separate location screen) */}
+      <LocationPills />
 
       {/* Global Discount Banner */}
       {showGlobalDiscount && (
@@ -810,12 +814,13 @@ export function ServiceStep() {
       )}
       
       {/* Empty State */}
-      {!isLoadingServices && Object.keys(groupedServices).length === 0 && (
+      {!isLoadingServices && selectedLocation && Object.keys(groupedServices).length === 0 && (
         <div className="text-center py-12 bg-beige-50 rounded-xl">
           <Sparkles className="w-12 h-12 text-beige-300 mx-auto mb-3" />
           <p className="text-warm-gray">No hay servicios disponibles</p>
         </div>
       )}
+
       </div>
 
       {/* Description Modal */}
