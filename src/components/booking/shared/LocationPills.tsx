@@ -6,8 +6,9 @@ import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyLocation } from '@/types/booking'
 
 // P2: location is a compact pill selector at the top of the services screen
-// (remembered per device) instead of a full first screen.
-const PREFERRED_LOCATION_KEY = 'mimosa-preferred-location'
+// instead of a full first screen. Deliberately NOT preselected: choosing the
+// spa is an explicit prerequisite before treatments appear (a silently
+// remembered spa led to bookings at the wrong location).
 
 export function LocationPills() {
   const {
@@ -37,24 +38,9 @@ export function LocationPills() {
     fetchLocations()
   }, [locations.length, setLocations])
 
-  // Preselect the remembered location once the list is available
-  useEffect(() => {
-    if (selectedLocation || locations.length === 0) return
-    try {
-      const remembered = localStorage.getItem(PREFERRED_LOCATION_KEY)
-      if (remembered) {
-        const match = locations.find(l => String(l.Id) === remembered)
-        if (match) setLocation(match)
-      }
-    } catch {}
-  }, [selectedLocation, locations, setLocation])
-
   const handleSelect = (location: MindbodyLocation) => {
     if (selectedLocation?.Id === location.Id) return
     setLocation(location)
-    try {
-      localStorage.setItem(PREFERRED_LOCATION_KEY, String(location.Id))
-    } catch {}
   }
 
   return (
