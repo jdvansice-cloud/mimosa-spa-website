@@ -15,8 +15,10 @@
     "@supabase/ssr": "^0.6.0",
     "@supabase/supabase-js": "^2.48.0",
     "framer-motion": "^11.15.0",
+    "imapflow": "^1.7.0",
     "jsbarcode": "^3.11.6",
     "lucide-react": "^0.469.0",
+    "mailparser": "^3.9.15",
     "next": "16.1.1",
     "next-intl": "^4.7.0",
     "qz-tray": "^2.2.6",
@@ -28,6 +30,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@types/jsbarcode": "^3.11.4",
+    "@types/mailparser": "^3.4.6",
     "@types/node": "^22.0.0",
     "@types/qz-tray": "^2.2.2",
     "@types/react": "^19.0.0",

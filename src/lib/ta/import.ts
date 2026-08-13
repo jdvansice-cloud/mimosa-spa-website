@@ -3,10 +3,13 @@ import { serviceClient } from '@/lib/kpis/queries'
 import { parseNgtecoExport, type PunchRow } from './parse'
 
 // ===========================================
-// NGTeco export import: hash-dedupe whole files, upsert punches on
-// punch_key (employee|date|shift index) so overlapping date-range
-// re-exports correct earlier rows instead of duplicating them, and keep
-// the original file in the private ta-files bucket for audit.
+// NGTeco export import. Punches can be mended (edited OR deleted) in the
+// NGTeco software, so the last export is the truth: before inserting, we
+// delete every existing punch inside the file's date range for the
+// employees present in the file (replace-by-window). Restricting the wipe
+// to employees in the file keeps a single-person manual export from
+// erasing everyone else. Whole files are hash-deduped, and the original
+// is kept in the private ta-files bucket for audit.
 // ===========================================
 
 export interface TaImportResult {
@@ -23,7 +26,8 @@ const punchKey = (p: PunchRow): string =>
   `${p.employeeName.toLowerCase().trim()}|${p.workDate}|${p.pairIndex}`
 
 export async function importAttendanceFiles(
-  files: Array<{ filename: string; buffer: Buffer }>
+  files: Array<{ filename: string; buffer: Buffer }>,
+  source: 'manual' | 'email' = 'manual'
 ): Promise<TaImportResult[]> {
   const supabase = serviceClient()
   const results: TaImportResult[] = []
@@ -39,21 +43,41 @@ export async function importAttendanceFiles(
 
       const parsed = parseNgtecoExport(buffer)
 
-      const { data: fileRow, error: fileErr } = await supabase
+      const filePayload = {
+        filename,
+        file_hash: hash,
+        period_start: parsed.periodStart,
+        period_end: parsed.periodEnd,
+      }
+      let { data: fileRow, error: fileErr } = await supabase
         .from('ta_files')
-        .insert({
-          filename,
-          file_hash: hash,
-          period_start: parsed.periodStart,
-          period_end: parsed.periodEnd,
-        })
+        .insert({ ...filePayload, source })
         .select('id')
         .single()
+      if (fileErr?.message.includes("'source' column")) {
+        // migration 20260728_ta_source not applied yet — import anyway
+        ;({ data: fileRow, error: fileErr } = await supabase
+          .from('ta_files')
+          .insert(filePayload)
+          .select('id')
+          .single())
+      }
       if (fileErr || !fileRow) throw new Error(fileErr?.message ?? 'no file row')
       const fileId = fileRow.id as number
 
-      // Upsert in chunks; a punch_key hit re-points the row at this file
-      // and refreshes its times (corrective re-export wins).
+      // Last export wins: wipe this window for the employees in the file so
+      // punches deleted in a mend disappear here too, then insert fresh.
+      if (parsed.periodStart && parsed.periodEnd) {
+        const names = [...new Set(parsed.punches.map(p => p.employeeName))]
+        const { error: delErr } = await supabase
+          .from('ta_punches')
+          .delete()
+          .gte('work_date', parsed.periodStart)
+          .lte('work_date', parsed.periodEnd)
+          .in('employee_name', names)
+        if (delErr) throw new Error(delErr.message)
+      }
+
       const rows = parsed.punches.map(p => ({
         file_id: fileId,
         employee_name: p.employeeName,
