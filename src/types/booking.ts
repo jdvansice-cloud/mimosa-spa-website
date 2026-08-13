@@ -93,23 +93,23 @@ export type BookingStep =
   | 'success'
 
 export const BOOKING_STEPS: BookingStep[] = [
-  'auth',
   'location',
   'services',
   'addons',
   'datetime',  // Date/time before staff
   'staff',     // Staff after date/time
+  'auth',      // Identity last — only needed to confirm the booking
   'confirm',
   'success'
 ]
 
 export const STEP_NUMBERS: Record<BookingStep, number> = {
-  auth: 1,
-  location: 2,
-  services: 3,
-  addons: 4,
-  datetime: 5,  // Now step 5
-  staff: 6,     // Now step 6
+  location: 1,
+  services: 2,
+  addons: 3,
+  datetime: 4,
+  staff: 5,
+  auth: 6,     // Identity last
   confirm: 7,
   success: 8
 }

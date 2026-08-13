@@ -1261,14 +1261,9 @@ function HomeBookingButton({ locale, children, className, onClick }) {
     const handleClick = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(()=>{
         // Call optional onClick handler (e.g., close mobile menu)
         onClick?.();
-        if (isAuthenticated && mindbodyClientId) {
-            // User is logged in - go directly to booking
-            router.push(`/${locale}/reservar`);
-        } else {
-            // User is not logged in - redirect to login with redirect back to booking
-            const redirectUrl = encodeURIComponent(`/${locale}/reservar`);
-            router.push(`/${locale}/portal/login?redirect=${redirectUrl}`);
-        }
+        // Auth happens at the end of the flow now — everyone goes straight to
+        // the widget and browses availability first.
+        router.push(`/${locale}/reservar`);
     }, [
         isAuthenticated,
         mindbodyClientId,
@@ -1282,7 +1277,7 @@ function HomeBookingButton({ locale, children, className, onClick }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/src/components/shared/HomeBookingButton.tsx",
-        lineNumber: 41,
+        lineNumber: 36,
         columnNumber: 5
     }, this);
 }

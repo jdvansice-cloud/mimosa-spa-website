@@ -20,18 +20,12 @@ export function BookingButton({ service, locale, label, className }: BookingButt
   const { addService, setStep, reset } = useBookingStore()
 
   const handleClick = useCallback(() => {
-    if (isAuthenticated && mindbodyClientId) {
-      // User is logged in - reset booking state, pre-select service, and go to location step
-      reset()
-      addService(service)
-      setStep('location')
-      // Navigate to booking page (AuthStep will auto-skip since user is already authenticated)
-      router.push(`/${locale}/reservar?serviceId=${service.Id}`)
-    } else {
-      // User is not logged in - redirect to login with redirect back to booking with service
-      const redirectUrl = encodeURIComponent(`/${locale}/reservar?serviceId=${service.Id}`)
-      router.push(`/${locale}/portal/login?redirect=${redirectUrl}`)
-    }
+    // Auth happens at the end of the flow now — pre-select the service and
+    // go straight to the widget for everyone.
+    reset()
+    addService(service)
+    setStep('location')
+    router.push(`/${locale}/reservar?serviceId=${service.Id}`)
   }, [isAuthenticated, mindbodyClientId, service, locale, router, addService, setStep, reset])
 
   return (

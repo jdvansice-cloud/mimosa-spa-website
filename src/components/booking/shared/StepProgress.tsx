@@ -10,12 +10,12 @@ interface StepProgressProps {
 }
 
 const stepLabels: Record<number, string> = {
-  1: 'Identificación',
-  2: 'Ubicación',
-  3: 'Servicios',
-  4: 'Adicionales',
-  5: 'Fecha y Hora',
-  6: 'Terapeuta',
+  1: 'Ubicación',
+  2: 'Servicios',
+  3: 'Adicionales',
+  4: 'Fecha y Hora',
+  5: 'Terapeuta',
+  6: 'Tu Cuenta',
   7: 'Confirmar'
 }
 

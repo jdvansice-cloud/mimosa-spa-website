@@ -77,46 +77,9 @@ function AuthStepContent() {
     return supabaseRef.current as SupabaseClient
   }
 
-  // Handle pre-selected service/promotion and proceed to next step after auth
-  const proceedAfterAuth = async (clientId: number) => {
-    const promotionId = searchParams.get('promotionId')
-    const serviceId = searchParams.get('serviceId')
-
-    if (promotionId) {
-      try {
-        const response = await fetch(`/api/promotions/${promotionId}/with-services`)
-        if (response.ok) {
-          const data = await response.json()
-          const promo = data.data as PromotionWithServices
-          if (promo && promo.services && promo.services.length > 0) {
-            loadPromotion(promo)
-            setStep('location')
-            return
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching promotion:', err)
-      }
-    }
-
-    if (serviceId) {
-      try {
-        const response = await fetch('/api/mindbody/services?type=all&includeOffline=true')
-        const data = await response.json()
-        if (data.services) {
-          const parsedId = parseInt(serviceId, 10)
-          const service = data.services.find((s: { Id: number }) => s.Id === parsedId)
-          if (service) {
-            addService(service)
-            setStep('location')
-            return
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching service:', err)
-      }
-    }
-
+  // Auth now sits right before confirmation — deep-link preselection already
+  // happened at page load, so after identifying we simply continue.
+  const proceedAfterAuth = async (_clientId: number) => {
     nextStep()
   }
 
@@ -727,9 +690,9 @@ function AuthStepContent() {
                           flex items-center justify-center mx-auto mb-2 shadow-md">
               <User className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-lg font-bold text-dark mb-0.5">¡Bienvenido!</h2>
+            <h2 className="text-lg font-bold text-dark mb-0.5">Último paso</h2>
             <p className="text-xs text-warm-gray">
-              Ingresa tu número de teléfono para comenzar tu reserva
+              Confirma tu número de teléfono para completar tu reserva
             </p>
           </div>
 

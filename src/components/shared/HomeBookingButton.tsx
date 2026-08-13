@@ -27,14 +27,9 @@ export function HomeBookingButton({ locale, children, className, onClick }: Home
     // Call optional onClick handler (e.g., close mobile menu)
     onClick?.()
 
-    if (isAuthenticated && mindbodyClientId) {
-      // User is logged in - go directly to booking
-      router.push(`/${locale}/reservar`)
-    } else {
-      // User is not logged in - redirect to login with redirect back to booking
-      const redirectUrl = encodeURIComponent(`/${locale}/reservar`)
-      router.push(`/${locale}/portal/login?redirect=${redirectUrl}`)
-    }
+    // Auth happens at the end of the flow now — everyone goes straight to
+    // the widget and browses availability first.
+    router.push(`/${locale}/reservar`)
   }, [isAuthenticated, mindbodyClientId, locale, router, onClick])
 
   return (

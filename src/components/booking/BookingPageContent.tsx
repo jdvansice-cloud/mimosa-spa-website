@@ -39,177 +39,101 @@ function BookingPageInner() {
       const replaceId = searchParams.get('replace')
       if (replaceId) {
         setReplaceAppointmentId(replaceId)
-        // Fetch old booking details for comparison UI in ConfirmStep
         fetch(`/api/booking/by-appointment?id=${replaceId}`)
           .then(res => res.ok ? res.json() : null)
           .then(data => { if (data?.booking) setReplaceBookingDetails(data.booking) })
           .catch(() => {})
       }
 
-      // Load global online discount from site settings
-      try {
-        const settingsRes = await fetch('/api/admin/settings')
-        if (settingsRes.ok) {
-          const { data } = await settingsRes.json()
-          if (data) {
-            setGlobalDiscount(data.online_discount_percent ?? 0, data.online_discount_active ?? false)
+      // Deep-link preselection runs for EVERYONE — browsing no longer requires
+      // an account (auth moved to the step before confirmation).
+      const promotionId = searchParams.get('promotionId')
+      const serviceId = searchParams.get('serviceId')
+      if (promotionId) {
+        try {
+          const response = await fetch(`/api/promotions/${promotionId}/with-services`)
+          if (response.ok) {
+            const { data } = await response.json()
+            if (data?.services?.length > 0) {
+              loadPromotion(data as PromotionWithServices)
+            }
           }
+        } catch (err) {
+          console.error('Error loading promotion:', err)
         }
-      } catch {
-        // Non-critical — booking still works without the discount
+      } else if (serviceId) {
+        try {
+          const response = await fetch('/api/mindbody/services?type=all&includeOffline=true')
+          const data = await response.json()
+          if (data.services) {
+            const service = data.services.find((s: { Id: number }) => s.Id === parseInt(serviceId, 10))
+            if (service) addService(service)
+          }
+        } catch (err) {
+          console.error('Error loading service:', err)
+        }
       }
 
-      // If we already have client info in the store, user is authenticated
-      if (clientInfo) {
-        // Handle URL params for pre-selected items
-        const promotionId = searchParams.get('promotionId')
-        const serviceId = searchParams.get('serviceId')
-
-        if (promotionId) {
-          try {
-            const response = await fetch(`/api/promotions/${promotionId}/with-services`)
-            if (response.ok) {
-              const { data } = await response.json()
-              if (data?.services?.length > 0) {
-                loadPromotion(data as PromotionWithServices)
-                setStep('location')
-                setIsInitializing(false)
-                return
-              }
-            }
-          } catch (err) {
-            console.error('Error loading promotion:', err)
-          }
-        }
-
-        if (serviceId) {
-          try {
-            const response = await fetch('/api/mindbody/services?type=all&includeOffline=true')
-            const data = await response.json()
-            if (data.services) {
-              const service = data.services.find((s: { Id: number }) => s.Id === parseInt(serviceId, 10))
-              if (service) {
-                addService(service)
-                setStep('location')
-                setIsInitializing(false)
-                return
-              }
-            }
-          } catch (err) {
-            console.error('Error loading service:', err)
-          }
-        }
-
-        // Already authenticated, skip to location
-        if (currentStep === 'auth') {
-          setStep('location')
-        }
-        setIsInitializing(false)
-        return
+      // Old persisted sessions may still sit on the retired auth-first step.
+      if (currentStep === 'auth') {
+        setStep('location')
       }
 
-      // Check Supabase session
-      try {
-        const { getClient } = await import('@/lib/supabase/client')
-        const supabase = getClient()
-        const { data: { session } } = await supabase.auth.getSession()
+      // Show the widget now — everything below runs in the background.
+      setIsInitializing(false)
 
-        if (session?.user) {
-          // User has Supabase session, try to get Mindbody client
-          let mindbodyClientId: number | null = null
-
-          // Check URL for clientId (from magic link callback)
-          const urlClientId = searchParams.get('clientId')
-          if (urlClientId) {
-            const parsed = parseInt(urlClientId, 10)
-            if (!isNaN(parsed)) {
-              mindbodyClientId = parsed
-            }
+      // Global online discount (non-blocking, non-critical)
+      fetch('/api/admin/settings')
+        .then(res => (res.ok ? res.json() : null))
+        .then(body => {
+          if (body?.data) {
+            setGlobalDiscount(
+              body.data.online_discount_percent ?? 0,
+              body.data.online_discount_active ?? false
+            )
           }
+        })
+        .catch(() => {})
 
-          // Fetch from profile if not in URL
-          if (!mindbodyClientId) {
-            try {
-              const response = await fetch('/api/portal/client-id')
-              if (response.ok) {
-                const data = await response.json()
-                if (data.clientId) {
-                  mindbodyClientId = data.clientId
+      // Session restore: only hydrates clientInfo so the auth step later
+      // auto-skips for returning clients. Never changes the current step.
+      if (!clientInfo) {
+        try {
+          const { getClient } = await import('@/lib/supabase/client')
+          const supabase = getClient()
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.user) {
+            let mindbodyClientId: number | null = null
+            const urlClientId = searchParams.get('clientId')
+            if (urlClientId && !isNaN(parseInt(urlClientId, 10))) {
+              mindbodyClientId = parseInt(urlClientId, 10)
+            }
+            if (!mindbodyClientId) {
+              try {
+                const response = await fetch('/api/portal/client-id')
+                if (response.ok) {
+                  const data = await response.json()
+                  if (data.clientId) mindbodyClientId = data.clientId
                 }
+              } catch (err) {
+                console.error('Error fetching client ID:', err)
               }
-            } catch (err) {
-              console.error('Error fetching client ID:', err)
             }
-          }
-
-          // Try user metadata
-          if (!mindbodyClientId && session.user.user_metadata?.mindbody_client_id) {
-            mindbodyClientId = session.user.user_metadata.mindbody_client_id
-          }
-
-          if (mindbodyClientId) {
-            // Fetch client profile
-            try {
+            if (!mindbodyClientId && session.user.user_metadata?.mindbody_client_id) {
+              mindbodyClientId = session.user.user_metadata.mindbody_client_id
+            }
+            if (mindbodyClientId) {
               const response = await fetch(`/api/portal/profile?clientId=${mindbodyClientId}`)
               if (response.ok) {
                 const data = await response.json()
                 setClientInfo(data.client as MindbodyClient)
-
-                // Handle pre-selected items
-                const promotionId = searchParams.get('promotionId')
-                const serviceId = searchParams.get('serviceId')
-
-                if (promotionId) {
-                  try {
-                    const promoResponse = await fetch(`/api/promotions/${promotionId}/with-services`)
-                    if (promoResponse.ok) {
-                      const promoData = await promoResponse.json()
-                      if (promoData.data?.services?.length > 0) {
-                        loadPromotion(promoData.data as PromotionWithServices)
-                        setStep('location')
-                        setIsInitializing(false)
-                        return
-                      }
-                    }
-                  } catch (err) {
-                    console.error('Error loading promotion:', err)
-                  }
-                }
-
-                if (serviceId) {
-                  try {
-                    const servicesResponse = await fetch('/api/mindbody/services?type=all&includeOffline=true')
-                    const servicesData = await servicesResponse.json()
-                    if (servicesData.services) {
-                      const service = servicesData.services.find((s: { Id: number }) => s.Id === parseInt(serviceId, 10))
-                      if (service) {
-                        addService(service)
-                        setStep('location')
-                        setIsInitializing(false)
-                        return
-                      }
-                    }
-                  } catch (err) {
-                    console.error('Error loading service:', err)
-                  }
-                }
-
-                // Skip to location step
-                setStep('location')
-                setIsInitializing(false)
-                return
               }
-            } catch (err) {
-              console.error('Error fetching client profile:', err)
             }
           }
+        } catch (err) {
+          console.error('Error checking auth:', err)
         }
-      } catch (err) {
-        console.error('Error checking auth:', err)
       }
-
-      // Not authenticated or couldn't verify - show auth step
-      setIsInitializing(false)
     }
 
     checkAuthAndInitialize()

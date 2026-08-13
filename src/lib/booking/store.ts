@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
+import { devtools, persist, createJSONStorage } from 'zustand/middleware'
 import type {
   BookingStep,
   MindbodyLocation,
@@ -173,7 +173,7 @@ interface BookingActions {
 
 const initialState: BookingState = {
   // Progress
-  currentStep: 'auth',
+  currentStep: 'location',
   isLoading: false,
   error: null,
   slotConflictNotice: null,
@@ -232,7 +232,9 @@ const initialState: BookingState = {
 // ===========================================
 
 // Step order: auth -> location -> services -> addons -> datetime -> staff -> confirm -> success
-const STEP_ORDER: BookingStep[] = ['auth', 'location', 'services', 'addons', 'datetime', 'staff', 'confirm', 'success']
+// Auth moved LAST (before confirm): identity is only needed at POST /book,
+// so visitors browse services and real availability before any login wall.
+const STEP_ORDER: BookingStep[] = ['location', 'services', 'addons', 'datetime', 'staff', 'auth', 'confirm', 'success']
 
 function getNextStep(currentStep: BookingStep): BookingStep {
   const currentIndex = STEP_ORDER.indexOf(currentStep)
@@ -245,7 +247,7 @@ function getPrevStep(currentStep: BookingStep): BookingStep {
 }
 
 function getStepByNumber(stepNumber: number): BookingStep {
-  return STEP_ORDER[stepNumber - 1] || 'auth'
+  return STEP_ORDER[stepNumber - 1] || 'location'
 }
 
 function calculateTotalDuration(services: MindbodyService[], addons: MindbodyService[]): number {
@@ -258,10 +260,45 @@ function calculateTotalDuration(services: MindbodyService[], addons: MindbodySer
 // STORE CREATION
 // ===========================================
 
+// How long a saved cart stays valid. Slots go stale quickly, so keep this
+// short; bump or lower as needed.
+export const CART_TTL_HOURS = 3
+
+const expiringSessionStorage = {
+  getItem: (name: string): string | null => {
+    try {
+      const raw = sessionStorage.getItem(name)
+      if (!raw) return null
+      const savedAt = JSON.parse(raw)?.state?.cartSavedAt
+      if (
+        typeof savedAt === 'number' &&
+        Date.now() - savedAt > CART_TTL_HOURS * 3600 * 1000
+      ) {
+        sessionStorage.removeItem(name)
+        return null
+      }
+      return raw
+    } catch {
+      return null
+    }
+  },
+  setItem: (name: string, value: string) => {
+    try {
+      sessionStorage.setItem(name, value)
+    } catch {}
+  },
+  removeItem: (name: string) => {
+    try {
+      sessionStorage.removeItem(name)
+    } catch {}
+  },
+}
+
 export const useBookingStore = create<BookingState & BookingActions>()(
   devtools(
-    (set, get) => ({
-      ...initialState,
+    persist(
+      (set, get) => ({
+        ...initialState,
       
       // ===========================================
       // NAVIGATION ACTIONS
@@ -623,7 +660,35 @@ export const useBookingStore = create<BookingState & BookingActions>()(
         currentStep: 'location',
         isCartOpen: false,
       }), false, 'resetForNewBooking'),
-    }),
+      }),
+      {
+        name: 'mimosa-booking-cart',
+        // Session-scoped: survives reloads and the OTP flow, but never
+        // resurrects a days-old cart pointing at stale availability.
+        // On top of that, carts expire after CART_TTL_HOURS even in a
+        // long-lived tab (getItem returns null → rehydration is skipped).
+        storage: createJSONStorage(() => expiringSessionStorage),
+        version: 1,
+        // Persist SELECTIONS only — never identity/PII (clientInfo), never
+        // transient flags. Auth state is restored from the Supabase session.
+        partialize: (state) => ({
+          cartSavedAt: Date.now(),
+          currentStep:
+            state.currentStep === 'success' || state.currentStep === 'confirm'
+              ? 'location'
+              : state.currentStep === 'auth'
+                ? 'auth'
+                : state.currentStep,
+          selectedLocation: state.selectedLocation,
+          selectedServices: state.selectedServices,
+          selectedAddons: state.selectedAddons,
+          selectedStaff: state.selectedStaff,
+          selectedDate: state.selectedDate,
+          selectedTime: state.selectedTime,
+          activePromotion: state.activePromotion,
+        }),
+      }
+    ),
     { name: 'booking-store' }
   )
 )
@@ -633,7 +698,7 @@ export const useBookingStore = create<BookingState & BookingActions>()(
 // ===========================================
 
 export const selectCurrentStepNumber = (state: BookingState) => {
-  const steps: BookingStep[] = ['auth', 'location', 'services', 'addons', 'datetime', 'staff', 'confirm', 'success']
+  const steps: BookingStep[] = ['location', 'services', 'addons', 'datetime', 'staff', 'auth', 'confirm', 'success']
   return steps.indexOf(state.currentStep) + 1
 }
 
