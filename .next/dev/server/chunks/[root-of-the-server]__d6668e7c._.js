@@ -62,7 +62,7 @@ function getSupabaseAdmin() {
 }
 async function GET() {
     try {
-        const { data: settings, error } = await getSupabaseAdmin().from('treatment_settings').select('mindbody_service_id, is_visible, show_in_booking, show_booking_button, is_top_pick');
+        const { data: settings, error } = await getSupabaseAdmin().from('treatment_settings').select('mindbody_service_id, is_visible, show_in_booking, show_booking_button, is_top_pick, sort_order');
         if (error) {
             console.error('Error fetching treatment settings:', error);
             // Return empty settings on error - will show all treatments by default

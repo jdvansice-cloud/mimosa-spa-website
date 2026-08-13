@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Sparkles, Loader2, ChevronDown, ChevronUp, Clock, Check, Star, Info, X, Tag } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Sparkles, Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Clock, Check, Star, Info, X, Tag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectHasServices } from '@/lib/booking/store'
 import type { MindbodyService, PromotionWithServices } from '@/types/booking'
@@ -101,6 +101,7 @@ interface TreatmentSetting {
   show_in_booking: boolean // Show in booking widget for direct selection
   show_booking_button: boolean
   is_top_pick: boolean
+  sort_order: number
 }
 
 // Promotion Tile Component - Shows only final price, with expandable services list
@@ -287,45 +288,44 @@ function ServiceTile({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full text-left p-3"
+        className="w-full h-full text-left p-2.5 sm:p-3 flex flex-col"
       >
         {/* Selected Badge */}
         {isSelected && (
-          <div className="absolute top-2 right-2 z-10">
-            <div className="w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm">
-              <Check className="w-4 h-4 text-dark" />
+          <div className="absolute top-1.5 right-1.5 z-10">
+            <div className="w-5 h-5 bg-gold rounded-full flex items-center justify-center shadow-sm">
+              <Check className="w-3.5 h-3.5 text-dark" />
             </div>
           </div>
         )}
 
-        {/* Tile Content */}
         {/* Service Name */}
-        <div className="pr-8 mb-2">
-          <h4 className="font-semibold text-dark text-sm sm:text-base leading-snug">
+        <div className="pr-5 mb-1.5 flex-1">
+          <h4 className="font-semibold text-dark text-xs sm:text-sm leading-snug">
             {service.Name}
           </h4>
         </div>
 
         {/* Price & Duration Row */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap pr-6">
           {service.Price > 0 ? (
             discountedPrice !== null ? (
-              <span className="flex items-center gap-1.5">
-                <span className="text-sm line-through text-warm-gray">${service.Price.toFixed(0)}</span>
-                <span className="text-lg font-bold text-green-600">${discountedPrice.toFixed(0)}</span>
+              <span className="flex items-center gap-1">
+                <span className="text-xs line-through text-warm-gray">${service.Price.toFixed(0)}</span>
+                <span className="text-base font-bold text-green-600">${discountedPrice.toFixed(0)}</span>
               </span>
             ) : (
-              <span className={`text-lg font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`}>
+              <span className={`text-base font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`}>
                 ${service.Price.toFixed(0)}
               </span>
             )
           ) : (
-            <span className={`text-lg font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`}>
+            <span className={`text-base font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`}>
               Consultar
             </span>
           )}
           {service.Duration > 0 && (
-            <span className="flex items-center gap-1 text-xs text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-0.5 text-[10px] sm:text-xs text-warm-gray bg-beige-100 px-1.5 py-0.5 rounded-full whitespace-nowrap">
               <Clock className="w-3 h-3" />
               {service.Duration} min
             </span>
@@ -340,10 +340,10 @@ function ServiceTile({
           e.stopPropagation()
           onShowDescription()
         }}
-        className="absolute bottom-2 right-2 p-1.5 rounded-full bg-gold/10 hover:bg-gold/20 transition-colors"
+        className="absolute bottom-1.5 right-1.5 p-1 rounded-full bg-gold/10 hover:bg-gold/20 transition-colors"
         title="Ver descripción"
       >
-        <Info className="w-4 h-4 text-gold-600" />
+        <Info className="w-3.5 h-3.5 text-gold-600" />
       </button>
     </div>
   )
@@ -380,6 +380,7 @@ export function ServiceStep() {
 
   // Promotion state
   const [activePromotions, setActivePromotions] = useState<Promotion[]>([])
+  const promoScrollRef = useRef<HTMLDivElement>(null)
   const [loadingPromotionId, setLoadingPromotionId] = useState<string | null>(null)
 
   // Fetch services, treatment settings, and active promotions on mount
@@ -429,16 +430,25 @@ export function ServiceStep() {
           return setting?.show_in_booking !== false // Show if not explicitly hidden
         }
 
+        // Admin-managed ordering (drag & drop in /admin/tratamientos)
+        const orderOf = (id: number) => settingsMap.get(id)?.sort_order ?? 9999
+        const bySortOrder = (a: MindbodyService, b: MindbodyService) =>
+          orderOf(a.Id) - orderOf(b.Id) || a.Name.localeCompare(b.Name)
+
         // Filter top pick services (must be top pick AND show_in_booking)
-        const topPicks = servicesData.services.filter((service: MindbodyService) => {
-          const setting = settingsMap.get(service.Id)
-          return setting?.is_top_pick === true && shouldShowInBooking(service.Id)
-        })
+        const topPicks = servicesData.services
+          .filter((service: MindbodyService) => {
+            const setting = settingsMap.get(service.Id)
+            return setting?.is_top_pick === true && shouldShowInBooking(service.Id)
+          })
+          .sort(bySortOrder)
 
         // Filter grouped services to only show those with show_in_booking: true
         const filteredGrouped: Record<string, MindbodyService[]> = {}
         for (const [category, categoryServices] of Object.entries(servicesData.grouped as Record<string, MindbodyService[]>)) {
-          const filtered = categoryServices.filter((service: MindbodyService) => shouldShowInBooking(service.Id))
+          const filtered = categoryServices
+            .filter((service: MindbodyService) => shouldShowInBooking(service.Id))
+            .sort(bySortOrder)
           // Only include categories that have at least one visible service
           if (filtered.length > 0) {
             filteredGrouped[category] = filtered
@@ -599,14 +609,14 @@ export function ServiceStep() {
           {/* Promotions Header */}
           <button
             onClick={() => setIsPromotionsExpanded(!isPromotionsExpanded)}
-            className="w-full px-4 py-4 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200"
+            className="w-full px-3.5 py-2.5 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-gold to-gold/70 rounded-full flex items-center justify-center shadow-md">
-                <Tag className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-gradient-to-br from-gold to-gold/70 rounded-full flex items-center justify-center shadow-md">
+                <Tag className="w-4 h-4 text-white" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-dark">Promociones Activas</h3>
+                <h3 className="font-semibold text-dark !text-base md:!text-lg">Promociones Activas</h3>
                 <p className="text-xs text-warm-gray">
                   {activePromotions.length} oferta{activePromotions.length !== 1 ? 's' : ''} especial{activePromotions.length !== 1 ? 'es' : ''}
                   {activePromotion && (
@@ -639,17 +649,64 @@ export function ServiceStep() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="p-4 pt-0 space-y-3">
-                  {activePromotions.map((promotion) => (
-                    <PromotionTile
-                      key={promotion.id}
-                      promotion={promotion}
-                      isSelected={activePromotion?.id === promotion.id}
-                      isLoading={loadingPromotionId === promotion.id}
-                      onSelect={() => handleSelectPromotion(promotion)}
-                      allServices={allOnlineServices}
-                    />
-                  ))}
+                <div className="p-4 pt-0">
+                  {activePromotions.length <= 3 ? (
+                    /* Up to 3 promotions: three cards side by side */
+                    <div className="grid gap-3 sm:grid-cols-3 items-start">
+                      {activePromotions.map((promotion) => (
+                        <PromotionTile
+                          key={promotion.id}
+                          promotion={promotion}
+                          isSelected={activePromotion?.id === promotion.id}
+                          isLoading={loadingPromotionId === promotion.id}
+                          onSelect={() => handleSelectPromotion(promotion)}
+                          allServices={allOnlineServices}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    /* More than 3: carousel showing 3 per view */
+                    <div className="relative">
+                      <button
+                        onClick={() => promoScrollRef.current?.scrollBy({ left: -320, behavior: 'smooth' })}
+                        className="hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8
+                                 bg-white border border-beige-200 rounded-full shadow-md items-center justify-center
+                                 text-warm-gray hover:text-dark hover:border-gold/50 transition-colors"
+                        aria-label="Promociones anteriores"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => promoScrollRef.current?.scrollBy({ left: 320, behavior: 'smooth' })}
+                        className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8
+                                 bg-white border border-beige-200 rounded-full shadow-md items-center justify-center
+                                 text-warm-gray hover:text-dark hover:border-gold/50 transition-colors"
+                        aria-label="Más promociones"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                      <div
+                        ref={promoScrollRef}
+                        className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-hide items-start"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                      >
+                        {activePromotions.map((promotion) => (
+                          <div
+                            key={promotion.id}
+                            className="flex-shrink-0 snap-start w-[85%] sm:w-[calc((100%-1.5rem)/3)]"
+                          >
+                            <PromotionTile
+                              promotion={promotion}
+                              isSelected={activePromotion?.id === promotion.id}
+                              isLoading={loadingPromotionId === promotion.id}
+                              onSelect={() => handleSelectPromotion(promotion)}
+                              allServices={allOnlineServices}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -663,12 +720,12 @@ export function ServiceStep() {
           {/* Recommendations Header */}
           <button
             onClick={() => setIsRecommendationsExpanded(!isRecommendationsExpanded)}
-            className="w-full px-4 py-4 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200"
+            className="w-full px-3.5 py-2.5 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200"
           >
             <div className="flex items-center gap-3">
-              <Star className="w-6 h-6 text-gold-500 fill-gold-500" />
+              <Star className="w-5 h-5 text-gold-500 fill-gold-500" />
               <div className="text-left">
-                <h3 className="font-semibold text-dark">Nuestras Recomendaciones</h3>
+                <h3 className="font-semibold text-dark !text-base md:!text-lg">Nuestras Recomendaciones</h3>
                 <p className="text-xs text-warm-gray">
                   {topPickServices.length} tratamiento{topPickServices.length !== 1 ? 's' : ''} destacado{topPickServices.length !== 1 ? 's' : ''}
                 </p>
@@ -699,7 +756,7 @@ export function ServiceStep() {
                 className="overflow-hidden"
               >
                 <div className="p-4 pt-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                     {topPickServices.map((service) => (
                       <ServiceTile
                         key={service.Id}
@@ -736,17 +793,17 @@ export function ServiceStep() {
                 <button
                   onClick={() => toggleCategory(category)}
                   className={`
-                    w-full px-4 py-4 flex items-center justify-between
+                    w-full px-3.5 py-2.5 flex items-center justify-between
                     bg-gradient-to-r ${config.gradient}
                     hover:brightness-[0.98] transition-all duration-200
                   `}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl" role="img" aria-hidden="true">
+                    <span className="text-xl" role="img" aria-hidden="true">
                       {config.icon}
                     </span>
                     <div className="text-left">
-                      <h3 className="font-semibold text-dark">{category}</h3>
+                      <h3 className="font-semibold text-dark !text-base md:!text-lg">{category}</h3>
                       <p className="text-xs text-warm-gray">
                         {categoryServices.length} tratamiento{categoryServices.length !== 1 ? 's' : ''}
                         {selectedInCategory > 0 && (
@@ -790,7 +847,7 @@ export function ServiceStep() {
                       className="overflow-hidden"
                     >
                       <div className="p-4 bg-beige-50/30">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                           {categoryServices.map((service) => (
                             <ServiceTile
                               key={service.Id}

@@ -2,6 +2,7 @@
   "/[locale]/empresas/page": "app/[locale]/empresas/page.js",
   "/[locale]/page": "app/[locale]/page.js",
   "/[locale]/reservar/page": "app/[locale]/reservar/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
   "/api/admin/settings/route": "app/api/admin/settings/route.js",
   "/api/mindbody/auth/route": "app/api/mindbody/auth/route.js",
   "/api/mindbody/availability/route": "app/api/mindbody/availability/route.js",

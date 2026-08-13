@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw, Star, ChevronDown, ChevronRight, ShoppingBag } from 'lucide-react'
+import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw, Star, ChevronDown, ChevronRight, ShoppingBag, GripVertical } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { PROGRAM_NAMES } from '@/lib/booking/constants'
@@ -32,6 +32,11 @@ export default function AdminTreatmentsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [hasChanges, setHasChanges] = useState(false)
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
+  // Drag & drop ordering (disabled while searching — a filtered list would
+  // produce a misleading order)
+  const [dragged, setDragged] = useState<{ category: string; id: number } | null>(null)
+  const [dropTarget, setDropTarget] = useState<number | null>(null)
+  const canDrag = searchQuery.trim() === ''
 
   // Get unique categories from treatments
   const categories = Array.from(new Set(treatments.map(t => t.category))).sort()
@@ -86,7 +91,7 @@ export default function AdminTreatmentsPage() {
     return matchesSearch && matchesCategory
   })
 
-  // Group treatments by category
+  // Group treatments by category, ordered by sort_order (drag & drop)
   const groupedTreatments = filteredTreatments.reduce((acc, treatment) => {
     if (!acc[treatment.category]) {
       acc[treatment.category] = []
@@ -94,6 +99,33 @@ export default function AdminTreatmentsPage() {
     acc[treatment.category].push(treatment)
     return acc
   }, {} as Record<string, Treatment[]>)
+  for (const list of Object.values(groupedTreatments)) {
+    list.sort((a, b) => a.sort_order - b.sort_order || a.service_name.localeCompare(b.service_name))
+  }
+
+  // Drop the dragged treatment at the target's position within its category
+  // and renumber that category's sort_order to match the new visual order.
+  const handleDrop = (category: string, targetId: number) => {
+    if (!dragged || dragged.category !== category || dragged.id === targetId) {
+      setDragged(null); setDropTarget(null)
+      return
+    }
+    const list = [...(groupedTreatments[category] || [])]
+    const fromIdx = list.findIndex(t => t.mindbody_service_id === dragged.id)
+    const toIdx = list.findIndex(t => t.mindbody_service_id === targetId)
+    if (fromIdx === -1 || toIdx === -1) { setDragged(null); setDropTarget(null); return }
+    const [moved] = list.splice(fromIdx, 1)
+    list.splice(toIdx, 0, moved)
+    const orderById = new Map(list.map((t, i) => [t.mindbody_service_id, i]))
+    setTreatments(prev => prev.map(t =>
+      orderById.has(t.mindbody_service_id)
+        ? { ...t, sort_order: orderById.get(t.mindbody_service_id)! }
+        : t
+    ))
+    setHasChanges(true)
+    setDragged(null)
+    setDropTarget(null)
+  }
 
   // Toggle visibility (menu pages)
   const toggleVisibility = (mindbodyServiceId: number) => {
@@ -324,6 +356,7 @@ export default function AdminTreatmentsPage() {
             <table className="w-full">
               <thead className="bg-beige-100 border-b border-beige-200">
                 <tr>
+                  <th className="w-8 p-3" title="Arrastra para ordenar" />
                   <th className="text-left p-3 text-sm font-medium text-dark">Tratamiento</th>
                   <th className="text-left p-3 text-sm font-medium text-dark">Precio</th>
                   <th className="text-left p-3 text-sm font-medium text-dark">Duración</th>
@@ -338,11 +371,29 @@ export default function AdminTreatmentsPage() {
                 {categoryTreatments.map((treatment) => (
                   <tr
                     key={treatment.mindbody_service_id}
+                    draggable={canDrag}
+                    onDragStart={() => setDragged({ category, id: treatment.mindbody_service_id })}
+                    onDragOver={(e) => {
+                      if (dragged?.category === category) {
+                        e.preventDefault()
+                        setDropTarget(treatment.mindbody_service_id)
+                      }
+                    }}
+                    onDrop={() => handleDrop(category, treatment.mindbody_service_id)}
+                    onDragEnd={() => { setDragged(null); setDropTarget(null) }}
                     className={cn(
                       "hover:bg-beige-50 transition-colors",
-                      !treatment.is_visible && "opacity-50"
+                      !treatment.is_visible && "opacity-50",
+                      dragged?.id === treatment.mindbody_service_id && "opacity-30",
+                      dropTarget === treatment.mindbody_service_id &&
+                        dragged?.id !== treatment.mindbody_service_id &&
+                        "border-t-2 border-gold"
                     )}
                   >
+                    <td className={cn("p-3 text-center", canDrag ? "cursor-grab active:cursor-grabbing" : "opacity-30")}
+                        title={canDrag ? 'Arrastra para ordenar' : 'Limpia la búsqueda para ordenar'}>
+                      <GripVertical className="w-4 h-4 text-warm-gray inline-block" />
+                    </td>
                     <td className="p-3">
                       <div>
                         <p className="font-medium text-dark">{treatment.service_name}</p>

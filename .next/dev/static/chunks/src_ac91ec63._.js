@@ -5007,6 +5007,8 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader-circle.js [app-client] (ecmascript) <export default as Loader2>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronDown$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-down.js [app-client] (ecmascript) <export default as ChevronDown>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$up$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronUp$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-up.js [app-client] (ecmascript) <export default as ChevronUp>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$left$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronLeft$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-left.js [app-client] (ecmascript) <export default as ChevronLeft>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$right$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronRight$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-right.js [app-client] (ecmascript) <export default as ChevronRight>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$clock$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Clock$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/clock.js [app-client] (ecmascript) <export default as Clock>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$check$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Check$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/check.js [app-client] (ecmascript) <export default as Check>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$star$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Star$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/star.js [app-client] (ecmascript) <export default as Star>");
@@ -5251,17 +5253,17 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                 className: "w-4 h-4 text-dark"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 158,
+                                lineNumber: 159,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                            lineNumber: 157,
+                            lineNumber: 158,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 156,
+                        lineNumber: 157,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5273,7 +5275,7 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                         className: "w-4 h-4 text-gold-600 mt-0.5 flex-shrink-0"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 166,
+                                        lineNumber: 167,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -5281,13 +5283,13 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                         children: promotion.title_es
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 167,
+                                        lineNumber: 168,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 165,
+                                lineNumber: 166,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5301,7 +5303,7 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 174,
+                                        lineNumber: 175,
                                         columnNumber: 13
                                     }, this),
                                     promotion.duration_minutes && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5311,7 +5313,7 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                                 className: "w-3 h-3"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 179,
+                                                lineNumber: 180,
                                                 columnNumber: 17
                                             }, this),
                                             promotion.duration_minutes,
@@ -5319,19 +5321,19 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 178,
+                                        lineNumber: 179,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 173,
+                                lineNumber: 174,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 164,
+                        lineNumber: 165,
                         columnNumber: 9
                     }, this),
                     isLoading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5340,18 +5342,18 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                             className: "w-6 h-6 text-gold animate-spin"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                            lineNumber: 189,
+                            lineNumber: 190,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 188,
+                        lineNumber: 189,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                lineNumber: 148,
+                lineNumber: 149,
                 columnNumber: 7
             }, this),
             includedServices.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -5372,26 +5374,26 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 202,
+                                lineNumber: 203,
                                 columnNumber: 13
                             }, this),
                             isExpanded ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$up$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronUp$3e$__["ChevronUp"], {
                                 className: "w-4 h-4"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 206,
+                                lineNumber: 207,
                                 columnNumber: 15
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronDown$3e$__["ChevronDown"], {
                                 className: "w-4 h-4"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 208,
+                                lineNumber: 209,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 197,
+                        lineNumber: 198,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -5422,7 +5424,7 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                                 children: "✓"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 224,
+                                                lineNumber: 225,
                                                 columnNumber: 23
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5432,7 +5434,7 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                                         children: service.Name
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 226,
+                                                        lineNumber: 227,
                                                         columnNumber: 25
                                                     }, this),
                                                     service.Duration > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5443,34 +5445,34 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 228,
+                                                        lineNumber: 229,
                                                         columnNumber: 27
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 225,
+                                                lineNumber: 226,
                                                 columnNumber: 23
                                             }, this)
                                         ]
                                     }, service.Id, true, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 223,
+                                        lineNumber: 224,
                                         columnNumber: 21
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 221,
+                                lineNumber: 222,
                                 columnNumber: 17
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                            lineNumber: 214,
+                            lineNumber: 215,
                             columnNumber: 15
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 212,
+                        lineNumber: 213,
                         columnNumber: 11
                     }, this)
                 ]
@@ -5478,7 +5480,7 @@ function PromotionTile({ promotion, isSelected, isLoading, onSelect, allServices
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-        lineNumber: 137,
+        lineNumber: 138,
         columnNumber: 5
     }, this);
 }
@@ -5539,33 +5541,33 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                 type: "button",
                 onClick: onToggle,
-                className: "w-full text-left p-3",
+                className: "w-full h-full text-left p-2.5 sm:p-3 flex flex-col",
                 children: [
                     isSelected && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "absolute top-2 right-2 z-10",
+                        className: "absolute top-1.5 right-1.5 z-10",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "w-6 h-6 bg-gold rounded-full flex items-center justify-center shadow-sm",
+                            className: "w-5 h-5 bg-gold rounded-full flex items-center justify-center shadow-sm",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$check$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Check$3e$__["Check"], {
-                                className: "w-4 h-4 text-dark"
+                                className: "w-3.5 h-3.5 text-dark"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 296,
+                                lineNumber: 297,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                            lineNumber: 295,
+                            lineNumber: 296,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 294,
+                        lineNumber: 295,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "pr-8 mb-2",
+                        className: "pr-5 mb-1.5 flex-1",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
-                            className: "font-semibold text-dark text-sm sm:text-base leading-snug",
+                            className: "font-semibold text-dark text-xs sm:text-sm leading-snug",
                             children: service.Name
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
@@ -5578,13 +5580,13 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "flex items-center gap-2",
+                        className: "flex items-center gap-1.5 flex-wrap pr-6",
                         children: [
                             service.Price > 0 ? discountedPrice !== null ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: "flex items-center gap-1.5",
+                                className: "flex items-center gap-1",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        className: "text-sm line-through text-warm-gray",
+                                        className: "text-xs line-through text-warm-gray",
                                         children: [
                                             "$",
                                             service.Price.toFixed(0)
@@ -5595,7 +5597,7 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        className: "text-lg font-bold text-green-600",
+                                        className: "text-base font-bold text-green-600",
                                         children: [
                                             "$",
                                             discountedPrice.toFixed(0)
@@ -5611,7 +5613,7 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
                                 lineNumber: 313,
                                 columnNumber: 15
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: `text-lg font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`,
+                                className: `text-base font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`,
                                 children: [
                                     "$",
                                     service.Price.toFixed(0)
@@ -5621,7 +5623,7 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
                                 lineNumber: 318,
                                 columnNumber: 15
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: `text-lg font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`,
+                                className: `text-base font-bold ${isSelected ? 'text-gold-600' : 'text-dark'}`,
                                 children: "Consultar"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
@@ -5629,7 +5631,7 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
                                 columnNumber: 13
                             }, this),
                             service.Duration > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: "flex items-center gap-1 text-xs text-warm-gray bg-beige-100 px-2 py-0.5 rounded-full",
+                                className: "flex items-center gap-0.5 text-[10px] sm:text-xs text-warm-gray bg-beige-100 px-1.5 py-0.5 rounded-full whitespace-nowrap",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$clock$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Clock$3e$__["Clock"], {
                                         className: "w-3 h-3"
@@ -5655,7 +5657,7 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                lineNumber: 287,
+                lineNumber: 288,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5664,10 +5666,10 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
                     e.stopPropagation();
                     onShowDescription();
                 },
-                className: "absolute bottom-2 right-2 p-1.5 rounded-full bg-gold/10 hover:bg-gold/20 transition-colors",
+                className: "absolute bottom-1.5 right-1.5 p-1 rounded-full bg-gold/10 hover:bg-gold/20 transition-colors",
                 title: "Ver descripción",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$info$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Info$3e$__["Info"], {
-                    className: "w-4 h-4 text-gold-600"
+                    className: "w-3.5 h-3.5 text-gold-600"
                 }, void 0, false, {
                     fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
                     lineNumber: 346,
@@ -5681,7 +5683,7 @@ function ServiceTile({ service, isSelected, onToggle, onShowDescription, discoun
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-        lineNumber: 277,
+        lineNumber: 278,
         columnNumber: 5
     }, this);
 }
@@ -5702,6 +5704,7 @@ function ServiceStep() {
     const [descriptionService, setDescriptionService] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     // Promotion state
     const [activePromotions, setActivePromotions] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const promoScrollRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const [loadingPromotionId, setLoadingPromotionId] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     // Fetch services, treatment settings, and active promotions on mount
     // State for all online services (for promotion lookups - no session type filter)
@@ -5747,19 +5750,26 @@ function ServiceStep() {
                             ;
                         }
                     }["ServiceStep.useEffect.fetchServicesAndPromotions.shouldShowInBooking"];
+                    // Admin-managed ordering (drag & drop in /admin/tratamientos)
+                    const orderOf = {
+                        "ServiceStep.useEffect.fetchServicesAndPromotions.orderOf": (id)=>settingsMap.get(id)?.sort_order ?? 9999
+                    }["ServiceStep.useEffect.fetchServicesAndPromotions.orderOf"];
+                    const bySortOrder = {
+                        "ServiceStep.useEffect.fetchServicesAndPromotions.bySortOrder": (a, b)=>orderOf(a.Id) - orderOf(b.Id) || a.Name.localeCompare(b.Name)
+                    }["ServiceStep.useEffect.fetchServicesAndPromotions.bySortOrder"];
                     // Filter top pick services (must be top pick AND show_in_booking)
                     const topPicks = servicesData.services.filter({
                         "ServiceStep.useEffect.fetchServicesAndPromotions.topPicks": (service)=>{
                             const setting = settingsMap.get(service.Id);
                             return setting?.is_top_pick === true && shouldShowInBooking(service.Id);
                         }
-                    }["ServiceStep.useEffect.fetchServicesAndPromotions.topPicks"]);
+                    }["ServiceStep.useEffect.fetchServicesAndPromotions.topPicks"]).sort(bySortOrder);
                     // Filter grouped services to only show those with show_in_booking: true
                     const filteredGrouped = {};
                     for (const [category, categoryServices] of Object.entries(servicesData.grouped)){
                         const filtered = categoryServices.filter({
                             "ServiceStep.useEffect.fetchServicesAndPromotions.filtered": (service)=>shouldShowInBooking(service.Id)
-                        }["ServiceStep.useEffect.fetchServicesAndPromotions.filtered"]);
+                        }["ServiceStep.useEffect.fetchServicesAndPromotions.filtered"]).sort(bySortOrder);
                         // Only include categories that have at least one visible service
                         if (filtered.length > 0) {
                             filteredGrouped[category] = filtered;
@@ -5864,12 +5874,12 @@ function ServiceStep() {
                                     className: "w-5 h-5 text-white"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                    lineNumber: 557,
+                                    lineNumber: 567,
                                     columnNumber: 11
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 555,
+                                lineNumber: 565,
                                 columnNumber: 9
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -5877,7 +5887,7 @@ function ServiceStep() {
                                 children: "Selecciona tus Tratamientos"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 559,
+                                lineNumber: 569,
                                 columnNumber: 9
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5885,18 +5895,18 @@ function ServiceStep() {
                                 children: "Explora las categorías y agrega servicios a tu carrito"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 562,
+                                lineNumber: 572,
                                 columnNumber: 9
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 554,
+                        lineNumber: 564,
                         columnNumber: 7
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$booking$2f$shared$2f$LocationPills$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["LocationPills"], {}, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 568,
+                        lineNumber: 578,
                         columnNumber: 7
                     }, this),
                     showGlobalDiscount && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5906,7 +5916,7 @@ function ServiceStep() {
                                 className: "w-4 h-4 text-green-600 flex-shrink-0"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 573,
+                                lineNumber: 583,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5920,7 +5930,7 @@ function ServiceStep() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 575,
+                                        lineNumber: 585,
                                         columnNumber: 13
                                     }, this),
                                     ' ',
@@ -5928,13 +5938,13 @@ function ServiceStep() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 574,
+                                lineNumber: 584,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 572,
+                        lineNumber: 582,
                         columnNumber: 9
                     }, this),
                     isLoadingServices && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5944,7 +5954,7 @@ function ServiceStep() {
                                 className: "w-10 h-10 text-gold animate-spin mb-4"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 584,
+                                lineNumber: 594,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5952,13 +5962,13 @@ function ServiceStep() {
                                 children: "Cargando servicios..."
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 585,
+                                lineNumber: 595,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 583,
+                        lineNumber: 593,
                         columnNumber: 9
                     }, this),
                     servicesError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5966,7 +5976,7 @@ function ServiceStep() {
                         children: servicesError
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 591,
+                        lineNumber: 601,
                         columnNumber: 9
                     }, this),
                     !isLoadingServices && activePromotions.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5974,34 +5984,34 @@ function ServiceStep() {
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                 onClick: ()=>setIsPromotionsExpanded(!isPromotionsExpanded),
-                                className: "w-full px-4 py-4 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200",
+                                className: "w-full px-3.5 py-2.5 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "flex items-center gap-3",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "w-10 h-10 bg-gradient-to-br from-gold to-gold/70 rounded-full flex items-center justify-center shadow-md",
+                                                className: "w-8 h-8 bg-gradient-to-br from-gold to-gold/70 rounded-full flex items-center justify-center shadow-md",
                                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$tag$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Tag$3e$__["Tag"], {
-                                                    className: "w-5 h-5 text-white"
+                                                    className: "w-4 h-4 text-white"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                    lineNumber: 606,
+                                                    lineNumber: 616,
                                                     columnNumber: 17
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 605,
+                                                lineNumber: 615,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "text-left",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                                        className: "font-semibold text-dark",
+                                                        className: "font-semibold text-dark !text-base md:!text-lg",
                                                         children: "Promociones Activas"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 609,
+                                                        lineNumber: 619,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6017,25 +6027,25 @@ function ServiceStep() {
                                                                 children: "• 1 seleccionada"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                                lineNumber: 613,
+                                                                lineNumber: 623,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 610,
+                                                        lineNumber: 620,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 608,
+                                                lineNumber: 618,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 604,
+                                        lineNumber: 614,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6048,24 +6058,24 @@ function ServiceStep() {
                                             className: "w-5 h-5 text-dark"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                            lineNumber: 625,
+                                            lineNumber: 635,
                                             columnNumber: 17
                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronDown$3e$__["ChevronDown"], {
                                             className: "w-5 h-5 text-warm-gray"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                            lineNumber: 627,
+                                            lineNumber: 637,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 619,
+                                        lineNumber: 629,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 600,
+                                lineNumber: 610,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -6087,37 +6097,120 @@ function ServiceStep() {
                                     },
                                     className: "overflow-hidden",
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "p-4 pt-0 space-y-3",
-                                        children: activePromotions.map((promotion)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(PromotionTile, {
-                                                promotion: promotion,
-                                                isSelected: activePromotion?.id === promotion.id,
-                                                isLoading: loadingPromotionId === promotion.id,
-                                                onSelect: ()=>handleSelectPromotion(promotion),
-                                                allServices: allOnlineServices
-                                            }, promotion.id, false, {
-                                                fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 644,
-                                                columnNumber: 21
-                                            }, this))
+                                        className: "p-4 pt-0",
+                                        children: activePromotions.length <= 3 ? /* Up to 3 promotions: three cards side by side */ /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "grid gap-3 sm:grid-cols-3 items-start",
+                                            children: activePromotions.map((promotion)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(PromotionTile, {
+                                                    promotion: promotion,
+                                                    isSelected: activePromotion?.id === promotion.id,
+                                                    isLoading: loadingPromotionId === promotion.id,
+                                                    onSelect: ()=>handleSelectPromotion(promotion),
+                                                    allServices: allOnlineServices
+                                                }, promotion.id, false, {
+                                                    fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                                    lineNumber: 657,
+                                                    columnNumber: 25
+                                                }, this))
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                            lineNumber: 655,
+                                            columnNumber: 21
+                                        }, this) : /* More than 3: carousel showing 3 per view */ /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "relative",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                    onClick: ()=>promoScrollRef.current?.scrollBy({
+                                                            left: -320,
+                                                            behavior: 'smooth'
+                                                        }),
+                                                    className: "hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white border border-beige-200 rounded-full shadow-md items-center justify-center text-warm-gray hover:text-dark hover:border-gold/50 transition-colors",
+                                                    "aria-label": "Promociones anteriores",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$left$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronLeft$3e$__["ChevronLeft"], {
+                                                        className: "w-4 h-4"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                                        lineNumber: 677,
+                                                        columnNumber: 25
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                                    lineNumber: 670,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                    onClick: ()=>promoScrollRef.current?.scrollBy({
+                                                            left: 320,
+                                                            behavior: 'smooth'
+                                                        }),
+                                                    className: "hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white border border-beige-200 rounded-full shadow-md items-center justify-center text-warm-gray hover:text-dark hover:border-gold/50 transition-colors",
+                                                    "aria-label": "Más promociones",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$right$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronRight$3e$__["ChevronRight"], {
+                                                        className: "w-4 h-4"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                                        lineNumber: 686,
+                                                        columnNumber: 25
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                                    lineNumber: 679,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    ref: promoScrollRef,
+                                                    className: "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-hide items-start",
+                                                    style: {
+                                                        scrollbarWidth: 'none',
+                                                        msOverflowStyle: 'none'
+                                                    },
+                                                    children: activePromotions.map((promotion)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            className: "flex-shrink-0 snap-start w-[85%] sm:w-[calc((100%-1.5rem)/3)]",
+                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(PromotionTile, {
+                                                                promotion: promotion,
+                                                                isSelected: activePromotion?.id === promotion.id,
+                                                                isLoading: loadingPromotionId === promotion.id,
+                                                                onSelect: ()=>handleSelectPromotion(promotion),
+                                                                allServices: allOnlineServices
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                                                lineNumber: 698,
+                                                                columnNumber: 29
+                                                            }, this)
+                                                        }, promotion.id, false, {
+                                                            fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                                            lineNumber: 694,
+                                                            columnNumber: 27
+                                                        }, this))
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                                    lineNumber: 688,
+                                                    columnNumber: 23
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
+                                            lineNumber: 669,
+                                            columnNumber: 21
+                                        }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 642,
+                                        lineNumber: 652,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                    lineNumber: 635,
+                                    lineNumber: 645,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 633,
+                                lineNumber: 643,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 598,
+                        lineNumber: 608,
                         columnNumber: 9
                     }, this),
                     !isLoadingServices && topPickServices.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6125,27 +6218,27 @@ function ServiceStep() {
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                 onClick: ()=>setIsRecommendationsExpanded(!isRecommendationsExpanded),
-                                className: "w-full px-4 py-4 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200",
+                                className: "w-full px-3.5 py-2.5 flex items-center justify-between hover:brightness-[0.98] transition-all duration-200",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "flex items-center gap-3",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$star$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Star$3e$__["Star"], {
-                                                className: "w-6 h-6 text-gold-500 fill-gold-500"
+                                                className: "w-5 h-5 text-gold-500 fill-gold-500"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 669,
+                                                lineNumber: 726,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "text-left",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                                        className: "font-semibold text-dark",
+                                                        className: "font-semibold text-dark !text-base md:!text-lg",
                                                         children: "Nuestras Recomendaciones"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 671,
+                                                        lineNumber: 728,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6159,19 +6252,19 @@ function ServiceStep() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 672,
+                                                        lineNumber: 729,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 670,
+                                                lineNumber: 727,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 668,
+                                        lineNumber: 725,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6184,24 +6277,24 @@ function ServiceStep() {
                                             className: "w-5 h-5 text-dark"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                            lineNumber: 684,
+                                            lineNumber: 741,
                                             columnNumber: 17
                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronDown$3e$__["ChevronDown"], {
                                             className: "w-5 h-5 text-warm-gray"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                            lineNumber: 686,
+                                            lineNumber: 743,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 678,
+                                        lineNumber: 735,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 664,
+                                lineNumber: 721,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -6225,7 +6318,7 @@ function ServiceStep() {
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "p-4 pt-0",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "grid grid-cols-1 sm:grid-cols-2 gap-3",
+                                            className: "grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3",
                                             children: topPickServices.map((service)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(ServiceTile, {
                                                     service: service,
                                                     isSelected: isServiceSelected(service.Id),
@@ -6235,33 +6328,33 @@ function ServiceStep() {
                                                     showDiscount: showGlobalDiscount
                                                 }, service.Id, false, {
                                                     fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                    lineNumber: 704,
+                                                    lineNumber: 761,
                                                     columnNumber: 23
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                            lineNumber: 702,
+                                            lineNumber: 759,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 701,
+                                        lineNumber: 758,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                    lineNumber: 694,
+                                    lineNumber: 751,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 692,
+                                lineNumber: 749,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 662,
+                        lineNumber: 719,
                         columnNumber: 9
                     }, this),
                     !isLoadingServices && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6276,7 +6369,7 @@ function ServiceStep() {
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                         onClick: ()=>toggleCategory(category),
                                         className: `
-                    w-full px-4 py-4 flex items-center justify-between
+                    w-full px-3.5 py-2.5 flex items-center justify-between
                     bg-gradient-to-r ${config.gradient}
                     hover:brightness-[0.98] transition-all duration-200
                   `,
@@ -6285,24 +6378,24 @@ function ServiceStep() {
                                                 className: "flex items-center gap-3",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                        className: "text-2xl",
+                                                        className: "text-xl",
                                                         role: "img",
                                                         "aria-hidden": "true",
                                                         children: config.icon
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 745,
+                                                        lineNumber: 802,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "text-left",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                                                className: "font-semibold text-dark",
+                                                                className: "font-semibold text-dark !text-base md:!text-lg",
                                                                 children: category
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                                lineNumber: 749,
+                                                                lineNumber: 806,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6320,25 +6413,25 @@ function ServiceStep() {
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                                        lineNumber: 753,
+                                                                        lineNumber: 810,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                                lineNumber: 750,
+                                                                lineNumber: 807,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 748,
+                                                        lineNumber: 805,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 744,
+                                                lineNumber: 801,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6349,7 +6442,7 @@ function ServiceStep() {
                                                         children: selectedInCategory
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 763,
+                                                        lineNumber: 820,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6362,30 +6455,30 @@ function ServiceStep() {
                                                             className: "w-5 h-5 text-dark"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                            lineNumber: 774,
+                                                            lineNumber: 831,
                                                             columnNumber: 25
                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronDown$3e$__["ChevronDown"], {
                                                             className: "w-5 h-5 text-warm-gray"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                            lineNumber: 776,
+                                                            lineNumber: 833,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                        lineNumber: 768,
+                                                        lineNumber: 825,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 761,
+                                                lineNumber: 818,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 736,
+                                        lineNumber: 793,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -6409,7 +6502,7 @@ function ServiceStep() {
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "p-4 bg-beige-50/30",
                                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                    className: "grid grid-cols-1 sm:grid-cols-2 gap-3",
+                                                    className: "grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3",
                                                     children: categoryServices.map((service)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(ServiceTile, {
                                                             service: service,
                                                             isSelected: isServiceSelected(service.Id),
@@ -6419,39 +6512,39 @@ function ServiceStep() {
                                                             showDiscount: showGlobalDiscount
                                                         }, service.Id, false, {
                                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                            lineNumber: 795,
+                                                            lineNumber: 852,
                                                             columnNumber: 29
                                                         }, this))
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                    lineNumber: 793,
+                                                    lineNumber: 850,
                                                     columnNumber: 25
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                                lineNumber: 792,
+                                                lineNumber: 849,
                                                 columnNumber: 23
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                            lineNumber: 785,
+                                            lineNumber: 842,
                                             columnNumber: 21
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                        lineNumber: 783,
+                                        lineNumber: 840,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, category, true, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 731,
+                                lineNumber: 788,
                                 columnNumber: 15
                             }, this);
                         })
                     }, void 0, false, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 724,
+                        lineNumber: 781,
                         columnNumber: 9
                     }, this),
                     !isLoadingServices && selectedLocation && Object.keys(groupedServices).length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6461,7 +6554,7 @@ function ServiceStep() {
                                 className: "w-12 h-12 text-beige-300 mx-auto mb-3"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 819,
+                                lineNumber: 876,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6469,19 +6562,19 @@ function ServiceStep() {
                                 children: "No hay servicios disponibles"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                                lineNumber: 820,
+                                lineNumber: 877,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                        lineNumber: 818,
+                        lineNumber: 875,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                lineNumber: 552,
+                lineNumber: 562,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -6492,22 +6585,22 @@ function ServiceStep() {
                     showDiscount: showGlobalDiscount
                 }, void 0, false, {
                     fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                    lineNumber: 829,
+                    lineNumber: 886,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-                lineNumber: 827,
+                lineNumber: 884,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/booking/steps/ServiceStep.tsx",
-        lineNumber: 550,
+        lineNumber: 560,
         columnNumber: 5
     }, this);
 }
-_s1(ServiceStep, "HncbbXno5OshZd20KqZwaTmNDxk=", false, function() {
+_s1(ServiceStep, "1RbfuSQRdPJlaiXZ9WCqANLccIg=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBookingStore"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBookingStore"]
