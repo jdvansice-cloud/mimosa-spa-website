@@ -52,6 +52,7 @@ export function PromotionsList() {
           <PromotionCard
             key={promotion.id}
             promotion={promotion}
+            defaultOpen
           />
         ))}
       </div>

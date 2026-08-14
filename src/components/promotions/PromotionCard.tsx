@@ -9,9 +9,11 @@ import type { Promotion } from '@/types'
 
 interface PromotionCardProps {
   promotion: Promotion
+  /** Render the details section expanded (promotions page); home stays collapsed */
+  defaultOpen?: boolean
 }
 
-export function PromotionCard({ promotion }: PromotionCardProps) {
+export function PromotionCard({ promotion, defaultOpen = false }: PromotionCardProps) {
   const t = useTranslations('promotions')
   const locale = useLocale()
 
@@ -48,7 +50,7 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
         </div>
 
         {/* Price row — always visible; details collapsed below */}
-        <details className="group/details mx-4 mt-2">
+        <details className="group/details mx-4 mt-2" open={defaultOpen}>
           <summary className="list-none cursor-pointer flex items-center justify-between bg-warm-gray-500 text-cream px-5 py-3 rounded-lg [&::-webkit-details-marker]:hidden">
             <span className="flex items-baseline gap-2">
               <span className="text-2xl font-bold">{formatPrice(promotion.price)}</span>
