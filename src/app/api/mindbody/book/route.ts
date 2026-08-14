@@ -381,7 +381,7 @@ export async function POST(request: NextRequest) {
       const hasOffset = /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
       const bookingDate = new Date(hasOffset ? startDateTime : `${startDateTime}-05:00`)
       const dateStr = bookingDate.toLocaleDateString('es-PA', {
-        timeZone: 'America/Panama', day: '2-digit', month: '2-digit', year: 'numeric',
+        timeZone: 'America/Panama', day: 'numeric', month: 'long', year: 'numeric',
       })
       const timeStr = bookingDate.toLocaleTimeString('es-PA', {
         timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true,

@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     const appointmentDate = new Date(hasOffset ? raw : `${raw}-05:00`)
     const dateStr = appointmentDate.toLocaleDateString('es-PA', {
       timeZone: 'America/Panama',
-      day: '2-digit', month: '2-digit', year: 'numeric',
+      day: 'numeric', month: 'long', year: 'numeric',
     })
     const timeStr = appointmentDate.toLocaleTimeString('es-PA', {
       timeZone: 'America/Panama',
