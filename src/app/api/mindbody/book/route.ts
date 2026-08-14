@@ -203,6 +203,51 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Mindbody's addappointment REQUIRES StaffId. The widget normally sends
+    // one ("any" resolves client-side from the chosen slot), but after a
+    // page reload mid-flow the slot cache can be empty and staffId arrives
+    // undefined — re-derive the slot's staff from our own availability logic
+    // (same computation the customer saw) instead of failing with a 400.
+    let resolvedStaffId: number | undefined = staffId || undefined
+    if (!resolvedStaffId) {
+      try {
+        const requestDate = String(startDateTime).slice(0, 10)
+        const requestTime = String(startDateTime).slice(11, 16) // HH:mm
+        const svcList = services as BookingService[]
+        const durationSum =
+          Number(totalDuration) ||
+          svcList.reduce((sum, sv) => sum + (Number(sv.duration) || 0), 0)
+        const params = new URLSearchParams({
+          locationId: String(locationId),
+          serviceIds: svcList.map(sv => sv.sessionTypeId).join(','),
+          startDate: requestDate,
+          endDate: requestDate,
+          duration: String(durationSum),
+        })
+        const availabilityRes = await fetch(
+          `${request.nextUrl.origin}/api/mindbody/availability?${params}`,
+          { headers: { 'x-internal-staff-resolution': '1' } }
+        )
+        const availability = await availabilityRes.json()
+        const day = (availability.availableDates || []).find(
+          (d: { date: string }) => d.date === requestDate
+        )
+        const slot = day?.slots?.find(
+          (sl: { time: string; availableStaffIds?: number[] }) => sl.time === requestTime
+        )
+        resolvedStaffId = slot?.availableStaffIds?.[0]
+        console.log('Server-side staff fallback resolved:', resolvedStaffId, 'for', requestDate, requestTime)
+      } catch (err) {
+        console.error('Server-side staff fallback failed:', err)
+      }
+      if (!resolvedStaffId) {
+        return NextResponse.json(
+          { error: 'Ese horario ya no está disponible. Por favor elige otro horario.' },
+          { status: 409 }
+        )
+      }
+    }
+
     // Build appointments array with consecutive start times
     // Use the string Id from the verified Mindbody client record — this is what
     // Mindbody's addappointment endpoint expects for the ClientId field.
@@ -238,7 +283,7 @@ export async function POST(request: NextRequest) {
       appointments.push({
         ClientId: mindbodyClientId,  // use verified string Id, not raw numeric clientId
         LocationId: locationId,
-        StaffId: staffId || undefined,
+        StaffId: resolvedStaffId,
         SessionTypeId: service.sessionTypeId,
         StartDateTime: currentStartTime.toISOString().replace(/\.\d{3}Z$/, ''),
         Notes: noteParts.join(' | '),
@@ -278,7 +323,7 @@ export async function POST(request: NextRequest) {
           client_email: mindbodyClient?.Email || null,
           location_id: locationId,
           location_name: locationName || null,
-          staff_id: staffId || null,
+          staff_id: resolvedStaffId ?? null,
           therapist_name: therapistName || null,
           staff_requested: !!staffRequested,
           appointment_start: /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
@@ -393,7 +438,7 @@ export async function POST(request: NextRequest) {
           client_email: mindbodyClient?.Email || null,
           location_id: locationId,
           location_name: locationName || null,
-          staff_id: staffId || null,
+          staff_id: resolvedStaffId ?? null,
           therapist_name: finalTherapistName || null,
           staff_requested: !!staffRequested,
           // Store with Panama offset (-05:00) so Supabase saves the correct UTC value.

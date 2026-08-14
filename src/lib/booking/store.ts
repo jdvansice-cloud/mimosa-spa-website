@@ -721,6 +721,9 @@ export const useBookingStore = create<BookingState & BookingActions>()(
           selectedStaff: state.selectedStaff,
           selectedDate: state.selectedDate,
           selectedTime: state.selectedTime,
+          // Slots carry availableStaffIds — needed so "any therapist" can be
+          // resolved at confirm time even after a reload mid-flow.
+          availableSlots: state.availableSlots,
           activePromotion: state.activePromotion,
         }),
       }
