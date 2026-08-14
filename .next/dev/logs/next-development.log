@@ -1,198 +1,382 @@
-[00:00:01.991] Server  WARN    ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-[00:00:02.115] Server  LOG     ✓ Ready in 1905ms
-[00:00:03.357] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:03.588] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:00:03.588] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:00:15.073] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:15.312] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:00:15.312] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:00:15.312] Browser WARN    Image with src "https://aoqbaxfynmlcxwrnaeyo.supabase.co/storage/v1/object/public/images/site-images/category_body_treatments_1769180769688.jpeg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[00:01:02.089] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:02.296] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:01:02.296] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:01:07.425] Browser ERROR   {"code":"MISSING_MESSAGE","originalMessage":"Could not resolve `menu.categories.promotions` in messages for locale `es`."}
-[00:01:07.425] Browser ERROR   {"code":"MISSING_MESSAGE","originalMessage":"Could not resolve `menu.categories.promotions` in messages for locale `es`."}
-[00:01:07.425] Browser ERROR   {"code":"MISSING_MESSAGE","originalMessage":"Could not resolve `menu.categories.promotions` in messages for locale `es`."}
-[00:01:07.425] Browser ERROR   {"code":"MISSING_MESSAGE","originalMessage":"Could not resolve `menu.categories.promotions` in messages for locale `es`."}
-[00:01:07.686] Browser ERROR   {"code":"MISSING_MESSAGE","originalMessage":"Could not resolve `menu.categories.promotions` in messages for locale `es`."}
-[00:01:07.686] Browser ERROR   {"code":"MISSING_MESSAGE","originalMessage":"Could not resolve `menu.categories.promotions` in messages for locale `es`."}
-[00:01:07.686] Browser ERROR   {"code":"MISSING_MESSAGE","originalMessage":"Could not resolve `menu.categories.promotions` in messages for locale `es`."}
-[00:01:07.686] Browser ERROR   {"code":"MISSING_MESSAGE","originalMessage":"Could not resolve `menu.categories.promotions` in messages for locale `es`."}
-[00:01:41.018] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:41.194] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:01:41.194] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:05:30.989] Server  LOG     ✓ Compiled in 179ms
-[00:06:03.717] Browser ERROR   uncaughtError: ReferenceError: MapPin is not defined
-[00:06:11.906] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
-[00:06:12.063] Server  LOG     ✓ Compiled in 306ms
-[00:06:12.230] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
-[00:06:12.416] Server  LOG     ✓ Compiled in 0ms
-[00:06:12.510] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:06:12.751] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:06:12.751] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:06:26.618] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:06:26.764] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:06:26.764] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:08:38.820] Server  LOG     ✓ Compiled in 78ms
-[00:10:45.690] Server  LOG     ✓ Compiled in 218ms
-[00:11:07.074] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:11:07.279] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:11:07.279] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:11:07.279] Browser LOG     Fetching availability with params: {"addons":[],"duration":60,"locationId":1,"serviceIds":"x","services":[{"id":"x","name":"Masaje"}]}
-[00:11:07.279] Browser LOG     Fetching availability with params: {"addons":[],"duration":60,"locationId":1,"serviceIds":"x","services":[{"id":"x","name":"Masaje"}]}
-[00:11:07.324] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
-[00:11:07.325] Server  LOG     getStaff called with locationId: 1
-[00:11:07.857] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:11:08.292] Server  LOG     Total staff from Mindbody: 40
-[00:11:08.292] Server  LOG     Filtered staff (appointment providers): 40
-[00:11:08.293] Server  LOG     Staff members found: 40
-[00:11:08.315] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
-[00:11:08.316] Server  LOG     getStaff called with locationId: 1
-[00:11:08.316] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:11:08.591] Server  LOG     Total staff from Mindbody: 40
-[00:11:08.591] Server  LOG     Filtered staff (appointment providers): 40
-[00:11:08.591] Server  LOG     Staff members found: 40
-[00:11:44.601] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
-[00:11:44.601] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
-[00:11:44.603] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
-[00:11:45.153] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
-[00:11:46.191] Server  LOG     Total sale/services from Mindbody: 64
-[00:11:46.192] Server  LOG     Total online session types: 95
-[00:11:46.193] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
-[00:11:46.194] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
-[00:11:46.195] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
-[00:11:46.195] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
-[00:11:46.195] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
-[00:11:46.196] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
-[00:11:46.196] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
-[00:11:46.196] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
-[00:11:46.197] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
-[00:11:46.197] Server  LOG     Online bookable services (excluding Adicionales): 45
-[00:11:46.197] Server  LOG     Services with prices (tax removed): 45
-[00:11:46.198] Server  LOG     Total online services from Mindbody: 45
-[00:11:46.198] Server  LOG     Sample service: "{\"Id\":225,\"ProductId\":11248,\"Name\":\"Baño de Luna - 120 min\",\"Description\":\"\",\"Duration\":120,\"Price\":139,\"OnlinePrice\":139,\"TaxIncluded\":9.73,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
-[00:11:46.199] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
-[00:11:46.199] Server  LOG     ProgramIds found: [5,4,6]
-[00:11:46.200] Server  LOG     Filtered services count: 45
-[00:11:46.472] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:11:46.639] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
-[00:11:46.639] Server  LOG     getStaff called with locationId: 1
-[00:11:46.640] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:11:46.642] Server  LOG     getStaff called with locationId: 1
-[00:11:46.642] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:11:46.694] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:11:46.694] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:11:46.694] Browser LOG     Fetching availability with params: {"addons":[],"duration":120,"locationId":1,"serviceIds":"225","services":[{"id":225,"name":"Baño de Luna - 120 min"}]}
-[00:11:46.694] Browser LOG     Fetching availability with params: {"addons":[],"duration":120,"locationId":1,"serviceIds":"225","services":[{"id":225,"name":"Baño de Luna - 120 min"}]}
-[00:11:46.971] Server  LOG     Total staff from Mindbody: 40
-[00:11:46.972] Server  LOG     Filtered staff (appointment providers): 40
-[00:11:46.972] Server  LOG     Staff members found: 40
-[00:11:46.973] Server  LOG     Total staff from Mindbody: 40
-[00:11:46.973] Server  LOG     Filtered staff (appointment providers): 40
-[00:11:46.973] Server  LOG     getScheduleItems called with: {}
-[00:11:46.974] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-14&endDate=2026-09-13&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
-[00:11:46.980] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
-[00:11:46.980] Server  LOG     getStaff called with locationId: 1
-[00:11:46.980] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:11:47.232] Server  LOG     Total staff from Mindbody: 40
-[00:11:47.233] Server  LOG     Filtered staff (appointment providers): 40
-[00:11:47.233] Server  LOG     Staff members found: 40
-[00:11:50.126] Server  LOG     Schedule items response: 36 "staff members"
-[00:11:50.155] Server  LOG     getStaff called with locationId: 1
-[00:11:50.155] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:11:50.409] Server  LOG     Total staff from Mindbody: 40
-[00:11:50.409] Server  LOG     Filtered staff (appointment providers): 40
-[00:11:50.409] Server  LOG     getScheduleItems called with: {}
-[00:11:50.409] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-14&endDate=2026-09-13&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
-[00:11:52.984] Server  LOG     Schedule items response: 36 "staff members"
-[00:12:23.897] Server  LOG     ✓ Compiled in 82ms
-[00:12:59.394] Server  LOG     ✓ Compiled in 87ms
-[00:13:29.622] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:13:29.840] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
-[00:13:29.841] Server  LOG     getStaff called with locationId: 1
-[00:13:29.841] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:13:29.851] Server  LOG     getStaff called with locationId: 1
-[00:13:29.851] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:13:29.856] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:13:29.856] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:13:29.856] Browser LOG     Fetching availability with params: {"addons":[],"duration":120,"locationId":1,"serviceIds":"225","services":[{"id":225,"name":"Baño de Luna - 120 min"}]}
-[00:13:29.856] Browser LOG     Fetching availability with params: {"addons":[],"duration":120,"locationId":1,"serviceIds":"225","services":[{"id":225,"name":"Baño de Luna - 120 min"}]}
-[00:13:30.523] Server  LOG     Total staff from Mindbody: 40
-[00:13:30.523] Server  LOG     Filtered staff (appointment providers): 40
-[00:13:30.524] Server  LOG     getScheduleItems called with: {}
-[00:13:30.524] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-14&endDate=2026-09-13&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
-[00:13:30.526] Server  LOG     Total staff from Mindbody: 40
-[00:13:30.526] Server  LOG     Filtered staff (appointment providers): 40
-[00:13:30.526] Server  LOG     Staff members found: 40
-[00:13:30.538] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
-[00:13:30.539] Server  LOG     getStaff called with locationId: 1
-[00:13:30.539] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:13:30.798] Server  LOG     Total staff from Mindbody: 40
-[00:13:30.799] Server  LOG     Filtered staff (appointment providers): 40
-[00:13:30.799] Server  LOG     Staff members found: 40
-[00:13:33.074] Server  LOG     Schedule items response: 36 "staff members"
-[00:13:33.096] Server  LOG     getStaff called with locationId: 1
-[00:13:33.096] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:13:33.403] Server  LOG     Total staff from Mindbody: 40
-[00:13:33.403] Server  LOG     Filtered staff (appointment providers): 40
-[00:13:33.404] Server  LOG     getScheduleItems called with: {}
-[00:13:33.404] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-14&endDate=2026-09-13&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
-[00:13:35.768] Server  LOG     Schedule items response: 36 "staff members"
-[00:32:07.488] Server  LOG     ✓ Compiled in 156ms
-[00:32:22.833] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:32:23.082] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:32:23.082] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:49:21.884] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
-[00:49:21.885] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
-[00:49:21.890] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
-[00:49:22.394] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
-[00:49:23.130] Server  LOG     Total sale/services from Mindbody: 64
-[00:49:23.131] Server  LOG     Total online session types: 95
-[00:49:23.131] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
-[00:49:23.131] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
-[00:49:23.131] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
-[00:49:23.131] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
-[00:49:23.132] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
-[00:49:23.132] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
-[00:49:23.132] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
-[00:49:23.132] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
-[00:49:23.132] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
-[00:49:23.132] Server  LOG     Online bookable services (excluding Adicionales): 45
-[00:49:23.132] Server  LOG     Services with prices (tax removed): 45
-[00:49:23.133] Server  LOG     Total online services from Mindbody: 45
-[00:49:23.133] Server  LOG     Sample service: "{\"Id\":225,\"ProductId\":11248,\"Name\":\"Baño de Luna - 120 min\",\"Description\":\"\",\"Duration\":120,\"Price\":139,\"OnlinePrice\":139,\"TaxIncluded\":9.73,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
-[00:49:23.133] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
-[00:49:23.133] Server  LOG     ProgramIds found: [5,4,6]
-[00:49:23.134] Server  LOG     Filtered services count: 45
-[00:49:23.794] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:49:23.932] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
-[00:49:23.932] Server  LOG     getStaff called with locationId: 1
-[00:49:23.933] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:49:23.939] Server  LOG     getStaff called with locationId: 1
-[00:49:23.939] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:49:23.976] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:49:23.976] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:49:23.976] Browser LOG     Fetching availability with params: {"addons":[],"duration":120,"locationId":1,"serviceIds":"225","services":[{"id":225,"name":"Baño de Luna - 120 min"}]}
-[00:49:23.976] Browser LOG     Fetching availability with params: {"addons":[],"duration":120,"locationId":1,"serviceIds":"225","services":[{"id":225,"name":"Baño de Luna - 120 min"}]}
-[00:49:24.200] Server  LOG     Total staff from Mindbody: 40
-[00:49:24.201] Server  LOG     Filtered staff (appointment providers): 40
-[00:49:24.201] Server  LOG     getScheduleItems called with: {}
-[00:49:24.202] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-14&endDate=2026-09-13&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
-[00:49:24.203] Server  LOG     Total staff from Mindbody: 40
-[00:49:24.203] Server  LOG     Filtered staff (appointment providers): 40
-[00:49:24.203] Server  LOG     Staff members found: 40
-[00:49:24.208] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
-[00:49:24.208] Server  LOG     getStaff called with locationId: 1
-[00:49:24.208] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:49:24.449] Server  LOG     Total staff from Mindbody: 40
-[00:49:24.449] Server  LOG     Filtered staff (appointment providers): 40
-[00:49:24.449] Server  LOG     Staff members found: 40
-[00:49:26.938] Server  LOG     Schedule items response: 36 "staff members"
-[00:49:26.949] Server  LOG     getStaff called with locationId: 1
-[00:49:26.950] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
-[00:49:27.273] Server  LOG     Total staff from Mindbody: 40
-[00:49:27.273] Server  LOG     Filtered staff (appointment providers): 40
-[00:49:27.273] Server  LOG     getScheduleItems called with: {}
-[00:49:27.273] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-14&endDate=2026-09-13&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
-[00:49:29.998] Server  LOG     Schedule items response: 36 "staff members"
+[00:00:01.293] Server  WARN    ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[00:00:01.551] Server  LOG     ✓ Ready in 1241ms
+[00:00:04.807] Server  LOG     ○ Compiling /[locale]/reservar ...
+[00:00:10.920] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:11.180] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:11.180] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:12.698] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:00:13.178] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:00:28.951] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:00:28.952] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:00:28.953] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:00:28.957] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:00:28.957] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:00:28.958] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:00:29.323] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:00:29.325] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:00:29.734] Server  LOG     Total sale/services from Mindbody: 64
+[00:00:29.735] Server  LOG     Total online session types: 95
+[00:00:29.735] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:00:29.736] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:00:29.736] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:00:29.736] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:00:29.737] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:00:29.738] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:00:29.738] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:00:29.738] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:00:29.738] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:00:29.738] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:00:29.738] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:00:29.739] Server  LOG     All online bookable services for promotions (no filters): 64
+[00:00:29.739] Server  LOG     Total online services for promotions: 64
+[00:00:29.739] Server  LOG     Filtered services count: 64
+[00:00:29.743] Server  LOG     Total sale/services from Mindbody: 64
+[00:00:29.743] Server  LOG     Total online session types: 95
+[00:00:29.744] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:00:29.744] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:00:29.744] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:00:29.745] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:00:29.745] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:00:29.745] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:00:29.745] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:00:29.746] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:00:29.746] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:00:29.746] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:00:29.747] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:00:29.747] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:00:29.747] Server  LOG     Services with prices (tax removed): 43
+[00:00:29.747] Server  LOG     Total online services from Mindbody: 43
+[00:00:29.747] Server  LOG     Sample service: "{\"Id\":106,\"ProductId\":10294,\"Name\":\"Facial Anti-age\",\"Description\":\"<p style=\\\"text-align: left\\\">Abraza el paso del tiempo con gracia y belleza. Este tratamiento antiedad combina técnicas rejuvenecedoras y producos premium para suavizar líneas finas, restaurar la firmeza y devolver a tu rostro un resplandor juvenil. Porque cada etapa de tu vida merece celebrarse con una piel radiante.</p>\",\"Duration\":60,\"Price\":69,\"OnlinePrice\":69,\"TaxIncluded\":4.83,\"OnlineBooking\":true,\"Category\":\"Tratamientos Faciales\",\"ProgramId\":6,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:00:29.748] Server  LOG     Categories found: ["Tratamientos Faciales","Tratamientos Corporales","Rituales Mimosa"]
+[00:00:29.748] Server  LOG     ProgramIds found: [6,4,5]
+[00:00:29.748] Server  LOG     Filtered services count: 43
+[00:01:03.030] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:03.235] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:01:03.235] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:01:10.285] Server  LOG     ✓ Compiled in 244ms
+[00:01:25.938] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:26.220] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:01:26.220] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:01:26.314] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:01:26.333] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:01:26.333] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:01:26.335] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:01:26.346] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:01:26.346] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:01:26.351] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:01:27.263] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:01:27.264] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:01:27.438] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:01:27.596] Server  LOG     Total sale/services from Mindbody: 64
+[00:01:27.597] Server  LOG     Total online session types: 95
+[00:01:27.598] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:01:27.599] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:01:27.599] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:01:27.599] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:01:27.600] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:01:27.600] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:01:27.601] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:01:27.601] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:01:27.602] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:01:27.602] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:01:27.602] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:01:27.603] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:01:27.604] Server  LOG     Services with prices (tax removed): 43
+[00:01:27.604] Server  LOG     Total online services from Mindbody: 43
+[00:01:27.604] Server  LOG     Sample service: "{\"Id\":106,\"ProductId\":10294,\"Name\":\"Facial Anti-age\",\"Description\":\"<p style=\\\"text-align: left\\\">Abraza el paso del tiempo con gracia y belleza. Este tratamiento antiedad combina técnicas rejuvenecedoras y producos premium para suavizar líneas finas, restaurar la firmeza y devolver a tu rostro un resplandor juvenil. Porque cada etapa de tu vida merece celebrarse con una piel radiante.</p>\",\"Duration\":60,\"Price\":69,\"OnlinePrice\":69,\"TaxIncluded\":4.83,\"OnlineBooking\":true,\"Category\":\"Tratamientos Faciales\",\"ProgramId\":6,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:01:27.604] Server  LOG     Categories found: ["Tratamientos Faciales","Tratamientos Corporales","Rituales Mimosa"]
+[00:01:27.604] Server  LOG     ProgramIds found: [6,4,5]
+[00:01:27.604] Server  LOG     Filtered services count: 43
+[00:01:27.614] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:01:27.615] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:01:27.616] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:01:27.620] Server  LOG     Total sale/services from Mindbody: 64
+[00:01:27.620] Server  LOG     Total online session types: 95
+[00:01:27.620] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:01:27.620] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:01:27.621] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:01:27.622] Server  LOG     All online bookable services for promotions (no filters): 64
+[00:01:27.622] Server  LOG     Total online services for promotions: 64
+[00:01:27.622] Server  LOG     Filtered services count: 64
+[00:01:27.628] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:01:27.629] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:01:27.629] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:01:27.925] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:01:27.926] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:01:28.280] Server  LOG     Total sale/services from Mindbody: 64
+[00:01:28.281] Server  LOG     Total online session types: 95
+[00:01:28.283] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:01:28.284] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:01:28.284] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:01:28.284] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:01:28.284] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:01:28.285] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:01:28.285] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:01:28.285] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:01:28.285] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:01:28.285] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:01:28.285] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:01:28.285] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:01:28.285] Server  LOG     Services with prices (tax removed): 43
+[00:01:28.285] Server  LOG     Total online services from Mindbody: 43
+[00:01:28.286] Server  LOG     Sample service: "{\"Id\":106,\"ProductId\":10294,\"Name\":\"Facial Anti-age\",\"Description\":\"<p style=\\\"text-align: left\\\">Abraza el paso del tiempo con gracia y belleza. Este tratamiento antiedad combina técnicas rejuvenecedoras y producos premium para suavizar líneas finas, restaurar la firmeza y devolver a tu rostro un resplandor juvenil. Porque cada etapa de tu vida merece celebrarse con una piel radiante.</p>\",\"Duration\":60,\"Price\":69,\"OnlinePrice\":69,\"TaxIncluded\":4.83,\"OnlineBooking\":true,\"Category\":\"Tratamientos Faciales\",\"ProgramId\":6,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:01:28.286] Server  LOG     Categories found: ["Tratamientos Faciales","Tratamientos Corporales","Rituales Mimosa"]
+[00:01:28.286] Server  LOG     ProgramIds found: [6,4,5]
+[00:01:28.286] Server  LOG     Filtered services count: 43
+[00:01:28.859] Server  LOG     Total sale/services from Mindbody: 64
+[00:01:28.859] Server  LOG     Total online session types: 95
+[00:01:28.860] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:01:28.860] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:01:28.860] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:01:28.860] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:01:28.861] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:01:28.861] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:01:28.861] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:01:28.862] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:01:28.862] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:01:28.862] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:01:28.862] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:01:28.863] Server  LOG     All online bookable services for promotions (no filters): 64
+[00:01:28.863] Server  LOG     Total online services for promotions: 64
+[00:01:28.863] Server  LOG     Filtered services count: 64
+[00:03:40.753] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:03:40.765] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:03:41.584] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:03:41.586] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:03:41.587] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:03:41.588] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:03:41.827] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:03:41.876] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:03:42.156] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:03:42.237] Server  LOG     Total sale/services from Mindbody: 64
+[00:03:42.237] Server  LOG     Total online session types: 95
+[00:03:42.238] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:03:42.239] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:03:42.239] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:03:42.239] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:03:42.240] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:03:42.240] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:03:42.240] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:03:42.241] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:03:42.241] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:03:42.241] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:03:42.241] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:03:42.242] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:03:42.242] Server  LOG     Services with prices (tax removed): 43
+[00:03:42.242] Server  LOG     Total online services from Mindbody: 43
+[00:03:42.242] Server  LOG     Sample service: "{\"Id\":106,\"ProductId\":10294,\"Name\":\"Facial Anti-age\",\"Description\":\"<p style=\\\"text-align: left\\\">Abraza el paso del tiempo con gracia y belleza. Este tratamiento antiedad combina técnicas rejuvenecedoras y producos premium para suavizar líneas finas, restaurar la firmeza y devolver a tu rostro un resplandor juvenil. Porque cada etapa de tu vida merece celebrarse con una piel radiante.</p>\",\"Duration\":60,\"Price\":69,\"OnlinePrice\":69,\"TaxIncluded\":4.83,\"OnlineBooking\":true,\"Category\":\"Faciales\",\"ProgramId\":6,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:03:42.243] Server  LOG     Categories found: ["Faciales","Masajes","Rituales Mimosa"]
+[00:03:42.243] Server  LOG     ProgramIds found: [6,4,5]
+[00:03:42.243] Server  LOG     Filtered services count: 43
+[00:03:42.253] Server  LOG     Total sale/services from Mindbody: 64
+[00:03:42.253] Server  LOG     Total online session types: 95
+[00:03:42.253] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:03:42.254] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:03:42.254] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:03:42.254] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:03:42.254] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:03:42.255] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:03:42.255] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:03:42.255] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:03:42.255] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:03:42.256] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:03:42.256] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:03:42.256] Server  LOG     All online bookable services for promotions (no filters): 64
+[00:03:42.257] Server  LOG     Total online services for promotions: 64
+[00:03:42.257] Server  LOG     Filtered services count: 64
+[00:03:55.047] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:03:55.275] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:03:55.275] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:03:55.309] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:03:55.324] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:03:55.325] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:03:55.328] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:03:55.344] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:03:55.344] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:03:55.347] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:03:55.655] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:03:55.655] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:03:55.839] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:03:55.967] Server  LOG     Total sale/services from Mindbody: 64
+[00:03:55.967] Server  LOG     Total online session types: 95
+[00:03:55.968] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:03:55.968] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:03:55.968] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:03:55.968] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:03:55.968] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:03:55.968] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:03:55.969] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:03:55.969] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:03:55.969] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:03:55.969] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:03:55.969] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:03:55.969] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:03:55.970] Server  LOG     Services with prices (tax removed): 43
+[00:03:55.970] Server  LOG     Total online services from Mindbody: 43
+[00:03:55.970] Server  LOG     Sample service: "{\"Id\":106,\"ProductId\":10294,\"Name\":\"Facial Anti-age\",\"Description\":\"<p style=\\\"text-align: left\\\">Abraza el paso del tiempo con gracia y belleza. Este tratamiento antiedad combina técnicas rejuvenecedoras y producos premium para suavizar líneas finas, restaurar la firmeza y devolver a tu rostro un resplandor juvenil. Porque cada etapa de tu vida merece celebrarse con una piel radiante.</p>\",\"Duration\":60,\"Price\":69,\"OnlinePrice\":69,\"TaxIncluded\":4.83,\"OnlineBooking\":true,\"Category\":\"Faciales\",\"ProgramId\":6,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:03:55.970] Server  LOG     Categories found: ["Faciales","Masajes","Rituales Mimosa"]
+[00:03:55.971] Server  LOG     ProgramIds found: [6,4,5]
+[00:03:55.971] Server  LOG     Filtered services count: 43
+[00:03:55.983] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:03:55.984] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:03:55.984] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:03:55.989] Server  LOG     Total sale/services from Mindbody: 64
+[00:03:55.989] Server  LOG     Total online session types: 95
+[00:03:55.990] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:03:55.990] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:03:55.990] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:03:55.990] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:03:55.990] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:03:55.990] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:03:55.991] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:03:55.991] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:03:55.991] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:03:55.991] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:03:55.991] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:03:55.991] Server  LOG     All online bookable services for promotions (no filters): 64
+[00:03:55.992] Server  LOG     Total online services for promotions: 64
+[00:03:55.992] Server  LOG     Filtered services count: 64
+[00:03:56.005] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:03:56.006] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:03:56.006] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:03:56.303] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:03:56.568] Server  LOG     Total sale/services from Mindbody: 64
+[00:03:56.568] Server  LOG     Total online session types: 95
+[00:03:56.568] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:03:56.569] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:03:56.569] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:03:56.569] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:03:56.569] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:03:56.569] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:03:56.569] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:03:56.569] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:03:56.569] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:03:56.569] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:03:56.570] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:03:56.570] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:03:56.570] Server  LOG     Services with prices (tax removed): 43
+[00:03:56.570] Server  LOG     Total online services from Mindbody: 43
+[00:03:56.570] Server  LOG     Sample service: "{\"Id\":106,\"ProductId\":10294,\"Name\":\"Facial Anti-age\",\"Description\":\"<p style=\\\"text-align: left\\\">Abraza el paso del tiempo con gracia y belleza. Este tratamiento antiedad combina técnicas rejuvenecedoras y producos premium para suavizar líneas finas, restaurar la firmeza y devolver a tu rostro un resplandor juvenil. Porque cada etapa de tu vida merece celebrarse con una piel radiante.</p>\",\"Duration\":60,\"Price\":69,\"OnlinePrice\":69,\"TaxIncluded\":4.83,\"OnlineBooking\":true,\"Category\":\"Faciales\",\"ProgramId\":6,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:03:56.570] Server  LOG     Categories found: ["Faciales","Masajes","Rituales Mimosa"]
+[00:03:56.570] Server  LOG     ProgramIds found: [6,4,5]
+[00:03:56.571] Server  LOG     Filtered services count: 43
+[00:03:56.578] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:03:56.629] Server  LOG     Total sale/services from Mindbody: 64
+[00:03:56.630] Server  LOG     Total online session types: 95
+[00:03:56.630] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:03:56.631] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:03:56.631] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:03:56.631] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:03:56.631] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:03:56.632] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:03:56.632] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:03:56.632] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:03:56.633] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:03:56.633] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:03:56.633] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:03:56.633] Server  LOG     All online bookable services for promotions (no filters): 64
+[00:03:56.633] Server  LOG     Total online services for promotions: 64
+[00:03:56.633] Server  LOG     Filtered services count: 64
+[00:06:00.853] Server  LOG     ✓ Compiled in 169ms
+[00:07:18.470] Server  LOG     ✓ Compiled in 177ms
+[00:07:33.974] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:34.223] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:07:34.223] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:07:34.272] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:07:34.283] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:07:34.284] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:07:34.286] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:07:34.293] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:07:34.294] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:07:34.296] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:07:35.085] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:07:35.268] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:07:35.365] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:07:35.468] Server  LOG     Total sale/services from Mindbody: 64
+[00:07:35.468] Server  LOG     Total online session types: 95
+[00:07:35.469] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:07:35.469] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:07:35.469] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:07:35.470] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:07:35.470] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:07:35.470] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:07:35.471] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:07:35.471] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:07:35.471] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:07:35.471] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:07:35.472] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:07:35.472] Server  LOG     All online bookable services for promotions (no filters): 64
+[00:07:35.472] Server  LOG     Total online services for promotions: 64
+[00:07:35.472] Server  LOG     Filtered services count: 64
+[00:07:35.482] Server  LOG     Total sale/services from Mindbody: 64
+[00:07:35.483] Server  LOG     Total online session types: 95
+[00:07:35.483] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:07:35.483] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:07:35.483] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:07:35.484] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:07:35.484] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:07:35.484] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:07:35.485] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:07:35.485] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:07:35.485] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:07:35.485] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:07:35.486] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:07:35.486] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:07:35.486] Server  LOG     Services with prices (tax removed): 43
+[00:07:35.486] Server  LOG     Total online services from Mindbody: 43
+[00:07:35.487] Server  LOG     Sample service: "{\"Id\":106,\"ProductId\":10294,\"Name\":\"Facial Anti-age\",\"Description\":\"<p style=\\\"text-align: left\\\">Abraza el paso del tiempo con gracia y belleza. Este tratamiento antiedad combina técnicas rejuvenecedoras y producos premium para suavizar líneas finas, restaurar la firmeza y devolver a tu rostro un resplandor juvenil. Porque cada etapa de tu vida merece celebrarse con una piel radiante.</p>\",\"Duration\":60,\"Price\":69,\"OnlinePrice\":69,\"TaxIncluded\":4.83,\"OnlineBooking\":true,\"Category\":\"Faciales\",\"ProgramId\":6,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:07:35.487] Server  LOG     Categories found: ["Faciales","Masajes","Rituales Mimosa"]
+[00:07:35.487] Server  LOG     ProgramIds found: [6,4,5]
+[00:07:35.487] Server  LOG     Filtered services count: 43
+[00:07:35.509] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" true
+[00:07:35.510] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:07:35.511] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:07:35.519] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:07:35.519] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:07:35.520] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:07:35.764] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:07:35.770] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:07:36.057] Server  LOG     Total sale/services from Mindbody: 64
+[00:07:36.057] Server  LOG     Total online session types: 95
+[00:07:36.058] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:07:36.058] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:07:36.059] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:07:36.059] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:07:36.059] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:07:36.059] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:07:36.060] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:07:36.061] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:07:36.061] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:07:36.061] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:07:36.062] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:07:36.062] Server  LOG     All online bookable services for promotions (no filters): 64
+[00:07:36.062] Server  LOG     Total online services for promotions: 64
+[00:07:36.062] Server  LOG     Filtered services count: 64
+[00:07:36.165] Server  LOG     Total sale/services from Mindbody: 64
+[00:07:36.166] Server  LOG     Total online session types: 95
+[00:07:36.166] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:07:36.166] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:07:36.166] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:07:36.167] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:07:36.167] Server  LOG     Warning: No session type match for service: Eliminado - Baño de Luna - 120 min (ProgramId=4)
+[00:07:36.167] Server  LOG     Warning: No session type match for service: Eliminado - Day Spa - 150 min (ProgramId=4)
+[00:07:36.167] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:07:36.167] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:07:36.167] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:07:36.167] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:07:36.168] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:07:36.168] Server  LOG     Online bookable services (excluding Adicionales): 43
+[00:07:36.168] Server  LOG     Services with prices (tax removed): 43
+[00:07:36.168] Server  LOG     Total online services from Mindbody: 43
+[00:07:36.168] Server  LOG     Sample service: "{\"Id\":106,\"ProductId\":10294,\"Name\":\"Facial Anti-age\",\"Description\":\"<p style=\\\"text-align: left\\\">Abraza el paso del tiempo con gracia y belleza. Este tratamiento antiedad combina técnicas rejuvenecedoras y producos premium para suavizar líneas finas, restaurar la firmeza y devolver a tu rostro un resplandor juvenil. Porque cada etapa de tu vida merece celebrarse con una piel radiante.</p>\",\"Duration\":60,\"Price\":69,\"OnlinePrice\":69,\"TaxIncluded\":4.83,\"OnlineBooking\":true,\"Category\":\"Faciales\",\"ProgramId\":6,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:07:36.168] Server  LOG     Categories found: ["Faciales","Masajes","Rituales Mimosa"]
+[00:07:36.168] Server  LOG     ProgramIds found: [6,4,5]
+[00:07:36.169] Server  LOG     Filtered services count: 43

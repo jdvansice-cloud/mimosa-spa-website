@@ -17,8 +17,8 @@ interface Treatment {
 type TreatmentGroup = 'body' | 'facial' | 'addon'
 
 const GROUP_LABEL: Record<TreatmentGroup, string> = {
-  body: 'Tratamientos Corporales',
-  facial: 'Tratamientos Faciales',
+  body: 'Masajes',
+  facial: 'Faciales',
   addon: 'Adicionales',
 }
 

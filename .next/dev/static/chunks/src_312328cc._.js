@@ -1369,9 +1369,9 @@ const PROGRAM_IDS = {
     PAREJAS: 21
 };
 const PROGRAM_NAMES = {
-    [PROGRAM_IDS.TRATAMIENTOS_CORPORALES]: 'Tratamientos Corporales',
-    [PROGRAM_IDS.PAQUETES_DELUXE]: 'Paquetes Deluxe',
-    [PROGRAM_IDS.TRATAMIENTOS_FACIALES]: 'Tratamientos Faciales',
+    [PROGRAM_IDS.TRATAMIENTOS_CORPORALES]: 'Masajes',
+    [PROGRAM_IDS.PAQUETES_DELUXE]: 'Rituales Mimosa',
+    [PROGRAM_IDS.TRATAMIENTOS_FACIALES]: 'Faciales',
     [PROGRAM_IDS.ADICIONALES]: 'Adicionales',
     [PROGRAM_IDS.TRATAMIENTOS_PAREJAS]: 'Tratamientos Parejas',
     [PROGRAM_IDS.ADICIONALES_EN_CABINA]: 'Adicionales en Cabina',
@@ -2038,6 +2038,9 @@ const useBookingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
             selectedStaff: state.selectedStaff,
             selectedDate: state.selectedDate,
             selectedTime: state.selectedTime,
+            // Slots carry availableStaffIds — needed so "any therapist" can be
+            // resolved at confirm time even after a reload mid-flow.
+            availableSlots: state.availableSlots,
             activePromotion: state.activePromotion
         })
 }), {

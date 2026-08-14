@@ -26,9 +26,9 @@ export const PROGRAM_IDS = {
 
 // Spanish program names from Mindbody
 export const PROGRAM_NAMES: Record<number, string> = {
-  [PROGRAM_IDS.TRATAMIENTOS_CORPORALES]: 'Tratamientos Corporales',
-  [PROGRAM_IDS.PAQUETES_DELUXE]: 'Paquetes Deluxe',
-  [PROGRAM_IDS.TRATAMIENTOS_FACIALES]: 'Tratamientos Faciales',
+  [PROGRAM_IDS.TRATAMIENTOS_CORPORALES]: 'Masajes',
+  [PROGRAM_IDS.PAQUETES_DELUXE]: 'Rituales Mimosa',
+  [PROGRAM_IDS.TRATAMIENTOS_FACIALES]: 'Faciales',
   [PROGRAM_IDS.ADICIONALES]: 'Adicionales',
   [PROGRAM_IDS.TRATAMIENTOS_PAREJAS]: 'Tratamientos Parejas',
   [PROGRAM_IDS.ADICIONALES_EN_CABINA]: 'Adicionales en Cabina',

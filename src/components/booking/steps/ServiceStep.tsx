@@ -248,9 +248,9 @@ function PromotionTile({
 
 // Category configuration with icons and colors
 const CATEGORY_CONFIG: Record<string, { icon: string; color: string; gradient: string }> = {
-  'Tratamientos Corporales': { icon: '💆', color: 'bg-amber-100', gradient: 'from-amber-500/20 to-amber-600/5' },
-  'Tratamientos Faciales': { icon: '✨', color: 'bg-pink-100', gradient: 'from-pink-500/20 to-pink-600/5' },
-  'Paquetes Deluxe': { icon: '👑', color: 'bg-purple-100', gradient: 'from-purple-500/20 to-purple-600/5' },
+  'Masajes': { icon: '💆', color: 'bg-amber-100', gradient: 'from-amber-500/20 to-amber-600/5' },
+  'Faciales': { icon: '✨', color: 'bg-pink-100', gradient: 'from-pink-500/20 to-pink-600/5' },
+  'Rituales Mimosa': { icon: '👑', color: 'bg-purple-100', gradient: 'from-purple-500/20 to-purple-600/5' },
   'Paquetes de Masajes': { icon: '🌿', color: 'bg-green-100', gradient: 'from-green-500/20 to-green-600/5' },
   'Tratamientos Parejas': { icon: '💕', color: 'bg-red-100', gradient: 'from-red-500/20 to-red-600/5' },
   'TAI': { icon: '🧘', color: 'bg-blue-100', gradient: 'from-blue-500/20 to-blue-600/5' },
@@ -258,6 +258,24 @@ const CATEGORY_CONFIG: Record<string, { icon: string; color: string; gradient: s
 }
 
 const DEFAULT_CONFIG = { icon: '🌸', color: 'bg-beige-100', gradient: 'from-gold/20 to-gold/5' }
+
+// Display order of category sections (promos + recommendations render above)
+const CATEGORY_ORDER = ['Rituales Mimosa', 'Masajes', 'Faciales']
+const categoryRank = (name: string) => {
+  const idx = CATEGORY_ORDER.indexOf(name)
+  return idx === -1 ? CATEGORY_ORDER.length : idx
+}
+
+// Short type tag for mixed lists (recommendations): masaje / facial / ritual
+function serviceKindLabel(programId: number | undefined): string | null {
+  switch (programId) {
+    case 4: return 'Masaje'        // Tratamientos Corporales
+    case 6: return 'Facial'        // Tratamientos Faciales
+    case 5: return 'Ritual'        // Rituales Mimosa
+    case 19: return 'Ritual'       // Paquetes de Masajes
+    default: return null
+  }
+}
 
 // Service Tile Component - Clickable anywhere
 function ServiceTile({
@@ -267,6 +285,7 @@ function ServiceTile({
   onShowDescription,
   discountPercent = 0,
   showDiscount = false,
+  showKind = false,
 }: {
   service: MindbodyService
   isSelected: boolean
@@ -274,7 +293,9 @@ function ServiceTile({
   onShowDescription: () => void
   discountPercent?: number
   showDiscount?: boolean
+  showKind?: boolean
 }) {
+  const kind = showKind ? serviceKindLabel(service.ProgramId) : null
   const discountedPrice = showDiscount && discountPercent > 0
     ? Math.round(service.Price * (1 - discountPercent / 100) * 100) / 100
     : null
@@ -282,7 +303,7 @@ function ServiceTile({
   return (
     <div
       className={`
-        relative h-[112px] rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full
+        relative h-[124px] rounded-xl border-2 transition-all duration-200 overflow-hidden text-left w-full
         ${isSelected
           ? 'border-gold bg-gold/5 shadow-md ring-2 ring-gold/20'
           : 'border-beige-200 bg-white hover:border-gold/50 hover:shadow-sm'
@@ -306,7 +327,12 @@ function ServiceTile({
 
         {/* Service Name */}
         <div className="pr-5 mb-1.5 flex-1 min-h-0">
-          <h4 className="font-semibold text-dark text-xs sm:text-sm leading-snug line-clamp-2">
+          {kind && (
+            <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-gold-700 mb-0.5">
+              {kind}
+            </p>
+          )}
+          <h4 className={`font-semibold text-dark text-xs sm:text-sm leading-snug ${kind ? 'line-clamp-2' : 'line-clamp-2'}`}>
             {service.Name}
           </h4>
         </div>
@@ -440,13 +466,24 @@ export function ServiceStep() {
         const bySortOrder = (a: MindbodyService, b: MindbodyService) =>
           orderOf(a.Id) - orderOf(b.Id) || a.Name.localeCompare(b.Name)
 
-        // Filter top pick services (must be top pick AND show_in_booking)
+        // Filter top pick services (must be top pick AND show_in_booking).
+        // Mixed list → group by kind: rituales first, then masajes, faciales.
+        const kindRank = (programId: number | undefined) => {
+          switch (programId) {
+            case 5: case 19: return 0 // rituales
+            case 4: return 1          // masajes
+            case 6: return 2          // faciales
+            default: return 3
+          }
+        }
         const topPicks = servicesData.services
           .filter((service: MindbodyService) => {
             const setting = settingsMap.get(service.Id)
             return setting?.is_top_pick === true && shouldShowInBooking(service.Id)
           })
-          .sort(bySortOrder)
+          .sort((a: MindbodyService, b: MindbodyService) =>
+            kindRank(a.ProgramId) - kindRank(b.ProgramId) || bySortOrder(a, b)
+          )
 
         // Filter grouped services to only show those with show_in_booking: true
         const filteredGrouped: Record<string, MindbodyService[]> = {}
@@ -768,6 +805,7 @@ export function ServiceStep() {
                         onShowDescription={() => setDescriptionService(service)}
                         discountPercent={globalDiscountPercent}
                         showDiscount={showGlobalDiscount}
+                        showKind
                       />
                     ))}
                   </div>
@@ -781,7 +819,9 @@ export function ServiceStep() {
       {/* Category Tiles */}
       {!isLoadingServices && (
         <div className="space-y-4">
-          {Object.entries(groupedServices).map(([category, categoryServices]) => {
+          {Object.entries(groupedServices)
+            .sort(([a], [b]) => categoryRank(a) - categoryRank(b) || a.localeCompare(b))
+            .map(([category, categoryServices]) => {
             const config = getCategoryConfig(category)
             const isExpanded = expandedCategories.has(category)
             const selectedInCategory = categoryServices.filter(s => isServiceSelected(s.Id)).length

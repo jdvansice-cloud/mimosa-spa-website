@@ -95,9 +95,9 @@ const PROGRAM_IDS = {
     PAREJAS: 21
 };
 const PROGRAM_NAMES = {
-    [PROGRAM_IDS.TRATAMIENTOS_CORPORALES]: 'Tratamientos Corporales',
-    [PROGRAM_IDS.PAQUETES_DELUXE]: 'Paquetes Deluxe',
-    [PROGRAM_IDS.TRATAMIENTOS_FACIALES]: 'Tratamientos Faciales',
+    [PROGRAM_IDS.TRATAMIENTOS_CORPORALES]: 'Masajes',
+    [PROGRAM_IDS.PAQUETES_DELUXE]: 'Rituales Mimosa',
+    [PROGRAM_IDS.TRATAMIENTOS_FACIALES]: 'Faciales',
     [PROGRAM_IDS.ADICIONALES]: 'Adicionales',
     [PROGRAM_IDS.TRATAMIENTOS_PAREJAS]: 'Tratamientos Parejas',
     [PROGRAM_IDS.ADICIONALES_EN_CABINA]: 'Adicionales en Cabina',
@@ -764,9 +764,11 @@ async function getAllServices(locationId) {
         });
     }
     // Filter for single session services with price (but don't require SellOnline)
+    // "Eliminado -" is the house convention for retired pricing options that
+    // Mindbody won't let us delete — keep them out of the admin entirely.
     const filteredServices = allSaleServices.filter((s)=>s.Count === 1 && // Single session only
-        s.Price > 0 // Has price
-    );
+        s.Price > 0 && // Has price
+        !/^eliminado\b/i.test(s.Name.trim()));
     console.log('Filtered sale services (single session, has price):', filteredServices.length);
     // Transform services - include both online and offline bookable
     const services = filteredServices.map((s)=>{
@@ -793,10 +795,31 @@ async function getAllServices(locationId) {
             HasSessionTypeMatch: sessionType !== undefined
         };
     });
-    console.log('All services for admin:', services.length);
-    console.log('Online bookable services:', services.filter((s)=>s.OnlineBooking).length);
-    console.log('Offline only services:', services.filter((s)=>!s.OnlineBooking).length);
-    return services;
+    // Dedupe: when several retail products share one session type (e.g. an old
+    // pricing option left behind after a treatment moved category), keep the one
+    // whose program matches the session type's CURRENT program — that's the
+    // category source of truth for appointments.
+    const byId = new Map();
+    for (const svc of services){
+        const existing = byId.get(svc.Id);
+        if (!existing) {
+            byId.set(svc.Id, svc);
+            continue;
+        }
+        const sessionType = findSessionTypeMatch(svc.Name, sessionTypeMap);
+        const trueProgramId = sessionType?.ProgramId;
+        if (trueProgramId && svc.ProgramId === trueProgramId && existing.ProgramId !== trueProgramId) {
+            byId.set(svc.Id, svc);
+        }
+    }
+    const dedupedServices = Array.from(byId.values());
+    if (dedupedServices.length !== services.length) {
+        console.log(`Deduped ${services.length - dedupedServices.length} stale retail duplicates`);
+    }
+    console.log('All services for admin:', dedupedServices.length);
+    console.log('Online bookable services:', dedupedServices.filter((s)=>s.OnlineBooking).length);
+    console.log('Offline only services:', dedupedServices.filter((s)=>!s.OnlineBooking).length);
+    return dedupedServices;
 }
 async function getStaff(locationId) {
     console.log('getStaff called with locationId:', locationId);
