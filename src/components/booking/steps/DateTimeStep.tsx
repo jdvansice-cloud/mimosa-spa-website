@@ -291,9 +291,15 @@ export function DateTimeStep() {
         setAvailableDatesData(data.availableDates)
         setAvailableDates(data.availableDates)
 
-        // Auto-select first available date if none selected
-        if (!selectedDate && data.availableDates.length > 0) {
-          setDate(data.availableDates[0].date)
+        // Auto-select TODAY when it has availability (else the first
+        // available date). Also recover when a persisted date is no longer
+        // offered (e.g. it passed while the cart was parked).
+        const dates = (data.availableDates || []) as AvailableDate[]
+        const today = new Date().toLocaleDateString('en-CA', panamaLocale)
+        const staleSelection = selectedDate && !dates.some(d => d.date === selectedDate)
+        if ((!selectedDate || staleSelection) && dates.length > 0) {
+          const todayEntry = dates.find(d => d.date === today && d.slots.length > 0)
+          setDate(todayEntry ? todayEntry.date : dates[0].date)
         }
       } catch (err) {
         setAvailabilityError(err instanceof Error ? err.message : 'Error de conexión')

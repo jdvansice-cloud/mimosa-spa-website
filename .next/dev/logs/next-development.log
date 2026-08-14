@@ -143,3 +143,56 @@ Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
 [00:32:22.833] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [00:32:23.082] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
 [00:32:23.082] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:49:21.884] Server  LOG     Fetching services for locationId: "1" "type:" "main" "includeOffline:" false "forPromotions:" false
+[00:49:21.885] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=true" ""
+[00:49:21.890] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/sale/services?limit=200&sellOnline=true&locationId=1" ""
+[00:49:22.394] Server  LOG     Session types from Mindbody (onlineOnly=true): 95
+[00:49:23.130] Server  LOG     Total sale/services from Mindbody: 64
+[00:49:23.131] Server  LOG     Total online session types: 95
+[00:49:23.131] Server  LOG     Filtered sale services (SellOnline, single session, has price): 64
+[00:49:23.131] Server  LOG     Warning: No session type match for service: Extra por Evento de Grupo (ProgramId=8)
+[00:49:23.131] Server  LOG     Warning: No session type match for service: Led Theraphy (20 min) (ProgramId=8)
+[00:49:23.131] Server  LOG     Warning: No session type match for service: 1 masaje deportivo - 45 min (ProgramId=19)
+[00:49:23.132] Server  LOG     Warning: No session type match for service: 1 masaje moldeador 45 min (ProgramId=19)
+[00:49:23.132] Server  LOG     Warning: No session type match for service: Masaje Tai Full (ProgramId=20)
+[00:49:23.132] Server  LOG     Warning: No session type match for service: Masaje Tailandes (ProgramId=20)
+[00:49:23.132] Server  LOG     Warning: No session type match for service: Shiatsu y Ayurvedico (ProgramId=20)
+[00:49:23.132] Server  LOG     Warning: No session type match for service: Oxigenación / facial con extraccion (ProgramId=6)
+[00:49:23.132] Server  LOG     Online bookable services (excluding Adicionales): 45
+[00:49:23.132] Server  LOG     Services with prices (tax removed): 45
+[00:49:23.133] Server  LOG     Total online services from Mindbody: 45
+[00:49:23.133] Server  LOG     Sample service: "{\"Id\":225,\"ProductId\":11248,\"Name\":\"Baño de Luna - 120 min\",\"Description\":\"\",\"Duration\":120,\"Price\":139,\"OnlinePrice\":139,\"TaxIncluded\":9.73,\"OnlineBooking\":true,\"Category\":\"Paquetes Deluxe\",\"ProgramId\":5,\"IsAddOn\":false,\"HasSessionTypeMatch\":true}"
+[00:49:23.133] Server  LOG     Categories found: ["Paquetes Deluxe","Tratamientos Corporales","Tratamientos Faciales"]
+[00:49:23.133] Server  LOG     ProgramIds found: [5,4,6]
+[00:49:23.134] Server  LOG     Filtered services count: 45
+[00:49:23.794] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:49:23.932] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
+[00:49:23.932] Server  LOG     getStaff called with locationId: 1
+[00:49:23.933] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:49:23.939] Server  LOG     getStaff called with locationId: 1
+[00:49:23.939] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:49:23.976] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:49:23.976] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:49:23.976] Browser LOG     Fetching availability with params: {"addons":[],"duration":120,"locationId":1,"serviceIds":"225","services":[{"id":225,"name":"Baño de Luna - 120 min"}]}
+[00:49:23.976] Browser LOG     Fetching availability with params: {"addons":[],"duration":120,"locationId":1,"serviceIds":"225","services":[{"id":225,"name":"Baño de Luna - 120 min"}]}
+[00:49:24.200] Server  LOG     Total staff from Mindbody: 40
+[00:49:24.201] Server  LOG     Filtered staff (appointment providers): 40
+[00:49:24.201] Server  LOG     getScheduleItems called with: {}
+[00:49:24.202] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-14&endDate=2026-09-13&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:49:24.203] Server  LOG     Total staff from Mindbody: 40
+[00:49:24.203] Server  LOG     Filtered staff (appointment providers): 40
+[00:49:24.203] Server  LOG     Staff members found: 40
+[00:49:24.208] Server  LOG     Fetching staff for locationId: 1 "sessionTypeIds:" []
+[00:49:24.208] Server  LOG     getStaff called with locationId: 1
+[00:49:24.208] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:49:24.449] Server  LOG     Total staff from Mindbody: 40
+[00:49:24.449] Server  LOG     Filtered staff (appointment providers): 40
+[00:49:24.449] Server  LOG     Staff members found: 40
+[00:49:26.938] Server  LOG     Schedule items response: 36 "staff members"
+[00:49:26.949] Server  LOG     getStaff called with locationId: 1
+[00:49:26.950] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/staff/staff?locationIds=1" ""
+[00:49:27.273] Server  LOG     Total staff from Mindbody: 40
+[00:49:27.273] Server  LOG     Filtered staff (appointment providers): 40
+[00:49:27.273] Server  LOG     getScheduleItems called with: {}
+[00:49:27.273] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/scheduleitems?locationIds=1&startDate=2026-08-14&endDate=2026-09-13&staffIds=1&staffIds=9&staffIds=14&staffIds=15&staffIds=18&staffIds=21&staffIds=100000008&staffIds=100000013&staffIds=100000015&staffIds=100000016&staffIds=100000017&staffIds=100000032&staffIds=100000033&staffIds=100000034&staffIds=100000035&staffIds=100000038&staffIds=100000039&staffIds=100000044&staffIds=100000047&staffIds=100000054&staffIds=100000055&staffIds=100000063&staffIds=100000064&staffIds=100000065&staffIds=100000066&staffIds=100000067&staffIds=100000068&staffIds=100000069&staffIds=100000072&staffIds=100000074&staffIds=100000076&staffIds=100000077&staffIds=100000078&staffIds=100000080&staffIds=100000081&staffIds=100000082" ""
+[00:49:29.998] Server  LOG     Schedule items response: 36 "staff members"
