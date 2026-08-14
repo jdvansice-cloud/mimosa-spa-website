@@ -210,27 +210,33 @@ export function DateTimeStep() {
   }, [filterStaff, selectedTime])
 
   // Availability restricted to the filtered therapist (client-side: each slot
-  // already lists which staff can take it)
-  const visibleDatesData = filterStaff
-    ? availableDatesData
-        .map(d => {
-          const slots = d.slots.filter(sl => sl.availableStaffIds.includes(filterStaff.Id))
-          return { ...d, slots, slotsCount: slots.length, hasAvailability: slots.length > 0 }
-        })
-        .filter(d => d.slots.length > 0)
+  // already lists which staff can take it). Dates are NOT removed when empty —
+  // the strip stays stable and an empty day shows a clear message instead.
+  const todayPanama = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Panama' })
+  const filteredDatesData = filterStaff
+    ? availableDatesData.map(d => {
+        const slots = d.slots.filter(sl => sl.availableStaffIds.includes(filterStaff.Id))
+        return { ...d, slots, slotsCount: slots.length, hasAvailability: slots.length > 0 }
+      })
     : availableDatesData
+  // Today is always present and first, even with zero availability
+  const visibleDatesData = filteredDatesData.some(d => d.date === todayPanama)
+    ? filteredDatesData
+    : (availableDatesData.length > 0
+        ? [{
+            date: todayPanama,
+            displayDate: new Date(`${todayPanama}T12:00:00`).toLocaleDateString('es-PA', {
+              weekday: 'long', day: 'numeric', month: 'long',
+            }),
+            hasAvailability: false,
+            slotsCount: 0,
+            slots: [],
+          }, ...filteredDatesData]
+        : filteredDatesData)
 
   const handleFilterChange = (staffId: string) => {
     const member = allStaff.find(st => String(st.Id) === staffId) || null
     setFilterStaff(member)
-    // Reset a date that may not exist under the new filter FIRST — setDate
-    // clears selectedStaff in the store, so the staff pick must come after.
-    if (member && selectedDate) {
-      const stillValid = availableDatesData.some(d =>
-        d.date === selectedDate && d.slots.some(sl => sl.availableStaffIds.includes(member.Id))
-      )
-      if (!stillValid) setDate('')
-    }
     setStaff(member)
   }
 
@@ -291,15 +297,15 @@ export function DateTimeStep() {
         setAvailableDatesData(data.availableDates)
         setAvailableDates(data.availableDates)
 
-        // Auto-select TODAY when it has availability (else the first
-        // available date). Also recover when a persisted date is no longer
-        // offered (e.g. it passed while the cart was parked).
+        // Every arrival at this step starts on TODAY — even when today has no
+        // availability (an explanatory message shows instead of slots). Only a
+        // completed date+time pick from earlier in the session is preserved.
         const dates = (data.availableDates || []) as AvailableDate[]
         const today = new Date().toLocaleDateString('en-CA', panamaLocale)
-        const staleSelection = selectedDate && !dates.some(d => d.date === selectedDate)
-        if ((!selectedDate || staleSelection) && dates.length > 0) {
-          const todayEntry = dates.find(d => d.date === today && d.slots.length > 0)
-          setDate(todayEntry ? todayEntry.date : dates[0].date)
+        const keepExisting =
+          selectedDate && selectedTime && dates.some(d => d.date === selectedDate)
+        if (!keepExisting) {
+          setDate(today)
         }
       } catch (err) {
         setAvailabilityError(err instanceof Error ? err.message : 'Error de conexión')
@@ -530,7 +536,12 @@ export function DateTimeStep() {
               ) : selectedDateSlots.length === 0 ? (
                 <div className="text-center py-8 text-warm-gray">
                   <Clock className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">No hay horarios disponibles</p>
+                  <p className="text-sm">
+                    {filterStaff
+                      ? `${staffName(filterStaff)} no tiene horarios disponibles para esta fecha.`
+                      : 'No hay horarios disponibles para esta fecha.'}
+                  </p>
+                  <p className="text-xs mt-1">Selecciona otra fecha para ver más horarios.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">

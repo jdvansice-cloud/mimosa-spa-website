@@ -6862,8 +6862,12 @@ function DateTimeStep() {
         selectedTime
     ]);
     // Availability restricted to the filtered therapist (client-side: each slot
-    // already lists which staff can take it)
-    const visibleDatesData = filterStaff ? availableDatesData.map((d)=>{
+    // already lists which staff can take it). Dates are NOT removed when empty —
+    // the strip stays stable and an empty day shows a clear message instead.
+    const todayPanama = new Date().toLocaleDateString('en-CA', {
+        timeZone: 'America/Panama'
+    });
+    const filteredDatesData = filterStaff ? availableDatesData.map((d)=>{
         const slots = d.slots.filter((sl)=>sl.availableStaffIds.includes(filterStaff.Id));
         return {
             ...d,
@@ -6871,16 +6875,25 @@ function DateTimeStep() {
             slotsCount: slots.length,
             hasAvailability: slots.length > 0
         };
-    }).filter((d)=>d.slots.length > 0) : availableDatesData;
+    }) : availableDatesData;
+    // Today is always present and first, even with zero availability
+    const visibleDatesData = filteredDatesData.some((d)=>d.date === todayPanama) ? filteredDatesData : availableDatesData.length > 0 ? [
+        {
+            date: todayPanama,
+            displayDate: new Date(`${todayPanama}T12:00:00`).toLocaleDateString('es-PA', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+            }),
+            hasAvailability: false,
+            slotsCount: 0,
+            slots: []
+        },
+        ...filteredDatesData
+    ] : filteredDatesData;
     const handleFilterChange = (staffId)=>{
         const member = allStaff.find((st)=>String(st.Id) === staffId) || null;
         setFilterStaff(member);
-        // Reset a date that may not exist under the new filter FIRST — setDate
-        // clears selectedStaff in the store, so the staff pick must come after.
-        if (member && selectedDate) {
-            const stillValid = availableDatesData.some((d)=>d.date === selectedDate && d.slots.some((sl)=>sl.availableStaffIds.includes(member.Id)));
-            if (!stillValid) setDate('');
-        }
         setStaff(member);
     };
     const staffName = (st)=>st.DisplayName || `${st.FirstName} ${st.LastName}`.trim();
@@ -6944,19 +6957,16 @@ function DateTimeStep() {
                     }
                     setAvailableDatesData(data.availableDates);
                     setAvailableDates(data.availableDates);
-                    // Auto-select TODAY when it has availability (else the first
-                    // available date). Also recover when a persisted date is no longer
-                    // offered (e.g. it passed while the cart was parked).
+                    // Every arrival at this step starts on TODAY — even when today has no
+                    // availability (an explanatory message shows instead of slots). Only a
+                    // completed date+time pick from earlier in the session is preserved.
                     const dates = data.availableDates || [];
                     const today = new Date().toLocaleDateString('en-CA', panamaLocale);
-                    const staleSelection = selectedDate && !dates.some({
+                    const keepExisting = selectedDate && selectedTime && dates.some({
                         "DateTimeStep.useEffect.fetchAvailability": (d)=>d.date === selectedDate
                     }["DateTimeStep.useEffect.fetchAvailability"]);
-                    if ((!selectedDate || staleSelection) && dates.length > 0) {
-                        const todayEntry = dates.find({
-                            "DateTimeStep.useEffect.fetchAvailability.todayEntry": (d)=>d.date === today && d.slots.length > 0
-                        }["DateTimeStep.useEffect.fetchAvailability.todayEntry"]);
-                        setDate(todayEntry ? todayEntry.date : dates[0].date);
+                    if (!keepExisting) {
+                        setDate(today);
                     }
                 } catch (err) {
                     setAvailabilityError(err instanceof Error ? err.message : 'Error de conexión');
@@ -7062,12 +7072,12 @@ function DateTimeStep() {
                                 className: "w-5 h-5 text-white"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                lineNumber: 376,
+                                lineNumber: 382,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 374,
+                            lineNumber: 380,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -7075,7 +7085,7 @@ function DateTimeStep() {
                             children: "Fecha y Hora"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 378,
+                            lineNumber: 384,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7087,13 +7097,13 @@ function DateTimeStep() {
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 381,
+                            lineNumber: 387,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                    lineNumber: 373,
+                    lineNumber: 379,
                     columnNumber: 9
                 }, this),
                 slotConflictNotice && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7103,7 +7113,7 @@ function DateTimeStep() {
                             className: "w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 389,
+                            lineNumber: 395,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7111,13 +7121,13 @@ function DateTimeStep() {
                             children: slotConflictNotice
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 390,
+                            lineNumber: 396,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                    lineNumber: 388,
+                    lineNumber: 394,
                     columnNumber: 11
                 }, this),
                 isLoadingAvailability && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7127,7 +7137,7 @@ function DateTimeStep() {
                             className: "w-10 h-10 text-gold animate-spin mb-4"
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 397,
+                            lineNumber: 403,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7135,13 +7145,13 @@ function DateTimeStep() {
                             children: "Cargando disponibilidad..."
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 398,
+                            lineNumber: 404,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                    lineNumber: 396,
+                    lineNumber: 402,
                     columnNumber: 11
                 }, this),
                 availabilityError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7149,7 +7159,7 @@ function DateTimeStep() {
                     children: availabilityError
                 }, void 0, false, {
                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                    lineNumber: 404,
+                    lineNumber: 410,
                     columnNumber: 11
                 }, this),
                 !isLoadingAvailability && !availabilityError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7169,13 +7179,13 @@ function DateTimeStep() {
                                         children: "✕"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                        lineNumber: 418,
+                                        lineNumber: 424,
                                         columnNumber: 21
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                lineNumber: 416,
+                                lineNumber: 422,
                                 columnNumber: 19
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                 className: "flex items-center gap-2 text-xs text-warm-gray",
@@ -7191,7 +7201,7 @@ function DateTimeStep() {
                                                 children: "Cualquier terapeuta"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                lineNumber: 435,
+                                                lineNumber: 441,
                                                 columnNumber: 23
                                             }, this),
                                             bookableStaff.map((st)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -7199,24 +7209,24 @@ function DateTimeStep() {
                                                     children: staffName(st)
                                                 }, st.Id, false, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 437,
+                                                    lineNumber: 443,
                                                     columnNumber: 25
                                                 }, this))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                        lineNumber: 429,
+                                        lineNumber: 435,
                                         columnNumber: 21
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                lineNumber: 427,
+                                lineNumber: 433,
                                 columnNumber: 19
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 414,
+                            lineNumber: 420,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7232,14 +7242,14 @@ function DateTimeStep() {
                                                     className: "w-4 h-4 text-gold"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 449,
+                                                    lineNumber: 455,
                                                     columnNumber: 19
                                                 }, this),
                                                 "Selecciona Fecha"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 448,
+                                            lineNumber: 454,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7252,12 +7262,12 @@ function DateTimeStep() {
                                                         className: "w-4 h-4 text-warm-gray"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                        lineNumber: 457,
+                                                        lineNumber: 463,
                                                         columnNumber: 21
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 453,
+                                                    lineNumber: 459,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -7267,24 +7277,24 @@ function DateTimeStep() {
                                                         className: "w-4 h-4 text-warm-gray"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                        lineNumber: 463,
+                                                        lineNumber: 469,
                                                         columnNumber: 21
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 459,
+                                                    lineNumber: 465,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 452,
+                                            lineNumber: 458,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                    lineNumber: 447,
+                                    lineNumber: 453,
                                     columnNumber: 15
                                 }, this),
                                 visibleDatesData.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7294,7 +7304,7 @@ function DateTimeStep() {
                                             className: "w-10 h-10 mx-auto mb-2 opacity-30"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 470,
+                                            lineNumber: 476,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7302,13 +7312,13 @@ function DateTimeStep() {
                                             children: "No hay fechas disponibles"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 471,
+                                            lineNumber: 477,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                    lineNumber: 469,
+                                    lineNumber: 475,
                                     columnNumber: 17
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     ref: dateScrollRef,
@@ -7333,7 +7343,7 @@ function DateTimeStep() {
                                                     children: dayName.slice(0, 3)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 496,
+                                                    lineNumber: 502,
                                                     columnNumber: 25
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7341,7 +7351,7 @@ function DateTimeStep() {
                                                     children: dayNum
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 499,
+                                                    lineNumber: 505,
                                                     columnNumber: 25
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7349,7 +7359,7 @@ function DateTimeStep() {
                                                     children: monthShort
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 500,
+                                                    lineNumber: 506,
                                                     columnNumber: 25
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7360,25 +7370,25 @@ function DateTimeStep() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 503,
+                                                    lineNumber: 509,
                                                     columnNumber: 25
                                                 }, this)
                                             ]
                                         }, dateItem.date, true, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 484,
+                                            lineNumber: 490,
                                             columnNumber: 23
                                         }, this);
                                     })
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                    lineNumber: 474,
+                                    lineNumber: 480,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 446,
+                            lineNumber: 452,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7391,7 +7401,7 @@ function DateTimeStep() {
                                             className: "w-4 h-4 text-gold"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 516,
+                                            lineNumber: 522,
                                             columnNumber: 17
                                         }, this),
                                         "Horarios Disponibles",
@@ -7400,13 +7410,13 @@ function DateTimeStep() {
                                             children: selectedDateInfo.displayDate
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 519,
+                                            lineNumber: 525,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                    lineNumber: 515,
+                                    lineNumber: 521,
                                     columnNumber: 15
                                 }, this),
                                 !selectedDate ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7416,7 +7426,7 @@ function DateTimeStep() {
                                             className: "w-10 h-10 mx-auto mb-2 opacity-30"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 527,
+                                            lineNumber: 533,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7424,13 +7434,13 @@ function DateTimeStep() {
                                             children: "Selecciona una fecha para ver los horarios"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 528,
+                                            lineNumber: 534,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                    lineNumber: 526,
+                                    lineNumber: 532,
                                     columnNumber: 17
                                 }, this) : selectedDateSlots.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "text-center py-8 text-warm-gray",
@@ -7439,21 +7449,29 @@ function DateTimeStep() {
                                             className: "w-10 h-10 mx-auto mb-2 opacity-30"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 532,
+                                            lineNumber: 538,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-sm",
-                                            children: "No hay horarios disponibles"
+                                            children: filterStaff ? `${staffName(filterStaff)} no tiene horarios disponibles para esta fecha.` : 'No hay horarios disponibles para esta fecha.'
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                            lineNumber: 533,
+                                            lineNumber: 539,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-xs mt-1",
+                                            children: "Selecciona otra fecha para ver más horarios."
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
+                                            lineNumber: 544,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                    lineNumber: 531,
+                                    lineNumber: 537,
                                     columnNumber: 17
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2",
@@ -7485,7 +7503,7 @@ function DateTimeStep() {
                                                         children: slot.displayTime
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                        lineNumber: 558,
+                                                        lineNumber: 569,
                                                         columnNumber: 27
                                                     }, this),
                                                     isSelected && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -7506,40 +7524,40 @@ function DateTimeStep() {
                                                                 clipRule: "evenodd"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                                lineNumber: 568,
+                                                                lineNumber: 579,
                                                                 columnNumber: 33
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                            lineNumber: 567,
+                                                            lineNumber: 578,
                                                             columnNumber: 31
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                        lineNumber: 562,
+                                                        lineNumber: 573,
                                                         columnNumber: 29
                                                     }, this)
                                                 ]
                                             }, slot.time, true, {
                                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                lineNumber: 541,
+                                                lineNumber: 552,
                                                 columnNumber: 25
                                             }, this);
                                         })
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                        lineNumber: 537,
+                                        lineNumber: 548,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                    lineNumber: 536,
+                                    lineNumber: 547,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 514,
+                            lineNumber: 520,
                             columnNumber: 13
                         }, this),
                         selectedDate && selectedTime && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -7564,12 +7582,12 @@ function DateTimeStep() {
                                                     className: "w-5 h-5 text-gold"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                    lineNumber: 590,
+                                                    lineNumber: 601,
                                                     columnNumber: 23
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                lineNumber: 589,
+                                                lineNumber: 600,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7579,7 +7597,7 @@ function DateTimeStep() {
                                                         children: selectedDateInfo?.displayDate
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                        lineNumber: 593,
+                                                        lineNumber: 604,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7598,67 +7616,67 @@ function DateTimeStep() {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                                lineNumber: 599,
+                                                                lineNumber: 610,
                                                                 columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                        lineNumber: 596,
+                                                        lineNumber: 607,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                                lineNumber: 592,
+                                                lineNumber: 603,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                        lineNumber: 588,
+                                        lineNumber: 599,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$clock$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Clock$3e$__["Clock"], {
                                         className: "w-5 h-5 text-gold"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                        lineNumber: 606,
+                                        lineNumber: 617,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                                lineNumber: 587,
+                                lineNumber: 598,
                                 columnNumber: 17
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 582,
+                            lineNumber: 593,
                             columnNumber: 15
                         }, this),
                         selectedDate && selectedTime && selectedSlot && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(TherapistPicker, {
                             availableStaffIds: selectedSlot.availableStaffIds
                         }, void 0, false, {
                             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                            lineNumber: 613,
+                            lineNumber: 624,
                             columnNumber: 15
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-                    lineNumber: 410,
+                    lineNumber: 416,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-            lineNumber: 371,
+            lineNumber: 377,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/booking/steps/DateTimeStep.tsx",
-        lineNumber: 369,
+        lineNumber: 375,
         columnNumber: 5
     }, this);
 }
