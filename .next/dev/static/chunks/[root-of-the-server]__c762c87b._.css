@@ -2594,6 +2594,10 @@ button {
   border-color: #ffffff26;
 }
 
+.border-cream\/60 {
+  border-color: #fdfaf599;
+}
+
 .border-t-transparent {
   border-top-color: #0000;
 }
@@ -4583,6 +4587,11 @@ button {
 
 .hover\:bg-white\/80:hover {
   background-color: #fffc;
+}
+
+.hover\:bg-cream:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(253 250 245 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-cream:hover {

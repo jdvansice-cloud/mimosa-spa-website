@@ -90,18 +90,19 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-4">
             <LanguageSwitcher variant="dark" />
             <Link
-              href={`/${locale}/ubicaciones`}
-              className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
-              title={locale === 'en' ? 'Find a location' : 'Encuentra tu spa'}
-            >
-              <MapPin className="h-5 w-5" />
-            </Link>
-            <Link
               href={`/${locale}/portal`}
               className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
               title={t('portal')}
             >
               <User className="h-5 w-5" />
+            </Link>
+            <Link
+              href={`/${locale}/ubicaciones`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-cream/60
+                       text-cream text-sm font-semibold hover:bg-cream hover:text-dark transition-colors"
+            >
+              <MapPin className="h-4 w-4 flex-shrink-0" />
+              {locale === 'en' ? 'Locations' : 'Ubicaciones'}
             </Link>
             <HomeBookingButton locale={locale} className={smButtonStyles}>
               <Calendar className="h-4 w-4 flex-shrink-0" />
