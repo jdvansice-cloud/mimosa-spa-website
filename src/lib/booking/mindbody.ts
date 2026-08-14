@@ -678,9 +678,12 @@ export async function getAllServices(locationId?: number) {
   }
 
   // Filter for single session services with price (but don't require SellOnline)
+  // "Eliminado -" is the house convention for retired pricing options that
+  // Mindbody won't let us delete — keep them out of the admin entirely.
   const filteredServices = allSaleServices.filter(s =>
     s.Count === 1 && // Single session only
-    s.Price > 0 // Has price
+    s.Price > 0 && // Has price
+    !/^eliminado\b/i.test(s.Name.trim())
   )
   console.log('Filtered sale services (single session, has price):', filteredServices.length)
 
@@ -713,11 +716,33 @@ export async function getAllServices(locationId?: number) {
     }
   })
 
-  console.log('All services for admin:', services.length)
-  console.log('Online bookable services:', services.filter(s => s.OnlineBooking).length)
-  console.log('Offline only services:', services.filter(s => !s.OnlineBooking).length)
+  // Dedupe: when several retail products share one session type (e.g. an old
+  // pricing option left behind after a treatment moved category), keep the one
+  // whose program matches the session type's CURRENT program — that's the
+  // category source of truth for appointments.
+  const byId = new Map<number, (typeof services)[number]>()
+  for (const svc of services) {
+    const existing = byId.get(svc.Id)
+    if (!existing) {
+      byId.set(svc.Id, svc)
+      continue
+    }
+    const sessionType = findSessionTypeMatch(svc.Name, sessionTypeMap)
+    const trueProgramId = sessionType?.ProgramId
+    if (trueProgramId && svc.ProgramId === trueProgramId && existing.ProgramId !== trueProgramId) {
+      byId.set(svc.Id, svc)
+    }
+  }
+  const dedupedServices = Array.from(byId.values())
+  if (dedupedServices.length !== services.length) {
+    console.log(`Deduped ${services.length - dedupedServices.length} stale retail duplicates`)
+  }
 
-  return services
+  console.log('All services for admin:', dedupedServices.length)
+  console.log('Online bookable services:', dedupedServices.filter(s => s.OnlineBooking).length)
+  console.log('Offline only services:', dedupedServices.filter(s => !s.OnlineBooking).length)
+
+  return dedupedServices
 }
 
 // Get staff - basic endpoint without service filtering

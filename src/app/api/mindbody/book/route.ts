@@ -387,7 +387,12 @@ export async function POST(request: NextRequest) {
         timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true,
       })
       const serviceNames = (services as BookingService[]).map(s => s.name || 'Servicio').filter(Boolean)
-      const whatsappTherapistName = finalTherapistName || 'Nuestro equipo'
+      // Only promise a name the customer actually chose. Auto-assigned staff
+      // can be reshuffled by the front desk, and "Nuestro equipo" read as a
+      // person's name — "Por asignar" is unambiguous.
+      const whatsappTherapistName = staffRequested
+        ? (finalTherapistName || 'Por asignar')
+        : 'Por asignar'
 
       watiNotificationData = {
         clientName, clientPhone,
