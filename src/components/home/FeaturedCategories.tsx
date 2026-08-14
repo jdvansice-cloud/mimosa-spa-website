@@ -12,6 +12,7 @@ const DEFAULT_IMAGES = {
   body: SHARED_DEFAULTS.category_body_treatments,
   facial: SHARED_DEFAULTS.category_facial_treatments,
   packages: SHARED_DEFAULTS.category_packages,
+  promotions: SHARED_DEFAULTS.category_promotions,
 }
 
 interface FeaturedCategoriesProps {
@@ -19,6 +20,7 @@ interface FeaturedCategoriesProps {
     body?: string
     facial?: string
     packages?: string
+    promotions?: string
   }
 }
 
@@ -47,6 +49,12 @@ export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
       titleKey: 'packages',
       href: '/menu/paquetes',
     },
+    {
+      id: 'promotions',
+      image: images?.promotions || DEFAULT_IMAGES.promotions,
+      titleKey: 'promotions',
+      href: '/promociones',
+    },
   ]
 
   return (
@@ -74,7 +82,7 @@ export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
           >
             <Link
               href={`/${locale}${category.href}`}
-              className="group block relative aspect-[4/5] rounded-2xl overflow-hidden"
+              className="group block relative aspect-square rounded-2xl overflow-hidden"
             >
               {/* Image */}
               <div className="absolute inset-0">
@@ -91,11 +99,11 @@ export function FeaturedCategories({ images }: FeaturedCategoriesProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-dark/40 to-transparent transition-opacity group-hover:opacity-90" />
 
               {/* Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-end p-8 text-white">
-                <h3 className="text-xl md:text-2xl font-display font-semibold text-center mb-4">
+              <div className="absolute inset-0 flex flex-col items-center justify-end p-4 sm:p-6 text-white">
+                <h3 className="text-base sm:text-xl font-display font-semibold text-center mb-2 sm:mb-3">
                   {tMenu(category.titleKey).toUpperCase()}
                 </h3>
-                <span className="inline-flex items-center px-6 py-2 border-2 border-white rounded-full text-sm font-medium transition-colors group-hover:bg-white group-hover:text-dark">
+                <span className="inline-flex items-center px-4 py-1.5 border border-white rounded-full text-xs sm:text-sm font-medium transition-colors group-hover:bg-white group-hover:text-dark">
                   {tCommon('view').toUpperCase()}
                 </span>
               </div>

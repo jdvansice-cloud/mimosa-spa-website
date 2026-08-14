@@ -44,6 +44,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     'category_body_treatments',
     'category_facial_treatments',
     'category_packages',
+    'category_promotions',
     'location_costa_del_este',
     'location_san_francisco',
   ])
@@ -70,6 +71,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             body: images.category_body_treatments,
             facial: images.category_facial_treatments,
             packages: images.category_packages,
+            promotions: images.category_promotions,
           }} />
         </div>
       </section>

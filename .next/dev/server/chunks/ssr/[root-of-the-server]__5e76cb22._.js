@@ -347,6 +347,11 @@ const PUBLIC_ROUTES = [
         priority: 0.6
     },
     {
+        path: '/ubicaciones',
+        sitemap: true,
+        priority: 0.7
+    },
+    {
         path: '/galeria',
         sitemap: true,
         priority: 0.5

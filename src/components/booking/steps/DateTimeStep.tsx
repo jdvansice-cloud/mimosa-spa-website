@@ -169,6 +169,8 @@ export function DateTimeStep() {
   } = useBookingStore()
 
   const totalDuration = useBookingStore(selectTotalDuration)
+  const setStaff = useBookingStore(state => state.setStaff)
+  const selectedStaff = useBookingStore(state => state.selectedStaff)
 
   // Local state for this step
   const [availableDatesData, setAvailableDatesData] = useState<AvailableDate[]>([])
@@ -178,6 +180,67 @@ export function DateTimeStep() {
 
   // Ref for horizontal scroll
   const dateScrollRef = useRef<HTMLDivElement>(null)
+
+  // Optional "book with my therapist" filter: most customers skip it, but
+  // regulars can pick their person FIRST and see only their availability.
+  const [allStaff, setAllStaff] = useState<MindbodyStaff[]>([])
+  const [filterStaff, setFilterStaff] = useState<MindbodyStaff | null>(null)
+
+  useEffect(() => {
+    async function fetchRoster() {
+      if (!selectedLocation) return
+      try {
+        const response = await fetch(`/api/mindbody/staff?locationId=${selectedLocation.Id}`)
+        const data = await response.json()
+        if (response.ok) setAllStaff(data.staff || [])
+      } catch {
+        // Filter is optional — quietly unavailable on error
+      }
+    }
+    fetchRoster()
+  }, [selectedLocation])
+
+  // The store clears selectedStaff whenever the time changes; if the customer
+  // filtered by a therapist, re-apply that choice to the actual booking.
+  useEffect(() => {
+    if (filterStaff && selectedTime && selectedStaff?.Id !== filterStaff.Id) {
+      setStaff(filterStaff)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterStaff, selectedTime])
+
+  // Availability restricted to the filtered therapist (client-side: each slot
+  // already lists which staff can take it)
+  const visibleDatesData = filterStaff
+    ? availableDatesData
+        .map(d => {
+          const slots = d.slots.filter(sl => sl.availableStaffIds.includes(filterStaff.Id))
+          return { ...d, slots, slotsCount: slots.length, hasAvailability: slots.length > 0 }
+        })
+        .filter(d => d.slots.length > 0)
+    : availableDatesData
+
+  const handleFilterChange = (staffId: string) => {
+    const member = allStaff.find(st => String(st.Id) === staffId) || null
+    setFilterStaff(member)
+    // Reset a date that may not exist under the new filter FIRST — setDate
+    // clears selectedStaff in the store, so the staff pick must come after.
+    if (member && selectedDate) {
+      const stillValid = availableDatesData.some(d =>
+        d.date === selectedDate && d.slots.some(sl => sl.availableStaffIds.includes(member.Id))
+      )
+      if (!stillValid) setDate('')
+    }
+    setStaff(member)
+  }
+
+  const staffName = (st: MindbodyStaff) => st.DisplayName || `${st.FirstName} ${st.LastName}`.trim()
+
+  // Only offer therapists who actually have availability for this service in
+  // the loaded window — hides system accounts and non-bookable staff.
+  const bookableStaff = allStaff.filter(st =>
+    availableDatesData.some(d => d.slots.some(sl => sl.availableStaffIds.includes(st.Id)))
+  )
 
   // Fetch availability when step loads or services change
   useEffect(() => {
@@ -242,18 +305,21 @@ export function DateTimeStep() {
     fetchAvailability()
   }, [selectedLocation, selectedServices, selectedAddons, totalDuration, setAvailableDates])
 
-  // Update time slots when date is selected
+  // Update time slots when date is selected (respecting the therapist filter)
   useEffect(() => {
     if (selectedDate) {
       const dateData = availableDatesData.find(d => d.date === selectedDate)
-      const slots = dateData?.slots || []
+      let slots = dateData?.slots || []
+      if (filterStaff) {
+        slots = slots.filter(sl => sl.availableStaffIds.includes(filterStaff.Id))
+      }
       setSelectedDateSlots(slots)
       setAvailableSlots(slots)
     } else {
       setSelectedDateSlots([])
       setAvailableSlots([])
     }
-  }, [selectedDate, availableDatesData, setAvailableSlots])
+  }, [selectedDate, availableDatesData, filterStaff, setAvailableSlots])
 
   const handleDateSelect = (dateString: string) => {
     setDate(dateString)
@@ -291,7 +357,7 @@ export function DateTimeStep() {
 
   // Get selected slot info for display
   const selectedSlot = selectedDateSlots.find(s => s.time === selectedTime)
-  const selectedDateInfo = availableDatesData.find(d => d.date === selectedDate)
+  const selectedDateInfo = visibleDatesData.find(d => d.date === selectedDate)
 
   return (
     <div className="datetime-step flex flex-col h-full">
@@ -336,6 +402,40 @@ export function DateTimeStep() {
 
         {!isLoadingAvailability && !availabilityError && (
           <div className="space-y-6">
+            {/* Optional therapist filter — one quiet line for the majority,
+                two taps for regulars who book with "their" therapist */}
+            {bookableStaff.length > 0 && (
+              <div className="flex items-center justify-center gap-2 flex-wrap -mb-2">
+                {filterStaff ? (
+                  <span className="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-gold/15 border border-gold/40 text-sm text-dark font-medium">
+                    Mostrando horarios de {staffName(filterStaff)}
+                    <button
+                      onClick={() => handleFilterChange('')}
+                      className="w-5 h-5 rounded-full bg-gold/30 hover:bg-gold text-dark flex items-center justify-center text-xs"
+                      aria-label="Quitar filtro de terapeuta"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ) : (
+                  <label className="flex items-center gap-2 text-xs text-warm-gray">
+                    ¿Buscas a alguien en especial?
+                    <select
+                      value=""
+                      onChange={(e) => handleFilterChange(e.target.value)}
+                      className="px-2 py-1.5 rounded-lg border border-beige-200 bg-white text-xs text-dark
+                               focus:outline-none focus:ring-2 focus:ring-gold/50"
+                    >
+                      <option value="">Cualquier terapeuta</option>
+                      {bookableStaff.map((st) => (
+                        <option key={st.Id} value={st.Id}>{staffName(st)}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </div>
+            )}
+
             {/* Date Selection - Horizontal Scrollable */}
             <div className="bg-white border border-beige-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
@@ -359,7 +459,7 @@ export function DateTimeStep() {
                 </div>
               </div>
 
-              {availableDatesData.length === 0 ? (
+              {visibleDatesData.length === 0 ? (
                 <div className="text-center py-8 text-warm-gray">
                   <Calendar className="w-10 h-10 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">No hay fechas disponibles</p>
@@ -370,7 +470,7 @@ export function DateTimeStep() {
                   className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  {availableDatesData.map((dateItem) => {
+                  {visibleDatesData.map((dateItem) => {
                     const { dayName, dayNum, monthShort } = parseDisplayDate(dateItem.displayDate, dateItem.date)
                     const isSelected = selectedDate === dateItem.date
 

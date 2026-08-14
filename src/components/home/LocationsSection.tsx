@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { MapPin, Clock, Phone, MessageCircle, Star } from 'lucide-react'
+import { MapPin, Clock, Phone, MessageCircle, Star, Navigation } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui'
 
@@ -31,6 +31,12 @@ export interface LocationRatingInfo {
 }
 
 interface LocationsSectionProps {
+  /** Render each card's info open (dedicated /ubicaciones page) */
+  expanded?: boolean
+  /** Show a Waze navigation button per location */
+  showWaze?: boolean
+  /** Hide the section header (when the page provides its own) */
+  hideTitle?: boolean
   images?: {
     costaDelEste?: string
     sanFrancisco?: string
@@ -49,6 +55,7 @@ const getLocations = (images?: LocationsSectionProps['images']) => [
     phoneKey: 'phone_costa_del_este' as const,
     image: images?.costaDelEste || DEFAULT_IMAGES.costaDelEste,
     mapUrl: 'https://maps.app.goo.gl/5iX28mGH2mxUiJJ1A',
+    wazeUrl: 'https://waze.com/ul?ll=9.022731,-79.461740&navigate=yes',
     mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1970.5!2d-79.46174!3d9.022731!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8facaa1a4be8b0d7%3A0xeea70492420826f4!2sMimosa%20Spa%20-%20Costa%20del%20Este!5e0!3m2!1ses!2spa!4v1700000000000!5m2!1ses!2spa',
   },
   {
@@ -57,6 +64,7 @@ const getLocations = (images?: LocationsSectionProps['images']) => [
     phoneKey: 'phone_san_francisco' as const,
     image: images?.sanFrancisco || DEFAULT_IMAGES.sanFrancisco,
     mapUrl: 'https://maps.app.goo.gl/sgT9VCx6DZBoy5wn6',
+    wazeUrl: 'https://waze.com/ul?ll=8.993279,-79.505447&navigate=yes',
     mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1970.5!2d-79.5054466!3d8.9932791!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8faca91ce23320e9%3A0x15bbc21f0fa10701!2sMimosa%20Spa%20-%20San%20Francisco!5e0!3m2!1ses!2spa!4v1700000000000!5m2!1ses!2spa',
   },
 ]
@@ -81,7 +89,7 @@ function formatWhatsAppDisplay(number: string): string {
   return number
 }
 
-export function LocationsSection({ images, ratings }: LocationsSectionProps) {
+export function LocationsSection({ images, ratings, expanded = false, showWaze = false, hideTitle = false }: LocationsSectionProps) {
   const t = useTranslations('home.locations')
   const locale = useLocale()
   const tContact = useTranslations('contact')
@@ -115,12 +123,14 @@ export function LocationsSection({ images, ratings }: LocationsSectionProps) {
   return (
     <div>
       {/* Section Header */}
+      {!hideTitle && (
       <div className="text-center mb-10 md:mb-14">
         <h2 className="font-display text-3xl md:text-4xl font-semibold text-dark text-balance">
           {t('title')}
         </h2>
         <span className="block h-[2px] w-12 bg-gold mt-5 mx-auto" aria-hidden />
       </div>
+      )}
 
       {/* Locations Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -183,7 +193,7 @@ export function LocationsSection({ images, ratings }: LocationsSectionProps) {
                 </div>
 
                 {/* Content — collapsed by default, expands on demand */}
-                <details className="group/details">
+                <details className="group/details" open={expanded}>
                   <summary className="list-none cursor-pointer p-4 flex items-center justify-between text-sm font-medium text-dark hover:text-gold-700 transition-colors [&::-webkit-details-marker]:hidden">
                     <span className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-gold" />
@@ -251,6 +261,20 @@ export function LocationsSection({ images, ratings }: LocationsSectionProps) {
                       title={`Mapa de ${t(`${location.nameKey}.name`)}`}
                     />
                   </div>
+
+                  {/* Waze navigation */}
+                  {showWaze && (
+                    <a
+                      href={location.wazeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl
+                               bg-[#33ccff] text-white font-semibold text-sm hover:brightness-95 transition-all"
+                    >
+                      <Navigation className="h-4 w-4" />
+                      {locale === 'en' ? 'Drive there with Waze' : 'Ir con Waze'}
+                    </a>
+                  )}
                 </div>
                 </details>
               </Card>

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
-import { Menu, X, Calendar, User } from 'lucide-react'
+import { Menu, X, Calendar, User, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { GIFT_CARDS_PATH, FEATURES } from '@/lib/nav'
 import { LanguageSwitcher } from '@/components/ui'
@@ -90,6 +90,13 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-4">
             <LanguageSwitcher variant="dark" />
             <Link
+              href={`/${locale}/ubicaciones`}
+              className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
+              title={locale === 'en' ? 'Find a location' : 'Encuentra tu spa'}
+            >
+              <MapPin className="h-5 w-5" />
+            </Link>
+            <Link
               href={`/${locale}/portal`}
               className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
               title={t('portal')}
@@ -121,7 +128,7 @@ export function Header() {
       {/* Mobile Menu - z-[60] to appear above BookingNav which has z-50 */}
       <div
         className={cn(
-          'lg:hidden fixed inset-x-0 top-20 z-[60] bg-dark/98 backdrop-blur-md',
+          'lg:hidden fixed inset-x-0 top-20 z-[60] bg-dark backdrop-blur-md',
           'border-b border-cream/10 shadow-lg',
           'transition-all duration-300 ease-in-out',
           isMobileMenuOpen
@@ -140,6 +147,14 @@ export function Header() {
               {item.label}
             </Link>
           ))}
+
+          <Link
+            href={`/${locale}/ubicaciones`}
+            className="block py-3 text-lg font-medium text-cream/90 hover:text-gold transition-colors border-b border-cream/10"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            {locale === 'en' ? 'Locations' : 'Ubicaciones'}
+          </Link>
 
           <Link
             href={`/${locale}/portal`}

@@ -14,7 +14,7 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthor
 R.c("server/chunks/ssr/[root-of-the-server]__8f3ecc2f._.js")
 R.c("server/chunks/ssr/node_modules_d122a186._.js")
 R.c("server/chunks/ssr/_f462cc71._.js")
-R.c("server/chunks/ssr/_a6bdbf3c._.js")
+R.c("server/chunks/ssr/_c79af640._.js")
 R.c("server/chunks/ssr/d4b1c_modules_next-intl_dist_esm_production_server_react-server_getConfig_ce4e1894.js")
 R.c("server/chunks/ssr/node_modules_@supabase_supabase-js_dist_index_mjs_1b27b6a8._.js")
 R.c("server/chunks/ssr/node_modules_next_639f23e9._.js")

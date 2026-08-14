@@ -30,6 +30,7 @@ export const PUBLIC_ROUTES: PublicRoute[] = [
   { path: '/menu/giftcards', sitemap: true, priority: 0.8 },
   { path: '/promociones', sitemap: true, priority: 0.8 },
   { path: '/nosotros', sitemap: true, priority: 0.6 },
+  { path: '/ubicaciones', sitemap: true, priority: 0.7 },
   { path: '/galeria', sitemap: true, priority: 0.5 },
   { path: '/reservar', sitemap: true, priority: 0.9 },
   { path: '/parejas', sitemap: FEATURES.parejas, priority: 0.9 },

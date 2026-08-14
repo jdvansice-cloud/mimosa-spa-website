@@ -127,6 +127,20 @@
 <priority>0.6</priority>
 </url>
 <url>
+<loc>https://mimosaretreat.com/es/ubicaciones</loc>
+<xhtml:link rel="alternate" hreflang="es" href="https://mimosaretreat.com/es/ubicaciones" />
+<xhtml:link rel="alternate" hreflang="en" href="https://mimosaretreat.com/en/ubicaciones" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://mimosaretreat.com/en/ubicaciones</loc>
+<xhtml:link rel="alternate" hreflang="es" href="https://mimosaretreat.com/es/ubicaciones" />
+<xhtml:link rel="alternate" hreflang="en" href="https://mimosaretreat.com/en/ubicaciones" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
 <loc>https://mimosaretreat.com/es/galeria</loc>
 <xhtml:link rel="alternate" hreflang="es" href="https://mimosaretreat.com/es/galeria" />
 <xhtml:link rel="alternate" hreflang="en" href="https://mimosaretreat.com/en/galeria" />
