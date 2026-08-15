@@ -77,7 +77,16 @@ export function bookingConfirmationEmail(d: BookingEmailData): { subject: string
   }
 }
 
-export function bookingReminderEmail(d: BookingEmailData): { subject: string; html: string } {
+export function bookingReminderEmail(
+  d: BookingEmailData & { appointmentId?: string }
+): { subject: string; html: string } {
+  // Mirror the WhatsApp reminder: confirm + reschedule actions
+  const confirmUrl = d.appointmentId
+    ? `https://mimosaretreat.com/api/cita/confirmar?id=${d.appointmentId}`
+    : null
+  const changeUrl = d.appointmentId
+    ? `https://mimosaretreat.com/reservar?replace=${d.appointmentId}`
+    : 'https://www.mimosaretreat.com/es/reservar'
   return {
     subject: `Recordatorio: tu cita en Mimosa Spa es mañana — ${d.date}`,
     html: shell(
@@ -90,8 +99,36 @@ export function bookingReminderEmail(d: BookingEmailData): { subject: string; ht
         ['Fecha', d.date],
         ['Hora', d.time],
       ])}
+      ${confirmUrl ? button('✅ Confirmar asistencia', confirmUrl) : ''}
+      <div style="text-align:center;margin:4px 0 10px;">
+        <a href="${changeUrl}" style="font-family:Arial,sans-serif;font-size:13px;color:#A68700;text-decoration:underline;">🔄 Cambiar mi cita</a>
+      </div>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#8B8680;line-height:1.6;text-align:center;">
+        Favor confirmar tu asistencia 🙏
+      </p>`
+    ),
+  }
+}
+
+export function bookingChangeEmail(d: BookingEmailData): { subject: string; html: string } {
+  const rows: Array<[string, string]> = [
+    ['Sede', d.locationName],
+    ['Nueva fecha', d.date],
+    ['Nueva hora', d.time],
+  ]
+  if (d.services?.length) rows.push(['Servicios', d.services.join(', ')])
+  if (d.therapistName) rows.push(['Terapeuta', d.therapistName])
+  return {
+    subject: `Tu cita en Mimosa Spa cambió — nueva fecha: ${d.date}`,
+    html: shell(
+      `Tu cita fue actualizada, ${d.clientName}`,
+      `<p style="font-family:Arial,sans-serif;font-size:14px;color:#54514D;line-height:1.6;margin:0;">
+        Estos son los nuevos datos de tu reserva:
+      </p>
+      ${detailRows(rows)}
       <p style="font-family:Arial,sans-serif;font-size:12px;color:#8B8680;line-height:1.6;">
-        Si no puedes asistir, avísanos por WhatsApp al +507 6404-9464 para reagendar.
+        Si el nuevo horario no te funciona, escríbenos por WhatsApp al +507 6404-9464 o
+        <a href="https://www.mimosaretreat.com/es/reservar" style="color:#A68700;">reagenda en línea</a>.
       </p>`
     ),
   }
@@ -100,12 +137,21 @@ export function bookingReminderEmail(d: BookingEmailData): { subject: string; ht
 export function bookingCancellationEmail(
   d: BookingEmailData & { reagendarUrl: string }
 ): { subject: string; html: string } {
+  const rows: Array<[string, string]> = [
+    ['Sede', d.locationName],
+    ['Fecha', d.date],
+    ['Hora', d.time],
+  ]
+  if (d.services?.length) rows.push(['Servicios', d.services.join(', ')])
   return {
     subject: `Tu cita en Mimosa Spa fue cancelada — ${d.date}`,
     html: shell(
-      `Hola ${d.clientName}`,
+      `Tu cita fue cancelada, ${d.clientName}`,
       `<p style="font-family:Arial,sans-serif;font-size:14px;color:#54514D;line-height:1.6;margin:0;">
-        Tu cita en Mimosa Spa ${d.locationName} del ${d.date} a las ${d.time} ha sido cancelada.
+        <b style="color:#B3261E;">Esta cita ya no está activa</b> — fue cancelada y el espacio quedó liberado:
+      </p>
+      ${detailRows(rows)}
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#54514D;line-height:1.6;margin:0;">
         Si deseas reagendar, elige tu nuevo horario en un par de clics:
       </p>
       ${button('Reagendar mi cita', d.reagendarUrl)}

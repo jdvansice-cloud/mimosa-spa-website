@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getLocations, getStaffAppointments, getClientWithCustomFields, getSessionTypes } from '@/lib/booking/mindbody'
 import { sendBookingCancellation, sendBookingConfirmation, sendBookingChange, isWatiConfigured } from '@/lib/booking/wati'
 import { sendEmail, isEmailConfigured } from '@/lib/email/resend'
-import { bookingCancellationEmail, bookingConfirmationEmail } from '@/lib/email/templates/booking'
+import { bookingCancellationEmail, bookingConfirmationEmail, bookingChangeEmail } from '@/lib/email/templates/booking'
 
 // Real /appointment/staffappointments shape (no nested Client/Location/
 // SessionType objects — flat ids only)
@@ -173,6 +173,7 @@ export async function GET(request: NextRequest) {
           clientName: booking.client_name || 'Cliente',
           locationName: booking.location_name || 'Mimosa Spa Retreat',
           date: dateStr, time: timeStr, reagendarUrl,
+          services: ((booking.services as Array<{ name?: string }> | null) || []).map(sv => sv.name || 'Servicio'),
         })
         const r = await sendEmail({ to: booking.client_email, ...mail, kind: 'booking' })
         if (r.ok) {
@@ -400,17 +401,13 @@ export async function GET(request: NextRequest) {
         }
       }
       if (!changeSent && isEmailConfigured() && booking.client_email) {
-        const mail = bookingConfirmationEmail({
+        const mail = bookingChangeEmail({
           clientName: booking.client_name || 'Cliente',
           locationName: booking.location_name || 'Mimosa Spa Retreat',
           date: dateStr, time: timeStr, services: serviceNames,
+          therapistName: booking.staff_requested && booking.therapist_name ? booking.therapist_name : undefined,
         })
-        const r = await sendEmail({
-          to: booking.client_email,
-          subject: `Tu cita en Mimosa Spa cambió — nueva fecha: ${dateStr}`,
-          html: mail.html,
-          kind: 'booking',
-        })
+        const r = await sendEmail({ to: booking.client_email, ...mail, kind: 'booking' })
         if (r.ok) changeNoticesSent++
       }
     }

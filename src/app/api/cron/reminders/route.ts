@@ -104,12 +104,15 @@ export async function GET(request: NextRequest) {
   const sendReminderEmail = async (booking: {
     id: string; client_name: string | null; client_email: string | null
     location_name: string | null; appointment_start: string
+    mindbody_appointment_ids?: number[] | null
   }, dateStr: string, timeStr: string): Promise<boolean> => {
     if (!isEmailConfigured() || !booking.client_email) return false
+    const aptId = (booking.mindbody_appointment_ids as number[] | null)?.[0]
     const mail = bookingReminderEmail({
       clientName: booking.client_name || 'Cliente',
       locationName: booking.location_name || 'Mimosa Spa Retreat',
       date: dateStr, time: timeStr,
+      appointmentId: aptId ? String(aptId) : undefined,
     })
     const r = await sendEmail({ to: booking.client_email, ...mail, kind: 'booking' })
     if (r.ok) {
