@@ -348,8 +348,10 @@ export async function deliverOrder(orderId: string): Promise<void> {
   const whatsappForwardUrl = `https://wa.me/?text=${encodeURIComponent(forwardText)}`
 
   if (!order.email_sent_at && isEmailConfigured()) {
-    // Recipient email (when we have one)
-    if (order.recipient_email && order.delivery_email) {
+    // Recipient email — ALWAYS when we have an address, even if the buyer
+    // chose WhatsApp delivery: the gift card is a document the recipient
+    // keeps, and email is the durable copy. WhatsApp remains additive.
+    if (order.recipient_email) {
       const mail = recipientGiftEmail({
         locale: order.locale || 'es',
         recipientName: order.recipient_name,
