@@ -2092,6 +2092,88 @@ async function GET(request) {
             console.log(`First ingest baseline: ${ingested} staff bookings recorded silently`);
         }
     }
+    // ====== PHASE 1.6: reschedules (appointment moved in place) ======
+    // A receptionist dragging an appointment to a new time keeps its Mindbody
+    // id but changes StartDateTime. Compare stored vs live start times for
+    // known upcoming bookings: when moved, update the record, notify the
+    // customer (cambio_cita), and re-arm the 24h reminder.
+    let rescheduled = 0;
+    let changeNoticesSent = 0;
+    if (upcoming && upcoming.length > 0 && liveAppointmentsGlobal.length > 0) {
+        const liveById = new Map();
+        for (const a of liveAppointmentsGlobal)liveById.set(a.Id, a);
+        for (const booking of upcoming){
+            const ids = booking.mindbody_appointment_ids || [];
+            const firstId = ids[0];
+            if (!firstId) continue;
+            const live = liveById.get(firstId);
+            if (!live) continue; // vanished → handled by cancellation phase
+            const liveStartIso = `${live.StartDateTime}-05:00`;
+            const storedMs = new Date(booking.appointment_start).getTime();
+            const liveMs = new Date(liveStartIso).getTime();
+            if (!Number.isFinite(liveMs) || storedMs === liveMs) continue;
+            // Guarded update: flip exactly once per move, re-arm the reminder
+            const { data: moved } = await supabase.from('bookings').update({
+                appointment_start: liveStartIso,
+                reminder_sent: false,
+                reminder_sent_at: null,
+                status_synced_at: new Date().toISOString()
+            }).eq('id', booking.id).eq('appointment_start', booking.appointment_start).select('id');
+            if (!moved || moved.length === 0) continue;
+            rescheduled++;
+            console.log(`Booking ${booking.id}: rescheduled ${booking.appointment_start} → ${liveStartIso}`);
+            const d = new Date(liveStartIso);
+            const dateStr = d.toLocaleDateString('es-PA', {
+                timeZone: 'America/Panama',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            const timeStr = d.toLocaleTimeString('es-PA', {
+                timeZone: 'America/Panama',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            const serviceNames = (booking.services || []).map((sv)=>sv.name || 'Servicio');
+            const totalDuration = (booking.services || []).reduce((sum, sv)=>sum + (sv.duration || 0), 0) || 60;
+            let changeSent = false;
+            if ((0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$wati$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["isWatiConfigured"])() && booking.client_phone && booking.client_name) {
+                const r = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$booking$2f$wati$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["sendBookingChange"])({
+                    clientName: booking.client_name,
+                    clientPhone: booking.client_phone,
+                    locationName: booking.location_name || 'Mimosa Spa Retreat',
+                    date: dateStr,
+                    time: timeStr,
+                    services: serviceNames,
+                    totalDuration,
+                    therapistName: 'Por asignar'
+                });
+                if (r.result) {
+                    changeSent = true;
+                    changeNoticesSent++;
+                } else {
+                    console.error(`Change notice failed for booking ${booking.id}:`, JSON.stringify(r).slice(0, 300));
+                }
+            }
+            if (!changeSent && (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$email$2f$resend$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["isEmailConfigured"])() && booking.client_email) {
+                const mail = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$email$2f$templates$2f$booking$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["bookingConfirmationEmail"])({
+                    clientName: booking.client_name || 'Cliente',
+                    locationName: booking.location_name || 'Mimosa Spa Retreat',
+                    date: dateStr,
+                    time: timeStr,
+                    services: serviceNames
+                });
+                const r = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$email$2f$resend$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["sendEmail"])({
+                    to: booking.client_email,
+                    subject: `Tu cita en Mimosa Spa cambió — nueva fecha: ${dateStr}`,
+                    html: mail.html,
+                    kind: 'booking'
+                });
+                if (r.ok) changeNoticesSent++;
+            }
+        }
+    }
     // ========== PHASE 2: past bookings (completed / noshow / cancelled) ==========
     // Only sync bookings whose appointment time has already passed
     const now = new Date().toISOString();
@@ -2113,6 +2195,8 @@ async function GET(request) {
             cancellationNoticesSent,
             ingested,
             staffConfirmationsSent,
+            rescheduled,
+            changeNoticesSent,
             message: 'No past bookings to sync'
         });
     }
@@ -2265,6 +2349,8 @@ async function GET(request) {
         cancellationNoticesSent,
         ingested,
         staffConfirmationsSent,
+        rescheduled,
+        changeNoticesSent,
         total_unsynced: bookings.length
     });
 }

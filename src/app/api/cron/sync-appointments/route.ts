@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getLocations, getStaffAppointments, getClientWithCustomFields, getSessionTypes } from '@/lib/booking/mindbody'
-import { sendBookingCancellation, sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
+import { sendBookingCancellation, sendBookingConfirmation, sendBookingChange, isWatiConfigured } from '@/lib/booking/wati'
 import { sendEmail, isEmailConfigured } from '@/lib/email/resend'
 import { bookingCancellationEmail, bookingConfirmationEmail } from '@/lib/email/templates/booking'
 
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
 
   const { data: upcoming } = await supabase
     .from('bookings')
-    .select('id, client_name, client_phone, client_email, location_id, location_name, appointment_start, mindbody_appointment_ids, services')
+    .select('id, client_name, client_phone, client_email, location_id, location_name, appointment_start, mindbody_appointment_ids, services, therapist_name, staff_requested')
     .eq('status', 'confirmed')
     .gte('appointment_start', nowIso)
     .lte('appointment_start', horizon)
@@ -332,6 +332,90 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // ====== PHASE 1.6: reschedules (appointment moved in place) ======
+  // A receptionist dragging an appointment to a new time keeps its Mindbody
+  // id but changes StartDateTime. Compare stored vs live start times for
+  // known upcoming bookings: when moved, update the record, notify the
+  // customer (cambio_cita), and re-arm the 24h reminder.
+  let rescheduled = 0
+  let changeNoticesSent = 0
+  if (upcoming && upcoming.length > 0 && liveAppointmentsGlobal.length > 0) {
+    const liveById = new Map<number, LiveAppointment>()
+    for (const a of liveAppointmentsGlobal) liveById.set(a.Id, a)
+
+    for (const booking of upcoming) {
+      const ids = (booking.mindbody_appointment_ids as number[] | null) || []
+      const firstId = ids[0]
+      if (!firstId) continue
+      const live = liveById.get(firstId)
+      if (!live) continue // vanished → handled by cancellation phase
+
+      const liveStartIso = `${live.StartDateTime}-05:00`
+      const storedMs = new Date(booking.appointment_start as string).getTime()
+      const liveMs = new Date(liveStartIso).getTime()
+      if (!Number.isFinite(liveMs) || storedMs === liveMs) continue
+
+      // Guarded update: flip exactly once per move, re-arm the reminder
+      const { data: moved } = await supabase
+        .from('bookings')
+        .update({
+          appointment_start: liveStartIso,
+          reminder_sent: false,
+          reminder_sent_at: null,
+          status_synced_at: new Date().toISOString(),
+        })
+        .eq('id', booking.id)
+        .eq('appointment_start', booking.appointment_start)
+        .select('id')
+      if (!moved || moved.length === 0) continue
+      rescheduled++
+      console.log(`Booking ${booking.id}: rescheduled ${booking.appointment_start} → ${liveStartIso}`)
+
+      const d = new Date(liveStartIso)
+      const dateStr = d.toLocaleDateString('es-PA', { timeZone: 'America/Panama', day: 'numeric', month: 'long', year: 'numeric' })
+      const timeStr = d.toLocaleTimeString('es-PA', { timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true })
+      const serviceNames = ((booking.services as Array<{ name?: string }> | null) || [])
+        .map(sv => sv.name || 'Servicio')
+      const totalDuration = ((booking.services as Array<{ duration?: number }> | null) || [])
+        .reduce((sum, sv) => sum + (sv.duration || 0), 0) || 60
+
+      let changeSent = false
+      if (isWatiConfigured() && booking.client_phone && booking.client_name) {
+        const r = await sendBookingChange({
+          clientName: booking.client_name,
+          clientPhone: booking.client_phone,
+          locationName: booking.location_name || 'Mimosa Spa Retreat',
+          date: dateStr, time: timeStr,
+          services: serviceNames,
+          totalDuration,
+          therapistName: booking.staff_requested && booking.therapist_name
+            ? booking.therapist_name
+            : 'Por asignar',
+        })
+        if (r.result) {
+          changeSent = true
+          changeNoticesSent++
+        } else {
+          console.error(`Change notice failed for booking ${booking.id}:`, JSON.stringify(r).slice(0, 300))
+        }
+      }
+      if (!changeSent && isEmailConfigured() && booking.client_email) {
+        const mail = bookingConfirmationEmail({
+          clientName: booking.client_name || 'Cliente',
+          locationName: booking.location_name || 'Mimosa Spa Retreat',
+          date: dateStr, time: timeStr, services: serviceNames,
+        })
+        const r = await sendEmail({
+          to: booking.client_email,
+          subject: `Tu cita en Mimosa Spa cambió — nueva fecha: ${dateStr}`,
+          html: mail.html,
+          kind: 'booking',
+        })
+        if (r.ok) changeNoticesSent++
+      }
+    }
+  }
+
   // ========== PHASE 2: past bookings (completed / noshow / cancelled) ==========
   // Only sync bookings whose appointment time has already passed
   const now = new Date().toISOString()
@@ -351,7 +435,7 @@ export async function GET(request: NextRequest) {
 
   if (!bookings || bookings.length === 0) {
     return NextResponse.json({
-      synced: 0, upcomingCancelled, cancellationNoticesSent, ingested, staffConfirmationsSent, message: 'No past bookings to sync',
+      synced: 0, upcomingCancelled, cancellationNoticesSent, ingested, staffConfirmationsSent, rescheduled, changeNoticesSent, message: 'No past bookings to sync',
     })
   }
 
@@ -523,5 +607,5 @@ export async function GET(request: NextRequest) {
   }
 
   console.log(`Sync complete: ${synced} past updated, ${unchanged} unchanged, ${upcomingCancelled} upcoming cancelled (${cancellationNoticesSent} notices sent)`)
-  return NextResponse.json({ synced, unchanged, upcomingCancelled, cancellationNoticesSent, ingested, staffConfirmationsSent, total_unsynced: bookings.length })
+  return NextResponse.json({ synced, unchanged, upcomingCancelled, cancellationNoticesSent, ingested, staffConfirmationsSent, rescheduled, changeNoticesSent, total_unsynced: bookings.length })
 }
