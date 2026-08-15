@@ -68,6 +68,9 @@ export function track(
   data?: { path?: string; locale?: string; locationId?: number; meta?: Record<string, unknown> }
 ) {
   if (typeof window === 'undefined') return
+  // Dev/test sessions must not pollute production analytics (the dev server
+  // writes to the same Supabase) — localhost never tracks.
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return
   try {
     pushToDataLayer({ event, ...data?.meta })
     const attr = captureAttribution()

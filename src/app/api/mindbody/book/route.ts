@@ -208,8 +208,11 @@ export async function POST(request: NextRequest) {
     // page reload mid-flow the slot cache can be empty and staffId arrives
     // undefined — re-derive the slot's staff from our own availability logic
     // (same computation the customer saw) instead of failing with a 400.
-    let resolvedStaffId: number | undefined = staffId || undefined
-    if (!resolvedStaffId) {
+    // All therapists able to take this exact slot, freshly computed with the
+    // same availability logic the customer saw. Used both to resolve "any
+    // therapist" and to retry with a different therapist when two customers
+    // race for the same slot (each auto-assignment picks a different person).
+    const fetchSlotStaffCandidates = async (): Promise<number[]> => {
       try {
         const requestDate = String(startDateTime).slice(0, 10)
         const requestTime = String(startDateTime).slice(11, 16) // HH:mm
@@ -235,11 +238,19 @@ export async function POST(request: NextRequest) {
         const slot = day?.slots?.find(
           (sl: { time: string; availableStaffIds?: number[] }) => sl.time === requestTime
         )
-        resolvedStaffId = slot?.availableStaffIds?.[0]
-        console.log('Server-side staff fallback resolved:', resolvedStaffId, 'for', requestDate, requestTime)
+        return slot?.availableStaffIds || []
       } catch (err) {
-        console.error('Server-side staff fallback failed:', err)
+        console.error('Slot staff candidate lookup failed:', err)
+        return []
       }
+    }
+
+    let staffCandidates: number[] = []
+    let resolvedStaffId: number | undefined = staffId || undefined
+    if (!resolvedStaffId) {
+      staffCandidates = await fetchSlotStaffCandidates()
+      resolvedStaffId = staffCandidates[0]
+      console.log('Server-side staff fallback resolved:', resolvedStaffId, 'candidates:', staffCandidates.length)
       if (!resolvedStaffId) {
         return NextResponse.json(
           { error: 'Ese horario ya no está disponible. Por favor elige otro horario.' },
@@ -297,8 +308,32 @@ export async function POST(request: NextRequest) {
     }
 
 
-    // Submit all appointments (all-or-nothing: rolls back on failure)
-    const result = await addMultipleAppointments(appointments)
+    // Submit all appointments (all-or-nothing: rolls back on failure).
+    // Race recovery: when the customer did NOT request a specific therapist
+    // and Mindbody says the slot was just taken (another customer got the
+    // same auto-assigned person seconds earlier), retry the full set with the
+    // next therapist who can take this slot — up to 3 attempts total.
+    const isSlotTakenError = (msg: string | undefined) =>
+      !!msg && (msg.includes('InvalidBookingTime') || msg.toLowerCase().includes('already booked'))
+
+    let result = await addMultipleAppointments(appointments)
+
+    if (!result.success && !staffRequested && isSlotTakenError(result.error)) {
+      if (staffCandidates.length === 0) {
+        staffCandidates = await fetchSlotStaffCandidates()
+      }
+      const alternatives = staffCandidates.filter(id => id !== resolvedStaffId).slice(0, 2)
+      for (const altStaffId of alternatives) {
+        console.log('Slot race detected — retrying with alternative therapist:', altStaffId)
+        const retryAppointments = appointments.map(a => ({ ...a, StaffId: altStaffId }))
+        result = await addMultipleAppointments(retryAppointments)
+        if (result.success) {
+          resolvedStaffId = altStaffId
+          break
+        }
+        if (!isSlotTakenError(result.error)) break
+      }
+    }
 
 
     // If booking failed (any appointment couldn't be created), save to Supabase and return error
