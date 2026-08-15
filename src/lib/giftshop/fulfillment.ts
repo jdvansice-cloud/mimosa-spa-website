@@ -359,7 +359,7 @@ export async function deliverOrder(orderId: string): Promise<void> {
         message: order.gift_message,
         giftUrl,
       })
-      await sendEmail({ to: order.recipient_email, ...mail })
+      await sendEmail({ to: order.recipient_email, ...mail, kind: 'gift' })
     }
     // Buyer receipt (always)
     let bonusLabel: string | null = null
@@ -392,7 +392,7 @@ export async function deliverOrder(orderId: string): Promise<void> {
           )
         : null,
     })
-    const sent = await sendEmail({ to: order.buyer_email, ...receipt })
+    const sent = await sendEmail({ to: order.buyer_email, ...receipt, kind: 'purchase' })
     if (sent.ok) {
       await supabase
         .from('gc_orders')

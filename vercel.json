@@ -11,7 +11,7 @@
     },
     {
       "path": "/api/cron/sync-appointments",
-      "schedule": "0 8 * * *"
+      "schedule": "45 */2 * * *"
     },
     {
       "path": "/api/cron/sync-giftcards",

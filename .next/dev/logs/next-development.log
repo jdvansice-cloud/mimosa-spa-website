@@ -1,10 +1,1366 @@
-[00:00:01.627] Server  WARN    ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-[00:00:01.862] Server  LOG     ✓ Ready in 1537ms
-[00:00:05.475] Server  LOG     ○ Compiling /[locale] ...
-[00:00:09.203] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:09.514] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:00:09.514] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:01:02.919] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:03.203] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:01:03.203] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
-[00:05:53.901] Server  ERROR   Tilopay callback hash mismatch for "GC260814-FA20FC"
+[00:00:03.794] Server  WARN    ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[00:00:04.068] Server  LOG     ✓ Ready in 3.3s
+[00:00:08.886] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:19.276] Server  LOG     getStaffAppointments called with: {}
+[00:00:20.384] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:00:20.888] Server  LOG     Staff appointments response: 146 "appointments"
+[00:00:20.889] Server  LOG     getStaffAppointments called with: {}
+[00:00:20.890] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:00:21.426] Server  LOG     Staff appointments response: 158 "appointments"
+[00:00:21.568] Server  LOG     Upcoming booking 5e798c41-c9bb-40b0-983d-5d09e43abdff: appointment 200405 gone from Mindbody → cancelled
+[00:00:21.575] Server  LOG     WATI request: "https://live-mt-server.wati.io/1036696/api/v1/sendTemplateMessage?whatsappNumber=50766124546" "{\"template_name\":\"cancelacion_cita\",\"broadcast_name\":\"cancelacion_cita\",\"parameters\":[{\"name\":\"1\",\"value\":\"Juan Vansice\"},{\"name\":\"2\",\"value\":\"San Francisco\"},{\"name\":\"3\",\"value\":\"16 de agosto de 2026\"},{\"name\":\"4\",\"value\":\"1:00 p. m.\"}]}"
+[00:00:22.194] Server  ERROR   WATI API error: 400 "{\"items\":[{\"code\":\"Template\",\"description\":\"template_name field is missing/wrong\"}]}"
+[00:00:22.194] Server  ERROR   Cancellation notice failed for booking 5e798c41-c9bb-40b0-983d-5d09e43abdff: "{\"result\":false,\"error\":\"HTTP 400: {\\\"items\\\":[{\\\"code\\\":\\\"Template\\\",\\\"description\\\":\\\"template_name field is missing/wrong\\\"}]}\"}"
+[00:00:22.398] Server  LOG     Syncing 3 of 902 total bookings (window: 2026-03-08 → 2026-03-15)
+[00:00:22.398] Server  LOG     Target IDs: 185857, 185883, 185617
+[00:00:22.399] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:00:22.841] Server  LOG     Found 2 locations: 1, 2
+[00:00:22.841] Server  LOG     getStaffAppointments called with: {}
+[00:00:22.842] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=0" ""
+[00:00:23.684] Server  LOG     Staff appointments response: 200 "appointments"
+[00:00:23.685] Server  LOG     Location 1 page 1 sample IDs: 185697, 185698, 185696, 185855, 184550, 186004, 186005, 186006, 186007, 186435
+[00:00:23.686] Server  LOG     getStaffAppointments called with: {}
+[00:00:23.687] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=200" ""
+[00:00:24.249] Server  LOG     Staff appointments response: 200 "appointments"
+[00:00:24.251] Server  LOG     getStaffAppointments called with: {}
+[00:00:24.252] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=400" ""
+[00:00:25.552] Server  LOG     Staff appointments response: 57 "appointments"
+[00:00:25.553] Server  LOG     Location 1: found 0 matches so far
+[00:00:25.553] Server  LOG     getStaffAppointments called with: {}
+[00:00:25.553] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=0" ""
+[00:00:26.122] Server  LOG     Staff appointments response: 200 "appointments"
+[00:00:26.122] Server  LOG     Location 2 page 1 sample IDs: 185436, 185437, 184996, 185706, 185796, 185777, 185778, 185887, 185895, 185834
+[00:00:26.123] Server  LOG     getStaffAppointments called with: {}
+[00:00:26.123] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=200" ""
+[00:00:26.526] Server  LOG     Staff appointments response: 3 "appointments"
+[00:00:26.526] Server  LOG     Location 2: found 0 matches so far
+[00:00:26.526] Server  LOG     Status map built: 0 of 3 IDs found
+[00:00:26.527] Server  LOG     Sync complete: 0 past updated, 0 unchanged, 1 upcoming cancelled (0 notices sent)
+[00:00:28.848] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:28.848] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:28.848] Browser WARN    Image with src "/logo-icon.png" has "fill" and a height value of 0. This is likely because the parent element of the image has not been styled to have a set height.
+[00:01:01.838] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:02.123] Browser WARN    Image with src "/Logo_mimosa.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:01:02.123] Browser WARN    Image with src "/logo-icon.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:01:20.510] Server  LOG     getStaffAppointments called with: {}
+[00:01:21.132] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:01:21.582] Server  LOG     Staff appointments response: 146 "appointments"
+[00:01:21.582] Server  LOG     getStaffAppointments called with: {}
+[00:01:21.583] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:01:22.001] Server  LOG     Staff appointments response: 158 "appointments"
+[00:01:22.211] Server  LOG     Syncing 3 of 902 total bookings (window: 2026-03-08 → 2026-03-15)
+[00:01:22.212] Server  LOG     Target IDs: 185857, 185883, 185617
+[00:01:22.212] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:01:22.700] Server  LOG     Found 2 locations: 1, 2
+[00:01:22.701] Server  LOG     getStaffAppointments called with: {}
+[00:01:22.701] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=0" ""
+[00:01:23.279] Server  LOG     Staff appointments response: 200 "appointments"
+[00:01:23.280] Server  LOG     Location 1 page 1 sample IDs: 185697, 185698, 185696, 185855, 184550, 186004, 186005, 186006, 186007, 186435
+[00:01:23.281] Server  LOG     getStaffAppointments called with: {}
+[00:01:23.282] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=200" ""
+[00:01:23.803] Server  LOG     Staff appointments response: 200 "appointments"
+[00:01:23.804] Server  LOG     getStaffAppointments called with: {}
+[00:01:23.804] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=400" ""
+[00:01:24.290] Server  LOG     Staff appointments response: 57 "appointments"
+[00:01:24.290] Server  LOG     Location 1: found 0 matches so far
+[00:01:24.291] Server  LOG     getStaffAppointments called with: {}
+[00:01:24.291] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=0" ""
+[00:01:25.610] Server  LOG     Staff appointments response: 200 "appointments"
+[00:01:25.612] Server  LOG     Location 2 page 1 sample IDs: 185436, 185437, 184996, 185706, 185796, 185777, 185778, 185887, 185895, 185834
+[00:01:25.614] Server  LOG     getStaffAppointments called with: {}
+[00:01:25.615] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-08&endDate=2026-03-15&limit=200&offset=200" ""
+[00:01:25.941] Server  LOG     Staff appointments response: 3 "appointments"
+[00:01:25.942] Server  LOG     Location 2: found 0 matches so far
+[00:01:25.943] Server  LOG     Status map built: 0 of 3 IDs found
+[00:01:26.319] Server  LOG     Backlog: 3 past bookings absent from Mindbody → cancelled
+[00:01:26.320] Server  LOG     Sync complete: 0 past updated, 0 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:02:21.389] Server  LOG     getStaffAppointments called with: {}
+[00:02:21.390] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:02:22.313] Server  LOG     Staff appointments response: 148 "appointments"
+[00:02:22.313] Server  LOG     getStaffAppointments called with: {}
+[00:02:22.313] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:02:22.720] Server  LOG     Staff appointments response: 159 "appointments"
+[00:02:22.943] Server  LOG     Syncing 3 of 899 total bookings (window: 2026-03-20 → 2026-03-27)
+[00:02:22.944] Server  LOG     Target IDs: 186078, 187088, 187197
+[00:02:22.944] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:02:23.427] Server  LOG     Found 2 locations: 1, 2
+[00:02:23.429] Server  LOG     getStaffAppointments called with: {}
+[00:02:23.429] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-20&endDate=2026-03-27&limit=200&offset=0" ""
+[00:02:24.259] Server  LOG     Staff appointments response: 200 "appointments"
+[00:02:24.260] Server  LOG     Location 1 page 1 sample IDs: 186756, 186886, 186887, 186972, 185859, 186362, 186638, 187028, 187029, 186492
+[00:02:24.260] Server  LOG     getStaffAppointments called with: {}
+[00:02:24.261] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-20&endDate=2026-03-27&limit=200&offset=200" ""
+[00:02:24.810] Server  LOG     Staff appointments response: 200 "appointments"
+[00:02:24.810] Server  LOG     getStaffAppointments called with: {}
+[00:02:24.812] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-20&endDate=2026-03-27&limit=200&offset=400" ""
+[00:02:25.352] Server  LOG     Staff appointments response: 41 "appointments"
+[00:02:25.352] Server  LOG     Location 1: found 0 matches so far
+[00:02:25.352] Server  LOG     getStaffAppointments called with: {}
+[00:02:25.352] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-20&endDate=2026-03-27&limit=200&offset=0" ""
+[00:02:26.051] Server  LOG     Staff appointments response: 200 "appointments"
+[00:02:26.053] Server  LOG     Location 2 page 1 sample IDs: 186780, 186654, 186655, 186656, 186837, 186864, 186838, 186953, 186954, 186955
+[00:02:26.054] Server  LOG     getStaffAppointments called with: {}
+[00:02:26.056] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-20&endDate=2026-03-27&limit=200&offset=200" ""
+[00:02:26.385] Server  LOG     Staff appointments response: 4 "appointments"
+[00:02:26.386] Server  LOG     Location 2: found 0 matches so far
+[00:02:26.386] Server  LOG     Status map built: 0 of 3 IDs found
+[00:02:26.879] Server  LOG     Backlog: 3 past bookings absent from Mindbody → cancelled
+[00:02:26.880] Server  LOG     Sync complete: 0 past updated, 0 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:02:55.886] Server  LOG     getStaffAppointments called with: {}
+[00:02:56.387] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:02:57.013] Server  LOG     Staff appointments response: 148 "appointments"
+[00:02:57.014] Server  LOG     getStaffAppointments called with: {}
+[00:02:57.014] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:02:57.406] Server  LOG     Staff appointments response: 159 "appointments"
+[00:02:57.664] Server  LOG     Syncing 115 of 896 total bookings (window: 2026-03-28 → 2026-04-27)
+[00:02:57.666] Server  LOG     Target IDs: 187103, 187386, 187014, 188286, 188329, 188331, 187980, 187976, 188492, 188285, 188588, 188762, 188755, 188973, 188964, 188968, 188991, 189159, 189162, 189205, 189248, 189182, 189186, 189232, 189174, 189189, 189210, 189264, 188624, 189164, 189165, 189179, 189180, 189278, 189280, 189302, 189286, 189296, 189306, 189288, 188783, 189201, 189176, 189329, 189169, 189148, 189376, 189433, 189326, 189443, 189508, 189482, 189470, 189472, 189543, 189553, 189534, 189571, 189621, 189615, 189625, 189168, 189685, 189618, 189310, 189346, 189706, 189785, 189812, 189838, 189836, 189856, 189884, 189892, 189901, 189828, 189788, 189936, 190021, 190056, 189977, 189897, 189799, 188909, 189827, 189940, 189458, 190180, 190194, 190167, 189931, 190184, 190235, 190185, 190229, 190246, 190100, 190105, 190232, 190225, 190284, 189612, 190017, 190291, 190288, 190308, 190315, 189978, 190314, 190327, 190276, 190274, 190282, 190271, 190279
+[00:02:57.668] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:02:58.102] Server  LOG     Found 2 locations: 1, 2
+[00:02:58.102] Server  LOG     getStaffAppointments called with: {}
+[00:02:58.103] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=0" ""
+[00:03:00.440] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:00.442] Server  LOG     Location 1 page 1 sample IDs: 187660, 187649, 187650, 187651, 187588, 187451, 187452, 187453, 187569, 187536
+[00:03:00.442] Server  LOG     getStaffAppointments called with: {}
+[00:03:00.443] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=200" ""
+[00:03:01.294] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:01.295] Server  LOG     getStaffAppointments called with: {}
+[00:03:01.295] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=400" ""
+[00:03:02.232] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:02.233] Server  LOG     getStaffAppointments called with: {}
+[00:03:02.234] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=600" ""
+[00:03:03.251] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:03.252] Server  LOG     getStaffAppointments called with: {}
+[00:03:03.252] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=800" ""
+[00:03:04.135] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:04.136] Server  LOG     getStaffAppointments called with: {}
+[00:03:04.136] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=1000" ""
+[00:03:05.167] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:05.168] Server  LOG     getStaffAppointments called with: {}
+[00:03:05.168] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=1200" ""
+[00:03:06.031] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:06.032] Server  LOG     getStaffAppointments called with: {}
+[00:03:06.033] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=1400" ""
+[00:03:06.960] Server  LOG     Staff appointments response: 139 "appointments"
+[00:03:06.961] Server  LOG     Location 1: found 47 matches so far
+[00:03:06.961] Server  LOG     getStaffAppointments called with: {}
+[00:03:06.962] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=0" ""
+[00:03:07.949] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:07.950] Server  LOG     Location 2 page 1 sample IDs: 187291, 187292, 187548, 187311, 187312, 187178, 187177, 187179, 187572, 187573
+[00:03:07.951] Server  LOG     getStaffAppointments called with: {}
+[00:03:07.951] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=200" ""
+[00:03:08.646] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:08.647] Server  LOG     getStaffAppointments called with: {}
+[00:03:08.647] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=400" ""
+[00:03:09.369] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:09.370] Server  LOG     getStaffAppointments called with: {}
+[00:03:09.372] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=600" ""
+[00:03:10.327] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:10.328] Server  LOG     getStaffAppointments called with: {}
+[00:03:10.329] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=800" ""
+[00:03:11.046] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:11.048] Server  LOG     getStaffAppointments called with: {}
+[00:03:11.049] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-03-28&endDate=2026-04-27&limit=200&offset=1000" ""
+[00:03:11.768] Server  LOG     Staff appointments response: 5 "appointments"
+[00:03:11.769] Server  LOG     Location 2: found 74 matches so far
+[00:03:11.769] Server  LOG     Status map built: 74 of 115 IDs found
+[00:03:11.973] Server  LOG     Booking 04b60afe-a870-46bf-9770-d4076359bab2: confirmed → completed (Mindbody: Completed)
+[00:03:12.149] Server  LOG     Booking 29b02960-4525-451e-beff-c052bdbea7f2: confirmed → noshow (Mindbody: NoShow)
+[00:03:12.313] Server  LOG     Booking 7babe8d3-6459-4301-9acd-74b29e94a6af: confirmed → completed (Mindbody: Completed)
+[00:03:12.493] Server  LOG     Booking 5f3dd70e-766a-4bc7-8924-df6e907db5a0: confirmed → completed (Mindbody: Completed)
+[00:03:12.612] Server  LOG     Booking c540de86-0cd7-4161-8e35-162ae16c290b: confirmed → completed (Mindbody: Completed)
+[00:03:12.722] Server  LOG     Booking c7c668c0-c610-44a6-8787-e5eb6a9cc456: confirmed → completed (Mindbody: Completed)
+[00:03:12.844] Server  LOG     Booking a6c9855d-16ce-4917-b8f1-54d4c5eed393: confirmed → completed (Mindbody: Completed)
+[00:03:13.024] Server  LOG     Booking d65a948a-f828-4841-b697-a94d1419ca8c: confirmed → completed (Mindbody: Completed)
+[00:03:13.137] Server  LOG     Booking 8f7e08f8-1fb0-4f7c-9d6e-feefc4cee371: confirmed → completed (Mindbody: Completed)
+[00:03:13.255] Server  LOG     Booking 6b05897f-73ed-4024-8d56-3f08e31c777b: confirmed → completed (Mindbody: Completed)
+[00:03:13.374] Server  LOG     Booking 80e00641-5922-40a2-a76c-5a70c00738d4: confirmed → completed (Mindbody: Completed)
+[00:03:13.543] Server  LOG     Booking 91f3c7e6-582f-4f19-9905-e4690cf5475a: confirmed → completed (Mindbody: Completed)
+[00:03:13.664] Server  LOG     Booking a3203f84-e17a-4978-813d-73a029f7fb56: confirmed → completed (Mindbody: Completed)
+[00:03:13.774] Server  LOG     Booking c19697b6-57da-402a-804e-1b5ef26a4594: confirmed → completed (Mindbody: Completed)
+[00:03:13.887] Server  LOG     Booking 42ede5f3-effb-4056-b872-58a207978d6f: confirmed → completed (Mindbody: Completed)
+[00:03:14.069] Server  LOG     Booking 6bff9876-4bc3-4324-8d36-93a21c89bf8e: confirmed → completed (Mindbody: Completed)
+[00:03:14.174] Server  LOG     Booking 1c8bb10c-be13-4d9f-9d51-a4f6fa930ea3: confirmed → completed (Mindbody: Completed)
+[00:03:14.272] Server  LOG     Booking 3fdf6983-3e29-48aa-b000-ff5386b17dff: confirmed → completed (Mindbody: Completed)
+[00:03:14.362] Server  LOG     Booking 9f5e2c72-bff7-4102-a5c1-b7b3d28aaf9c: confirmed → completed (Mindbody: Completed)
+[00:03:14.457] Server  LOG     Booking b3756f4c-05ac-4910-8058-a1c21ae9e331: confirmed → completed (Mindbody: Completed)
+[00:03:14.593] Server  LOG     Booking a571ee72-fee0-41f8-b7b9-7ecbc6cc7055: confirmed → completed (Mindbody: Completed)
+[00:03:14.695] Server  LOG     Booking 0e02ebfa-6719-44c2-bad1-1efe216559c8: confirmed → completed (Mindbody: Completed)
+[00:03:14.800] Server  LOG     Booking 745dcdcb-b313-47e7-aede-9f998b87dceb: confirmed → completed (Mindbody: Completed)
+[00:03:14.898] Server  LOG     Booking 7ac2b16d-4217-4c30-b3ac-8cc115b0ddae: confirmed → completed (Mindbody: Completed)
+[00:03:15.003] Server  LOG     Booking a794715a-33fe-46f3-9b80-730e7df75b53: confirmed → completed (Mindbody: Completed)
+[00:03:15.119] Server  LOG     Booking ae48166b-b1a0-4d73-9274-2a4bf9b9fa6d: confirmed → completed (Mindbody: Completed)
+[00:03:15.224] Server  LOG     Booking 04a82e75-89db-443e-8611-b1e6fed6207d: confirmed → completed (Mindbody: Completed)
+[00:03:15.320] Server  LOG     Booking 12a24942-31f5-4052-bbae-89b83382fadb: confirmed → completed (Mindbody: Completed)
+[00:03:15.419] Server  LOG     Booking 2b0b98cf-1115-46bd-b6cc-3f88bcb12478: confirmed → completed (Mindbody: Completed)
+[00:03:15.514] Server  LOG     Booking 2150881c-392c-46e7-91d3-db2a06fef03d: confirmed → completed (Mindbody: Completed)
+[00:03:15.639] Server  LOG     Booking aea7a501-2dd9-41ff-aa75-c0e44c0f6a64: confirmed → completed (Mindbody: Completed)
+[00:03:15.734] Server  LOG     Booking da8759bf-b647-4918-8a29-3ea225774904: confirmed → completed (Mindbody: Completed)
+[00:03:15.833] Server  LOG     Booking b578d9c1-f12e-40fd-abde-b2d8f25c3664: confirmed → completed (Mindbody: Completed)
+[00:03:15.926] Server  LOG     Booking a67184d7-6884-46f8-8d3a-9e4bbb305892: confirmed → completed (Mindbody: Completed)
+[00:03:16.023] Server  LOG     Booking 5a6011e7-3db6-4fe9-98bc-99f26dd2ad81: confirmed → completed (Mindbody: Completed)
+[00:03:16.162] Server  LOG     Booking acbc9917-48f1-41fc-9665-a75dffbb0c03: confirmed → completed (Mindbody: Completed)
+[00:03:16.257] Server  LOG     Booking 8771098d-3832-4b15-bfc7-a7989677ef89: confirmed → completed (Mindbody: Completed)
+[00:03:16.355] Server  LOG     Booking c938b448-f221-4567-9bae-05b768f05a9a: confirmed → completed (Mindbody: Completed)
+[00:03:16.451] Server  LOG     Booking f99e3b96-fbf2-40d2-9ff6-ad6e3c31b7f0: confirmed → completed (Mindbody: Completed)
+[00:03:16.552] Server  LOG     Booking 77e9ed8c-f565-4088-ba90-c87bd8e21eea: confirmed → completed (Mindbody: Completed)
+[00:03:16.690] Server  LOG     Booking 68e65443-915d-40eb-9aab-1c298721930f: confirmed → completed (Mindbody: Completed)
+[00:03:16.804] Server  LOG     Booking 8aad4552-6d07-4a31-83f8-1dcc94bd5d84: confirmed → completed (Mindbody: Completed)
+[00:03:16.901] Server  LOG     Booking 56253e93-406a-4003-814c-001383fcdc49: confirmed → completed (Mindbody: Completed)
+[00:03:16.993] Server  LOG     Booking 2199d88b-70d7-4263-8ca1-5b5d57c3a358: confirmed → completed (Mindbody: Completed)
+[00:03:17.095] Server  LOG     Booking 0197387b-b325-49e0-b57a-63d6e4b67595: confirmed → completed (Mindbody: Completed)
+[00:03:17.217] Server  LOG     Booking d6934b85-723c-4048-92f6-d9252a96fb58: confirmed → completed (Mindbody: Completed)
+[00:03:17.326] Server  LOG     Booking ee77a447-6e24-4e3c-a333-4e6cce8de6b4: confirmed → completed (Mindbody: Completed)
+[00:03:17.422] Server  LOG     Booking 3fc619c7-b0de-45e0-b885-7d2c9a786671: confirmed → completed (Mindbody: Completed)
+[00:03:17.514] Server  LOG     Booking 82e005db-df97-4750-9db6-55ecb6179b88: confirmed → completed (Mindbody: Completed)
+[00:03:17.607] Server  LOG     Booking fd7d8bc7-2104-4a36-b71c-67551b8a1e00: confirmed → completed (Mindbody: Completed)
+[00:03:17.739] Server  LOG     Booking b2e20d31-db95-4a21-86fd-830e4ded490e: confirmed → completed (Mindbody: Completed)
+[00:03:17.837] Server  LOG     Booking 43154a3c-c0e3-44f6-8f19-40ead179f192: confirmed → completed (Mindbody: Completed)
+[00:03:17.931] Server  LOG     Booking bb7a2988-dd8e-4af4-9a2c-feafeac514ed: confirmed → completed (Mindbody: Completed)
+[00:03:18.023] Server  LOG     Booking 7ad72d14-7914-439d-ba24-ae9c7ac30f52: confirmed → completed (Mindbody: Completed)
+[00:03:18.119] Server  LOG     Booking b92118b7-2cdf-4b3a-8c67-dd83533c4984: confirmed → completed (Mindbody: Completed)
+[00:03:18.260] Server  LOG     Booking af042a2d-5029-4cdb-9d1d-a6e0d7385ad3: confirmed → completed (Mindbody: Completed)
+[00:03:18.357] Server  LOG     Booking a5bc5152-0e52-477d-adcb-a649097655db: confirmed → completed (Mindbody: Completed)
+[00:03:18.458] Server  LOG     Booking be83f510-3ef5-4ae2-86f9-8f0489deedfd: confirmed → completed (Mindbody: Completed)
+[00:03:18.565] Server  LOG     Booking b8e5f31b-49b3-4daf-afb6-46fc7da23721: confirmed → completed (Mindbody: Completed)
+[00:03:18.679] Server  LOG     Booking 6139ac34-a2f7-4b07-a0f5-3c814a78a8b8: confirmed → completed (Mindbody: Completed)
+[00:03:18.815] Server  LOG     Booking 9447dc59-6c49-4dda-9c2f-d19c1de4ee8d: confirmed → completed (Mindbody: Completed)
+[00:03:18.932] Server  LOG     Booking d1a271dc-f59a-41be-a35f-25af60c0ceaf: confirmed → completed (Mindbody: Completed)
+[00:03:19.045] Server  LOG     Booking 2dbf7818-3172-44c0-8386-18c1654ddc6f: confirmed → completed (Mindbody: Completed)
+[00:03:19.143] Server  LOG     Booking 77846c77-1542-4cc6-8989-9738ab990678: confirmed → completed (Mindbody: Completed)
+[00:03:19.312] Server  LOG     Booking 8333fd6b-31d8-4760-a2f2-9abca67b4f17: confirmed → completed (Mindbody: Completed)
+[00:03:19.406] Server  LOG     Booking ba0eab50-009e-4c29-a33c-ee8d10a65874: confirmed → completed (Mindbody: Completed)
+[00:03:19.517] Server  LOG     Booking c55a9101-55ef-4b1e-b4fa-4f4e79f381c5: confirmed → completed (Mindbody: Completed)
+[00:03:19.616] Server  LOG     Booking ed912117-f1fa-422d-a5a2-a5e1db329cc1: confirmed → completed (Mindbody: Completed)
+[00:03:19.708] Server  LOG     Booking e8df96d6-3a3a-4efa-9410-a52ceec6987b: confirmed → completed (Mindbody: Completed)
+[00:03:19.830] Server  LOG     Booking 118844b2-bc23-4d7f-beb5-3aaae7ac0a8f: confirmed → completed (Mindbody: Completed)
+[00:03:19.928] Server  LOG     Booking cd3c2436-724c-474d-92c9-9393ada9dd2c: confirmed → completed (Mindbody: Completed)
+[00:03:20.030] Server  LOG     Booking b526fdb0-9edb-4e4e-97c1-5160bb314f5c: confirmed → completed (Mindbody: Completed)
+[00:03:20.126] Server  LOG     Booking de015907-1b31-4770-8b0a-fc16db69c5cf: confirmed → completed (Mindbody: Completed)
+[00:03:20.229] Server  LOG     Booking 801ad1f3-b88e-4ae1-a718-e1233d9b90a7: confirmed → completed (Mindbody: Completed)
+[00:03:25.364] Server  LOG     Backlog: 41 past bookings absent from Mindbody → cancelled
+[00:03:25.366] Server  LOG     Sync complete: 74 past updated, 0 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:03:25.606] Server  LOG     getStaffAppointments called with: {}
+[00:03:25.606] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:03:26.327] Server  LOG     Staff appointments response: 148 "appointments"
+[00:03:26.347] Server  LOG     getStaffAppointments called with: {}
+[00:03:26.349] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:03:26.768] Server  LOG     Staff appointments response: 159 "appointments"
+[00:03:26.961] Server  LOG     Syncing 229 of 781 total bookings (window: 2026-04-27 → 2026-05-27)
+[00:03:26.962] Server  LOG     Target IDs: 190381, 190331, 190374, 190362, 190334, 190165, 190493, 190476, 190504, 190544, 190569, 190514, 190591, 190746, 190318, 190632, 190740, 190656, 190742, 190599, 190662, 190745, 190774, 190787, 190801, 190634, 190085, 190263, 190622, 190853, 190856, 190847, 190859, 190910, 190733, 190735, 190401, 190405, 190976, 190990, 190915, 190988, 191007, 191019, 191021, 191023, 191027, 191087, 191084, 191125, 191150, 191174, 191180, 191215, 191147, 191153, 191294, 191305, 191337, 191375, 190673, 191345, 191344, 191213, 191386, 191231, 191212, 191365, 191424, 191383, 191082, 191083, 191238, 191382, 190867, 191339, 191443, 191450, 191069, 190948, 191326, 190951, 191442, 191190, 191536, 191545, 191538, 191542, 191447, 191554, 191437, 191206, 191587, 191669, 191672, 191648, 191667, 191685, 191250, 191670, 191691, 191680, 191745, 191772, 191773, 191776, 191804, 191826, 191805, 191771, 191833, 191849, 191860, 191803, 191841, 191911, 191892, 191916, 191921, 191919, 191934, 191937, 191942, 191940, 191967, 191320, 191992, 192065, 192066, 192047, 192067, 192068, 191927, 192077, 191636, 191754, 192123, 192159, 192166, 191931, 191951, 191579, 192127, 192138, 192192, 192157, 192187, 192174, 192132, 192170, 192236, 192243, 192168, 192245, 192270, 192273, 192324, 192348, 192259, 192385, 192377, 192349, 192413, 192422, 192351, 192501, 191088, 192206, 192450, 192503, 192505, 192625, 192626, 192562, 192541, 192606, 192547, 192687, 192584, 192479, 192742, 192757, 192690, 192793, 192394, 192796, 192803, 192782, 192760, 192749, 192753, 192759, 192506, 192827, 192728, 192463, 192930, 192228, 192616, 192721, 192612, 192928, 192517, 192916, 192923, 192432, 192691, 192924, 192989, 192954, 192986, 192995, 192258, 193031, 192914, 193046, 193028, 192996, 193082, 193026, 192602, 193110, 193111, 193149, 193164, 193024, 193022, 192686, 193179
+[00:03:26.963] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:03:27.441] Server  LOG     Found 2 locations: 1, 2
+[00:03:27.442] Server  LOG     getStaffAppointments called with: {}
+[00:03:27.442] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=0" ""
+[00:03:28.814] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:28.815] Server  LOG     Location 1 page 1 sample IDs: 191360, 189876, 189877, 191370, 191009, 190373, 190019, 190362, 190363, 190424
+[00:03:28.816] Server  LOG     getStaffAppointments called with: {}
+[00:03:28.816] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=200" ""
+[00:03:29.863] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:29.865] Server  LOG     getStaffAppointments called with: {}
+[00:03:29.866] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=400" ""
+[00:03:30.953] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:30.954] Server  LOG     getStaffAppointments called with: {}
+[00:03:30.955] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=600" ""
+[00:03:31.911] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:31.912] Server  LOG     getStaffAppointments called with: {}
+[00:03:31.912] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=800" ""
+[00:03:32.801] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:32.804] Server  LOG     getStaffAppointments called with: {}
+[00:03:32.806] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=1000" ""
+[00:03:33.798] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:33.799] Server  LOG     getStaffAppointments called with: {}
+[00:03:33.799] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=1200" ""
+[00:03:34.681] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:34.685] Server  LOG     getStaffAppointments called with: {}
+[00:03:34.687] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=1400" ""
+[00:03:35.700] Server  LOG     Staff appointments response: 150 "appointments"
+[00:03:35.701] Server  LOG     Location 1: found 149 matches so far
+[00:03:35.703] Server  LOG     getStaffAppointments called with: {}
+[00:03:35.705] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=0" ""
+[00:03:36.636] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:36.638] Server  LOG     Location 2 page 1 sample IDs: 190222, 190223, 190227, 190411, 189578, 189003, 190451, 190367, 190369, 188573
+[00:03:36.638] Server  LOG     getStaffAppointments called with: {}
+[00:03:36.640] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=200" ""
+[00:03:37.442] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:37.444] Server  LOG     getStaffAppointments called with: {}
+[00:03:37.446] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=400" ""
+[00:03:38.219] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:38.220] Server  LOG     getStaffAppointments called with: {}
+[00:03:38.221] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=600" ""
+[00:03:38.946] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:38.947] Server  LOG     getStaffAppointments called with: {}
+[00:03:38.947] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=800" ""
+[00:03:39.585] Server  LOG     Staff appointments response: 200 "appointments"
+[00:03:39.586] Server  LOG     getStaffAppointments called with: {}
+[00:03:39.586] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-04-27&endDate=2026-05-27&limit=200&offset=1000" ""
+[00:03:40.306] Server  LOG     Staff appointments response: 8 "appointments"
+[00:03:40.306] Server  LOG     Location 2: found 207 matches so far
+[00:03:40.306] Server  LOG     Status map built: 207 of 229 IDs found
+[00:03:40.449] Server  LOG     Booking 44e3474b-a844-4614-a579-ca00f6346e5a: confirmed → completed (Mindbody: Completed)
+[00:03:40.577] Server  LOG     Booking 96e2a968-a7da-41fb-8a43-45f69635bb89: confirmed → completed (Mindbody: Completed)
+[00:03:40.683] Server  LOG     Booking 847ae2c8-ddfe-4e38-b880-230483cda2dd: confirmed → completed (Mindbody: Completed)
+[00:03:40.805] Server  LOG     Booking c8290634-b6c7-498d-bb20-b711e34c9f47: confirmed → noshow (Mindbody: NoShow)
+[00:03:40.902] Server  LOG     Booking c7619d59-24d4-40f6-9c12-996d82239d8e: confirmed → completed (Mindbody: Completed)
+[00:03:41.005] Server  LOG     Booking 5aeb5812-98e8-4f3c-bab9-4bb0f8815e84: confirmed → completed (Mindbody: Completed)
+[00:03:41.100] Server  LOG     Booking 281bc440-a693-4afc-8c01-3778acab35cb: confirmed → completed (Mindbody: Completed)
+[00:03:41.200] Server  LOG     Booking edd3664f-544f-4cba-9c3e-76c012406e05: confirmed → completed (Mindbody: Completed)
+[00:03:41.330] Server  LOG     Booking 1bdef7bb-9401-469d-8b5a-959dafad5633: confirmed → completed (Mindbody: Completed)
+[00:03:41.431] Server  LOG     Booking e5a72ff1-bd12-4e3c-92a9-9efc3e0ee1e6: confirmed → completed (Mindbody: Completed)
+[00:03:41.526] Server  LOG     Booking 6c54e046-aeeb-4dbc-bb5d-14032ecae395: confirmed → completed (Mindbody: Completed)
+[00:03:41.622] Server  LOG     Booking c35c660e-c25f-48a6-b9b6-28e35bcc2cb2: confirmed → completed (Mindbody: Completed)
+[00:03:41.717] Server  LOG     Booking 92098a7e-2dfd-439d-bc30-19dea471f67b: confirmed → completed (Mindbody: Completed)
+[00:03:41.853] Server  LOG     Booking dae748c1-1182-421b-aa94-8d089961a722: confirmed → completed (Mindbody: Completed)
+[00:03:41.962] Server  LOG     Booking 95ea4ee7-2093-422e-aa08-9a632dceaa79: confirmed → completed (Mindbody: Completed)
+[00:03:42.063] Server  LOG     Booking a387aa2a-aeef-4c79-a3fb-3f957e0622b6: confirmed → completed (Mindbody: Completed)
+[00:03:42.161] Server  LOG     Booking c88a6d65-1537-4bb5-b60d-4e32fff5adb9: confirmed → completed (Mindbody: Completed)
+[00:03:42.257] Server  LOG     Booking d4c9d32f-0f7c-483e-bf18-d3e832b2796b: confirmed → completed (Mindbody: Completed)
+[00:03:42.380] Server  LOG     Booking dd0251b7-665c-446d-a9d6-f8e394fac7a7: confirmed → completed (Mindbody: Completed)
+[00:03:42.485] Server  LOG     Booking 5bd3b21a-53e9-4d03-ab94-dab833f25fd7: confirmed → completed (Mindbody: Completed)
+[00:03:42.585] Server  LOG     Booking 8bc6d396-e6a0-422c-8d52-0978e72edc3d: confirmed → completed (Mindbody: Completed)
+[00:03:42.684] Server  LOG     Booking fe873404-d9ff-40cd-916a-12ed0e9df849: confirmed → completed (Mindbody: Completed)
+[00:03:42.782] Server  LOG     Booking 25fa50da-7ffa-4507-b354-d62c3743d4c6: confirmed → completed (Mindbody: Completed)
+[00:03:42.904] Server  LOG     Booking b1b8eb1a-4705-4cc9-945c-800b2942e21a: confirmed → completed (Mindbody: Completed)
+[00:03:43.001] Server  LOG     Booking 19567c33-ba76-4fde-9424-9c79737ce4d4: confirmed → completed (Mindbody: Completed)
+[00:03:43.096] Server  LOG     Booking 1808ed41-7b00-41ee-aa08-899f6f27cad5: confirmed → completed (Mindbody: Completed)
+[00:03:43.187] Server  LOG     Booking ef59b58b-1915-4f69-b9e2-d8ec8e7934ec: confirmed → completed (Mindbody: Completed)
+[00:03:43.283] Server  LOG     Booking e317a2a5-70a6-4be4-9cdb-a074c4e60996: confirmed → completed (Mindbody: Completed)
+[00:03:43.427] Server  LOG     Booking b771dc1e-f524-4361-bf13-04b96552523d: confirmed → completed (Mindbody: Completed)
+[00:03:43.530] Server  LOG     Booking 132f56b3-e463-4fee-96a5-4ff03eefe887: confirmed → completed (Mindbody: Completed)
+[00:03:43.621] Server  LOG     Booking e4cbf054-ae29-4472-9a4a-6fe7c9d3af73: confirmed → completed (Mindbody: Completed)
+[00:03:43.717] Server  LOG     Booking 89bc5663-69af-4aec-9c63-1330d6cb3cb1: confirmed → completed (Mindbody: Completed)
+[00:03:43.810] Server  LOG     Booking 81c6b6a8-b521-4c43-a7f7-150c38b78269: confirmed → completed (Mindbody: Completed)
+[00:03:43.950] Server  LOG     Booking 71f28f5b-5eda-4ba3-8810-dc3dfd526854: confirmed → completed (Mindbody: Completed)
+[00:03:44.055] Server  LOG     Booking a78074f9-2e34-40a1-b5a3-830634194860: confirmed → completed (Mindbody: Completed)
+[00:03:44.211] Server  LOG     Booking 7e321987-aae1-4381-9c17-c53202440be8: confirmed → completed (Mindbody: Completed)
+[00:03:44.303] Server  LOG     Booking 4c77bf1c-ebe7-4a5a-bd18-ce5a0291ae0e: confirmed → completed (Mindbody: Completed)
+[00:03:44.480] Server  LOG     Booking bae8e79f-5214-4d8f-82aa-1987fcf916dc: confirmed → completed (Mindbody: Completed)
+[00:03:44.710] Server  LOG     Booking 3209ea61-0592-43b5-82df-06c0a4aa7b87: confirmed → completed (Mindbody: Completed)
+[00:03:44.996] Server  LOG     Booking d6045b2a-04cc-4f33-b1ad-23135d3d6e95: confirmed → completed (Mindbody: Completed)
+[00:03:45.163] Server  LOG     Booking c3324e7b-2e7e-41ac-a5ba-cce68cd3dca9: confirmed → completed (Mindbody: Completed)
+[00:03:45.255] Server  LOG     Booking 1ca0e82c-1967-4c8f-b5b5-380b23cc80cd: confirmed → completed (Mindbody: Completed)
+[00:03:45.353] Server  LOG     Booking eb6467f7-bde6-4126-adc1-ec5b48a7e70b: confirmed → completed (Mindbody: Completed)
+[00:03:45.523] Server  LOG     Booking 731291c1-ee61-4363-a9f2-f9bd6ef11ba4: confirmed → completed (Mindbody: Completed)
+[00:03:45.711] Server  LOG     Booking 5c5f7ace-2db4-4231-b2fd-802b468c348f: confirmed → noshow (Mindbody: NoShow)
+[00:03:45.924] Server  LOG     Booking beed2635-5d39-486e-83b8-3916e9ff2f8d: confirmed → completed (Mindbody: Completed)
+[00:03:46.080] Server  LOG     Booking 50e4ecfb-3633-44d1-ab20-7fa3c0156cfd: confirmed → completed (Mindbody: Completed)
+[00:03:46.194] Server  LOG     Booking b2f391a1-387a-4066-be1f-789fa8dfdb12: confirmed → completed (Mindbody: Completed)
+[00:03:46.304] Server  LOG     Booking 5cc8beb6-fe47-44e2-8325-eb9f8fbea227: confirmed → completed (Mindbody: Completed)
+[00:03:46.404] Server  LOG     Booking 669405a1-7dca-4f8f-af3e-f5727ad757eb: confirmed → noshow (Mindbody: NoShow)
+[00:03:46.573] Server  LOG     Booking d9b5dd3e-b995-469f-8d9a-b6b5c4b48a28: confirmed → completed (Mindbody: Completed)
+[00:03:46.663] Server  LOG     Booking cf70a157-27ba-4df6-b8df-bad5d2b2fc0c: confirmed → completed (Mindbody: Completed)
+[00:03:46.755] Server  LOG     Booking 89293ccc-3252-4478-b299-9b4a43c0a85e: confirmed → completed (Mindbody: Completed)
+[00:03:46.848] Server  LOG     Booking 46aa12c3-521a-4112-bf37-b8947bcbfeef: confirmed → completed (Mindbody: Completed)
+[00:03:46.949] Server  LOG     Booking cf13391e-7496-491a-81e6-5f8979448619: confirmed → completed (Mindbody: Completed)
+[00:03:47.096] Server  LOG     Booking 9e26f2d1-7a52-4e84-9cbf-afd6d511db44: confirmed → completed (Mindbody: Completed)
+[00:03:47.191] Server  LOG     Booking 459c8881-a739-49af-af74-3a03dcbe2bed: confirmed → completed (Mindbody: Completed)
+[00:03:47.286] Server  LOG     Booking 95e2655c-b8c2-4c02-bc75-08c757013070: confirmed → completed (Mindbody: Completed)
+[00:03:47.380] Server  LOG     Booking 07076f61-e6a2-4421-aeb0-99b5ea39a42f: confirmed → completed (Mindbody: Completed)
+[00:03:47.476] Server  LOG     Booking ecf0cb5d-49b0-4e09-a93d-d0f4b299b0c6: confirmed → completed (Mindbody: Completed)
+[00:03:47.620] Server  LOG     Booking 4bee8252-f4f0-49e5-94d5-7559c2cda683: confirmed → completed (Mindbody: Completed)
+[00:03:47.717] Server  LOG     Booking 76170ce9-ca32-4a56-9551-6d1d4c8180d4: confirmed → completed (Mindbody: Completed)
+[00:03:47.813] Server  LOG     Booking 6151eb32-550a-4896-95a8-050f2a476155: confirmed → completed (Mindbody: Completed)
+[00:03:47.905] Server  LOG     Booking c36c1ac6-d127-47c4-9b7e-3e3935adcd33: confirmed → completed (Mindbody: Completed)
+[00:03:47.999] Server  LOG     Booking 8032a896-b461-4db3-9cc9-a4f7bc5b95fb: confirmed → completed (Mindbody: Completed)
+[00:03:48.148] Server  LOG     Booking 16985d45-0b3d-4c58-8bb7-bd5a9fe01b26: confirmed → completed (Mindbody: Completed)
+[00:03:48.240] Server  LOG     Booking 4387fe39-d46b-4b0c-8d39-8982cc9239f2: confirmed → completed (Mindbody: Completed)
+[00:03:48.334] Server  LOG     Booking bdfafe11-1455-445a-a573-58edf6bf0985: confirmed → completed (Mindbody: Completed)
+[00:03:48.708] Server  LOG     Booking 152aa92b-4b8c-4211-a63c-d99a6629567e: confirmed → completed (Mindbody: Completed)
+[00:03:48.805] Server  LOG     Booking 7c256280-e15b-4998-b658-788d0d6712ee: confirmed → completed (Mindbody: Completed)
+[00:03:48.901] Server  LOG     Booking ca7c9e13-409a-4e9b-981f-df6947d87f96: confirmed → completed (Mindbody: Completed)
+[00:03:48.996] Server  LOG     Booking 189c3a30-1a42-4bd7-92fd-6590f402352f: confirmed → completed (Mindbody: Completed)
+[00:03:49.089] Server  LOG     Booking 0333d851-10f7-4423-b0de-2f6f33cccc28: confirmed → completed (Mindbody: Completed)
+[00:03:49.193] Server  LOG     Booking dbee88bc-93a7-484c-92ab-b3927f26b875: confirmed → noshow (Mindbody: NoShow)
+[00:03:49.289] Server  LOG     Booking 67cd76ac-abd6-427c-80e7-ee7ea65b69e0: confirmed → completed (Mindbody: Completed)
+[00:03:49.382] Server  LOG     Booking ba2b1855-51c2-4d4c-a850-6fc8ad96d233: confirmed → completed (Mindbody: Completed)
+[00:03:49.474] Server  LOG     Booking 85db3872-aebd-4725-abdb-7f22017ae41d: confirmed → completed (Mindbody: Completed)
+[00:03:49.571] Server  LOG     Booking 30caf69e-5cdb-4ad0-aed6-ef8da0567e1c: confirmed → completed (Mindbody: Completed)
+[00:03:49.716] Server  LOG     Booking 8cd477e4-629f-423d-98d9-c27bba6f8d0a: confirmed → completed (Mindbody: Completed)
+[00:03:49.815] Server  LOG     Booking a0622f9b-e673-4eed-a7fd-ae98ea2de505: confirmed → completed (Mindbody: Completed)
+[00:03:49.911] Server  LOG     Booking b8043c88-c073-473f-9ad2-718455868eac: confirmed → completed (Mindbody: Completed)
+[00:03:50.001] Server  LOG     Booking c11173fb-a7de-4a8b-80e2-f8a39bb0b8be: confirmed → completed (Mindbody: Completed)
+[00:03:50.097] Server  LOG     Booking 02d177fb-2e75-47f1-baab-8f3d8317323d: confirmed → completed (Mindbody: Completed)
+[00:03:50.238] Server  LOG     Booking 4b97cd99-6491-44c4-b818-38982b0ed164: confirmed → completed (Mindbody: Completed)
+[00:03:50.336] Server  LOG     Booking 87a88c84-815a-4d94-831d-c9058b3211dc: confirmed → completed (Mindbody: Completed)
+[00:03:50.430] Server  LOG     Booking fde23f2f-1f50-40ab-9c5d-fd1c1e663fc0: confirmed → completed (Mindbody: Completed)
+[00:03:50.527] Server  LOG     Booking 5fad614d-bbd0-4358-ab5e-f845ed71e6ee: confirmed → completed (Mindbody: Completed)
+[00:03:50.623] Server  LOG     Booking e957eb22-b368-478b-a33e-05e6ae01f145: confirmed → completed (Mindbody: Completed)
+[00:03:50.774] Server  LOG     Booking 2d40f770-ef5a-42c3-9fbe-f9cb0c4e1341: confirmed → completed (Mindbody: Completed)
+[00:03:50.877] Server  LOG     Booking d334514f-3909-44d2-871b-78a2ab68f766: confirmed → completed (Mindbody: Completed)
+[00:03:50.973] Server  LOG     Booking b5631369-070a-454a-9cef-496c3b60780c: confirmed → completed (Mindbody: Completed)
+[00:03:51.067] Server  LOG     Booking 7a98a38b-d5e6-4280-b708-0674d2a4c3b4: confirmed → completed (Mindbody: Completed)
+[00:03:51.176] Server  LOG     Booking 76c27761-cc6d-4ebe-98ee-bb6c0763d20b: confirmed → completed (Mindbody: Completed)
+[00:03:51.292] Server  LOG     Booking 33f29b06-bd2b-48f5-99c9-f03afb6ac57c: confirmed → completed (Mindbody: Completed)
+[00:03:51.386] Server  LOG     Booking e101de2c-9522-4f73-a48c-d80cd5e3091b: confirmed → completed (Mindbody: Completed)
+[00:03:51.480] Server  LOG     Booking c3ad0c03-3b1e-49a6-bc7e-081b5348a5a0: confirmed → noshow (Mindbody: NoShow)
+[00:03:51.570] Server  LOG     Booking 6fbd1a9e-01d3-4e14-8edf-d2c557c98caa: confirmed → completed (Mindbody: Completed)
+[00:03:51.666] Server  LOG     Booking 98483426-e695-4d71-94a7-4f3b9f517e2a: confirmed → completed (Mindbody: Completed)
+[00:03:51.816] Server  LOG     Booking 0f90653e-47a5-4861-ab50-50e626a47600: confirmed → completed (Mindbody: Completed)
+[00:03:51.911] Server  LOG     Booking 2ab850d9-b6f2-45e4-a0e5-fa2908b55859: confirmed → completed (Mindbody: Completed)
+[00:03:52.007] Server  LOG     Booking 227cba42-baac-4d52-b875-ed7b42dd3c53: confirmed → completed (Mindbody: Completed)
+[00:03:52.104] Server  LOG     Booking 9300baee-af9b-4090-a028-e079d22a2bc3: confirmed → completed (Mindbody: Completed)
+[00:03:52.200] Server  LOG     Booking fa0bd135-adc7-46bc-b390-5565093b4e23: confirmed → completed (Mindbody: Completed)
+[00:03:52.339] Server  LOG     Booking 96e87286-d9b3-4c40-a6e2-811247bef7d7: confirmed → completed (Mindbody: Completed)
+[00:03:52.444] Server  LOG     Booking 3611bb1e-bca2-42a2-8b78-99d3cbbbad7f: confirmed → completed (Mindbody: Completed)
+[00:03:52.536] Server  LOG     Booking d677b5b2-e832-4c0a-80f5-17844637c3ee: confirmed → completed (Mindbody: Completed)
+[00:03:52.625] Server  LOG     Booking d631f291-58c6-4b88-9904-9a900ab47c1d: confirmed → completed (Mindbody: Completed)
+[00:03:52.719] Server  LOG     Booking 58f79ee6-ddf5-49bc-9473-588ded409935: confirmed → completed (Mindbody: Completed)
+[00:03:52.866] Server  LOG     Booking ddba20d7-3f7c-45be-b044-3c4fda77e114: confirmed → completed (Mindbody: Completed)
+[00:03:52.966] Server  LOG     Booking b374f917-64a9-4d48-b068-29beadd42e21: confirmed → completed (Mindbody: Completed)
+[00:03:53.061] Server  LOG     Booking 1803bcc7-7482-4946-91ca-95d3eee831df: confirmed → completed (Mindbody: Completed)
+[00:03:53.153] Server  LOG     Booking 6524f758-eebd-444a-af0d-bd61087788ed: confirmed → completed (Mindbody: Completed)
+[00:03:53.248] Server  LOG     Booking 004d2f35-4b21-48b8-b81c-8a5478d82fdc: confirmed → completed (Mindbody: Completed)
+[00:03:53.388] Server  LOG     Booking 931c0431-6b7b-4c29-9516-2c2a4f1243b3: confirmed → noshow (Mindbody: NoShow)
+[00:03:53.496] Server  LOG     Booking eb779230-b364-47f6-b749-8fdf3f8db2e8: confirmed → completed (Mindbody: Completed)
+[00:03:53.592] Server  LOG     Booking a9da63cd-720f-41fb-a008-ff1aa75c1717: confirmed → completed (Mindbody: Completed)
+[00:03:53.683] Server  LOG     Booking 69b1c487-1331-4fdd-9f2c-9bddd26dbe2a: confirmed → completed (Mindbody: Completed)
+[00:03:53.782] Server  LOG     Booking a966a5ee-a35a-4c64-b76c-1218a5d5c7cc: confirmed → completed (Mindbody: Completed)
+[00:03:53.913] Server  LOG     Booking f1a979cf-2a90-47fc-819b-86640139aed9: confirmed → completed (Mindbody: Completed)
+[00:03:54.005] Server  LOG     Booking 534211b9-f766-41bd-9719-db8b6d91d982: confirmed → completed (Mindbody: Completed)
+[00:03:54.099] Server  LOG     Booking f093496e-d3d0-4983-8faa-4b5fbfa01d2c: confirmed → completed (Mindbody: Completed)
+[00:03:54.193] Server  LOG     Booking 5cbe8856-977d-4f26-b0a0-e234b54815a6: confirmed → completed (Mindbody: Completed)
+[00:03:54.285] Server  LOG     Booking 1e5c526b-ee1c-40e7-a667-2ccab9ef441f: confirmed → noshow (Mindbody: NoShow)
+[00:03:54.437] Server  LOG     Booking 24c2f043-95c5-47cd-a797-57f66cd27257: confirmed → completed (Mindbody: Completed)
+[00:03:54.535] Server  LOG     Booking 43b9566a-0374-4ad1-866b-d692d68d4b97: confirmed → completed (Mindbody: Completed)
+[00:03:54.630] Server  LOG     Booking 1ffaed56-f834-4a28-b4e2-db1adca6cb91: confirmed → completed (Mindbody: Completed)
+[00:03:54.726] Server  LOG     Booking 3e3fcebd-6e07-4c09-93d5-5ad4e4847ce6: confirmed → completed (Mindbody: Completed)
+[00:03:54.824] Server  LOG     Booking eb47d1cb-7e08-48eb-b3ad-f148c6857ed0: confirmed → completed (Mindbody: Completed)
+[00:03:54.963] Server  LOG     Booking 478479c5-31dc-4e0b-ab1f-bff35b4519dd: confirmed → completed (Mindbody: Completed)
+[00:03:55.134] Server  LOG     Booking 5d60174e-881e-4921-8d1f-acc1b0a207d0: confirmed → completed (Mindbody: Completed)
+[00:03:55.231] Server  LOG     Booking 1407caf6-e1a8-4ca9-862c-7af3dbb8da98: confirmed → completed (Mindbody: Completed)
+[00:03:55.325] Server  LOG     Booking 28372404-fcee-4b49-b262-1a473b7118cd: confirmed → completed (Mindbody: Completed)
+[00:03:55.489] Server  LOG     Booking fe13ee1e-c909-45eb-a55a-91839af7d345: confirmed → noshow (Mindbody: NoShow)
+[00:03:55.579] Server  LOG     Booking 17f98675-e5ae-413e-9df0-8dee6288f4d4: confirmed → completed (Mindbody: Completed)
+[00:03:55.673] Server  LOG     Booking 2544cb53-98f1-4058-b40b-28d88c8344de: confirmed → completed (Mindbody: Completed)
+[00:03:55.771] Server  LOG     Booking 57f4e260-a811-4ce9-8e28-ee5344bb9e3d: confirmed → completed (Mindbody: Completed)
+[00:03:55.866] Server  LOG     Booking 874b405d-038c-4141-9860-bf7d5205ba0b: confirmed → completed (Mindbody: Completed)
+[00:03:56.012] Server  LOG     Booking 97a43e06-2dcd-4e3b-af2a-83f042009a83: confirmed → completed (Mindbody: Completed)
+[00:03:56.111] Server  LOG     Booking b00218cf-f46c-40ee-a520-7901350935a2: confirmed → completed (Mindbody: Completed)
+[00:03:56.209] Server  LOG     Booking f59820f5-8508-46c2-b730-c5b95d683908: confirmed → noshow (Mindbody: NoShow)
+[00:03:56.303] Server  LOG     Booking 2143f3fc-e987-40e8-b222-8faa6a954da5: confirmed → completed (Mindbody: Completed)
+[00:03:56.397] Server  LOG     Booking 24966fb8-39c3-4e74-9835-024c527c4b6c: confirmed → completed (Mindbody: Completed)
+[00:03:56.536] Server  LOG     Booking d601f539-e727-428b-bf82-4f32d309698c: confirmed → completed (Mindbody: Completed)
+[00:03:56.628] Server  LOG     Booking e8b84f9d-cf7e-48d3-a5ec-430b75b40599: confirmed → noshow (Mindbody: NoShow)
+[00:03:56.725] Server  LOG     Booking 929f8a03-ef0d-4e9d-93f8-8701f078b0f0: confirmed → completed (Mindbody: Completed)
+[00:03:56.818] Server  LOG     Booking 270ef54f-5ac2-4328-951a-1506f92b942c: confirmed → completed (Mindbody: Completed)
+[00:03:56.912] Server  LOG     Booking 15bc5a82-bb78-4dc3-a623-6a39cafca434: confirmed → completed (Mindbody: Completed)
+[00:03:57.056] Server  LOG     Booking 95ce96da-391b-4e07-b5fc-50340b404f98: confirmed → completed (Mindbody: Completed)
+[00:03:57.148] Server  LOG     Booking 3831e298-819c-4db9-a10c-bd53547b4db5: confirmed → completed (Mindbody: Completed)
+[00:03:57.247] Server  LOG     Booking 33c7e789-6e6f-4ccb-a19a-8b4a6928d934: confirmed → completed (Mindbody: Completed)
+[00:03:57.341] Server  LOG     Booking a296d734-a4fc-42a4-a3f7-bcb201224f68: confirmed → completed (Mindbody: Completed)
+[00:03:57.443] Server  LOG     Booking dace6643-7688-4ff9-a008-8e28c0b29037: confirmed → completed (Mindbody: Completed)
+[00:03:57.583] Server  LOG     Booking df2cf15b-a54c-4f3a-9446-439ef8bcdbb6: confirmed → completed (Mindbody: Completed)
+[00:03:57.689] Server  LOG     Booking 0aa34084-6192-401f-bc78-435255fe84b4: confirmed → completed (Mindbody: Completed)
+[00:03:57.791] Server  LOG     Booking 1f300ea7-f0ef-4da2-b978-059de75a08fe: confirmed → completed (Mindbody: Completed)
+[00:03:57.887] Server  LOG     Booking 15acb0f5-4762-44bb-913e-7dff16757819: confirmed → completed (Mindbody: Completed)
+[00:03:57.980] Server  LOG     Booking 462ef615-7631-4fee-a4c6-0eabfe8c7953: confirmed → completed (Mindbody: Completed)
+[00:03:58.105] Server  LOG     Booking 59ffef34-f6f5-4df8-9204-a73f6a049bc9: confirmed → completed (Mindbody: Completed)
+[00:03:58.198] Server  LOG     Booking 3de0decc-6553-4304-8ef2-65855207a578: confirmed → completed (Mindbody: Completed)
+[00:03:58.293] Server  LOG     Booking fa39c810-5dc3-46fe-9c5a-b0802327fa4b: confirmed → completed (Mindbody: Completed)
+[00:03:58.393] Server  LOG     Booking f57642f5-b779-4a6e-83b9-035737e04079: confirmed → completed (Mindbody: Completed)
+[00:03:58.483] Server  LOG     Booking 2730fd60-1a8b-412b-a1d5-6a07a53fd87a: confirmed → completed (Mindbody: Completed)
+[00:03:58.630] Server  LOG     Booking 86490e71-caa1-4a96-81de-0939172b14f9: confirmed → completed (Mindbody: Completed)
+[00:03:58.723] Server  LOG     Booking 42e39bcd-7541-46b9-b156-fedc0b9c4570: confirmed → completed (Mindbody: Completed)
+[00:03:58.822] Server  LOG     Booking 7a0c95c5-e92d-465f-8318-0518038b7e5e: confirmed → completed (Mindbody: Completed)
+[00:03:58.918] Server  LOG     Booking 3adfddaa-d9d8-4e90-992c-2a36423305a1: confirmed → completed (Mindbody: Completed)
+[00:03:59.022] Server  LOG     Booking e32d4236-b589-4f4c-9401-23533b91afae: confirmed → completed (Mindbody: Completed)
+[00:03:59.159] Server  LOG     Booking 7f33f3c5-2211-4fb6-9c88-e7975296d034: confirmed → completed (Mindbody: Completed)
+[00:03:59.251] Server  LOG     Booking 0d50834d-1e75-482b-a296-854f2f75cf3c: confirmed → completed (Mindbody: Completed)
+[00:03:59.351] Server  LOG     Booking 45bd2c86-6142-4403-8095-4dc739794847: confirmed → completed (Mindbody: Completed)
+[00:03:59.444] Server  LOG     Booking 1c85d7a4-3fb8-4df1-b88c-b5b614653438: confirmed → completed (Mindbody: Completed)
+[00:03:59.540] Server  LOG     Booking afbedd96-3a6a-4126-abcd-a4a1518495b4: confirmed → completed (Mindbody: Completed)
+[00:03:59.709] Server  LOG     Booking 71e7ccb0-a898-4c66-8ae0-b54e5b6a48d0: confirmed → completed (Mindbody: Completed)
+[00:03:59.859] Server  LOG     Booking f06b0d5f-ec26-46e1-abc1-6cca476cfaad: confirmed → completed (Mindbody: Completed)
+[00:03:59.981] Server  LOG     Booking 75eceb04-6922-4d5e-9b05-84d39978c99a: confirmed → completed (Mindbody: Completed)
+[00:04:00.205] Server  LOG     Booking 340d0411-e16e-49fd-9fb0-827fe73fcf75: confirmed → completed (Mindbody: Completed)
+[00:04:00.371] Server  LOG     Booking ea367a96-ff1d-4b8f-9902-d85869da91f8: confirmed → completed (Mindbody: Completed)
+[00:04:00.533] Server  LOG     Booking 807f8065-50d0-441e-b1b0-bf4bc19ac590: confirmed → completed (Mindbody: Completed)
+[00:04:00.628] Server  LOG     Booking e6383060-b31f-4a79-8c22-56cade392eab: confirmed → completed (Mindbody: Completed)
+[00:04:00.727] Server  LOG     Booking 29477113-cf31-4a0f-80cc-b8cc02c91c3e: confirmed → completed (Mindbody: Completed)
+[00:04:00.896] Server  LOG     Booking 4d11d40d-f112-481e-9d5d-6e5e09708515: confirmed → completed (Mindbody: Completed)
+[00:04:01.000] Server  LOG     Booking 407728b6-0b62-4528-95ca-40db0a4f7f9d: confirmed → completed (Mindbody: Completed)
+[00:04:01.421] Server  LOG     Booking 3f456059-ac10-40ce-ba00-358b6b010c1f: confirmed → completed (Mindbody: Completed)
+[00:04:01.611] Server  LOG     Booking 56646ea3-ca9f-436b-b22a-66b722aa197c: confirmed → completed (Mindbody: Completed)
+[00:04:01.791] Server  LOG     Booking af9516c3-1999-47c2-90ed-f31f382dcbd0: confirmed → completed (Mindbody: Completed)
+[00:04:01.888] Server  LOG     Booking 611b9071-7a9e-45fb-82d4-ea22d181a812: confirmed → completed (Mindbody: Completed)
+[00:04:01.980] Server  LOG     Booking 186648b1-15f6-4611-a31c-f2f9c147782d: confirmed → completed (Mindbody: Completed)
+[00:04:02.076] Server  LOG     Booking 9628af2e-51fb-4c22-86e1-444c628c3e0b: confirmed → completed (Mindbody: Completed)
+[00:04:02.170] Server  LOG     Booking cb861063-4c74-486c-b45c-b28456b07d49: confirmed → completed (Mindbody: Completed)
+[00:04:02.301] Server  LOG     Booking 1a528bae-e32c-4dd7-a539-63d81a9323e5: confirmed → completed (Mindbody: Completed)
+[00:04:02.408] Server  LOG     Booking be63c603-cad3-4868-8c2b-c2ce607f7224: confirmed → completed (Mindbody: Completed)
+[00:04:02.504] Server  LOG     Booking 9a06b26e-dc47-4f3c-b8f5-0cd760da8489: confirmed → completed (Mindbody: Completed)
+[00:04:02.605] Server  LOG     Booking c747c972-3b66-41f5-a168-21796a055107: confirmed → completed (Mindbody: Completed)
+[00:04:02.699] Server  LOG     Booking 04063197-eb59-4689-acd1-0c4909e9726a: confirmed → completed (Mindbody: Completed)
+[00:04:02.826] Server  LOG     Booking f46b298a-af4b-490f-8240-f041ff3f173c: confirmed → completed (Mindbody: Completed)
+[00:04:02.918] Server  LOG     Booking 7e3114cb-f146-4532-9bc9-d5ad80248088: confirmed → completed (Mindbody: Completed)
+[00:04:03.009] Server  LOG     Booking 61f96574-b704-4a7e-be66-6f2818edfb37: confirmed → completed (Mindbody: Completed)
+[00:04:03.105] Server  LOG     Booking b2f1dbd6-dba6-48fd-a62a-5cf843c03ae4: confirmed → completed (Mindbody: Completed)
+[00:04:03.197] Server  LOG     Booking 2d07e066-072f-4908-af27-4851c3d408ab: confirmed → completed (Mindbody: Completed)
+[00:04:03.348] Server  LOG     Booking c6a8bbd3-d704-436f-87e6-af43153c8ad5: confirmed → completed (Mindbody: Completed)
+[00:04:03.445] Server  LOG     Booking 9d5f431a-5bb4-42e5-8d9e-6fafa8e79af2: confirmed → completed (Mindbody: Completed)
+[00:04:03.538] Server  LOG     Booking 8305867e-7742-498e-a5f0-c5ed120f5604: confirmed → completed (Mindbody: Completed)
+[00:04:03.636] Server  LOG     Booking 7ac5e2e2-e02d-4727-87e8-be1187b37beb: confirmed → completed (Mindbody: Completed)
+[00:04:03.736] Server  LOG     Booking 15af9ab8-9324-4912-97fa-52188a62e845: confirmed → completed (Mindbody: Completed)
+[00:04:03.878] Server  LOG     Booking 847911e7-04fe-4ee6-9fce-9ee94e832c9e: confirmed → completed (Mindbody: Completed)
+[00:04:04.013] Server  LOG     Booking 58c78f6e-fc6a-4b63-bd02-27e016daaf17: confirmed → completed (Mindbody: Completed)
+[00:04:06.356] Server  LOG     Backlog: 22 past bookings absent from Mindbody → cancelled
+[00:04:06.360] Server  LOG     Sync complete: 206 past updated, 1 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:04:34.039] Server  LOG     getStaffAppointments called with: {}
+[00:04:34.041] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:04:34.818] Server  LOG     Staff appointments response: 148 "appointments"
+[00:04:34.819] Server  LOG     getStaffAppointments called with: {}
+[00:04:34.821] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:04:35.339] Server  LOG     Staff appointments response: 159 "appointments"
+[00:04:35.546] Server  LOG     Syncing 23 of 553 total bookings (window: 2026-05-01 → 2026-05-31)
+[00:04:35.546] Server  LOG     Target IDs: 190746, 193224, 193335, 193333, 193252, 193047, 193400, 193205, 193348, 193397, 193382, 193469, 193097, 193278, 193441, 193098, 193506, 193482, 193407, 193216, 193406, 193568, 193184
+[00:04:35.547] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:04:36.038] Server  LOG     Found 2 locations: 1, 2
+[00:04:36.041] Server  LOG     getStaffAppointments called with: {}
+[00:04:36.044] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:04:37.256] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:37.257] Server  LOG     Location 1 page 1 sample IDs: 191360, 189876, 189877, 191370, 191009, 190716, 190600, 190649, 190712, 190457
+[00:04:37.258] Server  LOG     getStaffAppointments called with: {}
+[00:04:37.259] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=200" ""
+[00:04:38.212] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:38.213] Server  LOG     getStaffAppointments called with: {}
+[00:04:38.214] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=400" ""
+[00:04:39.361] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:39.371] Server  LOG     getStaffAppointments called with: {}
+[00:04:39.381] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=600" ""
+[00:04:40.415] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:40.417] Server  LOG     getStaffAppointments called with: {}
+[00:04:40.419] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=800" ""
+[00:04:41.427] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:41.428] Server  LOG     getStaffAppointments called with: {}
+[00:04:41.428] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=1000" ""
+[00:04:42.419] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:42.424] Server  LOG     getStaffAppointments called with: {}
+[00:04:42.424] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=1200" ""
+[00:04:43.459] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:43.460] Server  LOG     getStaffAppointments called with: {}
+[00:04:43.461] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=1400" ""
+[00:04:44.442] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:44.444] Server  LOG     getStaffAppointments called with: {}
+[00:04:44.444] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=1600" ""
+[00:04:45.466] Server  LOG     Staff appointments response: 132 "appointments"
+[00:04:45.468] Server  LOG     Location 1: found 15 matches so far
+[00:04:45.469] Server  LOG     getStaffAppointments called with: {}
+[00:04:45.470] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:04:46.217] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:46.218] Server  LOG     Location 2 page 1 sample IDs: 190318, 190319, 190320, 190730, 190731, 190732, 190657, 190044, 190045, 190046
+[00:04:46.219] Server  LOG     getStaffAppointments called with: {}
+[00:04:46.220] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=200" ""
+[00:04:47.014] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:47.015] Server  LOG     getStaffAppointments called with: {}
+[00:04:47.016] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=400" ""
+[00:04:47.755] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:47.756] Server  LOG     getStaffAppointments called with: {}
+[00:04:47.757] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=600" ""
+[00:04:48.570] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:48.571] Server  LOG     getStaffAppointments called with: {}
+[00:04:48.571] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=800" ""
+[00:04:49.323] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:49.325] Server  LOG     getStaffAppointments called with: {}
+[00:04:49.326] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=1000" ""
+[00:04:50.107] Server  LOG     Staff appointments response: 87 "appointments"
+[00:04:50.107] Server  LOG     Location 2: found 21 matches so far
+[00:04:50.108] Server  LOG     Status map built: 21 of 23 IDs found
+[00:04:50.332] Server  LOG     Booking 2853f240-14c2-4492-84fa-d9ae90031238: confirmed → completed (Mindbody: Completed)
+[00:04:50.539] Server  LOG     Booking f2f49573-872a-42b2-ad1b-3b16e9a84417: confirmed → completed (Mindbody: Completed)
+[00:04:50.702] Server  LOG     Booking 5f067df9-2379-4b4e-a9f3-cb799303790c: confirmed → completed (Mindbody: Completed)
+[00:04:50.866] Server  LOG     Booking 1e2a702b-a746-401e-b59f-0834defd0004: confirmed → completed (Mindbody: Completed)
+[00:04:51.058] Server  LOG     Booking 5c1de087-852d-407f-88f9-cecbacdc6674: confirmed → completed (Mindbody: Completed)
+[00:04:51.226] Server  LOG     Booking e7497c19-10d5-42a1-80e2-cc48a20a079c: confirmed → completed (Mindbody: Completed)
+[00:04:51.336] Server  LOG     Booking 4dc7a801-dac6-44ae-826a-c07112edf96d: confirmed → completed (Mindbody: Completed)
+[00:04:51.437] Server  LOG     Booking 6c15eec9-1d96-4bc3-acd2-24d81488bb0c: confirmed → completed (Mindbody: Completed)
+[00:04:51.585] Server  LOG     Booking ee28c909-f924-46b3-99d7-afe97d61fa98: confirmed → completed (Mindbody: Completed)
+[00:04:51.682] Server  LOG     Booking 6cacb2af-631d-4116-893d-052526b6291d: confirmed → completed (Mindbody: Completed)
+[00:04:51.778] Server  LOG     Booking 08b81de0-e5e1-4f06-aa62-02f10a8d3a1c: confirmed → completed (Mindbody: Completed)
+[00:04:52.146] Server  LOG     Booking 13deeda6-de65-4a9b-8b51-a077da047682: confirmed → completed (Mindbody: Completed)
+[00:04:52.248] Server  LOG     Booking 2b81715b-3de8-4b3d-90e6-f25ea2e72fea: confirmed → completed (Mindbody: Completed)
+[00:04:52.344] Server  LOG     Booking a6062f51-c37a-4d73-bd8a-881e8cdd3953: confirmed → completed (Mindbody: Completed)
+[00:04:52.446] Server  LOG     Booking dc8c68d6-e05c-4bbe-853d-06563ab81e08: confirmed → completed (Mindbody: Completed)
+[00:04:52.639] Server  LOG     Booking e8750145-d317-4b61-a71b-f157891851d3: confirmed → completed (Mindbody: Completed)
+[00:04:52.740] Server  LOG     Booking 6381147c-8336-4ab5-bd2e-af02da705387: confirmed → completed (Mindbody: Completed)
+[00:04:52.837] Server  LOG     Booking 342e88a2-0de1-498e-97bf-5650b6f70328: confirmed → completed (Mindbody: Completed)
+[00:04:52.935] Server  LOG     Booking ddb0da31-8f4d-4823-87b5-c54654fc708d: confirmed → completed (Mindbody: Completed)
+[00:04:53.032] Server  LOG     Booking b846d827-e10f-4394-928d-efed716b0e82: confirmed → completed (Mindbody: Completed)
+[00:04:53.263] Server  LOG     Backlog: 2 past bookings absent from Mindbody → cancelled
+[00:04:53.264] Server  LOG     Sync complete: 20 past updated, 1 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:04:53.516] Server  LOG     getStaffAppointments called with: {}
+[00:04:53.516] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:04:53.863] Server  LOG     Staff appointments response: 148 "appointments"
+[00:04:53.864] Server  LOG     getStaffAppointments called with: {}
+[00:04:53.864] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:04:54.260] Server  LOG     Staff appointments response: 159 "appointments"
+[00:04:54.443] Server  LOG     Syncing 1 of 531 total bookings (window: 2026-05-01 → 2026-05-31)
+[00:04:54.443] Server  LOG     Target IDs: 190746
+[00:04:54.444] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:04:54.935] Server  LOG     Found 2 locations: 1, 2
+[00:04:54.936] Server  LOG     getStaffAppointments called with: {}
+[00:04:54.937] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:04:56.193] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:56.194] Server  LOG     Location 1 page 1 sample IDs: 191360, 189876, 189877, 191370, 191009, 190716, 190600, 190649, 190712, 190457
+[00:04:56.199] Server  LOG     getStaffAppointments called with: {}
+[00:04:56.199] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=200" ""
+[00:04:57.379] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:57.380] Server  LOG     Location 1: found 1 matches so far
+[00:04:57.380] Server  LOG     getStaffAppointments called with: {}
+[00:04:57.381] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:04:58.181] Server  LOG     Staff appointments response: 200 "appointments"
+[00:04:58.183] Server  LOG     Location 2 page 1 sample IDs: 190318, 190319, 190320, 190730, 190731, 190732, 190657, 190044, 190045, 190046
+[00:04:58.184] Server  LOG     Location 2: found 1 matches so far
+[00:04:58.184] Server  LOG     Status map built: 1 of 1 IDs found
+[00:04:58.185] Server  LOG     Sync complete: 0 past updated, 1 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:04:58.497] Server  LOG     getStaffAppointments called with: {}
+[00:04:58.498] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:04:58.935] Server  LOG     Staff appointments response: 148 "appointments"
+[00:04:58.936] Server  LOG     getStaffAppointments called with: {}
+[00:04:58.936] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:04:59.457] Server  LOG     Staff appointments response: 159 "appointments"
+[00:04:59.648] Server  LOG     Syncing 1 of 531 total bookings (window: 2026-05-01 → 2026-05-31)
+[00:04:59.648] Server  LOG     Target IDs: 190746
+[00:04:59.649] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:05:00.091] Server  LOG     Found 2 locations: 1, 2
+[00:05:00.092] Server  LOG     getStaffAppointments called with: {}
+[00:05:00.093] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:01.074] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:01.075] Server  LOG     Location 1 page 1 sample IDs: 191360, 189876, 189877, 191370, 191009, 190716, 190600, 190649, 190712, 190457
+[00:05:01.075] Server  LOG     getStaffAppointments called with: {}
+[00:05:01.076] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=200" ""
+[00:05:02.141] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:02.142] Server  LOG     Location 1: found 1 matches so far
+[00:05:02.142] Server  LOG     getStaffAppointments called with: {}
+[00:05:02.143] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:02.872] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:02.872] Server  LOG     Location 2 page 1 sample IDs: 190318, 190319, 190320, 190730, 190731, 190732, 190657, 190044, 190045, 190046
+[00:05:02.873] Server  LOG     Location 2: found 1 matches so far
+[00:05:02.873] Server  LOG     Status map built: 1 of 1 IDs found
+[00:05:02.873] Server  LOG     Sync complete: 0 past updated, 1 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:05:03.127] Server  LOG     getStaffAppointments called with: {}
+[00:05:03.127] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:03.542] Server  LOG     Staff appointments response: 148 "appointments"
+[00:05:03.542] Server  LOG     getStaffAppointments called with: {}
+[00:05:03.543] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:03.942] Server  LOG     Staff appointments response: 159 "appointments"
+[00:05:04.212] Server  LOG     Syncing 1 of 531 total bookings (window: 2026-05-01 → 2026-05-31)
+[00:05:04.213] Server  LOG     Target IDs: 190746
+[00:05:04.213] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:05:04.759] Server  LOG     Found 2 locations: 1, 2
+[00:05:04.760] Server  LOG     getStaffAppointments called with: {}
+[00:05:04.766] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:05.761] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:05.762] Server  LOG     Location 1 page 1 sample IDs: 191360, 189876, 189877, 191370, 191009, 190716, 190600, 190649, 190712, 190457
+[00:05:05.763] Server  LOG     getStaffAppointments called with: {}
+[00:05:05.767] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=200" ""
+[00:05:06.860] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:06.861] Server  LOG     Location 1: found 1 matches so far
+[00:05:06.861] Server  LOG     getStaffAppointments called with: {}
+[00:05:06.862] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:07.696] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:07.697] Server  LOG     Location 2 page 1 sample IDs: 190318, 190319, 190320, 190730, 190731, 190732, 190657, 190044, 190045, 190046
+[00:05:07.697] Server  LOG     Location 2: found 1 matches so far
+[00:05:07.697] Server  LOG     Status map built: 1 of 1 IDs found
+[00:05:07.700] Server  LOG     Sync complete: 0 past updated, 1 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:05:07.949] Server  LOG     getStaffAppointments called with: {}
+[00:05:07.949] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:08.373] Server  LOG     Staff appointments response: 148 "appointments"
+[00:05:08.375] Server  LOG     getStaffAppointments called with: {}
+[00:05:08.375] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:08.772] Server  LOG     Staff appointments response: 159 "appointments"
+[00:05:08.991] Server  LOG     Syncing 1 of 531 total bookings (window: 2026-05-01 → 2026-05-31)
+[00:05:08.992] Server  LOG     Target IDs: 190746
+[00:05:08.993] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:05:09.730] Server  LOG     Found 2 locations: 1, 2
+[00:05:09.734] Server  LOG     getStaffAppointments called with: {}
+[00:05:09.735] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:10.824] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:10.825] Server  LOG     Location 1 page 1 sample IDs: 191360, 189876, 189877, 191370, 191009, 190716, 190600, 190649, 190712, 190457
+[00:05:10.825] Server  LOG     getStaffAppointments called with: {}
+[00:05:10.826] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=200" ""
+[00:05:11.923] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:11.924] Server  LOG     Location 1: found 1 matches so far
+[00:05:11.925] Server  LOG     getStaffAppointments called with: {}
+[00:05:11.926] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:12.634] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:12.635] Server  LOG     Location 2 page 1 sample IDs: 190318, 190319, 190320, 190730, 190731, 190732, 190657, 190044, 190045, 190046
+[00:05:12.635] Server  LOG     Location 2: found 1 matches so far
+[00:05:12.635] Server  LOG     Status map built: 1 of 1 IDs found
+[00:05:12.636] Server  LOG     Sync complete: 0 past updated, 1 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:05:12.908] Server  LOG     getStaffAppointments called with: {}
+[00:05:12.909] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:13.274] Server  LOG     Staff appointments response: 148 "appointments"
+[00:05:13.274] Server  LOG     getStaffAppointments called with: {}
+[00:05:13.275] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:13.648] Server  LOG     Staff appointments response: 159 "appointments"
+[00:05:13.826] Server  LOG     Syncing 1 of 531 total bookings (window: 2026-05-01 → 2026-05-31)
+[00:05:13.826] Server  LOG     Target IDs: 190746
+[00:05:13.826] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:05:14.287] Server  LOG     Found 2 locations: 1, 2
+[00:05:14.288] Server  LOG     getStaffAppointments called with: {}
+[00:05:14.289] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:15.409] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:15.410] Server  LOG     Location 1 page 1 sample IDs: 191360, 189876, 189877, 191370, 191009, 190716, 190600, 190649, 190712, 190457
+[00:05:15.411] Server  LOG     getStaffAppointments called with: {}
+[00:05:15.412] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=200" ""
+[00:05:16.346] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:16.347] Server  LOG     Location 1: found 1 matches so far
+[00:05:16.348] Server  LOG     getStaffAppointments called with: {}
+[00:05:16.351] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:17.124] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:17.125] Server  LOG     Location 2 page 1 sample IDs: 190318, 190319, 190320, 190730, 190731, 190732, 190657, 190044, 190045, 190046
+[00:05:17.126] Server  LOG     Location 2: found 1 matches so far
+[00:05:17.126] Server  LOG     Status map built: 1 of 1 IDs found
+[00:05:17.127] Server  LOG     Sync complete: 0 past updated, 1 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:05:38.406] Server  LOG     getStaffAppointments called with: {}
+[00:05:39.118] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:39.685] Server  LOG     Staff appointments response: 148 "appointments"
+[00:05:39.686] Server  LOG     getStaffAppointments called with: {}
+[00:05:39.687] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:40.169] Server  LOG     Staff appointments response: 159 "appointments"
+[00:05:40.415] Server  LOG     Syncing 1 of 531 total bookings (window: 2026-05-01 → 2026-05-31)
+[00:05:40.415] Server  LOG     Target IDs: 190746
+[00:05:40.416] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:05:41.051] Server  LOG     Found 2 locations: 1, 2
+[00:05:41.055] Server  LOG     getStaffAppointments called with: {}
+[00:05:41.057] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:42.333] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:42.335] Server  LOG     Location 1 page 1 sample IDs: 191360, 189876, 189877, 191370, 191009, 190716, 190600, 190649, 190712, 190457
+[00:05:42.336] Server  LOG     getStaffAppointments called with: {}
+[00:05:42.337] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=200" ""
+[00:05:43.392] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:43.392] Server  LOG     Location 1: found 1 matches so far
+[00:05:43.393] Server  LOG     getStaffAppointments called with: {}
+[00:05:43.393] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-01&endDate=2026-05-31&limit=200&offset=0" ""
+[00:05:44.148] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:44.149] Server  LOG     Location 2 page 1 sample IDs: 190318, 190319, 190320, 190730, 190731, 190732, 190657, 190044, 190045, 190046
+[00:05:44.149] Server  LOG     Location 2: found 1 matches so far
+[00:05:44.150] Server  LOG     Status map built: 1 of 1 IDs found
+[00:05:44.275] Server  LOG     Booking 4ce3b187-e636-490a-81bf-16718acbfb98: confirmed → completed (Mindbody: Arrived)
+[00:05:44.277] Server  LOG     Sync complete: 1 past updated, 0 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:05:44.548] Server  LOG     getStaffAppointments called with: {}
+[00:05:44.549] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:44.912] Server  LOG     Staff appointments response: 148 "appointments"
+[00:05:44.914] Server  LOG     getStaffAppointments called with: {}
+[00:05:44.915] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:05:45.371] Server  LOG     Staff appointments response: 159 "appointments"
+[00:05:45.604] Server  LOG     Syncing 199 of 530 total bookings (window: 2026-05-31 → 2026-06-30)
+[00:05:45.605] Server  LOG     Target IDs: 193614, 193619, 193624, 193625, 193030, 193487, 193616, 193651, 193622, 193615, 193675, 193713, 193685, 193689, 193758, 193766, 193681, 193837, 193694, 193757, 193750, 193937, 193921, 193965, 193818, 193971, 194031, 194047, 193974, 194051, 194054, 193384, 194119, 193794, 193888, 194117, 194148, 193687, 194075, 194178, 193490, 194185, 194186, 194169, 194244, 194069, 194252, 194251, 194288, 194250, 194279, 194290, 194308, 194310, 194343, 194354, 194357, 194396, 194304, 194410, 194431, 194363, 194463, 194306, 194469, 194466, 194488, 194500, 194506, 194496, 194420, 194540, 194323, 194558, 194552, 194559, 194553, 194625, 194550, 194432, 194638, 194648, 194637, 194538, 194429, 194577, 194421, 194423, 194667, 194664, 194592, 194714, 194734, 194742, 194495, 194561, 194759, 194239, 194743, 194311, 194762, 194823, 194830, 194847, 194848, 194849, 194790, 193617, 193618, 194890, 194858, 194874, 194961, 194970, 194963, 194959, 195038, 195108, 195040, 195121, 194919, 195107, 195130, 195131, 195182, 195135, 195113, 195173, 194365, 195170, 195171, 195251, 195268, 195257, 195275, 195248, 195292, 195238, 195239, 195120, 195093, 195360, 195136, 195241, 195280, 195138, 195341, 195344, 195296, 195329, 195335, 195310, 195370, 194828, 195473, 195321, 195322, 195498, 195422, 195590, 195608, 195631, 195635, 195647, 195618, 195701, 195700, 195166, 195421, 195786, 195597, 195707, 195802, 195323, 195052, 195651, 195785, 195564, 195906, 195844, 195878, 195933, 195928, 195890, 194995, 195795, 195934, 195653, 195929, 195740, 195823, 195825, 195963, 196004, 194880, 194885, 196023, 196003, 196019
+[00:05:45.605] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:05:46.124] Server  LOG     Found 2 locations: 1, 2
+[00:05:46.125] Server  LOG     getStaffAppointments called with: {}
+[00:05:46.125] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=0" ""
+[00:05:47.249] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:47.250] Server  LOG     Location 1 page 1 sample IDs: 195740, 195982, 195948, 195825, 195826, 193949, 193951, 193764, 193909, 194051
+[00:05:47.251] Server  LOG     getStaffAppointments called with: {}
+[00:05:47.252] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=200" ""
+[00:05:48.229] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:48.230] Server  LOG     getStaffAppointments called with: {}
+[00:05:48.231] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=400" ""
+[00:05:49.264] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:49.265] Server  LOG     getStaffAppointments called with: {}
+[00:05:49.266] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=600" ""
+[00:05:50.225] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:50.232] Server  LOG     getStaffAppointments called with: {}
+[00:05:50.233] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=800" ""
+[00:05:51.168] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:51.170] Server  LOG     getStaffAppointments called with: {}
+[00:05:51.171] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=1000" ""
+[00:05:52.067] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:52.068] Server  LOG     getStaffAppointments called with: {}
+[00:05:52.069] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=1200" ""
+[00:05:53.012] Server  LOG     Staff appointments response: 190 "appointments"
+[00:05:53.013] Server  LOG     Location 1: found 128 matches so far
+[00:05:53.014] Server  LOG     getStaffAppointments called with: {}
+[00:05:53.015] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=0" ""
+[00:05:53.747] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:53.752] Server  LOG     Location 2 page 1 sample IDs: 192907, 192909, 189813, 193242, 193243, 193244, 193426, 193680, 194313, 194314
+[00:05:53.753] Server  LOG     getStaffAppointments called with: {}
+[00:05:53.753] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=200" ""
+[00:05:54.419] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:54.421] Server  LOG     getStaffAppointments called with: {}
+[00:05:54.421] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=400" ""
+[00:05:55.207] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:55.208] Server  LOG     getStaffAppointments called with: {}
+[00:05:55.209] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=600" ""
+[00:05:55.982] Server  LOG     Staff appointments response: 200 "appointments"
+[00:05:55.983] Server  LOG     getStaffAppointments called with: {}
+[00:05:55.983] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-05-31&endDate=2026-06-30&limit=200&offset=800" ""
+[00:05:56.923] Server  LOG     Staff appointments response: 92 "appointments"
+[00:05:56.924] Server  LOG     Location 2: found 180 matches so far
+[00:05:56.925] Server  LOG     Status map built: 180 of 199 IDs found
+[00:05:57.122] Server  LOG     Booking 63d81751-7223-4bfb-9e50-ade51fd2c2ea: confirmed → completed (Mindbody: Completed)
+[00:05:57.411] Server  LOG     Booking 496cd35b-4912-4d55-bb89-1d0b6abd5071: confirmed → completed (Mindbody: Completed)
+[00:05:57.647] Server  LOG     Booking a381c8a3-5727-4b3e-a02a-1e2bd95bb807: confirmed → completed (Mindbody: Completed)
+[00:05:57.816] Server  LOG     Booking 96921f8c-369e-40cf-bc87-82159f0cd5ff: confirmed → completed (Mindbody: Completed)
+[00:05:57.975] Server  LOG     Booking 6fddd3bb-0ad0-464f-99e1-7a23eaed7303: confirmed → completed (Mindbody: Completed)
+[00:05:58.174] Server  LOG     Booking 0c3d4f6d-eed7-4f30-9de3-606c16bc822c: confirmed → completed (Mindbody: Completed)
+[00:05:58.289] Server  LOG     Booking cb4d108e-7af6-4664-8c94-95cdc226ebc6: confirmed → completed (Mindbody: Completed)
+[00:05:58.403] Server  LOG     Booking 2e601816-dacf-40fb-bffa-34b24e508ec9: confirmed → noshow (Mindbody: NoShow)
+[00:05:58.521] Server  LOG     Booking 6f849d53-e335-4cec-852c-a928a3af7d4e: confirmed → completed (Mindbody: Completed)
+[00:05:58.699] Server  LOG     Booking 881bea2e-67da-4fc8-aec0-e1ad80206ecd: confirmed → completed (Mindbody: Completed)
+[00:05:58.820] Server  LOG     Booking 323d74c7-0d9e-486b-b696-177e671835c0: confirmed → completed (Mindbody: Completed)
+[00:05:58.932] Server  LOG     Booking e60055b7-874c-48c5-9c8d-ed05fd9e72a5: confirmed → completed (Mindbody: Completed)
+[00:05:59.046] Server  LOG     Booking 6ad78143-6e53-43ad-8f89-edcc0a2ae8a6: confirmed → noshow (Mindbody: NoShow)
+[00:05:59.222] Server  LOG     Booking c38ed3f0-0846-4fac-b1a1-a31eef49b190: confirmed → completed (Mindbody: Completed)
+[00:05:59.312] Server  LOG     Booking b21aa0fc-6972-49b9-88d6-729c47e3b70f: confirmed → completed (Mindbody: Completed)
+[00:05:59.405] Server  LOG     Booking 23522cfe-831b-4d3b-869c-2009eb6bfb5f: confirmed → completed (Mindbody: Completed)
+[00:05:59.500] Server  LOG     Booking dd8c1570-b50e-4a06-94d1-01dee7ccbe1a: confirmed → completed (Mindbody: Completed)
+[00:05:59.598] Server  LOG     Booking d89e0f01-680d-490a-8e17-7ce798aa4115: confirmed → completed (Mindbody: Completed)
+[00:05:59.746] Server  LOG     Booking d1b4ed39-f070-495a-81f6-79e760813525: confirmed → completed (Mindbody: Completed)
+[00:05:59.836] Server  LOG     Booking 9dbddd0d-3624-42e6-840a-34961a64acf2: confirmed → completed (Mindbody: Completed)
+[00:05:59.927] Server  LOG     Booking 3c45f86c-4065-486b-970c-858ea8bc58cf: confirmed → completed (Mindbody: Completed)
+[00:06:00.022] Server  LOG     Booking 28815754-e98f-41ba-b791-db09f0cea1a9: confirmed → completed (Mindbody: Completed)
+[00:06:00.119] Server  LOG     Booking 06d92a87-419f-44db-8d4b-2227b8b3e0c7: confirmed → completed (Mindbody: Completed)
+[00:06:00.280] Server  LOG     Booking f5c59dfa-9385-4246-a9f5-74b003999e32: confirmed → completed (Mindbody: Completed)
+[00:06:00.376] Server  LOG     Booking 96a096df-7989-44ae-acf6-29f87d3d0582: confirmed → completed (Mindbody: Completed)
+[00:06:00.470] Server  LOG     Booking 25f2cb00-a098-41d5-8a40-894c8f485c49: confirmed → noshow (Mindbody: NoShow)
+[00:06:00.565] Server  LOG     Booking 25ca806b-7c6b-4d7d-8f6f-ff823cdb16f0: confirmed → completed (Mindbody: Completed)
+[00:06:00.666] Server  LOG     Booking 06cb70a6-9830-4f0a-b816-cd7c7130eb13: confirmed → completed (Mindbody: Completed)
+[00:06:00.791] Server  LOG     Booking 7f5f02df-9c25-4f9a-9237-f61f29b058b5: confirmed → completed (Mindbody: Completed)
+[00:06:00.884] Server  LOG     Booking 1c032d62-e948-4eae-b30a-b380a989698e: confirmed → completed (Mindbody: Completed)
+[00:06:00.978] Server  LOG     Booking 027850d9-d9c6-469f-868f-0e48bc41f117: confirmed → completed (Mindbody: Completed)
+[00:06:01.070] Server  LOG     Booking a7ba880d-6ab6-469d-9264-5429a11f1836: confirmed → completed (Mindbody: Completed)
+[00:06:01.170] Server  LOG     Booking 472b14c5-54aa-4614-a298-c3c50d9df7d5: confirmed → completed (Mindbody: Completed)
+[00:06:01.319] Server  LOG     Booking f687c888-5881-48ba-bed8-9cd59d102459: confirmed → completed (Mindbody: Completed)
+[00:06:01.408] Server  LOG     Booking 6cfa8df2-5706-40f5-bd13-850d16cc9165: confirmed → completed (Mindbody: Completed)
+[00:06:01.503] Server  LOG     Booking 9bb76caa-3d6c-4503-b7f9-5cd55044e2f1: confirmed → completed (Mindbody: Completed)
+[00:06:01.598] Server  LOG     Booking 6b2e3acb-45e6-40cf-9ae4-8eb5f622de39: confirmed → completed (Mindbody: Completed)
+[00:06:01.695] Server  LOG     Booking 43b4b352-e6e1-4cca-8b3e-bb7a9cc451d6: confirmed → completed (Mindbody: Completed)
+[00:06:01.846] Server  LOG     Booking 85367a47-e450-40c5-ab98-a782e16055f2: confirmed → completed (Mindbody: Completed)
+[00:06:01.942] Server  LOG     Booking 73b9d766-9d2f-4ad7-bf90-78e89f6f6e4f: confirmed → completed (Mindbody: Completed)
+[00:06:02.037] Server  LOG     Booking 9c1144e0-c705-4420-9f51-8f3f27278841: confirmed → completed (Mindbody: Completed)
+[00:06:02.128] Server  LOG     Booking bcda784d-7049-412f-8807-34ee2c8f7c29: confirmed → completed (Mindbody: Completed)
+[00:06:02.230] Server  LOG     Booking 4adc7695-ef4a-48c0-bca9-a8606ea4158b: confirmed → completed (Mindbody: Completed)
+[00:06:02.371] Server  LOG     Booking 865112ec-2e6a-480b-b572-049d003bef98: confirmed → completed (Mindbody: Completed)
+[00:06:02.461] Server  LOG     Booking 8858f42e-0765-4904-a854-ea745d7d75b5: confirmed → completed (Mindbody: Completed)
+[00:06:02.559] Server  LOG     Booking 5690fe9d-8d08-4d0d-8101-4f15d672feb1: confirmed → completed (Mindbody: Completed)
+[00:06:02.652] Server  LOG     Booking 363eaf53-16d7-436c-93da-d5c2e9028eee: confirmed → completed (Mindbody: Completed)
+[00:06:02.753] Server  LOG     Booking 5a40f460-1594-4321-8f88-852b71b970b3: confirmed → completed (Mindbody: Completed)
+[00:06:02.892] Server  LOG     Booking 50edb72a-5ef9-4331-8a37-43812481ce48: confirmed → completed (Mindbody: Completed)
+[00:06:02.984] Server  LOG     Booking 2727c287-a72c-4cd2-8d03-b8b1b9a93a09: confirmed → completed (Mindbody: Completed)
+[00:06:03.081] Server  LOG     Booking 73be56ac-5367-4f16-8403-a4d97f2ef5da: confirmed → completed (Mindbody: Completed)
+[00:06:03.173] Server  LOG     Booking 11a4dd37-e403-487b-a1ff-215b871acde4: confirmed → completed (Mindbody: Completed)
+[00:06:03.276] Server  LOG     Booking ba5adb83-06d4-4d7a-bb72-1b0751259695: confirmed → completed (Mindbody: Completed)
+[00:06:03.416] Server  LOG     Booking b6510beb-7196-44c3-b1e0-aaeaf8e3ccb1: confirmed → completed (Mindbody: Completed)
+[00:06:03.512] Server  LOG     Booking fbdcc4f7-9481-4dcc-86e0-134c98429c23: confirmed → completed (Mindbody: Completed)
+[00:06:03.617] Server  LOG     Booking e867677c-5491-4004-9305-063696519385: confirmed → completed (Mindbody: Completed)
+[00:06:03.719] Server  LOG     Booking 9ba2826b-a40a-4875-aaff-98d08c8886d4: confirmed → completed (Mindbody: Completed)
+[00:06:03.822] Server  LOG     Booking 5b147836-b07e-48ed-833e-8e1458d09938: confirmed → noshow (Mindbody: NoShow)
+[00:06:03.937] Server  LOG     Booking efd28316-7a57-4bcc-b9b8-2cf9b7ed60cd: confirmed → completed (Mindbody: Completed)
+[00:06:04.028] Server  LOG     Booking abe018d8-25e7-40f9-92f2-7b4d4f1652de: confirmed → completed (Mindbody: Completed)
+[00:06:04.125] Server  LOG     Booking fe3dbda9-0e38-418a-8b84-650d0130a17d: confirmed → completed (Mindbody: Completed)
+[00:06:04.216] Server  LOG     Booking 9c02734d-983a-4d57-82c7-d817ce8ccd7e: confirmed → completed (Mindbody: Completed)
+[00:06:04.319] Server  LOG     Booking 0a333fa3-d9a1-44b3-87bb-256e8ad84427: confirmed → completed (Mindbody: Completed)
+[00:06:04.466] Server  LOG     Booking 08558544-55e5-4b67-bb14-6fefddfcf026: confirmed → completed (Mindbody: Completed)
+[00:06:04.560] Server  LOG     Booking d51c151b-c075-49f9-a7f6-ae42f0a4d2b4: confirmed → completed (Mindbody: Completed)
+[00:06:04.661] Server  LOG     Booking e2cdc963-3950-4998-9f89-8d3cd7508e9e: confirmed → completed (Mindbody: Completed)
+[00:06:04.778] Server  LOG     Booking f2339ac6-6e52-4372-a0e2-d1f62f0df55c: confirmed → completed (Mindbody: Completed)
+[00:06:05.026] Server  LOG     Booking 340df0af-c0f7-4865-a3f6-a9dfacc78a03: confirmed → completed (Mindbody: Completed)
+[00:06:05.120] Server  LOG     Booking 12037b6e-c2aa-4559-a47d-cd5ab316a05d: confirmed → completed (Mindbody: Completed)
+[00:06:05.211] Server  LOG     Booking cb43fe96-1429-4e4e-b470-5e10f02b5ae7: confirmed → completed (Mindbody: Completed)
+[00:06:05.312] Server  LOG     Booking 5183dd49-20ba-449c-81c5-b28083028c34: confirmed → completed (Mindbody: Completed)
+[00:06:05.406] Server  LOG     Booking 42c580f0-88fe-4969-a9e5-d81ac8f081dd: confirmed → completed (Mindbody: Completed)
+[00:06:05.513] Server  LOG     Booking 9cbc3309-13f1-45c8-bb11-027482766529: confirmed → completed (Mindbody: Completed)
+[00:06:05.620] Server  LOG     Booking 61f73aa9-fb45-4fe9-bd23-67265870a564: confirmed → completed (Mindbody: Completed)
+[00:06:05.716] Server  LOG     Booking 186fd110-ccdb-40c2-a8e4-ebcac8878969: confirmed → completed (Mindbody: Completed)
+[00:06:05.809] Server  LOG     Booking 82be07e9-ec4e-443c-844c-4925a94967ba: confirmed → completed (Mindbody: Completed)
+[00:06:05.906] Server  LOG     Booking c40f30ab-00c6-4d96-b3b7-ac25be495272: confirmed → completed (Mindbody: Completed)
+[00:06:06.038] Server  LOG     Booking 25e74fb2-8b69-4e28-8196-987672b18b04: confirmed → completed (Mindbody: Completed)
+[00:06:06.133] Server  LOG     Booking 5167b6fd-dda7-45cb-b003-fc75a841ef27: confirmed → completed (Mindbody: Completed)
+[00:06:06.227] Server  LOG     Booking 108e034d-6956-4a61-9608-127b58adf920: confirmed → completed (Mindbody: Completed)
+[00:06:06.324] Server  LOG     Booking eb1f571a-0488-40ed-99af-fdbc04338a7e: confirmed → completed (Mindbody: Completed)
+[00:06:06.422] Server  LOG     Booking d09610ea-d799-43c0-b362-08081aed4bf0: confirmed → completed (Mindbody: Completed)
+[00:06:06.564] Server  LOG     Booking fc1f6a54-4c40-436b-aa55-d808822c79b3: confirmed → completed (Mindbody: Completed)
+[00:06:06.665] Server  LOG     Booking fd9054ab-8fca-448f-aec2-89878a8f956e: confirmed → completed (Mindbody: Completed)
+[00:06:06.756] Server  LOG     Booking 7c01c3c1-4ba8-4776-8fe0-8eadb0a10846: confirmed → noshow (Mindbody: NoShow)
+[00:06:06.851] Server  LOG     Booking 4097a5a1-9e11-4376-a23f-6cda5a77bb8e: confirmed → completed (Mindbody: Completed)
+[00:06:06.945] Server  LOG     Booking 5a4374d6-80ad-46e7-8a66-759ac95b4e46: confirmed → completed (Mindbody: Completed)
+[00:06:07.089] Server  LOG     Booking 07585202-dc23-4d53-9bd3-7a05e1f2ade5: confirmed → completed (Mindbody: Completed)
+[00:06:07.184] Server  LOG     Booking 1aeebfb0-b9b2-4549-bcbc-c6684a5f6eaa: confirmed → completed (Mindbody: Completed)
+[00:06:07.276] Server  LOG     Booking 873e31e4-bc70-4693-851b-563ad01647ff: confirmed → completed (Mindbody: Completed)
+[00:06:07.386] Server  LOG     Booking 4ee1f944-2643-4959-a262-cf1ccb26e5e3: confirmed → completed (Mindbody: Completed)
+[00:06:07.478] Server  LOG     Booking 616bae8d-0c71-4bb5-837e-2193afbdbb99: confirmed → completed (Mindbody: Completed)
+[00:06:07.611] Server  LOG     Booking 9c227f87-415a-419b-accf-15e72bd06e94: confirmed → completed (Mindbody: Completed)
+[00:06:07.709] Server  LOG     Booking f5120506-3e58-4694-8a7f-0696c648e5a7: confirmed → completed (Mindbody: Completed)
+[00:06:07.800] Server  LOG     Booking ba4ef092-9347-4eae-8b47-a7e0cc5f12ed: confirmed → completed (Mindbody: Completed)
+[00:06:07.897] Server  LOG     Booking 4622f93f-d60d-42d2-b751-ea7861e63efe: confirmed → noshow (Mindbody: NoShow)
+[00:06:07.989] Server  LOG     Booking bd64b70b-0523-4ef9-97fe-b7dc5f44474f: confirmed → completed (Mindbody: Completed)
+[00:06:08.136] Server  LOG     Booking 71371bfd-f961-4a3d-9ec2-728d1f68d93c: confirmed → completed (Mindbody: Completed)
+[00:06:08.229] Server  LOG     Booking e255c1a6-6f72-43bf-9952-1c8aac59298f: confirmed → completed (Mindbody: Completed)
+[00:06:08.334] Server  LOG     Booking e7c45307-780d-4bf9-ba10-dc55a61edd54: confirmed → completed (Mindbody: Completed)
+[00:06:08.434] Server  LOG     Booking 2249a2a2-4ec5-4e1a-af83-7c48b025e829: confirmed → completed (Mindbody: Completed)
+[00:06:08.529] Server  LOG     Booking cedaf853-2478-46b9-9f11-3cc41c18d72c: confirmed → completed (Mindbody: Completed)
+[00:06:08.658] Server  LOG     Booking 148286d5-c799-4ada-b049-08e6d5710de7: confirmed → completed (Mindbody: Completed)
+[00:06:08.756] Server  LOG     Booking 557305a5-0e2d-40c9-8b92-ac819ba681cb: confirmed → completed (Mindbody: Completed)
+[00:06:08.846] Server  LOG     Booking 4aa89c2d-9236-4745-8d34-e7476c2128a4: confirmed → completed (Mindbody: Completed)
+[00:06:08.943] Server  LOG     Booking 1fe23405-ac03-4250-bd25-047e01293862: confirmed → completed (Mindbody: Completed)
+[00:06:09.037] Server  LOG     Booking eab53e12-41fb-4b46-aebc-9e9c937a5dcc: confirmed → completed (Mindbody: Completed)
+[00:06:09.181] Server  LOG     Booking 0d3b0093-a0ab-4877-9bd5-40d181e9a121: confirmed → completed (Mindbody: Completed)
+[00:06:09.274] Server  LOG     Booking 5c88d184-8d5b-47a3-9700-797d4b216ad3: confirmed → noshow (Mindbody: NoShow)
+[00:06:09.367] Server  LOG     Booking 47bae614-9f47-420a-9d7c-82ad2c5609fd: confirmed → completed (Mindbody: Completed)
+[00:06:09.462] Server  LOG     Booking 60b9d936-6e32-43a0-bcaf-857f01df1341: confirmed → completed (Mindbody: Completed)
+[00:06:09.558] Server  LOG     Booking 22527740-9571-4f63-a484-67021365a190: confirmed → completed (Mindbody: Completed)
+[00:06:09.711] Server  LOG     Booking a31c9ec5-2e27-4b10-a9be-c81e03e8f59e: confirmed → completed (Mindbody: Completed)
+[00:06:09.805] Server  LOG     Booking 2bfa886d-e4b5-4704-8da7-d506ce2bd807: confirmed → completed (Mindbody: Completed)
+[00:06:09.900] Server  LOG     Booking 1bd1140c-c408-4f78-b264-72ef4af0ad98: confirmed → completed (Mindbody: Completed)
+[00:06:09.994] Server  LOG     Booking 6f1e31d4-cb74-49bc-a0a4-75d5052c8a8d: confirmed → completed (Mindbody: Completed)
+[00:06:10.089] Server  LOG     Booking c875666f-4382-4dd0-8346-b5783073302c: confirmed → completed (Mindbody: Completed)
+[00:06:10.232] Server  LOG     Booking a32db8d0-6f10-49e5-9151-e11a66116823: confirmed → completed (Mindbody: Completed)
+[00:06:10.330] Server  LOG     Booking cfa0dfe8-4ebd-4edc-806e-9129bb82d585: confirmed → noshow (Mindbody: NoShow)
+[00:06:10.425] Server  LOG     Booking 5bad50ee-323e-4452-ab7a-a31d10566e3e: confirmed → completed (Mindbody: Completed)
+[00:06:10.516] Server  LOG     Booking 509a40c1-c14b-41b9-9481-cb7189f76fab: confirmed → completed (Mindbody: Completed)
+[00:06:10.613] Server  LOG     Booking 0e4571e5-a670-41f4-bb38-c265a985a5c3: confirmed → completed (Mindbody: Completed)
+[00:06:10.758] Server  LOG     Booking 8a672a45-8484-4e14-9961-96d76b7bb4c5: confirmed → completed (Mindbody: Completed)
+[00:06:10.855] Server  LOG     Booking e2811f3c-b373-4ab0-a499-810364667056: confirmed → completed (Mindbody: Completed)
+[00:06:10.943] Server  LOG     Booking 9b545e43-1056-43d3-9351-3ea8334d4dc2: confirmed → completed (Mindbody: Completed)
+[00:06:11.041] Server  LOG     Booking 6d5e0552-494e-4961-941f-3df9d22d789c: confirmed → completed (Mindbody: Completed)
+[00:06:11.135] Server  LOG     Booking 501a644f-57dc-4554-a751-8bf587255f03: confirmed → completed (Mindbody: Completed)
+[00:06:11.286] Server  LOG     Booking 28f1c9d8-4f42-4e74-8fbc-1162a1e3bdab: confirmed → completed (Mindbody: Completed)
+[00:06:11.382] Server  LOG     Booking 55c228ac-26e1-4d73-a01d-7845d41d0552: confirmed → completed (Mindbody: Completed)
+[00:06:11.561] Server  LOG     Booking b51319ae-4edd-400d-b4cf-3056db166841: confirmed → completed (Mindbody: Completed)
+[00:06:11.806] Server  LOG     Booking b141e33a-2f61-4c02-a57e-42857fa84e99: confirmed → completed (Mindbody: Completed)
+[00:06:11.972] Server  LOG     Booking 53c25841-e636-4d8c-b593-3fd970a2b57d: confirmed → completed (Mindbody: Completed)
+[00:06:12.070] Server  LOG     Booking 78ce046f-a2fc-45bc-aa48-b7fc0cb2fc0a: confirmed → completed (Mindbody: Completed)
+[00:06:12.330] Server  LOG     Booking a6ed1877-217d-4105-bc7c-929dffc761ef: confirmed → completed (Mindbody: Completed)
+[00:06:12.502] Server  LOG     Booking 117feeb4-ac43-474a-b926-0dd0eb5c32c5: confirmed → completed (Mindbody: Completed)
+[00:06:12.750] Server  LOG     Booking e92ce041-8d35-4150-8826-519d32ee2e97: confirmed → completed (Mindbody: Completed)
+[00:06:12.860] Server  LOG     Booking 36f5b4a4-569f-4c8d-81fa-ec021f2883c8: confirmed → completed (Mindbody: Completed)
+[00:06:13.119] Server  LOG     Booking b58cd00a-90bf-42b3-aea5-8fdc88cd4d32: confirmed → completed (Mindbody: Completed)
+[00:06:13.215] Server  LOG     Booking 4c474ae2-f806-4f24-97d8-9546bba02e7a: confirmed → completed (Mindbody: Completed)
+[00:06:13.378] Server  LOG     Booking 50f707d0-083c-4f34-9128-8f3a29cb6e2a: confirmed → completed (Mindbody: Completed)
+[00:06:13.472] Server  LOG     Booking b812d9d6-d548-459a-b659-ee4e5cf66f34: confirmed → completed (Mindbody: Completed)
+[00:06:13.572] Server  LOG     Booking 13404c0a-6faf-4ec1-8253-c4635e9ed140: confirmed → completed (Mindbody: Completed)
+[00:06:13.670] Server  LOG     Booking f2b462d8-950b-4e66-993e-1914dcebcb7c: confirmed → completed (Mindbody: Completed)
+[00:06:13.772] Server  LOG     Booking b1ada571-db36-4987-afe5-38fb441d6d1b: confirmed → completed (Mindbody: Completed)
+[00:06:13.900] Server  LOG     Booking 5276664f-fdbc-4eba-a320-1a0badb60ae6: confirmed → completed (Mindbody: Completed)
+[00:06:13.995] Server  LOG     Booking 48f4a3ce-94d1-4e20-bd12-f961096d9496: confirmed → completed (Mindbody: Completed)
+[00:06:14.088] Server  LOG     Booking 4d1275aa-218b-4ad9-b658-652460774748: confirmed → completed (Mindbody: Completed)
+[00:06:14.185] Server  LOG     Booking ca26d37b-594e-426e-a94e-63cda93e5dd0: confirmed → completed (Mindbody: Completed)
+[00:06:14.276] Server  LOG     Booking e947ddad-4648-438c-8224-121ca33d8794: confirmed → completed (Mindbody: Completed)
+[00:06:14.427] Server  LOG     Booking d6eb3c43-865e-4b18-9f91-9e4d319ebe7d: confirmed → completed (Mindbody: Completed)
+[00:06:14.527] Server  LOG     Booking 7aab6e54-1711-447e-a985-6ca8712b7395: confirmed → completed (Mindbody: Completed)
+[00:06:14.620] Server  LOG     Booking b923782e-695e-4c74-805a-5a0e24edcaa2: confirmed → completed (Mindbody: Completed)
+[00:06:14.719] Server  LOG     Booking 89f35b47-06f4-43fa-ad2f-e63eeedd64e2: confirmed → completed (Mindbody: Completed)
+[00:06:14.816] Server  LOG     Booking ce449727-9b7f-42fb-817f-d3a6c5c24260: confirmed → completed (Mindbody: Completed)
+[00:06:14.952] Server  LOG     Booking 0cf79c1f-d68c-416a-ae44-adb9ce947233: confirmed → completed (Mindbody: Completed)
+[00:06:15.050] Server  LOG     Booking a4823661-23f0-443a-a2a4-60985766b2bf: confirmed → completed (Mindbody: Completed)
+[00:06:15.143] Server  LOG     Booking f93152c9-bd39-44b9-81f6-51b74222cd15: confirmed → completed (Mindbody: Completed)
+[00:06:15.247] Server  LOG     Booking 3777a897-80cc-405a-adfa-3221df09ea5b: confirmed → completed (Mindbody: Completed)
+[00:06:15.342] Server  LOG     Booking 9222e164-4274-43e0-bbda-a94432128890: confirmed → completed (Mindbody: Completed)
+[00:06:15.476] Server  LOG     Booking 564d6284-98bc-46bf-a883-34454ff3fcc4: confirmed → completed (Mindbody: Completed)
+[00:06:15.570] Server  LOG     Booking 88007695-edc1-4815-a687-c15252bdb4c0: confirmed → completed (Mindbody: Completed)
+[00:06:15.664] Server  LOG     Booking 954f0bd5-99a6-48f7-a23c-2c9176a4719a: confirmed → completed (Mindbody: Completed)
+[00:06:15.765] Server  LOG     Booking 9e53137c-fd22-481a-a76b-e9d8f9dfbc24: confirmed → completed (Mindbody: Completed)
+[00:06:15.862] Server  LOG     Booking 22c73ca7-4a9a-4481-b8ae-1e104e3903a9: confirmed → completed (Mindbody: Completed)
+[00:06:16.001] Server  LOG     Booking ad202b21-98ce-4e8c-a36d-ead7fd8c80fd: confirmed → completed (Mindbody: Completed)
+[00:06:16.094] Server  LOG     Booking c7e8dc38-cdfa-4f43-9a4c-e44f0e843e4e: confirmed → completed (Mindbody: Completed)
+[00:06:16.187] Server  LOG     Booking 98ee9533-d01f-462b-b0d1-4c8f154e0109: confirmed → completed (Mindbody: Completed)
+[00:06:16.281] Server  LOG     Booking 591e36e6-af95-44be-a664-e5cac0b8c89f: confirmed → completed (Mindbody: Completed)
+[00:06:16.376] Server  LOG     Booking 8f5fa1ed-7e17-41e4-b33d-6645823a2098: confirmed → completed (Mindbody: Completed)
+[00:06:16.524] Server  LOG     Booking b7802cb3-c18a-42e4-9c97-796565f3afb3: confirmed → completed (Mindbody: Completed)
+[00:06:16.622] Server  LOG     Booking 7cf22946-5e6b-4699-9832-e756ebfe2a50: confirmed → completed (Mindbody: Completed)
+[00:06:16.741] Server  LOG     Booking 91fa75cc-40f2-416c-a728-38e9f1a8625e: confirmed → completed (Mindbody: Completed)
+[00:06:16.840] Server  LOG     Booking 0c81c9b2-a82a-4628-96e8-605407e5704e: confirmed → completed (Mindbody: Completed)
+[00:06:16.943] Server  LOG     Booking 98eaad9e-55c8-405e-acce-559fa1fbef51: confirmed → completed (Mindbody: Completed)
+[00:06:17.050] Server  LOG     Booking 122bf77c-4dc3-4758-877b-1af6be468e1e: confirmed → completed (Mindbody: Completed)
+[00:06:17.157] Server  LOG     Booking 158d8b4e-34f1-433d-9eff-b8ba0a687839: confirmed → noshow (Mindbody: NoShow)
+[00:06:17.263] Server  LOG     Booking 5b185085-a31f-44c8-bfbe-8997cbd6bd52: confirmed → completed (Mindbody: Completed)
+[00:06:17.367] Server  LOG     Booking 5f17fa57-7785-4567-9b12-af6634dc61d1: confirmed → completed (Mindbody: Completed)
+[00:06:17.466] Server  LOG     Booking bb64b212-0198-49d7-8137-fcf8c8616c2d: confirmed → completed (Mindbody: Completed)
+[00:06:17.574] Server  LOG     Booking 442902d5-0d8b-4350-90f1-c554562acd87: confirmed → completed (Mindbody: Completed)
+[00:06:19.670] Server  LOG     Backlog: 19 past bookings absent from Mindbody → cancelled
+[00:06:19.675] Server  LOG     Sync complete: 180 past updated, 0 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:06:19.986] Server  LOG     getStaffAppointments called with: {}
+[00:06:19.986] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:06:20.732] Server  LOG     Staff appointments response: 148 "appointments"
+[00:06:20.733] Server  LOG     getStaffAppointments called with: {}
+[00:06:20.733] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:06:21.118] Server  LOG     Staff appointments response: 159 "appointments"
+[00:06:21.246] Server  LOG     Syncing 212 of 331 total bookings (window: 2026-06-30 → 2026-07-30)
+[00:06:21.246] Server  LOG     Target IDs: 196082, 195246, 195342, 196123, 196183, 196223, 196261, 196359, 196289, 196360, 196298, 196344, 196309, 196087, 196063, 196064, 196489, 196524, 196425, 196558, 196560, 196431, 196473, 196559, 196584, 196001, 196613, 196664, 196217, 196665, 196658, 196392, 196666, 196479, 196656, 196661, 196257, 196644, 196614, 196700, 196769, 196810, 196029, 196185, 196825, 196907, 196928, 195741, 197055, 197083, 196978, 196974, 197084, 197137, 197163, 197176, 197136, 197111, 197185, 197205, 197195, 197151, 197240, 197214, 197219, 197235, 197237, 197329, 197239, 197300, 197303, 196870, 197385, 197377, 197395, 197390, 197378, 197379, 197380, 197436, 197381, 197050, 197482, 197464, 197467, 197470, 197473, 197520, 197591, 197643, 197657, 196916, 197612, 197615, 197630, 197731, 197742, 197744, 197849, 197727, 197766, 197521, 197743, 197670, 197853, 197873, 197808, 197890, 197918, 197885, 197883, 197967, 197877, 197879, 197977, 197410, 197847, 198001, 198013, 197957, 197985, 198048, 198064, 198018, 197384, 197383, 197796, 198030, 198058, 197973, 197597, 198068, 198071, 198106, 198151, 198143, 198147, 198140, 197732, 197904, 198050, 198142, 198219, 198199, 197902, 197986, 198254, 198314, 198302, 196882, 198365, 198405, 198406, 197843, 198420, 198451, 198482, 198439, 198564, 198539, 198355, 198282, 198533, 198553, 198527, 196826, 196831, 198609, 198650, 198652, 196835, 198466, 198738, 198743, 198750, 198733, 198666, 198740, 198668, 198771, 198768, 198126, 198667, 198125, 198661, 198557, 198775, 198764, 198765, 198721, 198817, 198847, 198840, 198841, 198835, 198844, 198845, 198879, 198854, 198396, 198913, 198929, 198967, 199011, 198537, 199029, 199031, 198966, 197138, 199048, 199094, 197692
+[00:06:21.246] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:06:21.815] Server  LOG     Found 2 locations: 1, 2
+[00:06:21.815] Server  LOG     getStaffAppointments called with: {}
+[00:06:21.815] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=0" ""
+[00:06:22.917] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:22.918] Server  LOG     Location 1 page 1 sample IDs: 196470, 196471, 196262, 196263, 196264, 195965, 195966, 195967, 195968, 195969
+[00:06:22.918] Server  LOG     getStaffAppointments called with: {}
+[00:06:22.918] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=200" ""
+[00:06:23.778] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:23.778] Server  LOG     getStaffAppointments called with: {}
+[00:06:23.778] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=400" ""
+[00:06:24.778] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:24.780] Server  LOG     getStaffAppointments called with: {}
+[00:06:24.780] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=600" ""
+[00:06:25.764] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:25.764] Server  LOG     getStaffAppointments called with: {}
+[00:06:25.765] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=800" ""
+[00:06:27.014] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:27.015] Server  LOG     getStaffAppointments called with: {}
+[00:06:27.015] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=1000" ""
+[00:06:28.137] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:28.138] Server  LOG     getStaffAppointments called with: {}
+[00:06:28.138] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=1200" ""
+[00:06:29.211] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:29.212] Server  LOG     getStaffAppointments called with: {}
+[00:06:29.212] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=1400" ""
+[00:06:30.169] Server  LOG     Staff appointments response: 135 "appointments"
+[00:06:30.170] Server  LOG     Location 1: found 117 matches so far
+[00:06:30.170] Server  LOG     getStaffAppointments called with: {}
+[00:06:30.171] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=0" ""
+[00:06:31.208] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:31.209] Server  LOG     Location 2 page 1 sample IDs: 196558, 196256, 196406, 196322, 196323, 196324, 196325, 196567, 196568, 196565
+[00:06:31.210] Server  LOG     getStaffAppointments called with: {}
+[00:06:31.211] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=200" ""
+[00:06:32.070] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:32.071] Server  LOG     getStaffAppointments called with: {}
+[00:06:32.071] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=400" ""
+[00:06:32.867] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:32.868] Server  LOG     getStaffAppointments called with: {}
+[00:06:32.869] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=600" ""
+[00:06:33.698] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:33.699] Server  LOG     getStaffAppointments called with: {}
+[00:06:33.700] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=800" ""
+[00:06:34.524] Server  LOG     Staff appointments response: 200 "appointments"
+[00:06:34.527] Server  LOG     getStaffAppointments called with: {}
+[00:06:34.527] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-06-30&endDate=2026-07-30&limit=200&offset=1000" ""
+[00:06:35.265] Server  LOG     Staff appointments response: 142 "appointments"
+[00:06:35.266] Server  LOG     Location 2: found 182 matches so far
+[00:06:35.266] Server  LOG     Status map built: 182 of 212 IDs found
+[00:06:35.524] Server  LOG     Booking 321a7ce8-c976-4c2f-b98c-64d2309e7b37: confirmed → completed (Mindbody: Completed)
+[00:06:35.677] Server  LOG     Booking c28ffb04-1db9-46e4-86b9-935408b447da: confirmed → completed (Mindbody: Completed)
+[00:06:35.783] Server  LOG     Booking 6138dbbe-2a0a-429e-9efd-92f9daf95bb9: confirmed → completed (Mindbody: Completed)
+[00:06:35.927] Server  LOG     Booking 66575d9c-8a52-420b-88e7-001242f712c3: confirmed → completed (Mindbody: Completed)
+[00:06:36.023] Server  LOG     Booking 893fcabb-f692-440d-b5b3-e08d73d2e4a3: confirmed → completed (Mindbody: Completed)
+[00:06:36.122] Server  LOG     Booking 0f6c3bb4-e08c-4e2e-9563-0199759cbc85: confirmed → completed (Mindbody: Completed)
+[00:06:36.228] Server  LOG     Booking 862f13ac-2a8e-4655-8e62-5562e9529366: confirmed → completed (Mindbody: Completed)
+[00:06:36.351] Server  LOG     Booking 4becdc3b-4aa7-4826-9028-cc6e0deeeb08: confirmed → completed (Mindbody: Completed)
+[00:06:36.537] Server  LOG     Booking f0074d65-c209-4460-a11d-d5491780215c: confirmed → completed (Mindbody: Completed)
+[00:06:36.654] Server  LOG     Booking 70b15099-658d-4527-a9bd-6a941e5fb0dd: confirmed → completed (Mindbody: Completed)
+[00:06:36.751] Server  LOG     Booking 0be1ce69-90bb-42d3-9149-b63509e3dd1e: confirmed → completed (Mindbody: Completed)
+[00:06:36.852] Server  LOG     Booking 98c502ca-8366-44b2-b8a7-196387fcc86b: confirmed → completed (Mindbody: Completed)
+[00:06:36.974] Server  LOG     Booking 1f7556a1-cb30-4060-833d-db0817963068: confirmed → completed (Mindbody: Completed)
+[00:06:37.075] Server  LOG     Booking 39febcf2-d291-40ea-854c-360440177115: confirmed → completed (Mindbody: Completed)
+[00:06:37.174] Server  LOG     Booking 0296c12b-be86-4477-9c6e-dff20572c30b: confirmed → completed (Mindbody: Completed)
+[00:06:37.267] Server  LOG     Booking a03d623b-c329-4bb3-9f4e-71478fe8f984: confirmed → completed (Mindbody: Completed)
+[00:06:37.372] Server  LOG     Booking c3a6f233-52f2-40c6-9a93-20a53fb0b111: confirmed → completed (Mindbody: Completed)
+[00:06:37.499] Server  LOG     Booking 2dfd7930-c550-4471-a581-95eb6db9c601: confirmed → completed (Mindbody: Completed)
+[00:06:37.590] Server  LOG     Booking 91399cc7-2e93-4df1-a1dd-bafc63d8609c: confirmed → completed (Mindbody: Completed)
+[00:06:37.685] Server  LOG     Booking 403a471c-5a0a-46db-834f-9d308260d57e: confirmed → completed (Mindbody: Completed)
+[00:06:37.778] Server  LOG     Booking d1bddc5c-74b9-4536-aa88-189846045793: confirmed → completed (Mindbody: Completed)
+[00:06:37.874] Server  LOG     Booking ef2c0659-bc15-4a9c-96da-2898d6541484: confirmed → completed (Mindbody: Completed)
+[00:06:38.022] Server  LOG     Booking dd89227d-04f8-46bc-8b4c-4966bd47f4be: confirmed → completed (Mindbody: Completed)
+[00:06:38.114] Server  LOG     Booking 4debb8ef-785f-4704-904a-2b0b3caa0993: confirmed → completed (Mindbody: Completed)
+[00:06:38.206] Server  LOG     Booking fe0c33e5-2684-4cdf-8572-7c428e9d2307: confirmed → completed (Mindbody: Completed)
+[00:06:38.308] Server  LOG     Booking a5b37878-d939-47f9-8fae-c6cf447dbf96: confirmed → completed (Mindbody: Completed)
+[00:06:38.406] Server  LOG     Booking 469eba2a-4ecb-462e-9761-83ade7a79297: confirmed → completed (Mindbody: Completed)
+[00:06:38.546] Server  LOG     Booking 410745bb-da5f-482c-ad06-da91433356be: confirmed → completed (Mindbody: Completed)
+[00:06:38.638] Server  LOG     Booking 06854b17-ab7d-481a-b000-8239b2f3eb45: confirmed → completed (Mindbody: Completed)
+[00:06:38.734] Server  LOG     Booking e0ca5ec8-87f7-4a8b-8478-5dacae537ac4: confirmed → completed (Mindbody: Completed)
+[00:06:38.832] Server  LOG     Booking 8d1b3d1e-6509-4b3e-86ec-1c9a6acbe3aa: confirmed → completed (Mindbody: Completed)
+[00:06:38.930] Server  LOG     Booking cb42fa9b-91d3-409a-b311-8e699a7fc577: confirmed → completed (Mindbody: Completed)
+[00:06:39.072] Server  LOG     Booking b595752f-a85e-45c4-beb3-cd9fe383c20b: confirmed → completed (Mindbody: Completed)
+[00:06:39.169] Server  LOG     Booking 917678da-1199-422a-9cb3-17da840e6203: confirmed → completed (Mindbody: Completed)
+[00:06:39.266] Server  LOG     Booking 0b923e98-e67b-4e57-a797-ecdb705116da: confirmed → completed (Mindbody: Completed)
+[00:06:39.361] Server  LOG     Booking d2db8f4f-e2ee-4c6c-aefd-750865d39897: confirmed → completed (Mindbody: Completed)
+[00:06:39.465] Server  LOG     Booking 9167c037-571f-4ef7-ac13-83122c5957ed: confirmed → completed (Mindbody: Completed)
+[00:06:39.591] Server  LOG     Booking 231f50e7-8c8e-4983-97c6-bc71ddbc0066: confirmed → completed (Mindbody: Completed)
+[00:06:39.685] Server  LOG     Booking e067aba5-f11e-45c7-a90d-0633809f413d: confirmed → completed (Mindbody: Completed)
+[00:06:39.784] Server  LOG     Booking 92171ce8-1ed7-4054-a6b3-42a5f64daf84: confirmed → completed (Mindbody: Completed)
+[00:06:39.884] Server  LOG     Booking 943fcad4-38e7-4259-bb59-78f9362dcfb9: confirmed → noshow (Mindbody: NoShow)
+[00:06:39.986] Server  LOG     Booking cc34d42b-2d7d-44de-ac42-56eff5344c70: confirmed → completed (Mindbody: Completed)
+[00:06:40.116] Server  LOG     Booking 83f013a9-0e06-4a5a-98ed-8868768b53e6: confirmed → completed (Mindbody: Completed)
+[00:06:40.207] Server  LOG     Booking 5f40571a-96fb-4019-bd81-0c15471f83d4: confirmed → completed (Mindbody: Completed)
+[00:06:40.303] Server  LOG     Booking 140f475b-0934-449d-9ac0-7e12a393e9c4: confirmed → completed (Mindbody: Completed)
+[00:06:40.397] Server  LOG     Booking f2d771b4-89cf-40b2-a929-b0aa597567dc: confirmed → completed (Mindbody: Completed)
+[00:06:40.498] Server  LOG     Booking f736336e-10b5-4518-8261-567992dea38b: confirmed → completed (Mindbody: Completed)
+[00:06:40.645] Server  LOG     Booking b6190bf9-ce68-4ab6-a7b2-91a2ecd89e20: confirmed → completed (Mindbody: Completed)
+[00:06:40.746] Server  LOG     Booking 1866e6b1-b290-4ab5-be51-c8d35b8de0fc: confirmed → completed (Mindbody: Completed)
+[00:06:40.848] Server  LOG     Booking 57740438-f311-402d-89fb-e131707878cf: confirmed → completed (Mindbody: Completed)
+[00:06:40.947] Server  LOG     Booking 2f0929fd-c816-48de-bf95-1a3014c80c13: confirmed → completed (Mindbody: Completed)
+[00:06:41.065] Server  LOG     Booking e585b10c-c1fc-4a0f-9e47-ed924ec10f3a: confirmed → completed (Mindbody: Completed)
+[00:06:41.173] Server  LOG     Booking 221e189d-b23e-42a2-8512-3daaf8c81a19: confirmed → completed (Mindbody: Completed)
+[00:06:41.339] Server  LOG     Booking 06eaff61-e6bb-488a-a03e-17ac2bf6f01a: confirmed → completed (Mindbody: Completed)
+[00:06:41.489] Server  LOG     Booking a731db10-19d1-4d96-9c76-4ef57617267c: confirmed → completed (Mindbody: Completed)
+[00:06:41.688] Server  LOG     Booking 2f77efb2-26bb-4615-b8f6-ed2f1e71bbc1: confirmed → completed (Mindbody: Completed)
+[00:06:41.859] Server  LOG     Booking fbcb1042-63e6-4ca2-97d2-64db82b2cf9f: confirmed → completed (Mindbody: Completed)
+[00:06:42.030] Server  LOG     Booking b58122e9-94d9-4d5f-aaff-5812e1a1a7c6: confirmed → completed (Mindbody: Completed)
+[00:06:42.215] Server  LOG     Booking a45cfc71-dff1-46ba-861b-f72250704ba4: confirmed → completed (Mindbody: Completed)
+[00:06:42.382] Server  LOG     Booking 6057b182-6c01-4d11-abd6-a2dfc182b75a: confirmed → completed (Mindbody: Completed)
+[00:06:42.499] Server  LOG     Booking 4a6fd6a6-72de-433c-a596-dd405fe41f31: confirmed → completed (Mindbody: Completed)
+[00:06:42.738] Server  LOG     Booking 4c20c35b-6fba-447d-b011-20ad284c59f9: confirmed → completed (Mindbody: Completed)
+[00:06:42.904] Server  LOG     Booking 02efa809-dce5-44d0-9a29-27bfddca43a9: confirmed → completed (Mindbody: Completed)
+[00:06:43.000] Server  LOG     Booking f531b584-3091-4420-9d2d-e81c36b9a869: confirmed → completed (Mindbody: Completed)
+[00:06:43.098] Server  LOG     Booking c840bf61-724a-4ee0-8b1e-9c56209c1ea8: confirmed → completed (Mindbody: Completed)
+[00:06:43.265] Server  LOG     Booking cfbd40a7-825e-4951-ad5e-56fe181a50e1: confirmed → completed (Mindbody: Completed)
+[00:06:43.375] Server  LOG     Booking 98f1a037-5f29-4fd7-9083-7e08d011397f: confirmed → completed (Mindbody: Completed)
+[00:06:43.481] Server  LOG     Booking e5c4fbb8-593e-473a-b4db-8d962297eb63: confirmed → completed (Mindbody: Completed)
+[00:06:43.578] Server  LOG     Booking 434ec1e8-7327-41d9-a85c-d56f0a817454: confirmed → completed (Mindbody: Completed)
+[00:06:43.672] Server  LOG     Booking 2597ff6c-6377-4aea-8cb2-c31a6cb92d9a: confirmed → completed (Mindbody: Completed)
+[00:06:43.787] Server  LOG     Booking de92a008-6152-43e5-97f1-a8a6916a692d: confirmed → completed (Mindbody: Completed)
+[00:06:43.884] Server  LOG     Booking 7f242c29-d456-484d-9ea2-d4452e29de72: confirmed → completed (Mindbody: Completed)
+[00:06:43.980] Server  LOG     Booking ea2cf123-c5ac-4c8a-b0e8-bb2f2d06e5a1: confirmed → completed (Mindbody: Completed)
+[00:06:44.081] Server  LOG     Booking 7581aa09-c927-4b92-85a2-d6343a440b55: confirmed → completed (Mindbody: Completed)
+[00:06:44.188] Server  LOG     Booking be5be958-3631-4d7e-8624-bd912b6f0e45: confirmed → completed (Mindbody: Completed)
+[00:06:44.327] Server  LOG     Booking 9abf1fbf-8483-44d7-a981-6d286784eb44: confirmed → completed (Mindbody: Completed)
+[00:06:44.438] Server  LOG     Booking 748ffd66-7c60-4930-9890-75c1a1338d89: confirmed → completed (Mindbody: Completed)
+[00:06:44.534] Server  LOG     Booking c7314d7b-1f9a-4917-9d29-9589fa8cb104: confirmed → completed (Mindbody: Completed)
+[00:06:44.631] Server  LOG     Booking e7ef83a9-0707-4933-a5a3-be334365838c: confirmed → completed (Mindbody: Completed)
+[00:06:44.736] Server  LOG     Booking a9a19ed4-842c-4779-afee-b344fc8a7a58: confirmed → completed (Mindbody: Completed)
+[00:06:44.922] Server  LOG     Booking b566e354-31e8-4a7d-b4ec-cdf660004d6b: confirmed → completed (Mindbody: Completed)
+[00:06:45.017] Server  LOG     Booking 0c223f56-d15e-466c-9a32-2f47e2b68247: confirmed → completed (Mindbody: Completed)
+[00:06:45.111] Server  LOG     Booking 63e62a56-7462-4059-a2ec-a0655929a786: confirmed → completed (Mindbody: Completed)
+[00:06:45.213] Server  LOG     Booking 1a414c77-dcc3-41c2-9e0f-3d4a209c380a: confirmed → completed (Mindbody: Completed)
+[00:06:45.360] Server  LOG     Booking 8804b001-6f00-4cbd-8fbd-dc241886d446: confirmed → completed (Mindbody: Completed)
+[00:06:45.454] Server  LOG     Booking b558fc58-48cb-4eb3-b035-f51dfef56c35: confirmed → completed (Mindbody: Completed)
+[00:06:45.550] Server  LOG     Booking cde9082c-ed1f-4a83-8364-051207ec3382: confirmed → completed (Mindbody: Completed)
+[00:06:45.643] Server  LOG     Booking 9e7a61db-904a-49b2-9ba9-72149ea03751: confirmed → completed (Mindbody: Completed)
+[00:06:45.735] Server  LOG     Booking d093f875-751d-43fb-a29a-4b6d97f15142: confirmed → completed (Mindbody: Completed)
+[00:06:45.885] Server  LOG     Booking cea00ecd-09ab-4606-b6b3-a64d89392bfc: confirmed → completed (Mindbody: Completed)
+[00:06:45.981] Server  LOG     Booking ea81d823-6281-46bd-80a4-d9773bfe0485: confirmed → completed (Mindbody: Completed)
+[00:06:46.078] Server  LOG     Booking 1db8ecb6-115a-4b98-9947-8c2ff9958e0b: confirmed → completed (Mindbody: Completed)
+[00:06:46.176] Server  LOG     Booking f88587b1-5b3b-4579-b5f7-d23cde0ca6db: confirmed → completed (Mindbody: Completed)
+[00:06:46.270] Server  LOG     Booking 116bf170-eaa8-4b7a-a67d-dc53d7917b02: confirmed → completed (Mindbody: Completed)
+[00:06:46.411] Server  LOG     Booking b50d6ce0-638c-47cf-bfc6-d3764578f78d: confirmed → completed (Mindbody: Completed)
+[00:06:46.508] Server  LOG     Booking 3e5c4d48-f331-4f0f-840f-b4635346fa6c: confirmed → completed (Mindbody: Completed)
+[00:06:46.608] Server  LOG     Booking 76b76663-52af-4a76-af96-2b523f426713: confirmed → completed (Mindbody: Completed)
+[00:06:46.702] Server  LOG     Booking 00842e00-84b2-480e-b46c-8c5a46201fda: confirmed → completed (Mindbody: Completed)
+[00:06:46.799] Server  LOG     Booking fbfc6d3b-d0ca-47a5-b642-e65cf787bb87: confirmed → completed (Mindbody: Completed)
+[00:06:46.934] Server  LOG     Booking a21ea498-e882-4830-8a26-a1d60c446925: confirmed → completed (Mindbody: Completed)
+[00:06:47.032] Server  LOG     Booking 44cf2781-5de8-4aad-bec4-b3e600923e61: confirmed → completed (Mindbody: Completed)
+[00:06:47.131] Server  LOG     Booking 6373320a-5903-4e32-b2f1-eaa5016079b1: confirmed → completed (Mindbody: Completed)
+[00:06:47.226] Server  LOG     Booking d8d59001-4b22-40af-b14a-078d58eb2630: confirmed → completed (Mindbody: Completed)
+[00:06:47.317] Server  LOG     Booking e6f0198e-61d0-4d91-a618-e6fac7b34607: confirmed → completed (Mindbody: Completed)
+[00:06:47.463] Server  LOG     Booking 62da601c-b496-413b-8083-78256fdf2472: confirmed → completed (Mindbody: Completed)
+[00:06:47.554] Server  LOG     Booking 2e0f1665-c1d2-4ecd-a476-3245fa307556: confirmed → completed (Mindbody: Completed)
+[00:06:47.652] Server  LOG     Booking d49ec37f-f1c2-4c49-a737-fc6fa85b36f8: confirmed → completed (Mindbody: Completed)
+[00:06:47.750] Server  LOG     Booking 4f3224ad-f63d-43fb-b8c3-abe2fe1dee74: confirmed → completed (Mindbody: Completed)
+[00:06:47.851] Server  LOG     Booking b37aa8b7-05ea-4af5-a310-0589c5e76418: confirmed → completed (Mindbody: Completed)
+[00:06:47.984] Server  LOG     Booking ec6a40e6-8df8-47c3-a8ab-26865ad7efe6: confirmed → completed (Mindbody: Completed)
+[00:06:48.078] Server  LOG     Booking 5d89eb12-4a64-457d-8c6c-ed447636a300: confirmed → completed (Mindbody: Completed)
+[00:06:48.183] Server  LOG     Booking 047f4939-8bdf-4f55-805a-5946d69d8634: confirmed → completed (Mindbody: Completed)
+[00:06:48.293] Server  LOG     Booking d7c80977-d6fa-4818-94e5-e4da2686c01d: confirmed → completed (Mindbody: Completed)
+[00:06:48.386] Server  LOG     Booking 1bc488db-e9cf-4238-aee3-ef810aa2678f: confirmed → completed (Mindbody: Completed)
+[00:06:48.506] Server  LOG     Booking 82aeb9d0-09d7-4c2d-aa3e-b1ba83a79d7e: confirmed → completed (Mindbody: Completed)
+[00:06:48.598] Server  LOG     Booking d679c721-3899-415d-9b6d-4cfb1078d1f7: confirmed → completed (Mindbody: Completed)
+[00:06:48.697] Server  LOG     Booking 200a707b-0d5f-4471-8747-3c7e1088e0d1: confirmed → completed (Mindbody: Completed)
+[00:06:48.796] Server  LOG     Booking 117bdd83-8609-422b-b866-13dfd192dce1: confirmed → completed (Mindbody: Completed)
+[00:06:48.885] Server  LOG     Booking 7749e22c-0a17-478e-a6d6-c980820dbea1: confirmed → completed (Mindbody: Completed)
+[00:06:49.035] Server  LOG     Booking 5c546bd0-b7c2-4c12-aacc-0a45179095da: confirmed → completed (Mindbody: Completed)
+[00:06:49.131] Server  LOG     Booking 819bb088-6e9b-43a7-a6d8-ad49e1a1d804: confirmed → completed (Mindbody: Completed)
+[00:06:49.232] Server  LOG     Booking 6bc6de44-eb8e-4c06-9070-2b9f80dd6627: confirmed → completed (Mindbody: Completed)
+[00:06:49.331] Server  LOG     Booking d02b1b27-a1d2-4788-a3a7-77c3e49d493b: confirmed → completed (Mindbody: Completed)
+[00:06:49.425] Server  LOG     Booking 3a43fc52-4f30-46c5-8c59-6862adb465cc: confirmed → completed (Mindbody: Completed)
+[00:06:49.557] Server  LOG     Booking 04398c48-65e7-4189-b8e0-beb58f3ae19b: confirmed → completed (Mindbody: Completed)
+[00:06:49.652] Server  LOG     Booking aab661cc-ab62-4075-b92c-4bf14f60a8af: confirmed → completed (Mindbody: Completed)
+[00:06:49.746] Server  LOG     Booking d1a3b560-6ecb-477d-8056-3a5bbf227753: confirmed → completed (Mindbody: Completed)
+[00:06:49.840] Server  LOG     Booking bafad54d-bfd7-47a1-957d-a94de7563d49: confirmed → completed (Mindbody: Completed)
+[00:06:49.936] Server  LOG     Booking 1fa2c741-a007-4c65-8b7b-f4a023977ea4: confirmed → completed (Mindbody: Completed)
+[00:06:50.082] Server  LOG     Booking 064477cb-3254-48a0-a5a8-460ba2bb5b10: confirmed → completed (Mindbody: Completed)
+[00:06:50.177] Server  LOG     Booking f7d629f8-7767-4ea1-8753-a47a1bf2d60c: confirmed → completed (Mindbody: Completed)
+[00:06:50.270] Server  LOG     Booking 81b452e2-3eb1-4744-9542-be22c932548a: confirmed → completed (Mindbody: Completed)
+[00:06:50.367] Server  LOG     Booking 843047cf-8f6d-4bf1-8510-a06372e03dc8: confirmed → completed (Mindbody: Completed)
+[00:06:50.459] Server  LOG     Booking a0802074-558f-46cb-a95f-b07fd6f6226b: confirmed → completed (Mindbody: Completed)
+[00:06:50.604] Server  LOG     Booking 90cf1316-e0b5-47b0-81d8-602e395d4dd4: confirmed → completed (Mindbody: Completed)
+[00:06:50.704] Server  LOG     Booking 7a5b9d3a-bbd0-4021-b939-e1e29fdaf54a: confirmed → completed (Mindbody: Completed)
+[00:06:50.798] Server  LOG     Booking 99bbb954-b097-4766-a9d1-8ebf0acf2f0b: confirmed → completed (Mindbody: Completed)
+[00:06:50.892] Server  LOG     Booking d2282cae-6d6f-4085-8650-f4017d8b15fb: confirmed → completed (Mindbody: Completed)
+[00:06:50.989] Server  LOG     Booking 88af3afb-a10d-4f65-a6ea-d4883d4d5272: confirmed → completed (Mindbody: Completed)
+[00:06:51.130] Server  LOG     Booking a34fb57f-9e93-46b5-bc13-37ea1106905a: confirmed → completed (Mindbody: Completed)
+[00:06:51.224] Server  LOG     Booking c2143715-eff2-41b9-bb8b-bc1f18cd024b: confirmed → completed (Mindbody: Completed)
+[00:06:51.319] Server  LOG     Booking 530c91cb-6dd8-44cb-9f78-9a969ca3491a: confirmed → completed (Mindbody: Completed)
+[00:06:51.413] Server  LOG     Booking 7701b872-2586-4262-84ed-583967c9f7f1: confirmed → completed (Mindbody: Completed)
+[00:06:51.506] Server  LOG     Booking efa04388-f2d5-4292-9d95-7d8ff7f5296d: confirmed → completed (Mindbody: Completed)
+[00:06:51.654] Server  LOG     Booking 857675a6-3bd0-481f-858c-f37adcc98d9e: confirmed → completed (Mindbody: Completed)
+[00:06:51.749] Server  LOG     Booking 4962598c-ec12-465c-8da0-abdaa743807c: confirmed → completed (Mindbody: Completed)
+[00:06:51.854] Server  LOG     Booking 03453798-c2be-432f-9415-1e031e43a149: confirmed → completed (Mindbody: Completed)
+[00:06:51.946] Server  LOG     Booking 39bc4573-886c-4ae0-935b-9d2808efa867: confirmed → completed (Mindbody: Completed)
+[00:06:52.042] Server  LOG     Booking 64b83f0d-dad6-43cf-bd65-b04dc535669c: confirmed → completed (Mindbody: Completed)
+[00:06:52.183] Server  LOG     Booking 293cb340-72a8-4245-afc5-d96f8cc05901: confirmed → completed (Mindbody: Completed)
+[00:06:52.279] Server  LOG     Booking 426d84f7-170e-435d-963b-29efa13e59fc: confirmed → completed (Mindbody: Completed)
+[00:06:52.374] Server  LOG     Booking 99dafea2-b864-4982-989b-b5cbc8888528: confirmed → completed (Mindbody: Completed)
+[00:06:52.468] Server  LOG     Booking 1379c46d-843c-4451-a3b3-9e0f349bab13: confirmed → completed (Mindbody: Completed)
+[00:06:52.559] Server  LOG     Booking 57ccb2cf-19ba-4315-9a2b-a355cb4eb6c8: confirmed → completed (Mindbody: Completed)
+[00:06:52.700] Server  LOG     Booking e0efe1ea-0849-4fbd-9703-22dcc1fa62b0: confirmed → completed (Mindbody: Completed)
+[00:06:52.792] Server  LOG     Booking 1ca909be-1391-47c5-988b-e69365dc062e: confirmed → completed (Mindbody: Completed)
+[00:06:52.889] Server  LOG     Booking f53d42e3-beb3-4259-93a0-8f4681cd1dba: confirmed → completed (Mindbody: Completed)
+[00:06:52.982] Server  LOG     Booking 45e5fe28-ffa6-4ba5-9744-62abc70a2700: confirmed → completed (Mindbody: Completed)
+[00:06:53.078] Server  LOG     Booking 7784e8f8-b9fd-44d1-98af-ab04b15d5add: confirmed → completed (Mindbody: Completed)
+[00:06:53.225] Server  LOG     Booking 665e6285-fa37-4444-a1ce-902bab5d630b: confirmed → completed (Mindbody: Completed)
+[00:06:53.322] Server  LOG     Booking 038b5a95-1499-450d-b95f-63d8fa9e9247: confirmed → completed (Mindbody: Completed)
+[00:06:53.422] Server  LOG     Booking 2e3b018f-165a-40bb-9575-b5efa4e5c301: confirmed → completed (Mindbody: Completed)
+[00:06:53.516] Server  LOG     Booking 01e883dc-533c-48f3-a91a-2fe563e4db66: confirmed → completed (Mindbody: Completed)
+[00:06:53.608] Server  LOG     Booking 15c99cf8-bee3-4c65-9e0e-55ada66cc60f: confirmed → completed (Mindbody: Completed)
+[00:06:53.750] Server  LOG     Booking e60add9b-f590-48fa-8188-edaac2631b65: confirmed → completed (Mindbody: Completed)
+[00:06:53.841] Server  LOG     Booking 49f0d5f9-94a1-4a5b-a50c-e0b0850cc6e2: confirmed → completed (Mindbody: Completed)
+[00:06:53.939] Server  LOG     Booking ad17b1b7-c40f-451b-9ec8-8ead86c02a5b: confirmed → completed (Mindbody: Completed)
+[00:06:54.043] Server  LOG     Booking 9a006850-6726-4ee6-8da0-17fb35aae477: confirmed → completed (Mindbody: Completed)
+[00:06:54.134] Server  LOG     Booking d9b3533e-94b8-4115-a840-5eb1e16ea78c: confirmed → completed (Mindbody: Completed)
+[00:06:54.275] Server  LOG     Booking 0478c16f-352a-4f61-972f-ff052694059c: confirmed → completed (Mindbody: Completed)
+[00:06:54.365] Server  LOG     Booking 8c8185c1-d420-464e-bf99-60e61714b653: confirmed → completed (Mindbody: Completed)
+[00:06:54.479] Server  LOG     Booking e6052c0d-cd5a-4164-bfaa-812ed1ff8554: confirmed → completed (Mindbody: Completed)
+[00:06:54.615] Server  LOG     Booking ea89a316-2c02-443c-aa45-9a7189b4be88: confirmed → completed (Mindbody: Completed)
+[00:06:54.802] Server  LOG     Booking 84945ace-c017-4efc-b225-9c3992ce2bbe: confirmed → completed (Mindbody: Completed)
+[00:06:54.944] Server  LOG     Booking db39ba0c-ec31-4b7c-a830-d8775ba30e3d: confirmed → completed (Mindbody: Completed)
+[00:06:55.041] Server  LOG     Booking f3877f51-aecb-4e12-8b1f-9d1ace77448c: confirmed → completed (Mindbody: Completed)
+[00:06:55.137] Server  LOG     Booking 02b41c33-8818-436e-b9a9-04013cb45e4f: confirmed → completed (Mindbody: Completed)
+[00:06:55.322] Server  LOG     Booking 079b03a5-90d4-4117-a281-e85e84a98269: confirmed → completed (Mindbody: Completed)
+[00:06:55.411] Server  LOG     Booking 26a36d96-2912-4258-ae41-4284ceff7bd8: confirmed → completed (Mindbody: Completed)
+[00:06:55.504] Server  LOG     Booking 0a31ff4f-1cbe-4ecf-8925-706b694da41d: confirmed → completed (Mindbody: Completed)
+[00:06:55.596] Server  LOG     Booking 15b6f5d0-7402-49a1-96c7-97185461e4da: confirmed → completed (Mindbody: Completed)
+[00:06:55.692] Server  LOG     Booking 4d4eabdf-6959-4440-af77-acf8fbc2003b: confirmed → completed (Mindbody: Completed)
+[00:06:59.615] Server  LOG     Backlog: 30 past bookings absent from Mindbody → cancelled
+[00:06:59.618] Server  LOG     Sync complete: 182 past updated, 0 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:06:59.823] Server  LOG     getStaffAppointments called with: {}
+[00:06:59.824] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:07:00.375] Server  LOG     Staff appointments response: 148 "appointments"
+[00:07:00.375] Server  LOG     getStaffAppointments called with: {}
+[00:07:00.376] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:07:00.731] Server  LOG     Staff appointments response: 159 "appointments"
+[00:07:00.834] Server  LOG     Syncing 119 of 119 total bookings (window: 2026-07-30 → 2026-08-15)
+[00:07:00.837] Server  LOG     Target IDs: 199131, 198902, 199181, 199239, 199169, 199228, 199221, 199230, 199311, 199219, 199220, 199224, 199124, 199300, 199045, 197776, 199426, 199226, 199269, 199307, 198968, 199109, 199047, 199466, 199065, 199108, 199473, 199463, 199107, 199379, 199471, 199472, 199542, 199573, 199648, 199646, 199676, 199699, 199700, 199694, 199715, 199567, 199570, 199720, 199733, 199793, 199705, 199785, 199846, 199849, 199889, 199685, 199760, 199895, 199960, 199470, 200036, 199400, 199402, 199995, 199941, 200005, 198766, 199992, 200080, 200085, 200033, 199847, 200007, 199968, 200004, 200144, 200143, 199822, 200018, 200081, 200167, 200246, 200245, 200234, 200243, 200063, 200285, 200298, 200310, 200331, 200393, 200445, 200446, 199451, 200417, 199701, 200463, 200500, 200504, 200505, 200443, 200464, 200525, 200472, 200521, 200527, 200556, 200552, 200232, 200467, 200557, 200663, 200677, 200674, 200374, 200608, 200710, 200676, 200593, 200780, 200786, 200731, 200817
+[00:07:00.842] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:07:01.791] Server  LOG     Found 2 locations: 1, 2
+[00:07:01.792] Server  LOG     getStaffAppointments called with: {}
+[00:07:01.792] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-07-30&endDate=2026-08-15&limit=200&offset=0" ""
+[00:07:02.756] Server  LOG     Staff appointments response: 200 "appointments"
+[00:07:02.757] Server  LOG     Location 1 page 1 sample IDs: 199490, 199494, 199495, 199505, 199520, 199519, 199524, 199543, 199028, 199198
+[00:07:02.758] Server  LOG     getStaffAppointments called with: {}
+[00:07:02.762] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-07-30&endDate=2026-08-15&limit=200&offset=200" ""
+[00:07:03.455] Server  LOG     Staff appointments response: 200 "appointments"
+[00:07:03.456] Server  LOG     getStaffAppointments called with: {}
+[00:07:03.456] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-07-30&endDate=2026-08-15&limit=200&offset=400" ""
+[00:07:04.253] Server  LOG     Staff appointments response: 200 "appointments"
+[00:07:04.255] Server  LOG     getStaffAppointments called with: {}
+[00:07:04.255] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-07-30&endDate=2026-08-15&limit=200&offset=600" ""
+[00:07:05.071] Server  LOG     Staff appointments response: 200 "appointments"
+[00:07:05.072] Server  LOG     getStaffAppointments called with: {}
+[00:07:05.072] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-07-30&endDate=2026-08-15&limit=200&offset=800" ""
+[00:07:05.824] Server  LOG     Staff appointments response: 109 "appointments"
+[00:07:05.825] Server  LOG     Location 1: found 70 matches so far
+[00:07:05.825] Server  LOG     getStaffAppointments called with: {}
+[00:07:05.826] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-07-30&endDate=2026-08-15&limit=200&offset=0" ""
+[00:07:06.388] Server  LOG     Staff appointments response: 200 "appointments"
+[00:07:06.389] Server  LOG     Location 2 page 1 sample IDs: 199027, 199049, 199128, 199188, 199189, 199190, 199191, 199239, 199240, 198566
+[00:07:06.391] Server  LOG     getStaffAppointments called with: {}
+[00:07:06.391] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-07-30&endDate=2026-08-15&limit=200&offset=200" ""
+[00:07:07.047] Server  LOG     Staff appointments response: 200 "appointments"
+[00:07:07.048] Server  LOG     getStaffAppointments called with: {}
+[00:07:07.049] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-07-30&endDate=2026-08-15&limit=200&offset=400" ""
+[00:07:07.633] Server  LOG     Staff appointments response: 172 "appointments"
+[00:07:07.634] Server  LOG     Location 2: found 102 matches so far
+[00:07:07.634] Server  LOG     Status map built: 102 of 119 IDs found
+[00:07:07.767] Server  LOG     Booking f7431c67-ac4b-4c88-aeff-6a19797b9697: confirmed → completed (Mindbody: Completed)
+[00:07:07.907] Server  LOG     Booking 775af7d6-ea9b-4302-94a9-e76aece20c91: confirmed → completed (Mindbody: Completed)
+[00:07:08.008] Server  LOG     Booking 0bd4c55d-3dc0-4f3d-b3d6-46c177f2069a: confirmed → completed (Mindbody: Completed)
+[00:07:08.103] Server  LOG     Booking cf18f0de-f145-4dc8-ae85-38bcba886514: confirmed → completed (Mindbody: Completed)
+[00:07:08.196] Server  LOG     Booking 316560eb-ad3f-4187-b63c-6dcab83d07b1: confirmed → completed (Mindbody: Completed)
+[00:07:08.291] Server  LOG     Booking 5d8ba9bd-c073-408a-bb9e-2ac048f7b758: confirmed → completed (Mindbody: Completed)
+[00:07:08.430] Server  LOG     Booking 2f414b98-cdc4-40fc-9312-0588474750e8: confirmed → completed (Mindbody: Completed)
+[00:07:08.527] Server  LOG     Booking 385dd2ad-8cb7-4868-8fca-d130886c70dd: confirmed → completed (Mindbody: Completed)
+[00:07:08.623] Server  LOG     Booking 7677fe77-6b23-4b4b-9def-c5bc152a16cf: confirmed → completed (Mindbody: Completed)
+[00:07:08.714] Server  LOG     Booking ae9d0ead-4055-49b4-a7ae-fd08bde8d01f: confirmed → completed (Mindbody: Completed)
+[00:07:08.809] Server  LOG     Booking 3638ac7c-23be-4b55-acd4-f227317f6eea: confirmed → completed (Mindbody: Completed)
+[00:07:08.956] Server  LOG     Booking 144dafef-68ca-48c8-937f-4943cd1d12fc: confirmed → completed (Mindbody: Completed)
+[00:07:09.051] Server  LOG     Booking 7c1afc65-dcc3-4c48-ab81-50719daafc69: confirmed → completed (Mindbody: Completed)
+[00:07:09.142] Server  LOG     Booking 577d0998-9a49-48c4-b501-23600fb18229: confirmed → completed (Mindbody: Completed)
+[00:07:09.233] Server  LOG     Booking 29c3ead5-800b-48cf-9e79-badf76f86d37: confirmed → completed (Mindbody: Completed)
+[00:07:09.329] Server  LOG     Booking 77f22c3c-178a-4405-b1d6-fda737cb67b9: confirmed → completed (Mindbody: Completed)
+[00:07:09.474] Server  LOG     Booking c9592721-b27f-4af6-98ca-cd970547eb61: confirmed → completed (Mindbody: Completed)
+[00:07:09.567] Server  LOG     Booking 4cc100ca-db9a-41e0-9dc8-20ed2a3e1cb7: confirmed → noshow (Mindbody: NoShow)
+[00:07:09.658] Server  LOG     Booking a523b1d9-e737-43c6-80fe-a892f7be87b1: confirmed → completed (Mindbody: Completed)
+[00:07:09.748] Server  LOG     Booking 4e5cfaac-3046-47c3-bbf3-b6ee4a1734bb: confirmed → completed (Mindbody: Completed)
+[00:07:09.841] Server  LOG     Booking 95896640-ba8a-465f-8dbb-d9c3bc6113d1: confirmed → completed (Mindbody: Completed)
+[00:07:10.002] Server  LOG     Booking 32946d93-a9f0-4cd9-8f09-64da681ecb0b: confirmed → completed (Mindbody: Completed)
+[00:07:10.099] Server  LOG     Booking 436b9da8-4076-4948-9dcb-f7135b4879df: confirmed → completed (Mindbody: Completed)
+[00:07:10.201] Server  LOG     Booking 5bca5837-68cf-4dd4-99be-76b4f2be7581: confirmed → completed (Mindbody: Completed)
+[00:07:10.297] Server  LOG     Booking 57bf4f52-c531-4033-8145-a521ee8d5c44: confirmed → noshow (Mindbody: NoShow)
+[00:07:10.391] Server  LOG     Booking 88e1249e-0941-4284-becb-ac35ae00367c: confirmed → completed (Mindbody: Completed)
+[00:07:10.548] Server  LOG     Booking a049c013-b197-43cf-90f9-f2fce19ef351: confirmed → completed (Mindbody: Completed)
+[00:07:10.711] Server  LOG     Booking 6092f258-a715-49d4-853b-34ab0966a997: confirmed → completed (Mindbody: Arrived)
+[00:07:10.822] Server  LOG     Booking 267eec83-d8a8-421e-8b8c-7ce61d0ad5d5: confirmed → completed (Mindbody: Completed)
+[00:07:10.932] Server  LOG     Booking 5285fd71-3d27-4152-b179-83b324b98068: confirmed → completed (Mindbody: Completed)
+[00:07:11.053] Server  LOG     Booking 32b04c0e-aac6-4e0c-a67d-535d45937f27: confirmed → completed (Mindbody: Completed)
+[00:07:11.157] Server  LOG     Booking b65e4126-1c30-42ff-8953-d1084afd9664: confirmed → completed (Mindbody: Completed)
+[00:07:11.249] Server  LOG     Booking 26e48da0-2d7d-43f7-bdb6-b10a1abb4923: confirmed → completed (Mindbody: Completed)
+[00:07:11.346] Server  LOG     Booking b333229f-631f-4743-a9c7-73b6626745b1: confirmed → completed (Mindbody: Completed)
+[00:07:11.439] Server  LOG     Booking 568c2193-4bdd-42e5-bb03-0160f6473298: confirmed → completed (Mindbody: Completed)
+[00:07:11.576] Server  LOG     Booking 190ba059-e271-439a-ba1f-ef9caac3f8c4: confirmed → completed (Mindbody: Completed)
+[00:07:11.871] Server  LOG     Booking e9fe0b87-5623-4553-812d-f80926082085: confirmed → completed (Mindbody: Completed)
+[00:07:11.996] Server  LOG     Booking 9abd25d2-c20d-4569-a7d7-a649b09ac7bd: confirmed → completed (Mindbody: Completed)
+[00:07:12.264] Server  LOG     Booking d0c4e0bb-1cca-46b2-a170-88af618b9ed9: confirmed → completed (Mindbody: Completed)
+[00:07:12.428] Server  LOG     Booking e2ce94b0-b757-4acb-a40f-4b2429155733: confirmed → completed (Mindbody: Completed)
+[00:07:12.520] Server  LOG     Booking f4a04fe2-53b8-4fa4-a75a-4edacc7bc726: confirmed → completed (Mindbody: Completed)
+[00:07:12.620] Server  LOG     Booking 2005bffc-a103-4627-91b6-51c3fd804e3e: confirmed → completed (Mindbody: Completed)
+[00:07:12.789] Server  LOG     Booking 14bfb487-f87c-4d2f-9e5f-144e10f266d7: confirmed → completed (Mindbody: Completed)
+[00:07:12.879] Server  LOG     Booking 8b018186-d7c9-464d-b5cd-511d7ea306e2: confirmed → completed (Mindbody: Completed)
+[00:07:12.973] Server  LOG     Booking 98c8abc1-3169-4209-92d6-731c55f311e3: confirmed → completed (Mindbody: Completed)
+[00:07:13.148] Server  LOG     Booking 51ff3966-9cc4-4769-8f53-a2d127735c56: confirmed → completed (Mindbody: Completed)
+[00:07:13.313] Server  LOG     Booking 728cb81e-6b1e-4d9b-8da6-8f620079a121: confirmed → completed (Mindbody: Completed)
+[00:07:13.412] Server  LOG     Booking cd4316e3-7838-4bed-9172-0ee65ed668d5: confirmed → completed (Mindbody: Booked)
+[00:07:13.510] Server  LOG     Booking 36ac6ef5-61f3-48a6-8e0b-51a34a7264fc: confirmed → completed (Mindbody: Completed)
+[00:07:13.675] Server  LOG     Booking 2bc5866e-38ff-4eed-b5df-cc6a6cee6a78: confirmed → completed (Mindbody: Completed)
+[00:07:13.769] Server  LOG     Booking 2f8cd832-eacf-4e4f-a5b5-64f7fa146f03: confirmed → completed (Mindbody: Completed)
+[00:07:13.862] Server  LOG     Booking abc38fbc-1852-447e-a1d0-783294156f69: confirmed → completed (Mindbody: Completed)
+[00:07:13.961] Server  LOG     Booking 59e89a6b-523e-4e5f-bc92-3c3de7208cb9: confirmed → completed (Mindbody: Completed)
+[00:07:14.056] Server  LOG     Booking 078056c0-b88d-41f0-8211-7aa9bc1e27a6: confirmed → completed (Mindbody: Completed)
+[00:07:14.199] Server  LOG     Booking 95284420-96d8-4bce-bd15-b7516d4ca491: confirmed → completed (Mindbody: Completed)
+[00:07:14.293] Server  LOG     Booking 5e65f834-92a8-43a5-a5ce-e5460baf0739: confirmed → completed (Mindbody: Completed)
+[00:07:14.391] Server  LOG     Booking b4930b26-8105-4c8e-891e-70bee4cf7e85: confirmed → completed (Mindbody: Completed)
+[00:07:14.486] Server  LOG     Booking a5531655-6d1c-4b51-8f01-4e0d1b0d0ca9: confirmed → completed (Mindbody: Completed)
+[00:07:14.584] Server  LOG     Booking 3ab464ec-4204-4cb4-a868-acf6105e5aa2: confirmed → completed (Mindbody: Completed)
+[00:07:14.722] Server  LOG     Booking 954a1766-35f1-47fc-8448-d2c1997986f0: confirmed → completed (Mindbody: Completed)
+[00:07:14.819] Server  LOG     Booking 2f2e4498-939b-411c-942b-e78971f9b80c: confirmed → completed (Mindbody: Completed)
+[00:07:14.913] Server  LOG     Booking e76314e2-1274-48ef-8bc5-3a510bd9b9ce: confirmed → completed (Mindbody: Completed)
+[00:07:15.010] Server  LOG     Booking 81b99b68-79f6-430b-80d7-40c4efd4e918: confirmed → completed (Mindbody: Completed)
+[00:07:15.103] Server  LOG     Booking ac95a26f-3491-40a1-958b-8646f011f271: confirmed → completed (Mindbody: Completed)
+[00:07:15.245] Server  LOG     Booking 9aba38c6-6630-4b5e-88e7-8ec916492af8: confirmed → completed (Mindbody: Completed)
+[00:07:15.345] Server  LOG     Booking 044002c8-1809-4a30-9d97-c327d5c001aa: confirmed → completed (Mindbody: Completed)
+[00:07:15.437] Server  LOG     Booking 08dfa5d3-7a27-411f-bbcc-2e789930f902: confirmed → completed (Mindbody: Completed)
+[00:07:15.552] Server  LOG     Booking fbf137dd-cdb1-4909-a82c-2b20841798f0: confirmed → completed (Mindbody: Completed)
+[00:07:15.644] Server  LOG     Booking 070422fe-0341-4f4b-b6be-80426ee84533: confirmed → completed (Mindbody: Completed)
+[00:07:15.771] Server  LOG     Booking ee28fd8d-21a9-4af3-9004-ef054f591efd: confirmed → completed (Mindbody: Completed)
+[00:07:15.867] Server  LOG     Booking 6962e2dc-c882-418f-9bde-c9a184773314: confirmed → completed (Mindbody: Completed)
+[00:07:15.963] Server  LOG     Booking f0cfffaa-0327-4622-be39-16b225539f49: confirmed → completed (Mindbody: Completed)
+[00:07:16.057] Server  LOG     Booking 311910ae-9563-43f6-b6f6-c50cfad2b422: confirmed → completed (Mindbody: Completed)
+[00:07:16.152] Server  LOG     Booking 0cfdc96a-00ec-44de-8c0b-f56a50fc0362: confirmed → completed (Mindbody: Completed)
+[00:07:16.295] Server  LOG     Booking 240d378a-e972-4c79-9b50-fac63b6af3c8: confirmed → completed (Mindbody: Completed)
+[00:07:16.390] Server  LOG     Booking 812c0606-d48f-4689-9203-3cbcf6e869f0: confirmed → completed (Mindbody: Completed)
+[00:07:16.483] Server  LOG     Booking 4a8fc075-9f03-4fc4-beb3-3dbfd494a801: confirmed → completed (Mindbody: Completed)
+[00:07:16.578] Server  LOG     Booking 617e691f-1270-4dd2-8132-642ff289e5e6: confirmed → completed (Mindbody: Completed)
+[00:07:16.669] Server  LOG     Booking b0c95658-8762-4d39-b671-c35d1c54acc0: confirmed → completed (Mindbody: Completed)
+[00:07:16.822] Server  LOG     Booking ab961bd2-a7de-4582-afac-34068960cd16: confirmed → completed (Mindbody: Completed)
+[00:07:16.928] Server  LOG     Booking 256436eb-4cf7-4bf8-82b4-0d649a4b9241: confirmed → completed (Mindbody: Arrived)
+[00:07:17.041] Server  LOG     Booking 8f46fb46-e514-492d-9c15-ddfa82274770: confirmed → completed (Mindbody: Completed)
+[00:07:17.138] Server  LOG     Booking 5cf27a23-039b-49ab-bb8c-cf78d3f25b28: confirmed → completed (Mindbody: Completed)
+[00:07:17.228] Server  LOG     Booking 39abf7b2-452b-42b1-87d6-e784a63e7690: confirmed → completed (Mindbody: Completed)
+[00:07:17.344] Server  LOG     Booking c232280b-878b-452e-91a2-407124d2a809: confirmed → completed (Mindbody: Completed)
+[00:07:17.437] Server  LOG     Booking 754e492a-85a5-49a0-886e-f4f58d7d6047: confirmed → completed (Mindbody: Completed)
+[00:07:17.528] Server  LOG     Booking 42307b78-7dd4-424d-b818-8752b780c4c1: confirmed → completed (Mindbody: Completed)
+[00:07:17.622] Server  LOG     Booking a4aced4c-5510-473a-9d89-c76cda48e2b1: confirmed → completed (Mindbody: Completed)
+[00:07:17.713] Server  LOG     Booking f756f273-72f7-4b17-b2e9-05dca7dd4465: confirmed → completed (Mindbody: Completed)
+[00:07:17.868] Server  LOG     Booking ec99b720-da96-4ea4-94e6-2c73a3043e10: confirmed → completed (Mindbody: Completed)
+[00:07:17.962] Server  LOG     Booking c8dc0e1c-78a3-46f6-a453-f732df6b7194: confirmed → completed (Mindbody: Completed)
+[00:07:18.055] Server  LOG     Booking d11f8ea1-253b-492a-afc2-561ed1b66bdf: confirmed → completed (Mindbody: Completed)
+[00:07:18.151] Server  LOG     Booking d5f61978-7cda-4834-8d99-6d271eeff72d: confirmed → completed (Mindbody: Completed)
+[00:07:18.247] Server  LOG     Booking 4e60521f-2069-48f0-83be-61c309aa34d1: confirmed → completed (Mindbody: Completed)
+[00:07:18.391] Server  LOG     Booking 5390444b-d70a-440a-afa3-c32a364960df: confirmed → completed (Mindbody: Confirmed)
+[00:07:18.487] Server  LOG     Booking 7f78a9e1-9890-43e7-9e4f-1425611b06ba: confirmed → completed (Mindbody: Completed)
+[00:07:18.577] Server  LOG     Booking a37eb4e6-9031-47f6-86f7-43d6d66a0316: confirmed → completed (Mindbody: Completed)
+[00:07:18.678] Server  LOG     Booking 6d5264dd-06e4-44be-baa5-9ce504eae918: confirmed → completed (Mindbody: Completed)
+[00:07:18.770] Server  LOG     Booking 17b1147c-512f-4718-8e1a-80806cccf728: confirmed → completed (Mindbody: Completed)
+[00:07:18.919] Server  LOG     Booking 68da2672-35b5-4e59-93f4-baac01373d57: confirmed → completed (Mindbody: Completed)
+[00:07:19.009] Server  LOG     Booking 71386394-1fc8-4400-98ff-84810c9a9836: confirmed → completed (Mindbody: Completed)
+[00:07:19.103] Server  LOG     Booking f4be6e5b-b97f-4584-a448-0e1e48345b44: confirmed → completed (Mindbody: Completed)
+[00:07:21.107] Server  LOG     Backlog: 17 past bookings absent from Mindbody → cancelled
+[00:07:21.108] Server  LOG     Sync complete: 102 past updated, 0 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:07:21.298] Server  LOG     getStaffAppointments called with: {}
+[00:07:21.300] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:07:21.790] Server  LOG     Staff appointments response: 148 "appointments"
+[00:07:21.791] Server  LOG     getStaffAppointments called with: {}
+[00:07:21.791] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:07:22.224] Server  LOG     Staff appointments response: 159 "appointments"
+[00:43:58.344] Server  LOG       Reload env: .env.local
+[00:44:16.356] Server  LOG       Reload env: .env.local
+[00:44:16.448] Server  LOG     ✓ Compiled in 0ms
+[00:44:16.506] Server  LOG     ✓ Compiled in 116ms

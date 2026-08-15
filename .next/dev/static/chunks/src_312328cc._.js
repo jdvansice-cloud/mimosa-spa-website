@@ -2889,6 +2889,9 @@ function device() {
 function track(event, data) {
     if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
     ;
+    // Dev/test sessions must not pollute production analytics (the dev server
+    // writes to the same Supabase) — localhost never tracks.
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
     try {
         (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$analytics$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["pushToDataLayer"])({
             event,

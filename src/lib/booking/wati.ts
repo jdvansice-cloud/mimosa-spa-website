@@ -162,6 +162,33 @@ export async function sendBookingChange(
 }
 
 // ===========================================
+// BOOKING CANCELLATION NOTIFICATION
+// Template: cancelacion_cita
+// {{1}} nombre, {{2}} ubicacion, {{3}} fecha, {{4}} hora.
+// The reagendar link is STATIC in the template body
+// (https://www.mimosaretreat.com/es/reservar) — 4 variables only.
+// Sent when a confirmed online booking is cancelled in Mindbody (front
+// desk/phone) so the customer hears it from us, not silence.
+// ===========================================
+
+export async function sendBookingCancellation(data: {
+  clientName: string
+  clientPhone: string
+  locationName: string
+  date: string
+  time: string
+  /** Kept for the email fallback's deep link; unused by the WATI template */
+  serviceId?: number
+}): Promise<WatiResponse> {
+  return sendTemplate(data.clientPhone, 'cancelacion_cita', [
+    { name: '1', value: data.clientName },
+    { name: '2', value: stripMimosaPrefix(data.locationName) },
+    { name: '3', value: data.date },
+    { name: '4', value: data.time },
+  ])
+}
+
+// ===========================================
 // BOOKING REMINDER NOTIFICATION (24h before)
 // Template: recordatorio_cita
 // {{1}} nombre, {{2}} ubicacion, {{3}} fecha, {{4}} hora

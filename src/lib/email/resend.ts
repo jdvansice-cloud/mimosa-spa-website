@@ -5,7 +5,16 @@ export function isEmailConfigured(): boolean {
   return !!process.env.RESEND_API_KEY
 }
 
-const FROM =
+// Three sender identities:
+//  - purchases (buyer receipts, order emails)         → PURCHASE_EMAIL_FROM
+//  - appointment notifications (conf/reminder/cancel) → BOOKING_EMAIL_FROM
+//  - the electronic gift card itself, to the RECIPIENT → GIFTCARD_EMAIL_FROM
+//    (its own identity so the person receiving it recognizes a gift)
+const PURCHASE_FROM =
+  process.env.PURCHASE_EMAIL_FROM || 'Mimosa Spa Retreat <compras@mimosaretreat.com>'
+const BOOKING_FROM =
+  process.env.BOOKING_EMAIL_FROM || 'Mimosa Spa Retreat <citas@mimosaretreat.com>'
+const GIFT_FROM =
   process.env.GIFTCARD_EMAIL_FROM || 'Mimosa Spa Retreat <regalos@mimosaretreat.com>'
 
 export async function sendEmail(input: {
@@ -13,6 +22,8 @@ export async function sendEmail(input: {
   subject: string
   html: string
   replyTo?: string
+  /** 'purchase' (default) = gift cards; 'booking' = appointment emails */
+  kind?: 'purchase' | 'booking' | 'gift'
 }): Promise<{ ok: boolean; id?: string; error?: string }> {
   const key = process.env.RESEND_API_KEY
   if (!key) return { ok: false, error: 'RESEND_API_KEY not set' }
@@ -27,7 +38,10 @@ export async function sendEmail(input: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM,
+        from:
+          input.kind === 'booking' ? BOOKING_FROM :
+          input.kind === 'gift' ? GIFT_FROM :
+          PURCHASE_FROM,
         to: [input.to],
         subject: testPrefix + input.subject,
         html: input.html,

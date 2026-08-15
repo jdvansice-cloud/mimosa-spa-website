@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { addMultipleAppointments, getClientWithCustomFields, updateClient, removeAppointment } from '@/lib/booking/mindbody'
 import { sendBookingConfirmation, sendBookingChange, isWatiConfigured } from '@/lib/booking/wati'
+import { sendEmail, isEmailConfigured } from '@/lib/email/resend'
+import { bookingConfirmationEmail } from '@/lib/email/templates/booking'
 import {
   validateRequired,
   sanitizeError,
@@ -450,6 +452,27 @@ export async function POST(request: NextRequest) {
         } catch (watiError) {
           console.error('Error sending WhatsApp confirmation:', watiError)
         }
+      }
+    }
+
+    // Email fallback: customer has no phone, or the WhatsApp send failed —
+    // they still hear from us if Mindbody has their email.
+    if (!whatsappSent && !replaceAppointmentId && isEmailConfigured() && mindbodyClient?.Email) {
+      try {
+        const hasOffset = /[Z]$/.test(startDateTime) || /[+-]\d{2}:\d{2}$/.test(startDateTime)
+        const bookingDate = new Date(hasOffset ? startDateTime : `${startDateTime}-05:00`)
+        const mail = bookingConfirmationEmail({
+          clientName: clientName || mindbodyClient.FirstName || 'Cliente',
+          locationName: locationName || 'Mimosa Spa Retreat',
+          date: bookingDate.toLocaleDateString('es-PA', { timeZone: 'America/Panama', day: 'numeric', month: 'long', year: 'numeric' }),
+          time: bookingDate.toLocaleTimeString('es-PA', { timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true }),
+          services: (services as BookingService[]).map(sv => sv.name || 'Servicio'),
+          therapistName: staffRequested ? (finalTherapistName || undefined) : undefined,
+        })
+        const emailResult = await sendEmail({ to: mindbodyClient.Email, ...mail, kind: 'booking' })
+        console.log('Confirmation email fallback:', emailResult.ok ? 'sent' : emailResult.error)
+      } catch (emailErr) {
+        console.error('Confirmation email fallback failed:', emailErr)
       }
     }
 

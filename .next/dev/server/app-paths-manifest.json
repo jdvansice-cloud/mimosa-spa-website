@@ -1,9 +1,7 @@
 {
   "/[locale]/page": "app/[locale]/page.js",
-  "/api/giftcards/catalog/route": "app/api/giftcards/catalog/route.js",
-  "/api/giftcards/checkout/callback/route": "app/api/giftcards/checkout/callback/route.js",
-  "/api/giftcards/checkout/route": "app/api/giftcards/checkout/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/cron/sync-appointments/route": "app/api/cron/sync-appointments/route.js",
   "/api/promotions/route": "app/api/promotions/route.js",
-  "/api/settings/route": "app/api/settings/route.js",
-  "/api/track/route": "app/api/track/route.js"
+  "/api/settings/route": "app/api/settings/route.js"
 }
