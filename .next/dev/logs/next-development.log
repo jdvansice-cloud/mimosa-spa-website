@@ -1364,3 +1364,379 @@
 [00:44:16.356] Server  LOG       Reload env: .env.local
 [00:44:16.448] Server  LOG     ✓ Compiled in 0ms
 [00:44:16.506] Server  LOG     ✓ Compiled in 116ms
+[00:57:51.080] Server  LOG     getStaffAppointments called with: {}
+[00:57:51.841] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:57:53.261] Server  LOG     Staff appointments response: 161 "appointments"
+[00:57:53.261] Server  LOG     getStaffAppointments called with: {}
+[00:57:53.262] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-21&limit=200&offset=0" ""
+[00:57:53.646] Server  LOG     Staff appointments response: 149 "appointments"
+[00:57:54.037] Server  LOG     Syncing 2 of 2 total bookings (window: 2026-08-15 → 2026-08-15)
+[00:57:54.037] Server  LOG     Target IDs: 200745, 200754
+[00:57:54.037] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:57:54.504] Server  LOG     Found 2 locations: 1, 2
+[00:57:54.504] Server  LOG     getStaffAppointments called with: {}
+[00:57:54.505] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-15&limit=200&offset=0" ""
+[00:57:54.937] Server  LOG     Staff appointments response: 85 "appointments"
+[00:57:54.937] Server  LOG     Location 1 page 1 sample IDs: 200547, 200204, 200212, 200773, 200509, 200788, 200802, 200803, 200824, 200825
+[00:57:54.937] Server  LOG     Location 1: found 0 matches so far
+[00:57:54.938] Server  LOG     getStaffAppointments called with: {}
+[00:57:54.938] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-15&limit=200&offset=0" ""
+[00:57:55.279] Server  LOG     Staff appointments response: 50 "appointments"
+[00:57:55.279] Server  LOG     Location 2 page 1 sample IDs: 200613, 199136, 200336, 200337, 200338, 200339, 200747, 200745, 200808, 200241
+[00:57:55.280] Server  LOG     Location 2: found 2 matches so far
+[00:57:55.280] Server  LOG     Status map built: 2 of 2 IDs found
+[00:57:55.424] Server  LOG     Booking ff53e843-4ed9-45e1-a2eb-93b565e7f5c6: confirmed → completed (Mindbody: Confirmed)
+[00:57:55.564] Server  LOG     Booking 687bf94d-0f61-4996-abcd-994e171370d6: confirmed → completed (Mindbody: Confirmed)
+[00:57:55.569] Server  LOG     Sync complete: 2 past updated, 0 unchanged, 0 upcoming cancelled (0 notices sent)
+[00:58:38.571] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[00:58:39.037] Server  LOG     getStaffAppointments called with: {}
+[00:58:39.038] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-29&limit=200&offset=0" ""
+[00:58:39.517] Server  LOG     Staff appointments response: 184 "appointments"
+[00:58:39.517] Server  LOG     getStaffAppointments called with: {}
+[00:58:39.518] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-29&limit=200&offset=0" ""
+[00:58:39.907] Server  LOG     Staff appointments response: 185 "appointments"
+[01:00:11.793] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[01:00:12.242] Server  LOG     getStaffAppointments called with: {}
+[01:00:12.243] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-29&limit=200&offset=0" ""
+[01:00:12.734] Server  LOG     Staff appointments response: 184 "appointments"
+[01:00:12.734] Server  LOG     getStaffAppointments called with: {}
+[01:00:12.734] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-29&limit=200&offset=0" ""
+[01:00:13.112] Server  LOG     Staff appointments response: 189 "appointments"
+[01:00:13.492] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=false" ""
+[01:00:13.750] Server  LOG     Session types from Mindbody (onlineOnly=false): 130
+[01:00:13.751] Server  LOG     getClientWithCustomFields - Fetching client ID: "100000443"
+[01:00:13.752] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100000443" ""
+[01:00:14.240] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:14.386] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026152"
+[01:00:14.387] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026152" ""
+[01:00:14.790] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:14.903] Server  LOG     getClientWithCustomFields - Fetching client ID: "100020539"
+[01:00:14.903] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100020539" ""
+[01:00:15.772] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:15.885] Server  LOG     getClientWithCustomFields - Fetching client ID: "100022916"
+[01:00:15.886] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100022916" ""
+[01:00:16.352] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:16.465] Server  LOG     getClientWithCustomFields - Fetching client ID: "100017508"
+[01:00:16.466] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100017508" ""
+[01:00:16.959] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:17.073] Server  LOG     getClientWithCustomFields - Fetching client ID: "100017665"
+[01:00:17.074] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100017665" ""
+[01:00:17.465] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:17.578] Server  LOG     getClientWithCustomFields - Fetching client ID: "100016554"
+[01:00:17.578] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100016554" ""
+[01:00:18.052] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:18.165] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019870"
+[01:00:18.166] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019870" ""
+[01:00:18.578] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:18.687] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019763"
+[01:00:18.688] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019763" ""
+[01:00:19.382] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:19.546] Server  LOG     getClientWithCustomFields - Fetching client ID: "100021039"
+[01:00:19.546] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100021039" ""
+[01:00:20.074] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:20.229] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026395"
+[01:00:20.230] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026395" ""
+[01:00:20.951] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:21.061] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026397"
+[01:00:21.061] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026397" ""
+[01:00:21.479] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:21.593] Server  LOG     getClientWithCustomFields - Fetching client ID: "100011940"
+[01:00:21.593] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100011940" ""
+[01:00:22.176] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:22.290] Server  LOG     getClientWithCustomFields - Fetching client ID: "100014991"
+[01:00:22.290] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100014991" ""
+[01:00:22.755] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:22.870] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025188"
+[01:00:22.870] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025188" ""
+[01:00:23.351] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:23.457] Server  LOG     getClientWithCustomFields - Fetching client ID: "100016926"
+[01:00:23.457] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100016926" ""
+[01:00:24.101] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:24.199] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019286"
+[01:00:24.200] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019286" ""
+[01:00:24.667] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:24.772] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024588"
+[01:00:24.773] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024588" ""
+[01:00:25.233] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:25.332] Server  LOG     getClientWithCustomFields - Fetching client ID: "100009464"
+[01:00:25.333] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100009464" ""
+[01:00:25.822] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:25.921] Server  LOG     getClientWithCustomFields - Fetching client ID: "100023532"
+[01:00:25.921] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100023532" ""
+[01:00:26.721] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:26.816] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025037"
+[01:00:26.817] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025037" ""
+[01:00:27.369] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:27.466] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025446"
+[01:00:27.467] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025446" ""
+[01:00:27.905] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:28.002] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026361"
+[01:00:28.002] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026361" ""
+[01:00:28.370] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:28.469] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025293"
+[01:00:28.469] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025293" ""
+[01:00:28.939] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:29.034] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019500"
+[01:00:29.034] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019500" ""
+[01:00:29.424] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:29.518] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026317"
+[01:00:29.519] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026317" ""
+[01:00:29.911] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:30.020] Server  LOG     getClientWithCustomFields - Fetching client ID: "100022675"
+[01:00:30.021] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100022675" ""
+[01:00:30.475] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:30.572] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025187"
+[01:00:30.573] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025187" ""
+[01:00:31.034] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:31.133] Server  LOG     getClientWithCustomFields - Fetching client ID: "100013054"
+[01:00:31.134] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100013054" ""
+[01:00:31.489] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:31.582] Server  LOG     getClientWithCustomFields - Fetching client ID: "100013012"
+[01:00:31.583] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100013012" ""
+[01:00:31.987] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:32.085] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019004"
+[01:00:32.085] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019004" ""
+[01:00:32.653] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:32.802] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019202"
+[01:00:32.802] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019202" ""
+[01:00:33.535] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:33.700] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024757"
+[01:00:33.702] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024757" ""
+[01:00:34.104] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:34.199] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026215"
+[01:00:34.199] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026215" ""
+[01:00:34.611] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:34.706] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024555"
+[01:00:34.706] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024555" ""
+[01:00:35.110] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:35.206] Server  LOG     getClientWithCustomFields - Fetching client ID: "100000719"
+[01:00:35.206] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100000719" ""
+[01:00:35.663] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:35.758] Server  LOG     getClientWithCustomFields - Fetching client ID: "100017201"
+[01:00:35.758] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100017201" ""
+[01:00:36.319] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:36.412] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026333"
+[01:00:36.413] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026333" ""
+[01:00:36.835] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:36.928] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019502"
+[01:00:36.928] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019502" ""
+[01:00:37.404] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:37.505] Server  LOG     getClientWithCustomFields - Fetching client ID: "100011239"
+[01:00:37.506] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100011239" ""
+[01:00:37.872] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:37.970] Server  LOG     getClientWithCustomFields - Fetching client ID: "100018298"
+[01:00:37.970] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100018298" ""
+[01:00:38.424] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:38.518] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026390"
+[01:00:38.519] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026390" ""
+[01:00:38.940] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:39.038] Server  LOG     getClientWithCustomFields - Fetching client ID: "100021580"
+[01:00:39.039] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100021580" ""
+[01:00:39.482] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:39.578] Server  LOG     getClientWithCustomFields - Fetching client ID: "100014602"
+[01:00:39.579] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100014602" ""
+[01:00:40.004] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:40.096] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025488"
+[01:00:40.097] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025488" ""
+[01:00:40.501] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:40.598] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024264"
+[01:00:40.599] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024264" ""
+[01:00:41.000] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:41.104] Server  LOG     getClientWithCustomFields - Fetching client ID: "100018643"
+[01:00:41.104] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100018643" ""
+[01:00:41.527] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:41.631] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024838"
+[01:00:41.632] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024838" ""
+[01:00:42.058] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:42.155] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026235"
+[01:00:42.155] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026235" ""
+[01:00:42.566] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:42.666] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025449"
+[01:00:42.666] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025449" ""
+[01:00:43.098] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:43.219] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026413"
+[01:00:43.219] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026413" ""
+[01:00:43.720] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:43.817] Server  LOG     getClientWithCustomFields - Fetching client ID: "100014395"
+[01:00:43.817] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100014395" ""
+[01:00:44.258] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:44.351] Server  LOG     getClientWithCustomFields - Fetching client ID: "100022798"
+[01:00:44.352] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100022798" ""
+[01:00:44.755] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:44.855] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026356"
+[01:00:44.855] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026356" ""
+[01:00:45.268] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:45.361] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019599"
+[01:00:45.365] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019599" ""
+[01:00:45.739] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:45.840] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019879"
+[01:00:45.840] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019879" ""
+[01:00:46.326] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:46.422] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026190"
+[01:00:46.422] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026190" ""
+[01:00:46.918] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:47.167] Server  LOG     getClientWithCustomFields - Fetching client ID: "100006058"
+[01:00:47.167] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100006058" ""
+[01:00:47.691] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:47.857] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026157"
+[01:00:47.857] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026157" ""
+[01:00:48.377] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:48.474] Server  LOG     getClientWithCustomFields - Fetching client ID: "100023246"
+[01:00:48.474] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100023246" ""
+[01:00:48.877] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:48.974] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026260"
+[01:00:48.975] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026260" ""
+[01:00:49.419] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:49.517] Server  LOG     getClientWithCustomFields - Fetching client ID: "100008948"
+[01:00:49.517] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100008948" ""
+[01:00:50.008] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:50.120] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024859"
+[01:00:50.121] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024859" ""
+[01:00:50.517] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:50.611] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019650"
+[01:00:50.612] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019650" ""
+[01:00:51.081] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:51.183] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026403"
+[01:00:51.184] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026403" ""
+[01:00:51.591] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:51.688] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019031"
+[01:00:51.689] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019031" ""
+[01:00:52.141] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:52.237] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025646"
+[01:00:52.238] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025646" ""
+[01:00:52.653] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:52.748] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024286"
+[01:00:52.750] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024286" ""
+[01:00:53.216] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:53.312] Server  LOG     getClientWithCustomFields - Fetching client ID: "100022191"
+[01:00:53.312] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100022191" ""
+[01:00:53.771] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:53.868] Server  LOG     getClientWithCustomFields - Fetching client ID: "100020145"
+[01:00:53.869] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100020145" ""
+[01:00:54.337] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:54.512] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026262"
+[01:00:54.512] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026262" ""
+[01:00:54.916] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:55.033] Server  LOG     getClientWithCustomFields - Fetching client ID: "100015666"
+[01:00:55.033] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100015666" ""
+[01:00:55.462] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:55.642] Server  LOG     getClientWithCustomFields - Fetching client ID: "100018971"
+[01:00:55.643] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100018971" ""
+[01:00:56.084] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:56.179] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026410"
+[01:00:56.179] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026410" ""
+[01:00:56.611] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:56.711] Server  LOG     getClientWithCustomFields - Fetching client ID: "100001594"
+[01:00:56.711] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100001594" ""
+[01:00:57.134] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:57.240] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026250"
+[01:00:57.241] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026250" ""
+[01:00:57.662] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:57.765] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026384"
+[01:00:57.766] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026384" ""
+[01:00:58.180] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:58.274] Server  LOG     getClientWithCustomFields - Fetching client ID: "100021318"
+[01:00:58.274] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100021318" ""
+[01:00:58.703] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:58.804] Server  LOG     getClientWithCustomFields - Fetching client ID: "100021748"
+[01:00:58.804] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100021748" ""
+[01:00:59.227] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:59.324] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026324"
+[01:00:59.325] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026324" ""
+[01:00:59.755] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:00:59.854] Server  LOG     getClientWithCustomFields - Fetching client ID: "100022422"
+[01:00:59.855] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100022422" ""
+[01:01:00.320] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:00.415] Server  LOG     getClientWithCustomFields - Fetching client ID: "100023448"
+[01:01:00.416] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100023448" ""
+[01:01:00.850] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:00.948] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026340"
+[01:01:00.949] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026340" ""
+[01:01:01.391] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:01.507] Server  LOG     getClientWithCustomFields - Fetching client ID: "100022513"
+[01:01:01.507] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100022513" ""
+[01:01:01.857] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:01.951] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026328"
+[01:01:01.952] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026328" ""
+[01:01:02.376] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:02.473] Server  LOG     getClientWithCustomFields - Fetching client ID: "100017119"
+[01:01:02.474] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100017119" ""
+[01:01:02.923] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:03.019] Server  LOG     getClientWithCustomFields - Fetching client ID: "100015735"
+[01:01:03.020] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100015735" ""
+[01:01:03.493] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:03.590] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026188"
+[01:01:03.591] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026188" ""
+[01:01:04.015] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:04.111] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025968"
+[01:01:04.112] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025968" ""
+[01:01:04.535] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:04.643] Server  LOG     getClientWithCustomFields - Fetching client ID: "100020944"
+[01:01:04.643] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100020944" ""
+[01:01:05.179] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:05.516] Server  LOG     getClientWithCustomFields - Fetching client ID: "100019333"
+[01:01:05.517] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100019333" ""
+[01:01:06.050] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:06.206] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024858"
+[01:01:06.207] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024858" ""
+[01:01:06.733] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:06.832] Server  LOG     getClientWithCustomFields - Fetching client ID: "100012953"
+[01:01:06.833] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100012953" ""
+[01:01:07.302] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:07.399] Server  LOG     getClientWithCustomFields - Fetching client ID: "100022405"
+[01:01:07.400] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100022405" ""
+[01:01:07.837] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:07.935] Server  LOG     getClientWithCustomFields - Fetching client ID: "100022790"
+[01:01:07.936] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100022790" ""
+[01:01:08.401] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:08.511] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026334"
+[01:01:08.512] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026334" ""
+[01:01:08.944] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:09.057] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025880"
+[01:01:09.058] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025880" ""
+[01:01:09.469] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:09.567] Server  LOG     getClientWithCustomFields - Fetching client ID: "100011062"
+[01:01:09.567] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100011062" ""
+[01:01:10.027] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:10.235] Server  LOG     getClientWithCustomFields - Fetching client ID: "100024225"
+[01:01:10.236] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100024225" ""
+[01:01:10.767] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:10.866] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026002"
+[01:01:10.866] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026002" ""
+[01:01:11.309] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:11.413] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025711"
+[01:01:11.414] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025711" ""
+[01:01:11.882] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:11.984] Server  LOG     getClientWithCustomFields - Fetching client ID: "100025828"
+[01:01:11.984] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100025828" ""
+[01:01:12.394] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:12.498] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026189"
+[01:01:12.499] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026189" ""
+[01:01:12.992] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:13.089] Server  LOG     getClientWithCustomFields - Fetching client ID: "100023241"
+[01:01:13.089] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100023241" ""
+[01:01:13.464] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:13.564] Server  LOG     getClientWithCustomFields - Fetching client ID: "100023158"
+[01:01:13.564] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100023158" ""
+[01:01:13.950] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:14.047] Server  LOG     getClientWithCustomFields - Fetching client ID: "100026150"
+[01:01:14.048] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100026150" ""
+[01:01:14.442] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:14.540] Server  LOG     getClientWithCustomFields - Fetching client ID: "100009816"
+[01:01:14.541] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100009816" ""
+[01:01:14.957] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:15.057] Server  LOG     First ingest baseline: 107 staff bookings recorded silently
+[01:01:28.211] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/locations" ""
+[01:01:28.782] Server  LOG     getStaffAppointments called with: {}
+[01:01:28.783] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=1&startDate=2026-08-15&endDate=2026-08-29&limit=200&offset=0" ""
+[01:01:29.216] Server  LOG     Staff appointments response: 184 "appointments"
+[01:01:29.217] Server  LOG     getStaffAppointments called with: {}
+[01:01:29.217] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/appointment/staffappointments?locationIds=2&startDate=2026-08-15&endDate=2026-08-29&limit=200&offset=0" ""
+[01:01:29.686] Server  LOG     Staff appointments response: 191 "appointments"
+[01:01:30.162] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/site/sessiontypes?limit=200&onlineOnly=false" ""
+[01:01:30.431] Server  LOG     Session types from Mindbody (onlineOnly=false): 130
+[01:01:30.432] Server  LOG     getClientWithCustomFields - Fetching client ID: "100020577"
+[01:01:30.433] Server  LOG     Mindbody API request: "GET" "https://api.mindbodyonline.com/public/v6/client/clients?ClientIds=100020577" ""
+[01:01:30.868] Server  LOG     getClientWithCustomFields - Found client: {}
+[01:01:31.006] Server  LOG     WATI request: "https://live-mt-server.wati.io/1036696/api/v1/sendTemplateMessage?whatsappNumber=50762349710" "{\"template_name\":\"confirmacion_cita2\",\"broadcast_name\":\"confirmacion_cita2\",\"parameters\":[{\"name\":\"1\",\"value\":\"JENNY MORALES\"},{\"name\":\"2\",\"value\":\"San Francisco\"},{\"name\":\"3\",\"value\":\"17 de agosto de 2026\"},{\"name\":\"4\",\"value\":\"1:00 p. m.\"},{\"name\":\"5\",\"value\":\"65 min\"},{\"name\":\"6\",\"value\":\"Judith Padilla\"},{\"name\":\"7\",\"value\":\"Liberador de Tension 45 min, Masaje Piernas Cansadas 20 min\"}]}"
+[01:01:31.767] Server  LOG     WATI response: "{\"result\":true,\"phone_number\":\"50762349710\",\"target\":null,\"template_name\":\"confirmacion_cita2\",\"parameteres\":[{\"name\":\"1\",\"value\":\"JENNY MORALES\"},{\"name\":\"2\",\"value\":\"San Francisco\"},{\"name\":\"3\",\"value\":\"17 de agosto de 2026\"},{\"name\":\"4\",\"value\":\"1:00 p. m.\"},{\"name\":\"5\",\"value\":\"65 min\"},{\"name\":\"6\",\"value\":\"Judith Padilla\"},{\"name\":\"7\",\"value\":\"Liberador de Tension 45 min, Masaje Piernas Cansadas 20 min\"}],\"contact\":{\"scopedUsers\":[{\"bmId\":\"1727177540866905\",\"bsuid\":\"PA.4292777437640223\",\"parentBsuid\":null}],\"username\":null,\"id\":\"695d395522ca64b9831013ad\",\"tenantId\":\"1036696\",\"wAid\":\"50762349710\",\"firstName\":\"Jenny Morales 💜\",\"fullName\":\"Jenny Morales 💜\",\"phone\":\"50762349710\",\"source\":\"WhatsApp\",\"contactStatus\":\"VALID\",\"photo\":null,\"created\":\"Jan-06-2026\",\"customParams\":[{\"name\":\"name\",\"value\":\"Jenny Morales 💜\",\"type\":null,\"displayValue\":null},{\"name\":\"phone\",\"value\":\"50762349710\",\"type\":null,\"displayValue\":null},{\"name\":\"lead_stage\",\"value\":\"New Lead\",\"type\":null,\"displayValue\":null},{\"name\":\"contact_owner\",\"value\":\"\",\"type\":null,\"displayValue\":null},{\"name\":\"1\",\"value\":\"Jenny\",\"type\":null,\"displayValue\":null},{\"name\":\"2\",\"value\":\"🌼\",\"type\":null,\"displayValue\":null},{\"name\":\"3\",\"value\":\"Mañana, 8 de enero\",\"type\":null,\"displayValue\":null},{\"name\":\"4\",\"value\":\"10:30 a.m\",\"type\":null,\"displayValue\":null},{\"name\":\"5\",\"value\":\"Calma festiva, 90 minutos\",\"type\":null,\"displayValue\":null},{\"name\":\"6\",\"value\":\"Suc. San Francisco\",\"type\":null,\"displayValue\":null},{\"name\":\"cx_score\",\"value\":\"4\",\"type\":null,\"displayValue\":null},{\"name\":\"cx_score_latest\",\"value\":\"4\",\"type\":null,\"displayValue\":null}],\"originalCustomParams\":null,\"importTaskId\":null,\"updatedFromImport\":false,\"optedIn\":false,\"isDeleted\":false,\"isMerged\":false,\"mergedIntoContactId\":null,\"lastUpdated\":\"2026-06-21T21:52:49.024Z\",\"allowBroadcast\":true,\"allowSMS\":true,\"teamIds\":[\"68f7d5951d4ce1d13705af2e\"],\"isInFlow\":false,\"isInTestFlow\":false,\"lastFlowId\":\"693b48a0d31ae8556cbe7a33\",\"lastWorkflowRunId\":null,\"lastBotActionId\":null,\"lastBotActionCompensatable\":false,\"currentFlowNodeId\":\"main_assignAgent-ASIgB\",\"selectedHubspotId\":\"\",\"channelId\":null,\"displayId\":\"50762349710\",\"contactLinkId\":null,\"waChannelPhone\":null,\"igPhoneSource\":0,\"mgPhoneSource\":0,\"rcsPhoneSource\":0,\"tikTokPhoneSource\":0,\"tagName\":null,\"messengerPageName\":\"\",\"paylinkSettings\":null,\"ctwaFollowUpStatus\":0,\"ctwaFollowUpCount\":0,\"ctwaFollowUpNotice\":0,\"deletedFromSMB\":false,\"segments\":[\"AtRisk\",\"HighlyEngaged\",\"Winback\"],\"operatorIds\":[],\"regionCode\":\"PA\",\"customLabel\":null},\"model\":{\"ids\":[\"695d395522ca64b9831013ad\"]},\"validWhatsAppNumber\":true,\"info\":null,\"local_message_id\":\"b9f8df90-c7c5-4cfe-98f5-32b21e64ca3d\"}"

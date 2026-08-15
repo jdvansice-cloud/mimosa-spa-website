@@ -1,9 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getLocations, getStaffAppointments } from '@/lib/booking/mindbody'
-import { sendBookingCancellation, isWatiConfigured } from '@/lib/booking/wati'
+import { getLocations, getStaffAppointments, getClientWithCustomFields, getSessionTypes } from '@/lib/booking/mindbody'
+import { sendBookingCancellation, sendBookingConfirmation, isWatiConfigured } from '@/lib/booking/wati'
 import { sendEmail, isEmailConfigured } from '@/lib/email/resend'
-import { bookingCancellationEmail } from '@/lib/email/templates/booking'
+import { bookingCancellationEmail, bookingConfirmationEmail } from '@/lib/email/templates/booking'
+
+// Real /appointment/staffappointments shape (no nested Client/Location/
+// SessionType objects — flat ids only)
+interface LiveAppointment {
+  Id: number
+  StartDateTime: string
+  EndDateTime: string
+  Duration?: number
+  Status: string
+  LocationId: number
+  SessionTypeId: number
+  StaffId: number
+  Staff?: { Id: number; FirstName?: string; LastName?: string; DisplayName?: string }
+  ClientId: string | null
+}
+
+// Mindbody stores phones loosely; WATI wants country code + number, no '+'.
+function normalizePhoneForWati(phone: string | null | undefined): string | null {
+  const digits = (phone || '').replace(/\D/g, '')
+  if (digits.length === 8) return `507${digits}`
+  if (digits.length >= 10) return digits
+  return null
+}
 
 /**
  * GET /api/cron/sync-appointments
@@ -43,6 +66,47 @@ export async function GET(request: NextRequest) {
   let upcomingCancelled = 0
   let cancellationNoticesSent = 0
 
+  const liveAppointmentsGlobal: LiveAppointment[] = []
+  const liveIds = new Set<number>()
+  const okLocations = new Set<number>()
+  const locationNames = new Map<number, string>()
+
+  // Fetch the FULL upcoming window (today → +14d) for every location — this
+  // single dataset powers cancellation detection AND staff-booking ingestion.
+  {
+    let allLocationIds: number[] = []
+    try {
+      const locs = await getLocations()
+      allLocationIds = locs.map(l => l.Id)
+      for (const l of locs) locationNames.set(l.Id, l.Name)
+    } catch (err) {
+      console.error('Locations fetch failed:', err)
+    }
+    const winStart = nowIso.slice(0, 10)
+    const winEnd = horizon.slice(0, 10)
+    for (const locationId of allLocationIds) {
+      try {
+        let offset = 0
+        const PAGE = 200
+        while (true) {
+          const { appointments, pagination } = await getStaffAppointments({
+            locationId, startDate: winStart, endDate: winEnd, limit: PAGE, offset,
+          })
+          for (const apt of appointments) {
+            liveIds.add(apt.Id)
+            liveAppointmentsGlobal.push(apt as unknown as LiveAppointment)
+          }
+          const total = pagination?.TotalResults ?? appointments.length
+          offset += PAGE
+          if (offset >= total || appointments.length < PAGE) break
+        }
+        okLocations.add(locationId)
+      } catch (err) {
+        console.error(`Upcoming window fetch failed for location ${locationId}:`, err)
+      }
+    }
+  }
+
   const { data: upcoming } = await supabase
     .from('bookings')
     .select('id, client_name, client_phone, client_email, location_id, location_name, appointment_start, mindbody_appointment_ids, services')
@@ -52,32 +116,6 @@ export async function GET(request: NextRequest) {
     .not('mindbody_appointment_ids', 'is', null)
 
   if (upcoming && upcoming.length > 0) {
-    const upLocIds = [...new Set(upcoming.map(b => b.location_id as number).filter(Boolean))]
-    const upDates = upcoming.map(b => String(b.appointment_start).slice(0, 10)).sort()
-    const upStart = upDates[0]
-    const upEnd = upDates[upDates.length - 1]
-    const liveIds = new Set<number>()
-    const okLocations = new Set<number>()
-
-    for (const locationId of upLocIds) {
-      try {
-        let offset = 0
-        const PAGE = 200
-        while (true) {
-          const { appointments, pagination } = await getStaffAppointments({
-            locationId, startDate: upStart, endDate: upEnd, limit: PAGE, offset,
-          })
-          for (const apt of appointments) liveIds.add(apt.Id)
-          const total = pagination?.TotalResults ?? appointments.length
-          offset += PAGE
-          if (offset >= total || appointments.length < PAGE) break
-        }
-        okLocations.add(locationId)
-      } catch (err) {
-        console.error(`Upcoming sync fetch failed for location ${locationId}:`, err)
-      }
-    }
-
     for (const booking of upcoming) {
       const firstId = (booking.mindbody_appointment_ids as number[] | null)?.[0]
       if (!firstId) continue
@@ -147,6 +185,153 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // ====== PHASE 1.5: staff-created appointments → our notifications ======
+  // Any upcoming Mindbody appointment with no bookings row was created by
+  // staff (front desk / phone). Ingest it so OUR confirmation, reminder and
+  // cancellation flows cover it — this is what lets Mindbody's own client
+  // notifications be turned off entirely.
+  let ingested = 0
+  let staffConfirmationsSent = 0
+  {
+    // Known ids: every appointment id already tracked, any status
+    const { data: knownRows } = await supabase
+      .from('bookings')
+      .select('mindbody_appointment_ids')
+      .gte('appointment_start', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+    const knownIds = new Set<number>()
+    for (const r of knownRows || []) {
+      for (const id of (r.mindbody_appointment_ids as number[] | null) || []) knownIds.add(id)
+    }
+
+    // First ingest runs silently (baseline) — otherwise every historic
+    // walk-in booking would get a confirmation blast. After the baseline
+    // exists, anything unknown was created since the last run (≤2h) → notify.
+    const { count: baselineCount } = await supabase
+      .from('bookings')
+      .select('id', { count: 'exact', head: true })
+      .like('confirmation_number', 'MB-%')
+    const isFirstIngest = (baselineCount ?? 0) === 0
+
+    const fresh = liveAppointmentsGlobal.filter(a =>
+      a.ClientId &&
+      Number(a.ClientId) > 0 &&
+      !knownIds.has(a.Id) &&
+      (a.Status === 'Booked' || a.Status === 'Confirmed') &&
+      new Date(`${a.StartDateTime}-05:00`).getTime() > Date.now()
+    )
+
+    // Session type names for the services list
+    const sessionTypeNames = new Map<number, string>()
+    if (fresh.length > 0) {
+      try {
+        for (const st of await getSessionTypes(false)) sessionTypeNames.set(st.Id, st.Name)
+      } catch (err) {
+        console.error('Session type lookup failed:', err)
+      }
+    }
+
+    // One visit per client per day (staff book multi-service visits as
+    // consecutive appointments)
+    const visits = new Map<string, LiveAppointment[]>()
+    for (const a of fresh) {
+      const key = `${a.ClientId}|${a.StartDateTime.slice(0, 10)}`
+      if (!visits.has(key)) visits.set(key, [])
+      visits.get(key)!.push(a)
+    }
+
+    const MAX_NOTIFY_PER_RUN = 20
+    for (const group of visits.values()) {
+      group.sort((a, b) => a.StartDateTime.localeCompare(b.StartDateTime))
+      const first = group[0]
+      const clientId = Number(first.ClientId)
+      let phone: string | null = null
+      let email: string | null = null
+      let clientName = ''
+      try {
+        const mbClient = await getClientWithCustomFields(String(clientId))
+        phone = normalizePhoneForWati(mbClient?.MobilePhone)
+        email = mbClient?.Email || null
+        clientName = `${mbClient?.FirstName || ''} ${mbClient?.LastName || ''}`.trim()
+      } catch (err) {
+        console.error(`Client lookup failed for ${clientId}:`, err)
+      }
+
+      const durationOf = (a: LiveAppointment) =>
+        a.Duration ||
+        Math.max(0, Math.round((new Date(a.EndDateTime).getTime() - new Date(a.StartDateTime).getTime()) / 60000))
+      const servicesData = group.map(a => ({
+        sessionTypeId: a.SessionTypeId,
+        name: sessionTypeNames.get(a.SessionTypeId) || 'Servicio',
+        duration: durationOf(a),
+      }))
+      const totalDuration = servicesData.reduce((sum, sv) => sum + sv.duration, 0)
+      const therapistName =
+        (first.Staff && (`${first.Staff.FirstName || ''} ${first.Staff.LastName || ''}`.trim() || first.Staff.DisplayName)) || null
+
+      const { error: insErr } = await supabase.from('bookings').insert({
+        confirmation_number: `MB-${first.Id}`,
+        status: 'confirmed',
+        mindbody_client_id: clientId,
+        client_name: clientName || null,
+        client_phone: phone,
+        client_email: email,
+        location_id: first.LocationId,
+        location_name: locationNames.get(first.LocationId) || null,
+        staff_id: first.StaffId,
+        therapist_name: therapistName,
+        staff_requested: false,
+        appointment_start: `${first.StartDateTime}-05:00`,
+        services: servicesData,
+        total_duration: totalDuration,
+        mindbody_appointment_ids: group.map(a => a.Id),
+        total_requested: group.length,
+        total_booked: group.length,
+        whatsapp_sent: false,
+      })
+      if (insErr) {
+        // Unique-violation on rerun etc. — skip quietly
+        console.error(`Ingest insert failed for appointment ${first.Id}:`, insErr.message)
+        continue
+      }
+      ingested++
+
+      if (isFirstIngest || staffConfirmationsSent >= MAX_NOTIFY_PER_RUN) continue
+
+      const d = new Date(`${first.StartDateTime}-05:00`)
+      const dateStr = d.toLocaleDateString('es-PA', { timeZone: 'America/Panama', day: 'numeric', month: 'long', year: 'numeric' })
+      const timeStr = d.toLocaleTimeString('es-PA', { timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true })
+      let confirmed = false
+      if (isWatiConfigured() && phone && clientName) {
+        const r = await sendBookingConfirmation({
+          clientName, clientPhone: phone,
+          locationName: locationNames.get(first.LocationId) || 'Mimosa Spa Retreat',
+          date: dateStr, time: timeStr,
+          services: servicesData.map(sv => sv.name),
+          totalDuration, therapistName: therapistName || 'Por asignar',
+        })
+        if (r.result) {
+          confirmed = true
+          staffConfirmationsSent++
+          await supabase.from('bookings').update({ whatsapp_sent: true }).eq('confirmation_number', `MB-${first.Id}`)
+        }
+      }
+      if (!confirmed && isEmailConfigured() && email) {
+        const mail = bookingConfirmationEmail({
+          clientName: clientName || 'Cliente',
+          locationName: locationNames.get(first.LocationId) || 'Mimosa Spa Retreat',
+          date: dateStr, time: timeStr,
+          services: servicesData.map(sv => sv.name),
+          therapistName: therapistName || undefined,
+        })
+        const r = await sendEmail({ to: email, ...mail, kind: 'booking' })
+        if (r.ok) staffConfirmationsSent++
+      }
+    }
+    if (isFirstIngest && ingested > 0) {
+      console.log(`First ingest baseline: ${ingested} staff bookings recorded silently`)
+    }
+  }
+
   // ========== PHASE 2: past bookings (completed / noshow / cancelled) ==========
   // Only sync bookings whose appointment time has already passed
   const now = new Date().toISOString()
@@ -166,7 +351,7 @@ export async function GET(request: NextRequest) {
 
   if (!bookings || bookings.length === 0) {
     return NextResponse.json({
-      synced: 0, upcomingCancelled, cancellationNoticesSent, message: 'No past bookings to sync',
+      synced: 0, upcomingCancelled, cancellationNoticesSent, ingested, staffConfirmationsSent, message: 'No past bookings to sync',
     })
   }
 
@@ -338,5 +523,5 @@ export async function GET(request: NextRequest) {
   }
 
   console.log(`Sync complete: ${synced} past updated, ${unchanged} unchanged, ${upcomingCancelled} upcoming cancelled (${cancellationNoticesSent} notices sent)`)
-  return NextResponse.json({ synced, unchanged, upcomingCancelled, cancellationNoticesSent, total_unsynced: bookings.length })
+  return NextResponse.json({ synced, unchanged, upcomingCancelled, cancellationNoticesSent, ingested, staffConfirmationsSent, total_unsynced: bookings.length })
 }
