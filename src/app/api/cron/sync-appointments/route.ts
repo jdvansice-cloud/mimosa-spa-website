@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getLocations, getStaffAppointments, getClientWithCustomFields, getSessionTypes } from '@/lib/booking/mindbody'
+import { PROGRAM_IDS } from '@/lib/booking/constants'
 import { sendBookingCancellation, sendBookingConfirmation, sendBookingChange, isWatiConfigured } from '@/lib/booking/wati'
 import { sendEmail, isEmailConfigured } from '@/lib/email/resend'
 import { bookingCancellationEmail, bookingConfirmationEmail, bookingChangeEmail } from '@/lib/email/templates/booking'
@@ -109,7 +110,7 @@ export async function GET(request: NextRequest) {
 
   const { data: upcoming } = await supabase
     .from('bookings')
-    .select('id, client_name, client_phone, client_email, location_id, location_name, appointment_start, mindbody_appointment_ids, services, therapist_name, staff_requested')
+    .select('id, client_name, client_phone, client_email, location_id, location_name, appointment_start, mindbody_appointment_ids, services, therapist_name, staff_requested, is_couples')
     .eq('status', 'confirmed')
     .gte('appointment_start', nowIso)
     .lte('appointment_start', horizon)
@@ -174,6 +175,7 @@ export async function GET(request: NextRequest) {
           locationName: booking.location_name || 'Mimosa Spa Retreat',
           date: dateStr, time: timeStr, reagendarUrl,
           services: ((booking.services as Array<{ name?: string }> | null) || []).map(sv => sv.name || 'Servicio'),
+          isCouples: !!booking.is_couples,
         })
         const r = await sendEmail({ to: booking.client_email, ...mail, kind: 'booking' })
         if (r.ok) {
@@ -221,15 +223,20 @@ export async function GET(request: NextRequest) {
       new Date(`${a.StartDateTime}-05:00`).getTime() > Date.now()
     )
 
-    // Session type names for the services list
+    // Session type names + programs for the services list / couples detection
     const sessionTypeNames = new Map<number, string>()
+    const sessionTypePrograms = new Map<number, number>()
     if (fresh.length > 0) {
       try {
-        for (const st of await getSessionTypes(false)) sessionTypeNames.set(st.Id, st.Name)
+        for (const st of await getSessionTypes(false)) {
+          sessionTypeNames.set(st.Id, st.Name)
+          sessionTypePrograms.set(st.Id, st.ProgramId)
+        }
       } catch (err) {
         console.error('Session type lookup failed:', err)
       }
     }
+    const PAREJAS_PROGRAMS = new Set<number>([PROGRAM_IDS.TRATAMIENTOS_PAREJAS, PROGRAM_IDS.PAREJAS])
 
     // One visit per client per day (staff book multi-service visits as
     // consecutive appointments)
@@ -260,14 +267,31 @@ export async function GET(request: NextRequest) {
       const durationOf = (a: LiveAppointment) =>
         a.Duration ||
         Math.max(0, Math.round((new Date(a.EndDateTime).getTime() - new Date(a.StartDateTime).getTime()) / 60000))
+      const staffNameOf = (a: LiveAppointment) =>
+        (a.Staff && (`${a.Staff.FirstName || ''} ${a.Staff.LastName || ''}`.trim() || a.Staff.DisplayName)) || null
+      // Couples visit: 2+ simultaneous appointments with different therapists
+      // under one profile, or any service from a Parejas program.
+      const isCouples =
+        group.some(a =>
+          group.some(b => b.Id !== a.Id && b.StartDateTime === a.StartDateTime && b.StaffId !== a.StaffId)
+        ) || group.some(a => PAREJAS_PROGRAMS.has(sessionTypePrograms.get(a.SessionTypeId) ?? -1))
       const servicesData = group.map(a => ({
         sessionTypeId: a.SessionTypeId,
         name: sessionTypeNames.get(a.SessionTypeId) || 'Servicio',
         duration: durationOf(a),
+        therapistName: staffNameOf(a),
       }))
-      const totalDuration = servicesData.reduce((sum, sv) => sum + sv.duration, 0)
-      const therapistName =
-        (first.Staff && (`${first.Staff.FirstName || ''} ${first.Staff.LastName || ''}`.trim() || first.Staff.DisplayName)) || null
+      // Couples run in parallel — don't double-count simultaneous durations
+      const totalDuration = isCouples
+        ? Math.max(...servicesData.map(sv => sv.duration))
+        : servicesData.reduce((sum, sv) => sum + sv.duration, 0)
+      const durationParam: number | string = isCouples
+        ? [...new Set(servicesData.map(sv => sv.duration))].join(' y ')
+        : totalDuration
+      const therapistNames = [...new Set(servicesData.map(sv => sv.therapistName).filter(Boolean))] as string[]
+      const therapistName = therapistNames.length > 0
+        ? (isCouples ? therapistNames.join(' y ') : therapistNames[0])
+        : null
 
       const { error: insErr } = await supabase.from('bookings').insert({
         confirmation_number: `MB-${first.Id}`,
@@ -288,6 +312,7 @@ export async function GET(request: NextRequest) {
         total_requested: group.length,
         total_booked: group.length,
         whatsapp_sent: false,
+        is_couples: isCouples,
       })
       if (insErr) {
         // Unique-violation on rerun etc. — skip quietly
@@ -307,8 +332,10 @@ export async function GET(request: NextRequest) {
           clientName, clientPhone: phone,
           locationName: locationNames.get(first.LocationId) || 'Mimosa Spa Retreat',
           date: dateStr, time: timeStr,
-          services: servicesData.map(sv => sv.name),
-          totalDuration, therapistName: therapistName || 'Por asignar',
+          services: isCouples
+            ? [`💑 Cita en pareja: ${servicesData.map(sv => sv.name).join(' + ')}`]
+            : servicesData.map(sv => sv.name),
+          totalDuration: durationParam, therapistName: therapistName || 'Por asignar',
         })
         if (r.result) {
           confirmed = true
@@ -321,8 +348,11 @@ export async function GET(request: NextRequest) {
           clientName: clientName || 'Cliente',
           locationName: locationNames.get(first.LocationId) || 'Mimosa Spa Retreat',
           date: dateStr, time: timeStr,
-          services: servicesData.map(sv => sv.name),
-          therapistName: therapistName || undefined,
+          services: isCouples
+            ? servicesData.map(sv => (sv.therapistName ? `${sv.name} — ${sv.therapistName}` : sv.name))
+            : servicesData.map(sv => sv.name),
+          therapistName: isCouples ? undefined : therapistName || undefined,
+          isCouples,
         })
         const r = await sendEmail({ to: email, ...mail, kind: 'booking' })
         if (r.ok) staffConfirmationsSent++
@@ -375,10 +405,20 @@ export async function GET(request: NextRequest) {
       const d = new Date(liveStartIso)
       const dateStr = d.toLocaleDateString('es-PA', { timeZone: 'America/Panama', day: 'numeric', month: 'long', year: 'numeric' })
       const timeStr = d.toLocaleTimeString('es-PA', { timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true })
-      const serviceNames = ((booking.services as Array<{ name?: string }> | null) || [])
-        .map(sv => sv.name || 'Servicio')
-      const totalDuration = ((booking.services as Array<{ duration?: number }> | null) || [])
-        .reduce((sum, sv) => sum + (sv.duration || 0), 0) || 60
+      const isCouplesB = !!booking.is_couples
+      const svcItems = (booking.services as Array<{ name?: string; therapistName?: string | null }> | null) || []
+      const serviceNames = isCouplesB
+        ? [`💑 Cita en pareja: ${svcItems.map(sv => sv.name || 'Servicio').join(' + ')}`]
+        : svcItems.map(sv => sv.name || 'Servicio')
+      const emailServiceNames = isCouplesB
+        ? svcItems.map(sv => (sv.therapistName ? `${sv.name || 'Servicio'} — ${sv.therapistName}` : sv.name || 'Servicio'))
+        : svcItems.map(sv => sv.name || 'Servicio')
+      const svcDurations = svcItems
+        .map(sv => (sv as { duration?: number }).duration || 0)
+        .filter(n => n > 0)
+      const totalDuration: number | string = isCouplesB && svcDurations.length > 0
+        ? [...new Set(svcDurations)].join(' y ')
+        : svcDurations.reduce((sum, n) => sum + n, 0) || 60
 
       let changeSent = false
       if (isWatiConfigured() && booking.client_phone && booking.client_name) {
@@ -404,8 +444,9 @@ export async function GET(request: NextRequest) {
         const mail = bookingChangeEmail({
           clientName: booking.client_name || 'Cliente',
           locationName: booking.location_name || 'Mimosa Spa Retreat',
-          date: dateStr, time: timeStr, services: serviceNames,
+          date: dateStr, time: timeStr, services: emailServiceNames,
           therapistName: booking.staff_requested && booking.therapist_name ? booking.therapist_name : undefined,
+          isCouples: isCouplesB,
         })
         const r = await sendEmail({ to: booking.client_email, ...mail, kind: 'booking' })
         if (r.ok) changeNoticesSent++

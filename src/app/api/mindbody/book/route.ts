@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { addMultipleAppointments, getClientWithCustomFields, updateClient, removeAppointment } from '@/lib/booking/mindbody'
+import { addMultipleAppointments, getClientWithCustomFields, updateClient, removeAppointment, getSessionTypes } from '@/lib/booking/mindbody'
 import { sendBookingConfirmation, sendBookingChange, isWatiConfigured } from '@/lib/booking/wati'
 import { sendEmail, isEmailConfigured } from '@/lib/email/resend'
 import { bookingConfirmationEmail } from '@/lib/email/templates/booking'
@@ -10,7 +10,8 @@ import {
   ERROR_MESSAGES,
   formatDateForPanama,
   formatTimeForPanama,
-  isDateTimeInPastForPanama
+  isDateTimeInPastForPanama,
+  PROGRAM_IDS
 } from '@/lib/booking/constants'
 import {
   checkRateLimit,
@@ -406,12 +407,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Couples detection (case 1): any booked service from a Parejas program
+    let isCouples = false
+    try {
+      const sts = await getSessionTypes(true)
+      const parejasPrograms = new Set<number>([PROGRAM_IDS.TRATAMIENTOS_PAREJAS, PROGRAM_IDS.PAREJAS])
+      const progOf = new Map(sts.map(st => [st.Id, st.ProgramId]))
+      isCouples = (services as BookingService[]).some(
+        sv => parejasPrograms.has(progOf.get(sv.sessionTypeId) ?? -1)
+      )
+    } catch (stErr) {
+      console.error('Couples program lookup failed (non-fatal):', stErr)
+    }
+
     // Pre-compute WhatsApp notification data (used for both confirmation and change messages)
     // Use 'Nuestro equipo' only for the WhatsApp message — keep null in Supabase when no therapist selected
     let whatsappSent = false
     let watiNotificationData: {
       clientName: string; clientPhone: string; locationName: string
-      date: string; time: string; services: string[]; totalDuration: number; therapistName: string
+      date: string; time: string; services: string[]; totalDuration: number | string; therapistName: string
     } | null = null
 
     if (isWatiConfigured() && clientPhone && clientName) {
@@ -423,7 +437,8 @@ export async function POST(request: NextRequest) {
       const timeStr = bookingDate.toLocaleTimeString('es-PA', {
         timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true,
       })
-      const serviceNames = (services as BookingService[]).map(s => s.name || 'Servicio').filter(Boolean)
+      const plainNames = (services as BookingService[]).map(s => s.name || 'Servicio').filter(Boolean)
+      const serviceNames = isCouples ? [`\ud83d\udc91 Cita en pareja: ${plainNames.join(' + ')}`] : plainNames
       // Only promise a name the customer actually chose. Auto-assigned staff
       // can be reshuffled by the front desk, and "Nuestro equipo" read as a
       // person's name — "Por asignar" is unambiguous.
@@ -431,12 +446,13 @@ export async function POST(request: NextRequest) {
         ? (finalTherapistName || 'Por asignar')
         : 'Por asignar'
 
+      const svcDurations = [...new Set((services as BookingService[]).map(sv => sv.duration).filter(Boolean))]
       watiNotificationData = {
         clientName, clientPhone,
         locationName: locationName || 'Mimosa Spa Retreat',
         date: dateStr, time: timeStr,
         services: serviceNames,
-        totalDuration: totalDuration || 60,
+        totalDuration: isCouples && svcDurations.length > 0 ? svcDurations.join(' y ') : totalDuration || 60,
         therapistName: whatsappTherapistName,
       }
 
@@ -468,6 +484,7 @@ export async function POST(request: NextRequest) {
           time: bookingDate.toLocaleTimeString('es-PA', { timeZone: 'America/Panama', hour: 'numeric', minute: '2-digit', hour12: true }),
           services: (services as BookingService[]).map(sv => sv.name || 'Servicio'),
           therapistName: staffRequested ? (finalTherapistName || undefined) : undefined,
+          isCouples,
         })
         const emailResult = await sendEmail({ to: mindbodyClient.Email, ...mail, kind: 'booking' })
         console.log('Confirmation email fallback:', emailResult.ok ? 'sent' : emailResult.error)
@@ -519,6 +536,7 @@ export async function POST(request: NextRequest) {
           tax_amount: taxAmount || null,
           total_with_tax: totalWithTax || null,
           whatsapp_sent: whatsappSent,
+          is_couples: isCouples,
         })
 
       if (insertError) {

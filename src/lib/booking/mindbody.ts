@@ -230,6 +230,41 @@ export async function searchClients(searchText: string) {
   return response.Clients || []
 }
 
+// Paged client listing — used by the lifecycle cron to mirror clients into
+// Supabase (Mindbody cannot filter clients by birthdate).
+export interface MindbodyClientSummary {
+  Id: string
+  FirstName: string | null
+  LastName: string | null
+  Email: string | null
+  MobilePhone: string | null
+  BirthDate: string | null
+  CreationDate: string | null
+  Active?: boolean
+}
+
+export async function getClients(params: {
+  lastModifiedDate?: string // ISO, filters to clients created/updated since
+  limit?: number
+  offset?: number
+} = {}) {
+  interface ClientsPageResponse {
+    Clients: MindbodyClientSummary[]
+    PaginationResponse?: { RequestedLimit: number; RequestedOffset: number; PageSize: number; TotalResults: number }
+  }
+  const response = await mindbodyRequest<ClientsPageResponse>('/client/clients', {
+    params: {
+      ...(params.lastModifiedDate ? { LastModifiedDate: params.lastModifiedDate } : {}),
+      limit: params.limit ?? 200,
+      offset: params.offset ?? 0,
+    },
+  })
+  return {
+    clients: response.Clients || [],
+    pagination: response.PaginationResponse,
+  }
+}
+
 // Register new client
 export async function addClient(clientData: {
   FirstName: string

@@ -16,14 +16,18 @@ const BOOKING_FROM =
   process.env.BOOKING_EMAIL_FROM || 'Mimosa Spa Retreat <citas@mimosaretreat.com>'
 const GIFT_FROM =
   process.env.GIFTCARD_EMAIL_FROM || 'Mimosa Spa Retreat <regalos@mimosaretreat.com>'
+// Relationship emails (welcome, first-visit thanks, birthday) — warm identity
+const RELATION_FROM =
+  process.env.RELATION_EMAIL_FROM || 'Mimosa Spa Retreat <hola@mimosaretreat.com>'
 
 export async function sendEmail(input: {
   to: string
   subject: string
   html: string
   replyTo?: string
-  /** 'purchase' (default) = gift cards; 'booking' = appointment emails */
-  kind?: 'purchase' | 'booking' | 'gift'
+  /** 'purchase' (default) = receipts; 'booking' = appointments; 'gift' = the
+   * gift card itself; 'relation' = welcome/birthday/thanks lifecycle emails */
+  kind?: 'purchase' | 'booking' | 'gift' | 'relation'
 }): Promise<{ ok: boolean; id?: string; error?: string }> {
   const key = process.env.RESEND_API_KEY
   if (!key) return { ok: false, error: 'RESEND_API_KEY not set' }
@@ -41,6 +45,7 @@ export async function sendEmail(input: {
         from:
           input.kind === 'booking' ? BOOKING_FROM :
           input.kind === 'gift' ? GIFT_FROM :
+          input.kind === 'relation' ? RELATION_FROM :
           PURCHASE_FROM,
         to: [input.to],
         subject: testPrefix + input.subject,

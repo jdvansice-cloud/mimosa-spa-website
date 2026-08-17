@@ -24,7 +24,8 @@ interface BookingConfirmationData {
   date: string // "Lunes, 15 de Enero 2026"
   time: string // "10:00 AM"
   services: string[] // Array of service names
-  totalDuration: number // minutes
+  // Minutes; couples visits pass a joined string like "60 y 90"
+  totalDuration: number | string
   therapistName: string
 }
 
@@ -204,6 +205,41 @@ export async function sendBookingReminder(
     { name: '3', value: data.date },
     { name: '4', value: data.time },
     { name: '5', value: data.appointmentId },
+  ])
+}
+
+// ===========================================
+// LIFECYCLE MESSAGES (MARKETING templates — must be created + approved in WATI)
+// House rule: no variables at the end of the body; URLs static in the body.
+// ===========================================
+
+// Template: bienvenida_mimosa — {{1}} nombre
+export async function sendWelcome(data: {
+  clientName: string
+  clientPhone: string
+}): Promise<WatiResponse> {
+  return sendTemplate(data.clientPhone, 'bienvenida_mimosa', [
+    { name: '1', value: data.clientName },
+  ])
+}
+
+// Template: gracias_primera_visita — {{1}} nombre
+export async function sendFirstVisitThanks(data: {
+  clientName: string
+  clientPhone: string
+}): Promise<WatiResponse> {
+  return sendTemplate(data.clientPhone, 'gracias_primera_visita', [
+    { name: '1', value: data.clientName },
+  ])
+}
+
+// Template: cumpleanos_mimosa — {{1}} nombre
+export async function sendBirthday(data: {
+  clientName: string
+  clientPhone: string
+}): Promise<WatiResponse> {
+  return sendTemplate(data.clientPhone, 'cumpleanos_mimosa', [
+    { name: '1', value: data.clientName },
   ])
 }
 

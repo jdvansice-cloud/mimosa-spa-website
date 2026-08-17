@@ -5,7 +5,7 @@ const BRAND_DARK = '#333333'
 const BRAND_GOLD = '#FCCF08'
 const CREAM = '#FDFAF5'
 
-function shell(title: string, bodyHtml: string): string {
+export function shell(title: string, bodyHtml: string): string {
   return `<!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:24px 12px;background:${CREAM};font-family:Georgia,'Times New Roman',serif;">
@@ -26,7 +26,7 @@ function shell(title: string, bodyHtml: string): string {
 </body></html>`
 }
 
-function detailRows(rows: Array<[string, string]>): string {
+export function detailRows(rows: Array<[string, string]>): string {
   return `<table style="width:100%;border-collapse:collapse;background:${CREAM};border-radius:10px;margin:14px 0;font-family:Arial,sans-serif;font-size:14px;">
     ${rows
       .map(
@@ -39,7 +39,7 @@ function detailRows(rows: Array<[string, string]>): string {
   </table>`
 }
 
-function button(label: string, url: string): string {
+export function button(label: string, url: string): string {
   return `<div style="text-align:center;margin:20px 0 6px;">
     <a href="${url}" style="display:inline-block;background:${BRAND_GOLD};color:${BRAND_DARK};font-family:Arial,sans-serif;font-weight:bold;font-size:15px;padding:12px 28px;border-radius:10px;text-decoration:none;">${label}</a>
   </div>`
@@ -52,7 +52,10 @@ export interface BookingEmailData {
   time: string
   services?: string[]
   therapistName?: string
+  isCouples?: boolean
 }
+
+const COUPLES_ROW: [string, string] = ['Tipo', '💑 Cita en pareja']
 
 export function bookingConfirmationEmail(d: BookingEmailData): { subject: string; html: string } {
   const rows: Array<[string, string]> = [
@@ -60,6 +63,7 @@ export function bookingConfirmationEmail(d: BookingEmailData): { subject: string
     ['Fecha', d.date],
     ['Hora', d.time],
   ]
+  if (d.isCouples) rows.push(COUPLES_ROW)
   if (d.services?.length) rows.push(['Servicios', d.services.join(', ')])
   if (d.therapistName) rows.push(['Terapeuta', d.therapistName])
   return {
@@ -98,6 +102,8 @@ export function bookingReminderEmail(
         ['Sede', d.locationName],
         ['Fecha', d.date],
         ['Hora', d.time],
+        ...(d.isCouples ? [COUPLES_ROW] : []),
+        ...(d.services?.length ? [['Servicios', d.services.join(', ')] as [string, string]] : []),
       ])}
       ${confirmUrl ? button('✅ Confirmar asistencia', confirmUrl) : ''}
       <div style="text-align:center;margin:4px 0 10px;">
@@ -116,6 +122,7 @@ export function bookingChangeEmail(d: BookingEmailData): { subject: string; html
     ['Nueva fecha', d.date],
     ['Nueva hora', d.time],
   ]
+  if (d.isCouples) rows.push(COUPLES_ROW)
   if (d.services?.length) rows.push(['Servicios', d.services.join(', ')])
   if (d.therapistName) rows.push(['Terapeuta', d.therapistName])
   return {
@@ -142,6 +149,7 @@ export function bookingCancellationEmail(
     ['Fecha', d.date],
     ['Hora', d.time],
   ]
+  if (d.isCouples) rows.push(COUPLES_ROW)
   if (d.services?.length) rows.push(['Servicios', d.services.join(', ')])
   return {
     subject: `Tu cita en Mimosa Spa fue cancelada — ${d.date}`,

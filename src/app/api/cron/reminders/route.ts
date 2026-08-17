@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('bookings')
-    .select('id, client_name, client_phone, client_email, location_id, location_name, appointment_start, reminder_sent, mindbody_appointment_ids')
+    .select('id, client_name, client_phone, client_email, location_id, location_name, appointment_start, reminder_sent, mindbody_appointment_ids, services, is_couples')
 
   if (forceBookingId) {
     // Manual test: bypass time window + reminder_sent check
@@ -105,6 +105,8 @@ export async function GET(request: NextRequest) {
     id: string; client_name: string | null; client_email: string | null
     location_name: string | null; appointment_start: string
     mindbody_appointment_ids?: number[] | null
+    services?: Array<{ name?: string; therapistName?: string | null }> | null
+    is_couples?: boolean | null
   }, dateStr: string, timeStr: string): Promise<boolean> => {
     if (!isEmailConfigured() || !booking.client_email) return false
     const aptId = (booking.mindbody_appointment_ids as number[] | null)?.[0]
@@ -113,6 +115,10 @@ export async function GET(request: NextRequest) {
       locationName: booking.location_name || 'Mimosa Spa Retreat',
       date: dateStr, time: timeStr,
       appointmentId: aptId ? String(aptId) : undefined,
+      isCouples: !!booking.is_couples,
+      services: booking.is_couples
+        ? (booking.services || []).map(sv => (sv.therapistName ? `${sv.name || 'Servicio'} — ${sv.therapistName}` : sv.name || 'Servicio'))
+        : undefined,
     })
     const r = await sendEmail({ to: booking.client_email, ...mail, kind: 'booking' })
     if (r.ok) {
