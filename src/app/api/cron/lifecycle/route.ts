@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getClients, getClientVisits } from '@/lib/booking/mindbody'
 import { sendWelcome, sendFirstVisitThanks, sendBirthday, isWatiConfigured } from '@/lib/booking/wati'
 import { sendEmail, isEmailConfigured } from '@/lib/email/resend'
-import { welcomeEmail, firstVisitEmail, birthdayEmail } from '@/lib/email/templates/lifecycle'
+import { welcomeEmail, firstVisitEmail, birthdayEmail, REVIEW_URLS } from '@/lib/email/templates/lifecycle'
 
 // Mindbody stores phones loosely; WATI wants country code + number, no '+'.
 function normalizePhoneForWati(phone: string | null | undefined): string | null {
@@ -227,7 +227,11 @@ export async function GET(request: NextRequest) {
 
       const ch: LedgerChannels = { wa: false, email: false }
       if (phone && isWatiConfigured()) {
-        const r = await sendFirstVisitThanks({ clientName: name, clientPhone: phone })
+        const r = await sendFirstVisitThanks({
+          clientName: name,
+          clientPhone: phone,
+          reviewUrl: REVIEW_URLS[(b.location_id as number) || 1] || REVIEW_URLS[1],
+        })
         ch.wa = !!r.result
         if (!r.result) console.error(`First-visit WA failed for ${clientId}:`, JSON.stringify(r).slice(0, 200))
       }

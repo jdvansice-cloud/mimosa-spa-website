@@ -223,13 +223,16 @@ export async function sendWelcome(data: {
   ])
 }
 
-// Template: gracias_primera_visita — {{1}} nombre
+// Template: gracias_primera_visita — {{1}} nombre, {{2}} link de reseña Google
+// (per-location; the variable sits mid-body, text follows it)
 export async function sendFirstVisitThanks(data: {
   clientName: string
   clientPhone: string
+  reviewUrl: string
 }): Promise<WatiResponse> {
   return sendTemplate(data.clientPhone, 'gracias_primera_visita', [
     { name: '1', value: data.clientName },
+    { name: '2', value: data.reviewUrl },
   ])
 }
 
