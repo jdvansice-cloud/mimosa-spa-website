@@ -213,12 +213,12 @@ export async function sendBookingReminder(
 // House rule: no variables at the end of the body; URLs static in the body.
 // ===========================================
 
-// Template: bienvenida_mimosa — {{1}} nombre
+// Template: bienvenida_mimosa2 — {{1}} nombre
 export async function sendWelcome(data: {
   clientName: string
   clientPhone: string
 }): Promise<WatiResponse> {
-  return sendTemplate(data.clientPhone, 'bienvenida_mimosa', [
+  return sendTemplate(data.clientPhone, 'bienvenida_mimosa2', [
     { name: '1', value: data.clientName },
   ])
 }
