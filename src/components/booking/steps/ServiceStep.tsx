@@ -495,7 +495,9 @@ export function ServiceStep() {
         for (const [category, categoryServices] of Object.entries(servicesData.grouped as Record<string, MindbodyService[]>)) {
           const filtered = categoryServices
             .filter((service: MindbodyService) => shouldShowInBooking(service.Id))
-            .sort(bySortOrder)
+            .sort(category === 'Rituales Mimosa'
+              ? (a: MindbodyService, b: MindbodyService) => (b.Price || 0) - (a.Price || 0) || bySortOrder(a, b)
+              : bySortOrder)
           // Only include categories that have at least one visible service
           if (filtered.length > 0) {
             filteredGrouped[category] = filtered
