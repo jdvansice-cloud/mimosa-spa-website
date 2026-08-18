@@ -110,13 +110,16 @@ function PromotionTile({
   isSelected,
   isLoading,
   onSelect,
-  allServices
+  allServices,
+  compact = false
 }: {
   promotion: Promotion
   isSelected: boolean
   isLoading: boolean
   onSelect: () => void
   allServices: MindbodyService[]
+  /** Slim single-row layout used when tiles stack in one column */
+  compact?: boolean
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -161,10 +164,12 @@ function PromotionTile({
         type="button"
         onClick={onSelect}
         disabled={isLoading}
-        className="relative w-full text-left p-2.5 pb-2"
+        className={compact
+          ? 'relative w-full text-left px-3 py-2 flex items-center gap-3'
+          : 'relative w-full text-left p-2.5 pb-2'}
       >
         {/* Selected badge */}
-        {isSelected && (
+        {isSelected && !compact && (
           <div className="absolute top-1.5 right-1.5 z-10">
             <span className="w-5 h-5 bg-gold rounded-full flex items-center justify-center shadow-sm">
               <Check className="w-3.5 h-3.5 text-dark" />
@@ -172,19 +177,27 @@ function PromotionTile({
           </div>
         )}
 
-        <h4 className="font-display font-semibold text-cream !text-sm sm:!text-base leading-snug pr-6 mb-1.5 line-clamp-2">
+        <h4 className={compact
+          ? 'font-display font-semibold text-cream !text-sm sm:!text-base leading-snug line-clamp-2 flex-1 min-w-0'
+          : 'font-display font-semibold text-cream !text-sm sm:!text-base leading-snug pr-6 mb-1.5 line-clamp-2'}>
           {promotion.title_es}
         </h4>
 
         {/* Price row */}
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-base sm:text-lg font-bold text-white">
-            ${promotion.price.toFixed(0)}
-          </span>
+        <div className={compact ? 'flex items-center gap-2 flex-none' : 'flex items-baseline gap-2 flex-wrap'}>
           {promotion.duration_minutes && (
             <span className="flex items-center gap-0.5 text-[10px] sm:text-xs text-cream/70 bg-white/10 px-1.5 py-0.5 rounded-full whitespace-nowrap">
               <Clock className="w-3 h-3" />
               {promotion.duration_minutes} min
+            </span>
+          )}
+          {compact && promotion.duration_minutes ? null : null}
+          <span className="text-base sm:text-lg font-bold text-white whitespace-nowrap">
+            ${promotion.price.toFixed(0)}
+          </span>
+          {isSelected && compact && (
+            <span className="w-5 h-5 bg-gold rounded-full flex items-center justify-center shadow-sm flex-none">
+              <Check className="w-3.5 h-3.5 text-dark" />
             </span>
           )}
         </div>
@@ -694,7 +707,7 @@ export function ServiceStep() {
                 <div className="px-3 pb-4 pt-0">
                   {activePromotions.length <= 3 ? (
                     /* All offers visible — no interaction required to see any */
-                    <div className="grid grid-cols-2 gap-2.5 items-stretch">
+                    <div className="flex flex-col gap-2">
                       {activePromotions.map((promotion) => (
                         <PromotionTile
                           key={promotion.id}
@@ -703,6 +716,7 @@ export function ServiceStep() {
                           isLoading={loadingPromotionId === promotion.id}
                           onSelect={() => handleSelectPromotion(promotion)}
                           allServices={allOnlineServices}
+                          compact
                         />
                       ))}
                     </div>
