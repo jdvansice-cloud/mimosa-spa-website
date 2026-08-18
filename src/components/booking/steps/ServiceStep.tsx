@@ -480,22 +480,14 @@ export function ServiceStep() {
           orderOf(a.Id) - orderOf(b.Id) || a.Name.localeCompare(b.Name)
 
         // Filter top pick services (must be top pick AND show_in_booking).
-        // Mixed list → group by kind: rituales first, then masajes, faciales.
-        const kindRank = (programId: number | undefined) => {
-          switch (programId) {
-            case 5: case 19: return 0 // rituales
-            case 4: return 1          // masajes
-            case 6: return 2          // faciales
-            default: return 3
-          }
-        }
+        // Ordered by price, highest first.
         const topPicks = servicesData.services
           .filter((service: MindbodyService) => {
             const setting = settingsMap.get(service.Id)
             return setting?.is_top_pick === true && shouldShowInBooking(service.Id)
           })
           .sort((a: MindbodyService, b: MindbodyService) =>
-            kindRank(a.ProgramId) - kindRank(b.ProgramId) || bySortOrder(a, b)
+            (b.Price || 0) - (a.Price || 0) || bySortOrder(a, b)
           )
 
         // Filter grouped services to only show those with show_in_booking: true
@@ -517,9 +509,9 @@ export function ServiceStep() {
 
         // Set active promotions (filter only those with mindbody_service_ids)
         if (promotionsData.data) {
-          const promotionsWithServices = promotionsData.data.filter(
-            (p: Promotion) => p.mindbody_service_ids && p.mindbody_service_ids.length > 0
-          )
+          const promotionsWithServices = promotionsData.data
+            .filter((p: Promotion) => p.mindbody_service_ids && p.mindbody_service_ids.length > 0)
+            .sort((a: Promotion, b: Promotion) => (b.price || 0) - (a.price || 0))
           setActivePromotions(promotionsWithServices)
         }
 
