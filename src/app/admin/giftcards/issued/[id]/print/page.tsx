@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, Printer, Loader2, RefreshCw, FileText, Crosshair } from 'lucide-react'
+import { ArrowLeft, Printer, Loader2, RefreshCw, FileText, Crosshair, Plus, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui'
 import {
   GiftCardLabelPreview,
@@ -22,6 +22,7 @@ interface GiftCard extends LabelCard {
   tax_cents: number | null
   issued_at: string
   sold_at: string | null
+  redeemed_at: string | null
   mindbody_remaining_balance_cents: number | null
   mindbody_synced_at: string | null
 }
@@ -38,6 +39,9 @@ export default function GiftCardPrintPage() {
   const [printing, setPrinting] = useState(false)
   const [printMessage, setPrintMessage] = useState<string | null>(null)
   const [printerChoices, setPrinterChoices] = useState<string[] | null>(null)
+  // The QZ setup notes are onboarding content, so they stay collapsed until a
+  // print actually fails — then they're exactly what staff need.
+  const [helpOpen, setHelpOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -88,6 +92,7 @@ export default function GiftCardPrintPage() {
       const printer = await job()
       setPrintMessage(done(printer))
     } catch (e) {
+      setHelpOpen(true)
       if (e instanceof QzError) {
         setPrintMessage(e.message)
         if (e.kind === 'printer' && e.printers?.length) setPrinterChoices(e.printers)
@@ -134,8 +139,10 @@ export default function GiftCardPrintPage() {
       <div className="mb-4 no-print">
         <div className="rounded-lg border border-beige-300 bg-white p-4 flex flex-wrap items-center gap-4">
           <div className="flex-1 min-w-[200px]">
-            <div className="text-xs uppercase tracking-widest text-warm-gray">Estado en Mindbody</div>
-            {card.sold_at ? (
+            <div className="text-xs uppercase tracking-widest text-warm-gray-500">Estado en Mindbody</div>
+            {card.redeemed_at ? (
+              <div className="text-dark">Usada — saldo consumido en Mindbody</div>
+            ) : card.sold_at ? (
               <div className="text-dark">
                 Vendida · Saldo{' '}
                 <span className="font-medium">
@@ -145,10 +152,10 @@ export default function GiftCardPrintPage() {
                 </span>
               </div>
             ) : (
-              <div className="text-amber-700">Pendiente — aún no aparece en Mindbody</div>
+              <div className="text-amber-700">Emitida — aún no aparece en Mindbody</div>
             )}
             {card.mindbody_synced_at && (
-              <div className="text-xs text-warm-gray mt-1">
+              <div className="text-xs text-warm-gray-500 mt-1">
                 Última sincronización: {new Date(card.mindbody_synced_at).toLocaleString('es-PA')}
               </div>
             )}
@@ -166,37 +173,45 @@ export default function GiftCardPrintPage() {
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 no-print">
+      {/* Toolbar — printing is the routine action, so it carries the weight. */}
+      <div className="mb-4 no-print space-y-3">
         <Link
           href="/admin/giftcards/issued"
-          className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark"
+          className="inline-flex items-center gap-1 min-h-[44px] text-sm text-warm-gray-500 hover:text-dark"
         >
           <ArrowLeft className="h-4 w-4" /> Volver a Emitidas
         </Link>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => window.print()}
-            leftIcon={<FileText className="h-4 w-4" />}
-          >
-            Diálogo del navegador
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleTestPrint}
-            isLoading={printing}
-            leftIcon={<Crosshair className="h-4 w-4" />}
-          >
-            Prueba
-          </Button>
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             onClick={handleQzPrint}
             isLoading={printing}
-            leftIcon={printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
+            size="lg"
+            leftIcon={printing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Printer className="h-5 w-5" />}
           >
             Imprimir Etiqueta
           </Button>
+          <Link href="/admin/giftcards/issue">
+            <Button variant="secondary" size="lg" leftIcon={<Plus className="h-5 w-5" />}>
+              Emitir otra
+            </Button>
+          </Link>
+        </div>
+        <div className="flex flex-wrap items-center gap-4 text-sm">
+          <button
+            type="button"
+            onClick={handleTestPrint}
+            disabled={printing}
+            className="inline-flex items-center gap-1.5 min-h-[44px] text-warm-gray-500 hover:text-dark disabled:opacity-50"
+          >
+            <Crosshair className="h-4 w-4" /> Prueba de calibración
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-1.5 min-h-[44px] text-warm-gray-500 hover:text-dark"
+          >
+            <FileText className="h-4 w-4" /> Diálogo del navegador
+          </button>
         </div>
       </div>
 
@@ -206,7 +221,7 @@ export default function GiftCardPrintPage() {
           {printMessage && <div>{printMessage}</div>}
           {printerChoices && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-warm-gray">Impresoras detectadas:</span>
+              <span className="text-xs text-warm-gray-500">Impresoras detectadas:</span>
               {printerChoices.map((p) => (
                 <button
                   key={p}
@@ -224,8 +239,8 @@ export default function GiftCardPrintPage() {
 
       {/* Preview heading */}
       <div className="mb-3 no-print">
-        <div className="text-xs uppercase tracking-widest text-warm-gray">
-          Vista previa (≈2× tamaño real · etiqueta 3&quot; × 2&quot; con línea negra) — así se imprime
+        <div className="text-xs uppercase tracking-widest text-warm-gray-500">
+          Vista previa (≈2× tamaño real · etiqueta 2.25&quot; × 1.25&quot;) — así se imprime
         </div>
       </div>
 
@@ -239,15 +254,32 @@ export default function GiftCardPrintPage() {
         <GiftCardLabelPreview card={card} scale={1} physical />
       </div>
 
-      {/* Printer settings reminder */}
-      <div className="mt-5 no-print max-w-xl rounded-lg border border-beige-300 bg-beige-50 p-4 text-xs text-warm-gray leading-relaxed">
-        <div className="font-semibold text-dark mb-1">Impresión directa (QZ Tray · Omezizy D520)</div>
-        <ul className="list-disc pl-4 space-y-0.5">
-          <li><span className="font-medium text-dark">QZ Tray</span> debe estar instalado y ejecutándose en esta computadora (qz.io/download). La D520 va conectada por <span className="font-medium text-dark">USB</span>.</li>
-          <li>Al cargar un rollo nuevo presiona <span className="font-medium text-dark">feed</span> una vez para que la impresora calibre la etiqueta, y luego usa &quot;Prueba&quot; — el marco impreso debe coincidir con el borde de la etiqueta.</li>
-          <li>&quot;Imprimir Etiqueta&quot; envía la imagen a 203 dpi directo a la impresora, sin diálogo. &quot;Diálogo del navegador&quot; es el respaldo: tamaño 3&quot; × 2&quot;, márgenes 0, escala 100%.</li>
-          <li>Las etiquetas <span className="font-medium text-dark">transparentes</span> necesitan más calor que el papel: si la impresión sale clara, sube <span className="font-medium text-dark">Darkness</span> (los parches 100/50/25% de la prueba sirven de referencia).</li>
-        </ul>
+      {/* Printer setup notes — collapsed until something goes wrong. */}
+      <div className="mt-5 no-print max-w-xl">
+        <button
+          type="button"
+          onClick={() => setHelpOpen(o => !o)}
+          aria-expanded={helpOpen}
+          aria-controls="qz-help"
+          className="inline-flex items-center gap-1.5 min-h-[44px] text-sm text-warm-gray-500 hover:text-dark"
+        >
+          <ChevronDown className={`h-4 w-4 transition-transform ${helpOpen ? 'rotate-180' : ''}`} />
+          ¿Problemas al imprimir?
+        </button>
+        {helpOpen && (
+          <div
+            id="qz-help"
+            className="mt-2 rounded-lg border border-beige-300 bg-beige-50 p-4 text-xs text-warm-gray-500 leading-relaxed"
+          >
+            <div className="font-semibold text-dark mb-1">Impresión directa (QZ Tray · Omezizy D520)</div>
+            <ul className="list-disc pl-4 space-y-0.5">
+              <li><span className="font-medium text-dark">QZ Tray</span> debe estar instalado y ejecutándose en esta computadora (qz.io/download). La D520 va conectada por <span className="font-medium text-dark">USB</span>.</li>
+              <li>Al cargar un rollo nuevo presiona <span className="font-medium text-dark">feed</span> una vez para que la impresora calibre la etiqueta, y luego usa &quot;Prueba de calibración&quot; — el marco impreso debe coincidir con el borde de la etiqueta.</li>
+              <li>&quot;Imprimir Etiqueta&quot; envía la imagen a 203 dpi directo a la impresora, sin diálogo. &quot;Diálogo del navegador&quot; es el respaldo: tamaño 2.25&quot; × 1.25&quot;, márgenes 0, escala 100%.</li>
+              <li>Las etiquetas <span className="font-medium text-dark">transparentes</span> necesitan más calor que el papel: si la impresión sale clara, sube <span className="font-medium text-dark">Darkness</span> (los parches 100/50/25% de la prueba sirven de referencia).</li>
+            </ul>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`

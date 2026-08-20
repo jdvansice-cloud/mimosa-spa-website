@@ -17,21 +17,20 @@ export const LABEL_DOTS_H = Math.round(LABEL_HEIGHT_IN * DPI) // 406
 // pt → dots (203/72).
 const pt = (n: number) => Math.round((n * DPI) / 72)
 
-// Owner spec 2026-08-05 v2, measured off the LABEL (3 × 2 in): all text
-// stays within a 4 mm border of the label edges; the price additionally
-// sits 2 mm lower and 4 mm further left than that top-right corner.
-// (Supersedes the earlier card-derived print area.)
+// Owner spec 2026-08-05 v3: media downsized to 2.25 × 1.25 in — compact
+// design: 2 mm text border all around, no price nudges (the small label
+// sits well inside the gift card, so the card clearances hold anyway).
 const mm = (n: number) => Math.round((n / 25.4) * DPI)
-const PAD = mm(4) // 32 dots — text border: top and sides
+const PAD = mm(2) // 16 dots — text border, all four sides
 const PAD_TOP = PAD
-const PAD_BOTTOM = mm(11) // deeper bottom border (owner 2026-08-05)
-const PRICE_DROP = mm(2) // price nudge below the border
-const PRICE_INSET = mm(4) // price nudge left of the border
+const PAD_BOTTOM = PAD
+const PRICE_DROP = 0
+const PRICE_INSET = 0
 
 // One knob for the whole content block (type + barcode height — never the
-// barcode module width, which must stay exact printer dots). 0.85 = the
-// "everything smaller" pass of 2026-08-05, on top of the sizes below.
-const SCALE = 0.85
+// barcode module width, which must stay exact printer dots). 0.6 fits the
+// 2.25 × 1.25 in media (was 0.85 on the 3 × 2 labels).
+const SCALE = 0.6
 const sz = (n: number) => pt(n * SCALE)
 
 const PRICE_SIZE = sz(17) // 17 pt was already −35% from the original 26 pt
@@ -44,7 +43,7 @@ const MSG_LINE = Math.round(MSG_SIZE * 1.3)
 const SERIAL_SIZE = sz(9)
 
 const BARS_H = Math.round(0.216 * SCALE * DPI) // 0.27 in − 20%, × SCALE
-const BARS_MAX_W = Math.round(2.4 * DPI)
+const BARS_MAX_W = Math.round(1.95 * DPI) // must fit 2.25in minus borders
 const SERIAL_GAP = pt(2)
 
 const LATO = "Lato, sans-serif"
