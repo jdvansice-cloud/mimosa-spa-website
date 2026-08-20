@@ -1,6 +1,5 @@
 export { GiftCardLabelPreview } from './GiftCardLabelPreview'
 export { renderLabelCanvas, LABEL_DOTS_H } from './renderLabelCanvas'
-export { renderTestCanvas } from './renderTestLabel'
 export {
   LABEL_WIDTH_IN,
   LABEL_HEIGHT_IN,

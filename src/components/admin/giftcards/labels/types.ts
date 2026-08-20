@@ -10,10 +10,8 @@
 // Keep templates as pure functions of `LabelCard` so tweaking copy / layout
 // is a single-file edit.
 
-// Media since 2026-08-05: 2.25 × 1.25 in die-cut labels (the 3×2 clear
-// vinyl rolls turned out not to be direct-thermal and were returned).
-export const LABEL_WIDTH_IN = 2.25
-export const LABEL_HEIGHT_IN = 1.25
+export const LABEL_WIDTH_IN = 3 // full 3" label width (D520 prints edge to edge)
+export const LABEL_HEIGHT_IN = 2 // 50.8 mm — die-cut label height (printed area)
 
 /**
  * Per-printer print geometry. The Omezizy/Phomemo D520 is the primary
@@ -39,8 +37,8 @@ export interface LabelPrinterProfile {
 
 export const D520_PROFILE: LabelPrinterProfile = {
   hint: 'D520',
-  widthIn: LABEL_WIDTH_IN,
-  pageHeightIn: LABEL_HEIGHT_IN,
+  widthIn: 3,
+  pageHeightIn: 2,
   rotateBitmap: true,
 }
 
