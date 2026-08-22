@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { GIFT_CARDS_PATH, FEATURES } from '@/lib/nav'
 import { LanguageSwitcher } from '@/components/ui'
 import { HomeBookingButton } from '@/components/shared/HomeBookingButton'
+import { BagIcon } from '@/components/bag/BagIcon'
 
 // Button styles for sm and md sizes (matches Button component)
 const smButtonStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gold text-dark hover:bg-gold-600 active:bg-gold-700 focus:ring-gold-500 shadow-sm hover:shadow-md px-4 py-2 text-sm gap-1.5"
@@ -89,6 +90,7 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-4">
             <LanguageSwitcher variant="dark" />
+            {FEATURES.bag && <BagIcon locale={locale} />}
             <Link
               href={`/${locale}/portal`}
               className="p-2 rounded-lg text-cream/80 hover:text-gold hover:bg-cream/10 transition-colors"
@@ -110,7 +112,12 @@ export function Header() {
             </HomeBookingButton>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile: bag + menu button */}
+          {FEATURES.bag && (
+            <div className="lg:hidden ml-auto mr-1">
+              <BagIcon locale={locale} />
+            </div>
+          )}
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-cream/10 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

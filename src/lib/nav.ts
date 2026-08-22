@@ -5,6 +5,9 @@
 export const FEATURES = {
   parejas: false,
   giftShop: false,
+  // Unified bag + online checkout (header bag icon, /checkout). Server-side
+  // enablement lives in checkout_settings.checkout_enabled — both must be on.
+  bag: false,
 } as const
 
 // Where the "Gift Cards" nav entries point. Flip to '/giftcards' when the

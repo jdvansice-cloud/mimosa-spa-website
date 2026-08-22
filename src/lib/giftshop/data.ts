@@ -12,6 +12,8 @@ export function giftshopAdminClient() {
 
 export interface GcShopSettings {
   shop_enabled: boolean
+  /** gift_card_serial_config used for online cards; null = legacy MW- series. */
+  serial_config_id: string | null
   hero_banner_es: string | null
   hero_banner_en: string | null
   occasion_slug: string | null
@@ -41,6 +43,7 @@ export interface GcCatalogItem {
 
 const DEFAULT_SHOP_SETTINGS: GcShopSettings = {
   shop_enabled: false,
+  serial_config_id: null,
   hero_banner_es: null,
   hero_banner_en: null,
   occasion_slug: null,

@@ -316,16 +316,33 @@ export async function POST(request: NextRequest) {
     // and Mindbody says the slot was just taken (another customer got the
     // same auto-assigned person seconds earlier), retry the full set with the
     // next therapist who can take this slot — up to 3 attempts total.
-    const isSlotTakenError = (msg: string | undefined) =>
-      !!msg && (msg.includes('InvalidBookingTime') || msg.toLowerCase().includes('already booked'))
+    // Errors worth retrying with a DIFFERENT therapist. Two distinct causes,
+    // same remedy:
+    //  - the slot was taken between the customer seeing it and confirming
+    //    (InvalidBookingTime / "already booked");
+    //  - the auto-assigned therapist is free but isn't configured to perform
+    //    this service ("does not have availability configured"). Availability
+    //    is derived from schedule blocks, which don't know which services a
+    //    therapist offers, so "Cualquier disponible" can land on someone who
+    //    can't do it. Retrying another candidate is exactly the fix.
+    const isRetryableStaffError = (msg: string | undefined) => {
+      if (!msg) return false
+      const m = msg.toLowerCase()
+      return (
+        msg.includes('InvalidBookingTime') ||
+        m.includes('already booked') ||
+        m.includes('does not have availability configured') ||
+        m.includes('staff member does not have')
+      )
+    }
 
     let result = await addMultipleAppointments(appointments)
 
-    if (!result.success && !staffRequested && isSlotTakenError(result.error)) {
+    if (!result.success && !staffRequested && isRetryableStaffError(result.error)) {
       if (staffCandidates.length === 0) {
         staffCandidates = await fetchSlotStaffCandidates()
       }
-      const alternatives = staffCandidates.filter(id => id !== resolvedStaffId).slice(0, 2)
+      const alternatives = staffCandidates.filter(id => id !== resolvedStaffId).slice(0, 4)
       for (const altStaffId of alternatives) {
         console.log('Slot race detected — retrying with alternative therapist:', altStaffId)
         const retryAppointments = appointments.map(a => ({ ...a, StaffId: altStaffId }))
@@ -334,7 +351,7 @@ export async function POST(request: NextRequest) {
           resolvedStaffId = altStaffId
           break
         }
-        if (!isSlotTakenError(result.error)) break
+        if (!isRetryableStaffError(result.error)) break
       }
     }
 

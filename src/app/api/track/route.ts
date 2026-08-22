@@ -23,6 +23,10 @@ const ALLOWED_EVENTS = new Set([
   'giftshop_view',
   'giftshop_checkout',
   'giftshop_paid',
+  'giftshop_add_to_bag',
+  'bag_open',
+  'checkout_start',
+  'checkout_paid',
 ])
 
 const str = (v: unknown, max: number): string | null =>

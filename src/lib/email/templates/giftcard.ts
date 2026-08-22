@@ -61,8 +61,8 @@ export function recipientGiftEmail(d: GiftEmailData): { subject: string; html: s
       <p style="font-size:12px;color:#8B8680;margin:20px 0 0">
         ${
           en
-            ? 'Show the code on that page when you visit the spa. Book via WhatsApp +507 6404-9464.'
-            : 'Muestra el código de esa página el día de tu visita. Reserva por WhatsApp +507 6404-9464.'
+            ? 'Open your card to book online — we apply the balance automatically at checkout. You can also show the code at the spa, or book via WhatsApp +507 6404-9464.'
+            : 'Abre tu gift card y reserva en línea — aplicamos el saldo automáticamente al pagar. También puedes mostrar el código en el spa o reservar por WhatsApp +507 6404-9464.'
         }
       </p>
     </div>`)

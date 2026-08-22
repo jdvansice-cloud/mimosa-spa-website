@@ -34,6 +34,7 @@ export async function PUT(request: NextRequest) {
         hero_banner_en: s.hero_banner_en ?? null,
         occasion_slug: s.occasion_slug ?? null,
         default_mindbody_location_id: Number(s.default_mindbody_location_id ?? 1),
+        serial_config_id: s.serial_config_id || null,
         whatsapp_delivery_enabled: !!s.whatsapp_delivery_enabled,
         notify_email: s.notify_email ?? null,
         updated_at: new Date().toISOString(),

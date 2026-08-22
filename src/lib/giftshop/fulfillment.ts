@@ -49,7 +49,7 @@ const WEB_TENDERS = {
  * Unknown → Visa/MC Web (the most common case; verify per-method during
  * test-mode purchases and adjust if Tilopay's field names differ).
  */
-function tenderNameFor(tilopayMethod: string | null): string {
+export function tenderNameFor(tilopayMethod: string | null): string {
   const raw = (tilopayMethod || '').toLowerCase()
   const [method = '', crd = '', brand = ''] = raw.split('|')
 
@@ -80,7 +80,7 @@ function tenderNameFor(tilopayMethod: string | null): string {
  * in mindbody_status=failed with a clear error and the cron retries, instead
  * of silently posting under a tender the accountant can't reconcile.
  */
-async function resolvePaymentInfo(
+export async function resolvePaymentInfo(
   tilopayMethod: string | null,
   amountCents: number
 ): Promise<{ paymentInfo: { Type: string; Metadata?: Record<string, unknown> }; tender: string }> {
@@ -116,13 +116,28 @@ export async function fulfillOrder(orderId: string): Promise<void> {
   if (error || !order) throw new Error(`Order not found: ${orderId}`)
   if (order.status !== 'paid' && order.status !== 'fulfilled') return
 
+  // A gift card bought alongside a booking registers at the spa delivering the
+  // service (carried on the order); a gift-card-only sale has no location the
+  // customer picked, so it falls back to the shop's configured branch.
+  const locationId: number =
+    order.mindbody_location_id ?? settings.default_mindbody_location_id
+
   let giftCardId: string | null = order.gift_card_id
 
   // --- Step 1: mint serial + gift_cards row (skip if already done) ---------
   if (!giftCardId) {
-    const { data: serialData, error: serialError } = await supabase.rpc(
-      'next_online_giftcard_serial'
-    )
+    // Mint from the admin-managed sequence when one is configured (so the
+    // online channel has its own prefix and counter, visible in
+    // /admin/giftcards/config); otherwise fall back to the legacy MW- series.
+    //
+    // The serial is claimed BEFORE the row exists, so a failure here leaves a
+    // gap in the sequence. That is deliberate: each retry then mints a FRESH
+    // serial, which keeps this step self-healing. (Minting inside the insert's
+    // transaction would avoid gaps, but a serial clash would roll back and
+    // re-mint the same number forever.)
+    const { data: serialData, error: serialError } = settings.serial_config_id
+      ? await supabase.rpc('next_giftcard_serial', { p_config_id: settings.serial_config_id })
+      : await supabase.rpc('next_online_giftcard_serial')
     if (serialError || !serialData) {
       throw new Error(`Serial mint failed: ${serialError?.message}`)
     }
@@ -149,7 +164,8 @@ export async function fulfillOrder(orderId: string): Promise<void> {
         print_message: !!order.gift_message,
         print_recipient: true,
         print_treatments: isExperience,
-        mindbody_location_id: settings.default_mindbody_location_id,
+        gift_card_serial_config_id: settings.serial_config_id ?? null,
+        mindbody_location_id: locationId,
       })
       .select('id')
       .single()
@@ -190,6 +206,9 @@ async function registerInMindbody(orderId: string, giftCardId: string) {
 
   const { data: order } = await supabase.from('gc_orders').select('*').eq('id', orderId).single()
   if (!order) return
+
+  const locationId: number =
+    order.mindbody_location_id ?? settings.default_mindbody_location_id
 
   // Catalog item must be mapped to a Mindbody GC product; otherwise the card
   // stays app-native and front desk sells our serial at first redemption.
@@ -234,11 +253,22 @@ async function registerInMindbody(orderId: string, giftCardId: string) {
       order.total_cents
     )
 
+    // Our serial IS the redemption code: Mindbody honours a supplied BarcodeId
+    // (verified in sandbox), so the number printed on the card, the one the
+    // front desk scans, and the one we track are all the same — instead of the
+    // customer holding MO000002 while Mindbody knows it as 756806372052.
+    const { data: cardRow } = await supabase
+      .from('gift_cards')
+      .select('serial')
+      .eq('id', giftCardId)
+      .single()
+
     const result = await purchaseGiftCard({
       test: process.env.GIFTCARD_TEST_MODE === '1',
-      locationId: settings.default_mindbody_location_id,
+      locationId,
       giftCardId: Number(item.mindbody_giftcard_id),
       layoutId: item.mindbody_layout_id ? Number(item.mindbody_layout_id) : undefined,
+      barcodeId: cardRow?.serial || undefined,
       purchaserClientId: clientId,
       recipientName: order.recipient_name,
       recipientEmail: order.recipient_email || undefined,
@@ -248,6 +278,13 @@ async function registerInMindbody(orderId: string, giftCardId: string) {
     })
 
     if (result?.BarcodeId) {
+      // Normally identical to our serial. If Mindbody ever overrides it, the
+      // returned value wins — that's what redemption will actually accept.
+      if (cardRow?.serial && result.BarcodeId !== cardRow.serial) {
+        console.warn(
+          `Mindbody assigned barcode ${result.BarcodeId} instead of serial ${cardRow.serial}`
+        )
+      }
       await supabase
         .from('gift_cards')
         .update({ mindbody_barcode_id: result.BarcodeId })

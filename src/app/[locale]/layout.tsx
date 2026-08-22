@@ -5,7 +5,8 @@ import { Cormorant_Garamond, Lato } from 'next/font/google'
 import { Header, Footer, MobileBottomNav } from '@/components/layout'
 import { getServerSettings } from '@/lib/settings'
 import { GoogleTagManager, PageViewTracker } from '@/components/analytics'
-import { SITE_URL } from '@/lib/nav'
+import { SITE_URL, FEATURES } from '@/lib/nav'
+import { BagDrawer } from '@/components/bag/BagDrawer'
 import '@/app/globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -114,6 +115,7 @@ export default async function LocaleLayout({
             </main>
             <Footer />
             <MobileBottomNav />
+            {FEATURES.bag && <BagDrawer locale={locale} />}
           </div>
         </NextIntlClientProvider>
       </body>

@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Loader2, Gift, ChevronLeft } from 'lucide-react'
+import { Loader2, Gift, ChevronLeft, ShoppingBag } from 'lucide-react'
 import { track } from '@/lib/track'
 import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
 import { PhoneInput } from '@/components/shared/PhoneInput'
+import { FEATURES } from '@/lib/nav'
+import { useBagStore } from '@/lib/bag/store'
 
 interface CatalogItem {
   id: string
@@ -48,6 +50,8 @@ export function GiftShopClient({ locale }: { locale: string }) {
   })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const addGiftCardToBag = useBagStore((s) => s.addGiftCard)
+  const openBag = useBagStore((s) => s.openBag)
 
   useEffect(() => {
     fetch('/api/giftcards/catalog')
@@ -63,6 +67,26 @@ export function GiftShopClient({ locale }: { locale: string }) {
   const description = (i: CatalogItem) => (en ? i.description_en : i.description_es)
   const badge = (i: CatalogItem) => (en ? i.badge_en : i.badge_es)
   const money = (cents: number) => `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`
+
+  // With the unified bag on, "details" hands off to the bag instead of a
+  // gift-card-only Tilopay redirect — so a card can ride along with a booking.
+  const addToBag = () => {
+    if (!item) return
+    addGiftCardToBag({
+      catalogItemId: item.id,
+      name: name(item),
+      amountCents: item.amount_cents + item.itbms_cents,
+      recipientName: form.recipientName || undefined,
+      recipientEmail: form.recipientEmail || undefined,
+      message: form.message || undefined,
+      deliveryDate: form.scheduledDate || undefined,
+    })
+    track('giftshop_add_to_bag', { locale, meta: { item: item.id } })
+    setItem(null)
+    setForm({ ...form, recipientName: '', recipientEmail: '', recipientPhone: '', message: '', scheduledDate: '' })
+    setStep('pick')
+    openBag()
+  }
 
   const pay = async () => {
     if (!item || submitting) return
@@ -217,9 +241,20 @@ export function GiftShopClient({ locale }: { locale: string }) {
             <label className="text-xs text-warm-gray block mb-1">{t('sendDate')}</label>
             <input className={inputCls} type="date" value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} />
           </div>
-          <button onClick={() => setStep('pay')} className="btn-primary w-full" disabled={!form.recipientName}>
-            {t('continue')}
-          </button>
+          {FEATURES.bag ? (
+            <button
+              onClick={addToBag}
+              className="btn-primary w-full inline-flex items-center justify-center gap-2"
+              disabled={!form.recipientName}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {en ? 'Add to bag' : 'Agregar a la bolsa'}
+            </button>
+          ) : (
+            <button onClick={() => setStep('pay')} className="btn-primary w-full" disabled={!form.recipientName}>
+              {t('continue')}
+            </button>
+          )}
         </div>
       )}
 
