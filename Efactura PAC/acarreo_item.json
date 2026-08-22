@@ -1,0 +1,86 @@
+    {
+        "datosGenerales": {            
+            "tipoEmision": "01",
+            "tipoDocumento": "01",
+            "numeroDocumento": "0000023083",
+            "puntoFacturacion": "001",
+            "fechaEmision": "2023-11-01T01:05:05-05:00",
+            "naturalezaOperacion": "01",            
+            "tipoOperacion": 1,
+            "destinoOperacion": 1,
+            "formatoGeneracionCafe": 1,
+            "maneraEntregaCafe": 1,
+            "envioContenedorReceptor": 1,
+            "procesoGeneracionFe": 1,
+            "informacionReceptor": {
+                "tipoReceptorFe": "01",
+                "datosRucReceptor": {
+                    "tipoContribuyente": 2,
+                    "rucReceptor": "1-1-1",
+                    "digitoVerificador": "17"
+                  },
+                  "nombreRazonReceptor": "FE de pruebas - sin valor fiscal",
+                  "direccionReceptor": "Direcci\u00c3\u00b3n  de receptor",
+                  "ubicacionReceptor": {
+                    "codigoUbicacion": "8-8-7",
+                    "corregimiento": "Bella Vista",
+                    "distrito": "Panama",
+                    "provincia": "Panama"
+                  },   
+                "paisReceptor": "PA"
+            }
+        },
+        "listaItems": [
+            {
+                "numeroSecuenciaItem": 1,
+                "descripcionProductoServicio": "PRODUCTO O SERVICIO #1",
+                "codigoInternoItem": "F987654",
+                "cantidadProductoServicio": 10,
+                "codigoItemCodificacionPanamenaAbreviada": 81,
+                "grupoPrecios": {
+                    "precioUnitarioTransferencia": 10.00,
+                    "precioItem": 100.00,
+                    "precioAcarreo" : 20,
+                    "sumaPrecioItem": 127.00
+                },
+                "grupoITBMS": {
+                    "tasaITBMSAplicable": "01",
+                    "montoITBMS": 7.00
+                }
+            },
+            {
+                "numeroSecuenciaItem": 2,
+                "descripcionProductoServicio": "PRODUCTO O SERVICIO #2",
+                "codigoInternoItem": "F987654",
+                "cantidadProductoServicio": 1,
+                "codigoItemCodificacionPanamenaAbreviada": 81,
+                "grupoPrecios": {
+                    "precioUnitarioTransferencia": 100.00,
+                    "precioItem": 100.00,
+                    "precioAcarreo" : 20,
+                    "sumaPrecioItem": 127.00
+                },
+                "grupoITBMS": {
+                    "tasaITBMSAplicable": "01",
+                    "montoITBMS": 7.00
+                }
+            }
+        ],
+        "totales": {
+            "totalNeto": 200.00,
+            "totalITBMS": 14.00,
+            "totalGravado": 14.00,
+            "valorTotalFactura": 254.00,
+            "sumaValoresRecibidos": 254.00,
+            "tiempoPago": 1,
+            "numeroTotalItems": 2,
+            "totalTodosItems": 254.00,
+            "grupoFormasPago": [
+                {
+                    "formaPago": "02",
+                    "valorCuotaPagada": 254.00
+                }
+            ]
+        }
+    } 
+  
