@@ -20,7 +20,9 @@
     "efactura:pos-compare": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-june.ts",
     "efactura:pos-daily": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-daily.ts",
     "efactura:pos-match": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-match-june.ts",
-    "efactura:pos-returns": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-returns-dryrun.ts"
+    "efactura:pos-returns": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-returns-dryrun.ts",
+    "efactura:cafe-dryrun": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/cafe-payload-dryrun.ts",
+    "efactura:verify-schema": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/verify-schema.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
