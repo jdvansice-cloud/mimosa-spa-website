@@ -32,6 +32,7 @@ const config: Config = {
         },
         beige: {
           DEFAULT: '#F5EFE7',
+          50: '#FDFBF8',
           100: '#FAF7F2',
           200: '#F5EFE7',
           300: '#E8DFD1',
@@ -39,7 +40,11 @@ const config: Config = {
           500: '#CEBFA5',
         },
         'warm-gray': {
-          DEFAULT: '#8B8680',
+          // DEFAULT is the secondary-text alias, so it has to clear WCAG AA
+          // (4.5:1) on the site's light grounds. The old #8B8680 sat at ~3.2–3.6:1.
+          // It survives as warm-gray-400 for icons and borders, where the
+          // non-text threshold of 3:1 applies.
+          DEFAULT: '#6F6B66',
           100: '#D4D2CF',
           200: '#B8B5B1',
           300: '#9C9893',

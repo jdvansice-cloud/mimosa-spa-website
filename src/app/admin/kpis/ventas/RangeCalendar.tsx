@@ -72,7 +72,7 @@ export function RangeCalendar({
         </button>
       </div>
 
-      <div className="grid grid-cols-7 text-center text-[10px] font-bold text-warm-gray mb-1">
+      <div className="grid grid-cols-7 text-center text-[10px] font-bold text-warm-gray-500 mb-1">
         {WEEKDAY_LETTERS[lang].map((d, i) => <span key={i} className="py-1">{d}</span>)}
       </div>
       <div className="grid grid-cols-7 text-center text-sm">
@@ -105,13 +105,13 @@ export function RangeCalendar({
         })}
       </div>
 
-      <p className="text-xs text-warm-gray mt-2">
+      <p className="text-xs text-warm-gray-500 mt-2">
         {selStart && !selEnd && <>{t('Desde')} <b className="text-dark">{selStart}</b> — {t('elige la fecha final')}</>}
         {selStart && selEnd && <>{t('Del')} <b className="text-dark">{selStart}</b> {t('al')} <b className="text-dark">{selEnd}</b></>}
       </p>
 
       <div className="flex justify-end gap-2 mt-3">
-        <button onClick={onClose} className="px-3 py-1.5 rounded-lg text-sm font-medium text-warm-gray hover:bg-beige">
+        <button onClick={onClose} className="px-3 py-1.5 rounded-lg text-sm font-medium text-warm-gray-500 hover:bg-beige">
           {t('Cancelar')}
         </button>
         <button

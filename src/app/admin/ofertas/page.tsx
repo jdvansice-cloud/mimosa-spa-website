@@ -107,7 +107,7 @@ export default function AdminOfertasPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-dark">Ofertas y Precios</h1>
-        <p className="text-warm-gray text-sm mt-1">
+        <p className="text-warm-gray-500 text-sm mt-1">
           Rituales de pareja, planes del Club Mimosa y la oferta de primera visita.
           Los cambios se publican al instante, sin deploy.
         </p>
@@ -138,9 +138,9 @@ export default function AdminOfertasPage() {
                             className="flex-1 flex items-center gap-3 text-left"
                           >
                             {open ? (
-                              <ChevronUp className="h-4 w-4 text-warm-gray" />
+                              <ChevronUp className="h-4 w-4 text-warm-gray-500" />
                             ) : (
-                              <ChevronDown className="h-4 w-4 text-warm-gray" />
+                              <ChevronDown className="h-4 w-4 text-warm-gray-500" />
                             )}
                             <span className="font-medium text-sm text-dark">{o.name_es}</span>
                             {o.price != null && (
@@ -149,14 +149,14 @@ export default function AdminOfertasPage() {
                               </span>
                             )}
                             {!o.is_active && (
-                              <span className="text-xs bg-beige text-warm-gray rounded-full px-2 py-0.5">
+                              <span className="text-xs bg-beige text-warm-gray-500 rounded-full px-2 py-0.5">
                                 Oculta
                               </span>
                             )}
                           </button>
                           <button
                             onClick={() => toggleActive(o)}
-                            className="p-2 text-warm-gray hover:text-dark"
+                            className="p-2 text-warm-gray-500 hover:text-dark"
                             title={o.is_active ? 'Ocultar' : 'Mostrar'}
                           >
                             {o.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}

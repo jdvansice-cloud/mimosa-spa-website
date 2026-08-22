@@ -170,7 +170,7 @@ function VentasInner() {
           <LangToggle />
           <DictionaryLink />
         </div>
-        <p className="text-sm text-warm-gray mt-1">{t('Ventas netas por día, sin ITBMS ni propinas · comparado con el año pasado')}</p>
+        <p className="text-sm text-warm-gray-500 mt-1">{t('Ventas netas por día, sin ITBMS ni propinas · comparado con el año pasado')}</p>
       </div>
 
       {/* Filters — sticky while scrolling */}
@@ -184,7 +184,7 @@ function VentasInner() {
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
                 preset === p.key
                   ? 'bg-spa-green text-white border-spa-green'
-                  : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                  : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
               }`}
             >
               {t(p.label)}
@@ -197,7 +197,7 @@ function VentasInner() {
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
               preset === 'custom'
                 ? 'bg-spa-green text-white border-spa-green'
-                : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
             }`}
           >
             <CalendarDays className="h-3.5 w-3.5" />
@@ -213,7 +213,7 @@ function VentasInner() {
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
                 location === l.key
                   ? 'bg-dark text-white border-dark'
-                  : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                  : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
               }`}
             >
               {t(l.label)}
@@ -225,7 +225,7 @@ function VentasInner() {
             className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
               gcMode
                 ? 'bg-gold-600 text-white border-gold-600'
-                : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
             }`}
           >
             {t('Uso de gift cards')}
@@ -261,19 +261,19 @@ function VentasInner() {
               <span className="text-3xl font-bold text-dark tabular-nums">{money(data.totals.net)}</span>
               <DeltaChip delta={deltaPct(data.totals.net, data.totals.lyNet)} suffix={`vs ${lyYear}`} />
             </div>
-            <p className="text-xs text-warm-gray mt-1">
+            <p className="text-xs text-warm-gray-500 mt-1">
               {data.totals.lyNet > 0
                 ? `${money(data.totals.lyNet)} ${t('en las mismas fechas de')} ${lyYear}`
                 : `${t('sin datos de')} ${lyYear} ${t('para comparar')}`}
             </p>
             {data.lyFull && data.lyFull.net > 0 && (
-              <p className="text-xs text-warm-gray mt-0.5">
+              <p className="text-xs text-warm-gray-500 mt-0.5">
                 {t('Meta —')} {data.lyFull.kind === 'year'
                   ? (lang === 'es' ? `${lyYear} completo` : `full ${lyYear}`)
                   : (lang === 'es' ? `mes completo ${lyYear}` : `full month ${lyYear}`)}: <b className="text-dark">{money(data.lyFull.net)}</b>
               </p>
             )}
-            <p className="text-[11px] text-warm-gray mt-3">
+            <p className="text-[11px] text-warm-gray-500 mt-3">
               {data.range.start} → {data.range.end} vs {data.lyRange.start} → {data.lyRange.end}
               {data.series.unit === 'day' ? ` · ${t('por día')}` : ` · ${t('por mes')}`}
             </p>
@@ -283,7 +283,7 @@ function VentasInner() {
 
           {/* Daily rows */}
           <CardBox className="p-0 overflow-hidden">
-            {data.days.length === 0 && <p className="text-sm text-warm-gray p-4">{t('Sin ventas en el período.')}</p>}
+            {data.days.length === 0 && <p className="text-sm text-warm-gray-500 p-4">{t('Sin ventas en el período.')}</p>}
             {data.days.map(d => {
               const open = openDays.has(d.date)
               const state = days[d.date]
@@ -298,14 +298,14 @@ function VentasInner() {
                     <span className="flex items-center gap-3 shrink-0">
                       <span className="flex flex-col items-end gap-0.5">
                         <span className="flex items-baseline gap-3">
-                          <span className="text-xs text-warm-gray tabular-nums">{d.visits} {t(gcMode ? 'usos' : 'visitas')}</span>
+                          <span className="text-xs text-warm-gray-500 tabular-nums">{d.visits} {t(gcMode ? 'usos' : 'visitas')}</span>
                           <b className="text-sm text-dark tabular-nums">{money2(d.net)}</b>
                         </span>
                         <span className="text-[10px] font-bold tabular-nums text-gold-700">
                           {lyYear}: {d.lyNet > 0 ? money(d.lyNet) : '—'}
                         </span>
                       </span>
-                      <ChevronDown className={`h-4 w-4 text-warm-gray transition-transform ${open ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`h-4 w-4 text-warm-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
                     </span>
                   </button>
 
@@ -320,7 +320,7 @@ function VentasInner() {
                       {state?.status === 'ready' && (
                         <div className="divide-y divide-dashed divide-beige-400">
                           {state.transactions.length === 0 && (
-                            <p className="text-xs text-warm-gray py-2">{t('Sin transacciones este día.')}</p>
+                            <p className="text-xs text-warm-gray-500 py-2">{t('Sin transacciones este día.')}</p>
                           )}
                           {state.transactions.map(t2 => {
                             const shown = t2.items.filter(it => it.bucket !== 'tip')
@@ -329,12 +329,12 @@ function VentasInner() {
                               <div key={t2.saleId} className="py-2.5">
                                 <div className="flex items-baseline justify-between gap-3">
                                   <span className="text-sm text-dark">
-                                    <span className="tabular-nums text-warm-gray">{t2.time}</span>{' '}
+                                    <span className="tabular-nums text-warm-gray-500">{t2.time}</span>{' '}
                                     {t2.clientName ?? (t2.clientId ? `${t('Cliente')} ${t2.clientId}` : t('Sin cliente'))}
                                   </span>
                                   <b className="text-sm text-dark tabular-nums shrink-0">{money2(t2.net)}</b>
                                 </div>
-                                <p className="text-xs text-warm-gray mt-0.5">
+                                <p className="text-xs text-warm-gray-500 mt-0.5">
                                   #{t2.saleId} · {shown.map(it => `${it.returned ? '(dev) ' : ''}${it.description}`).join(' · ') || '—'}
                                   {t2.paymentTypes.length > 0 && <> · {t2.paymentTypes.join(', ')}</>}
                                   {!gcMode && t2.gcPaid > 0 && <> · {t('pagado con gift card')} {money2(t2.gcPaid)}</>}
@@ -368,7 +368,7 @@ function VentasInner() {
             )}
           </CardBox>
 
-          <p className="text-center text-xs text-warm-gray pb-4">
+          <p className="text-center text-xs text-warm-gray-500 pb-4">
             {t(gcMode
               ? 'Porción de ventas pagada con gift cards · neto sin ITBMS ni propinas'
               : 'Método de caja: dinero recibido, porción pagada con gift card excluida · neto sin ITBMS ni propinas')}

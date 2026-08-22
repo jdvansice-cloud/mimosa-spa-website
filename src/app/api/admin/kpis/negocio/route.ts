@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireKpisAccess } from '@/lib/auth/require-admin'
+import { requireAdmin } from '@/lib/auth/require-admin'
 import { getBizKpis } from '@/lib/biz/kpis'
 
 /**
@@ -9,7 +9,9 @@ import { getBizKpis } from '@/lib/biz/kpis'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  const denied = await requireKpisAccess()
+  // Full admins only — rent, planilla and packet figures are owner-level, so
+  // mobile managers are excluded here as well as in middleware.
+  const denied = await requireAdmin()
   if (denied) return denied
 
   const { searchParams } = new URL(request.url)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireKpisAccess } from '@/lib/auth/require-admin'
+import { requireAdmin } from '@/lib/auth/require-admin'
 import { importPacketFiles } from '@/lib/biz/import'
 
 /**
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 120
 
 export async function POST(request: NextRequest) {
-  const denied = await requireKpisAccess()
+  const denied = await requireAdmin()
   if (denied) return denied
 
   try {

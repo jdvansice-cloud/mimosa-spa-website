@@ -109,7 +109,7 @@ function DiccionarioInner() {
           </h1>
           <LangToggle />
         </div>
-        <p className="text-sm text-warm-gray mt-1">
+        <p className="text-sm text-warm-gray-500 mt-1">
           {lang === 'es'
             ? 'Qué significa cada dato del Mobile Manager · el ⓘ en cada tarjeta muestra esta misma explicación'
             : 'What every Mobile Manager number means · the ⓘ on each card shows this same explanation'}
@@ -124,7 +124,7 @@ function DiccionarioInner() {
               {section.terms.map(term => (
                 <div key={term.k} className="py-2">
                   <dt className="text-sm font-bold text-dark">{lang === 'es' ? term.es : term.en}</dt>
-                  <dd className="text-xs text-warm-gray leading-snug mt-0.5">
+                  <dd className="text-xs text-warm-gray-500 leading-snug mt-0.5">
                     {EXPLAIN[term.k]?.[lang]}
                   </dd>
                 </div>
@@ -132,7 +132,7 @@ function DiccionarioInner() {
             </dl>
           </CardBox>
         ))}
-        <p className="text-center text-xs text-warm-gray pb-4">
+        <p className="text-center text-xs text-warm-gray-500 pb-4">
           {lang === 'es'
             ? 'Resumen: una visita es un bloque continuo de tratamientos de un ID con una terapeuta, un tratamiento es una cita, el ticket promedio es neto ÷ visitas, el dinero es neto sin ITBMS en método de caja y toda comparación es contra las mismas fechas del año pasado.'
             : 'Summary: a visit is one ID\'s continuous treatment block with one therapist, a treatment is an appointment, average ticket is net ÷ visits, money is net of ITBMS on a cash basis, and every comparison is against the same dates last year.'}

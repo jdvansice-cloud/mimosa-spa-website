@@ -135,11 +135,11 @@ function ImageCard({
       <div className="p-4">
         <h3 className="font-semibold text-dark mb-1">{image.name}</h3>
         {image.description && (
-          <p className="text-sm text-warm-gray mb-2">{image.description}</p>
+          <p className="text-sm text-warm-gray-500 mb-2">{image.description}</p>
         )}
 
         {/* Size Reference */}
-        <div className="flex items-center gap-2 text-xs text-warm-gray mb-3">
+        <div className="flex items-center gap-2 text-xs text-warm-gray-500 mb-3">
           <span className="px-2 py-1 bg-beige-100 rounded">
             {sizeText}
           </span>
@@ -171,7 +171,7 @@ function ImageCard({
           <div
             className={`
               flex items-center justify-center gap-2 w-full py-2 px-4 rounded-lg
-              border-2 border-dashed border-beige-300 text-warm-gray
+              border-2 border-dashed border-beige-300 text-warm-gray-500
               hover:border-gold hover:text-gold transition-colors cursor-pointer
               ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
             `}
@@ -186,7 +186,7 @@ function ImageCard({
         {/* Rotation variants: extra photos this slot alternates between daily */}
         <button
           onClick={toggleVariants}
-          className="mt-3 w-full flex items-center justify-between text-xs text-warm-gray hover:text-dark transition-colors"
+          className="mt-3 w-full flex items-center justify-between text-xs text-warm-gray-500 hover:text-dark transition-colors"
         >
           <span className="inline-flex items-center gap-1.5">
             <Images className="w-3.5 h-3.5" />
@@ -196,7 +196,7 @@ function ImageCard({
         </button>
         {showVariants && (
           <div className="mt-2 space-y-2">
-            <p className="text-[11px] text-warm-gray leading-snug">
+            <p className="text-[11px] text-warm-gray-500 leading-snug">
               Si agregas fotos aquí, el sitio alterna entre la principal y estas
               variantes (cambia cada día automáticamente).
             </p>
@@ -214,7 +214,7 @@ function ImageCard({
                   </button>
                 </div>
               ))}
-              <label className="aspect-square rounded border-2 border-dashed border-beige-300 flex items-center justify-center cursor-pointer hover:border-gold text-warm-gray hover:text-gold transition-colors">
+              <label className="aspect-square rounded border-2 border-dashed border-beige-300 flex items-center justify-center cursor-pointer hover:border-gold text-warm-gray-500 hover:text-gold transition-colors">
                 <input
                   ref={variantInputRef}
                   type="file"
@@ -307,7 +307,7 @@ export default function ImageManagementPage() {
             Gestión de Imágenes
           </h1>
         </div>
-        <p className="text-warm-gray">
+        <p className="text-warm-gray-500">
           Administra las imágenes del sitio web. Sube nuevas imágenes para reemplazar las actuales.
         </p>
       </div>
@@ -317,7 +317,7 @@ export default function ImageManagementPage() {
         <CardContent>
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-warm-gray">
+            <div className="text-sm text-warm-gray-500">
               <p className="font-medium text-dark mb-1">Recomendaciones:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Usa los tamaños recomendados para cada imagen para mejor calidad</li>
@@ -380,7 +380,7 @@ export default function ImageManagementPage() {
               <CardContent>
                 <div className="text-center py-8">
                   <ImageIcon className="w-12 h-12 text-beige-300 mx-auto mb-4" />
-                  <p className="text-warm-gray">
+                  <p className="text-warm-gray-500">
                     No hay imágenes configuradas. Ejecuta la migración de base de datos.
                   </p>
                 </div>

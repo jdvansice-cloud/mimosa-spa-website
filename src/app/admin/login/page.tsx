@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
             <h1 className="text-2xl font-display font-semibold text-dark">
               Iniciar Sesión
             </h1>
-            <p className="text-warm-gray text-sm mt-1">
+            <p className="text-warm-gray-500 text-sm mt-1">
               {otpEmail
                 ? `Ingresa el código enviado a ${otpEmail}`
                 : 'Te enviaremos un código de acceso a tu correo'}
@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
                   Correo Electrónico
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-warm-gray" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-warm-gray-500" />
                   <input
                     type="email"
                     id="email"
@@ -96,7 +96,7 @@ export default function AdminLoginPage() {
                   Código de acceso
                 </label>
                 <div className="relative">
-                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-warm-gray" />
+                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-warm-gray-500" />
                   <input
                     type="text"
                     id="otp"
@@ -119,7 +119,7 @@ export default function AdminLoginPage() {
               <button
                 type="button"
                 onClick={() => { clearError(); useAuthStore.setState({ otpEmail: null }) }}
-                className="w-full text-sm text-warm-gray hover:text-dark transition-colors"
+                className="w-full text-sm text-warm-gray-500 hover:text-dark transition-colors"
               >
                 Cambiar correo electrónico
               </button>

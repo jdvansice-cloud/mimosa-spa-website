@@ -334,7 +334,7 @@ export default function AdminMembresiaPage() {
           </div>
           <h1 className="text-3xl font-display font-semibold text-dark">Membresía Privilege</h1>
         </div>
-        <p className="text-warm-gray">Gestiona el contenido de la página de Membresía</p>
+        <p className="text-warm-gray-500">Gestiona el contenido de la página de Membresía</p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -389,7 +389,7 @@ export default function AdminMembresiaPage() {
                   />
                   <div className={`
                     flex flex-col items-center justify-center p-6 rounded-lg
-                    border-2 border-dashed border-beige-300 text-warm-gray
+                    border-2 border-dashed border-beige-300 text-warm-gray-500
                     hover:border-gold hover:text-gold transition-colors
                     ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
                   `}>
@@ -400,7 +400,7 @@ export default function AdminMembresiaPage() {
                     <span className="text-sm mt-1">JPG, PNG, WebP (max. 5MB)</span>
                   </div>
                 </label>
-                <p className="text-xs text-warm-gray mt-2 flex items-center gap-1">
+                <p className="text-xs text-warm-gray-500 mt-2 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   Tamaño recomendado: 400 x 400 px (cuadrada)
                 </p>

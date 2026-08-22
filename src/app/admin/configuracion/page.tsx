@@ -128,7 +128,7 @@ export default function AdminConfigPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-display font-semibold text-dark">Configuración</h1>
-        <p className="text-warm-gray mt-1">Ajustes generales del sitio</p>
+        <p className="text-warm-gray-500 mt-1">Ajustes generales del sitio</p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -194,7 +194,7 @@ export default function AdminConfigPage() {
                 value={settings.whatsapp_number}
                 onChange={(e) => handleChange('whatsapp_number', e.target.value)}
               />
-              <p className="text-xs text-warm-gray mt-1">
+              <p className="text-xs text-warm-gray-500 mt-1">
                 Formato: código de país + número (sin + ni espacios)
               </p>
             </div>
@@ -230,7 +230,7 @@ export default function AdminConfigPage() {
                     value={settings.weekday_open}
                     onChange={(e) => handleChange('weekday_open', e.target.value)}
                   />
-                  <span className="text-warm-gray">a</span>
+                  <span className="text-warm-gray-500">a</span>
                   <input
                     type="time"
                     className="input"
@@ -248,7 +248,7 @@ export default function AdminConfigPage() {
                     value={settings.weekend_open}
                     onChange={(e) => handleChange('weekend_open', e.target.value)}
                   />
-                  <span className="text-warm-gray">a</span>
+                  <span className="text-warm-gray-500">a</span>
                   <input
                     type="time"
                     className="input"
@@ -302,7 +302,7 @@ export default function AdminConfigPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <p className="text-xs text-warm-gray -mt-2">
+            <p className="text-xs text-warm-gray-500 -mt-2">
               El sitio muestra el total combinado de ambas ubicaciones; cada
               tarjeta de ubicación muestra su propio rating.
             </p>
@@ -353,7 +353,7 @@ export default function AdminConfigPage() {
               </div>
             ))}
             <details>
-              <summary className="text-xs text-warm-gray cursor-pointer">
+              <summary className="text-xs text-warm-gray-500 cursor-pointer">
                 Valores globales (respaldo si faltan los de ubicación)
               </summary>
               <div className="mt-3 space-y-4">
@@ -405,7 +405,7 @@ export default function AdminConfigPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-warm-gray mb-6">
+            <p className="text-sm text-warm-gray-500 mb-6">
               Configura cómo se envían los códigos de verificación y notificaciones a los clientes.
             </p>
 
@@ -419,7 +419,7 @@ export default function AdminConfigPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-dark">Correo Electrónico</h3>
-                    <span className="text-xs text-warm-gray">Siempre activo</span>
+                    <span className="text-xs text-warm-gray-500">Siempre activo</span>
                   </div>
                 </div>
 
@@ -435,7 +435,7 @@ export default function AdminConfigPage() {
                 </div>
 
                 <div className="rounded-lg bg-gold/5 border border-gold/20 p-3">
-                  <p className="text-xs text-warm-gray">
+                  <p className="text-xs text-warm-gray-500">
                     Sin opciones adicionales. El cliente recibe únicamente el código por correo.
                   </p>
                 </div>
@@ -451,7 +451,7 @@ export default function AdminConfigPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-dark">WhatsApp</h3>
-                    <span className="text-xs text-warm-gray">Canal principal</span>
+                    <span className="text-xs text-warm-gray-500">Canal principal</span>
                   </div>
                 </div>
 
@@ -479,7 +479,7 @@ export default function AdminConfigPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs font-medium text-dark">También enviar por correo</p>
-                      <p className="text-xs text-warm-gray mt-0.5">
+                      <p className="text-xs text-warm-gray-500 mt-0.5">
                         {settings.whatsapp_dual_channel
                           ? 'El código llega por WhatsApp y por correo como respaldo'
                           : 'El código llega únicamente por WhatsApp'}
@@ -512,11 +512,11 @@ export default function AdminConfigPage() {
             <div className="mt-4 p-4 bg-beige-50 rounded-xl border border-beige-200">
               <p className="text-xs font-medium text-dark mb-2">Comportamiento actual:</p>
               <div className="space-y-1">
-                <p className="text-xs text-warm-gray">
+                <p className="text-xs text-warm-gray-500">
                   <span className="font-medium text-dark">Cliente elige correo →</span>{' '}
                   Recibe solo el código por correo electrónico
                 </p>
-                <p className="text-xs text-warm-gray">
+                <p className="text-xs text-warm-gray-500">
                   <span className="font-medium text-dark">Cliente elige WhatsApp →</span>{' '}
                   {settings.whatsapp_dual_channel
                     ? 'Recibe el código por WhatsApp y también por correo como respaldo'
@@ -541,11 +541,11 @@ export default function AdminConfigPage() {
                 <p className="text-sm text-dark font-medium mb-1">
                   Descuento para reservas en línea
                 </p>
-                <p className="text-xs text-warm-gray mb-4">
+                <p className="text-xs text-warm-gray-500 mb-4">
                   Se aplica automáticamente a todos los servicios que no estén dentro de una promoción activa.
                 </p>
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-warm-gray">Porcentaje:</label>
+                  <label className="text-sm text-warm-gray-500">Porcentaje:</label>
                   <div className="relative w-28">
                     <input
                       type="number"
@@ -560,14 +560,14 @@ export default function AdminConfigPage() {
                       disabled={!settings.online_discount_active}
                       className="input pr-8 text-center disabled:opacity-40"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-warm-gray text-sm">%</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-warm-gray-500 text-sm">%</span>
                   </div>
                 </div>
               </div>
 
               {/* Toggle */}
               <div className="flex flex-col items-center gap-2 pt-1">
-                <span className="text-xs text-warm-gray">
+                <span className="text-xs text-warm-gray-500">
                   {settings.online_discount_active ? 'Activo' : 'Inactivo'}
                 </span>
                 <button

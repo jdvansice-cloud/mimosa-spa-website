@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Plus, Edit, Trash2, Search, Loader2, RefreshCw, Check, X, Download, Tag, ChevronDown, ChevronUp, Upload, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import { Button, Card, Modal } from '@/components/ui'
+import { AdminTable, CardField, StatusPill, type AdminColumn } from '@/components/admin/AdminTable'
 import { cn } from '@/lib/utils'
 import type { Promotion } from '@/types'
 
@@ -546,8 +547,97 @@ export default function AdminPromotionsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-24">
         <Loader2 className="w-10 h-10 text-gold animate-spin mb-4" />
-        <p className="text-warm-gray">Cargando promociones...</p>
+        <p className="text-warm-gray-500">Cargando promociones...</p>
       </div>
+    )
+  }
+
+  const isExpired = (p: Promotion) =>
+    !!p.valid_until && p.valid_until < new Date().toISOString().split('T')[0]
+
+  const promoStatus = (p: Promotion): { label: string; tone: 'green' | 'red' | 'gray' } => {
+    if (p.is_active) return { label: 'Activa', tone: 'green' }
+    return isExpired(p) ? { label: 'Expirada', tone: 'red' } : { label: 'Inactiva', tone: 'gray' }
+  }
+
+  const rowActions = (p: Promotion) => (
+    <div className="flex items-center justify-end gap-1">
+      <button
+        onClick={() => handleEdit(p)}
+        className="h-11 w-11 inline-flex items-center justify-center rounded-lg hover:bg-beige transition-colors text-warm-gray-500 hover:text-dark"
+        aria-label={`Editar ${p.title_es}`}
+      >
+        <Edit className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => handleDelete(p.id)}
+        className="h-11 w-11 inline-flex items-center justify-center rounded-lg hover:bg-red-50 transition-colors text-warm-gray-500 hover:text-red-600"
+        aria-label={`Eliminar ${p.title_es}`}
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </div>
+  )
+
+  const promoColumns: Array<AdminColumn<Promotion>> = [
+    { key: 'name', header: 'Nombre', cellClassName: 'font-medium', render: p => p.title_es },
+    {
+      key: 'price',
+      header: 'Precio',
+      cellClassName: 'text-gold-700 font-semibold tabular-nums',
+      render: p => `$${p.price}`,
+    },
+    {
+      key: 'original',
+      header: 'Precio Original',
+      cellClassName: 'text-warm-gray-500 tabular-nums',
+      render: p => (p.original_price ? <span className="line-through">${p.original_price}</span> : '-'),
+    },
+    {
+      key: 'services',
+      header: 'Servicios',
+      cellClassName: 'text-warm-gray-500 text-sm',
+      render: p => `${p.mindbody_service_ids?.length || 0} servicios`,
+    },
+    {
+      key: 'valid',
+      header: 'Válida hasta',
+      cellClassName: 'text-warm-gray-500',
+      render: p => p.valid_until,
+    },
+    {
+      key: 'status',
+      header: 'Estado',
+      render: p => {
+        const st = promoStatus(p)
+        return <StatusPill tone={st.tone}>{st.label}</StatusPill>
+      },
+    },
+    { key: 'actions', header: '', srHeader: 'Acciones', align: 'right', render: rowActions },
+  ]
+
+  const promoCard = (p: Promotion) => {
+    const st = promoStatus(p)
+    return (
+      <>
+        <div className="flex items-start justify-between gap-3">
+          <p className="font-medium text-dark min-w-0">{p.title_es}</p>
+          <StatusPill tone={st.tone}>{st.label}</StatusPill>
+        </div>
+        <p className="mt-1 text-2xl font-display font-semibold text-gold-700 tabular-nums">
+          ${p.price}
+          {p.original_price && (
+            <span className="ml-2 text-sm font-body font-normal text-warm-gray-500 line-through">
+              ${p.original_price}
+            </span>
+          )}
+        </p>
+        <dl className="mt-3 space-y-1">
+          <CardField label="Servicios">{p.mindbody_service_ids?.length || 0}</CardField>
+          <CardField label="Válida hasta">{p.valid_until || '—'}</CardField>
+        </dl>
+        <div className="mt-3">{rowActions(p)}</div>
+      </>
     )
   }
 
@@ -557,7 +647,7 @@ export default function AdminPromotionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-display font-semibold text-dark">Promociones</h1>
-          <p className="text-warm-gray mt-1">Gestiona las promociones con servicios de Mindbody</p>
+          <p className="text-warm-gray-500 mt-1">Gestiona las promociones con servicios de Mindbody</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -582,7 +672,7 @@ export default function AdminPromotionsPage() {
       {/* Search Bar */}
       <Card variant="default" padding="md" className="mb-6">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-warm-gray" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-warm-gray-500" />
           <input
             type="text"
             placeholder="Buscar promociones..."
@@ -593,85 +683,13 @@ export default function AdminPromotionsPage() {
         </div>
       </Card>
 
-      {/* Promotions Table */}
-      <Card variant="default" padding="none">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-beige border-b border-beige-300">
-              <tr>
-                <th className="text-left p-4 font-medium text-dark">Nombre</th>
-                <th className="text-left p-4 font-medium text-dark">Precio</th>
-                <th className="text-left p-4 font-medium text-dark">Precio Original</th>
-                <th className="text-left p-4 font-medium text-dark">Servicios</th>
-                <th className="text-left p-4 font-medium text-dark">Válida hasta</th>
-                <th className="text-left p-4 font-medium text-dark">Estado</th>
-                <th className="text-right p-4 font-medium text-dark">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-beige-200">
-              {filteredPromotions.map((promotion) => (
-                <tr key={promotion.id} className="hover:bg-beige-100 transition-colors">
-                  <td className="p-4">
-                    <span className="font-medium text-dark">{promotion.title_es}</span>
-                  </td>
-                  <td className="p-4 text-gold font-semibold">${promotion.price}</td>
-                  <td className="p-4 text-warm-gray">
-                    {promotion.original_price ? (
-                      <span className="line-through">${promotion.original_price}</span>
-                    ) : '-'}
-                  </td>
-                  <td className="p-4 text-warm-gray text-sm">
-                    {promotion.mindbody_service_ids?.length || 0} servicios
-                  </td>
-                  <td className="p-4 text-warm-gray">{promotion.valid_until}</td>
-                  <td className="p-4">
-                    <span
-                      className={cn(
-                        'px-2 py-1 text-xs rounded-full',
-                        !promotion.is_active
-                          ? promotion.valid_until && promotion.valid_until < new Date().toISOString().split('T')[0]
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-gray-100 text-gray-700'
-                          : 'bg-green-100 text-green-700'
-                      )}
-                    >
-                      {!promotion.is_active
-                        ? promotion.valid_until && promotion.valid_until < new Date().toISOString().split('T')[0]
-                          ? 'Expirada'
-                          : 'Inactiva'
-                        : 'Activa'}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleEdit(promotion)}
-                        className="p-2 rounded-lg hover:bg-beige transition-colors text-warm-gray hover:text-dark"
-                        aria-label="Editar"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(promotion.id)}
-                        className="p-2 rounded-lg hover:bg-red-50 transition-colors text-warm-gray hover:text-red-600"
-                        aria-label="Eliminar"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredPromotions.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-warm-gray">No se encontraron promociones</p>
-          </div>
-        )}
-      </Card>
+      <AdminTable
+        rows={filteredPromotions}
+        columns={promoColumns}
+        rowKey={p => p.id}
+        mobileCard={promoCard}
+        empty="No se encontraron promociones"
+      />
 
       {/* Create/Edit Modal */}
       <Modal
@@ -718,7 +736,7 @@ export default function AdminPromotionsPage() {
                 {/* Search input with dropdown results */}
                 <div className="relative">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-warm-gray" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-warm-gray-500" />
                     <input
                       ref={promoSearchRef}
                       type="text"
@@ -749,12 +767,12 @@ export default function AdminPromotionsPage() {
                           {promoCodeError.includes('API error') || promoCodeError.includes('404') || promoCodeError.includes('500') ? (
                             <div className="text-amber-600">
                               <p className="font-medium mb-1">La API de Mindbody no está disponible</p>
-                              <p className="text-xs text-warm-gray">
+                              <p className="text-xs text-warm-gray-500">
                                 Ingresa los datos de la promoción manualmente usando los campos abajo.
                               </p>
                             </div>
                           ) : (
-                            <span className="text-warm-gray">{promoCodeError}</span>
+                            <span className="text-warm-gray-500">{promoCodeError}</span>
                           )}
                         </div>
                       ) : (
@@ -767,7 +785,7 @@ export default function AdminPromotionsPage() {
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-dark truncate">{pc.Name}</p>
-                                <p className="text-sm text-warm-gray">
+                                <p className="text-sm text-warm-gray-500">
                                   Código: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-xs">{pc.Code}</span>
                                 </p>
                               </div>
@@ -793,7 +811,7 @@ export default function AdminPromotionsPage() {
                             )}
 
                             <div className="mt-2 flex items-center justify-between">
-                              <span className="text-xs text-warm-gray">
+                              <span className="text-xs text-warm-gray-500">
                                 {pc.ActivationDate.split('T')[0]} → {pc.ExpirationDate.split('T')[0]}
                               </span>
                               <span className="text-xs text-blue-600 flex items-center gap-1 font-medium">
@@ -808,7 +826,7 @@ export default function AdminPromotionsPage() {
                 </div>
 
                 {promoCodeSearch.length > 0 && promoCodeSearch.length < 2 && (
-                  <p className="text-xs text-warm-gray">Escribe al menos 2 caracteres para buscar</p>
+                  <p className="text-xs text-warm-gray-500">Escribe al menos 2 caracteres para buscar</p>
                 )}
               </div>
             )}
@@ -842,7 +860,7 @@ export default function AdminPromotionsPage() {
           {/* Image Upload */}
           <div>
             <label className="label">Imagen de la Promoción</label>
-            <p className="text-sm text-warm-gray mb-2">
+            <p className="text-sm text-warm-gray-500 mb-2">
               Se mostrará en la página de promociones. Recomendado: imagen cuadrada, mínimo 400x400px.
             </p>
 
@@ -889,7 +907,7 @@ export default function AdminPromotionsPage() {
                     disabled={isUploadingImage}
                     className={cn(
                       "flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-beige-300",
-                      "text-warm-gray hover:border-gold hover:text-gold transition-colors",
+                      "text-warm-gray-500 hover:border-gold hover:text-gold transition-colors",
                       isUploadingImage && "opacity-50 cursor-not-allowed"
                     )}
                   >
@@ -915,7 +933,7 @@ export default function AdminPromotionsPage() {
                   <p className="text-sm text-red-600">{imageUploadError}</p>
                 )}
 
-                <p className="text-xs text-warm-gray">
+                <p className="text-xs text-warm-gray-500">
                   Formatos: JPEG, PNG, WebP, GIF. Máximo 5MB.
                 </p>
               </div>
@@ -965,7 +983,7 @@ export default function AdminPromotionsPage() {
           {/* Service Selection */}
           <div>
             <label className="label">Servicios de Mindbody *</label>
-            <p className="text-sm text-warm-gray mb-2">
+            <p className="text-sm text-warm-gray-500 mb-2">
               Selecciona los servicios que incluye esta promoción
             </p>
 
@@ -1004,7 +1022,7 @@ export default function AdminPromotionsPage() {
 
             {/* Service search */}
             <div className="relative mb-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-warm-gray" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-warm-gray-500" />
               <input
                 type="text"
                 className="input pl-9 py-2 text-sm"
@@ -1017,12 +1035,12 @@ export default function AdminPromotionsPage() {
             {/* Service list */}
             <div className="max-h-48 overflow-y-auto border border-beige-200 rounded-lg">
               {isServicesLoading ? (
-                <div className="p-4 text-center text-warm-gray">
+                <div className="p-4 text-center text-warm-gray-500">
                   <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
                   Cargando servicios...
                 </div>
               ) : filteredServices.length === 0 ? (
-                <div className="p-4 text-center text-warm-gray">
+                <div className="p-4 text-center text-warm-gray-500">
                   No se encontraron servicios
                 </div>
               ) : (
@@ -1040,7 +1058,7 @@ export default function AdminPromotionsPage() {
                     >
                       <div>
                         <p className="font-medium text-dark text-sm">{service.Name}</p>
-                        <p className="text-xs text-warm-gray">
+                        <p className="text-xs text-warm-gray-500">
                           {service.Category} | ${service.Price} | {service.Duration} min
                         </p>
                       </div>
@@ -1058,11 +1076,11 @@ export default function AdminPromotionsPage() {
               <h4 className="font-medium text-dark mb-3">Cálculo del Precio</h4>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-warm-gray">Subtotal (servicios):</span>
+                  <span className="text-warm-gray-500">Subtotal (servicios):</span>
                   <span className="font-medium">${formData.original_price?.toFixed(2) || '0.00'}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-warm-gray">
+                  <span className="text-warm-gray-500">
                     Descuento ({formData.discount_type === 'Percent' ? `${formData.discount_amount}%` : `$${formData.discount_amount}`}):
                   </span>
                   <span className="font-medium text-red-600">
@@ -1076,7 +1094,7 @@ export default function AdminPromotionsPage() {
                   <span className="font-semibold text-dark">
                     {formData.manual_price ? 'Precio calculado (referencia):' : 'Precio Promocional:'}
                   </span>
-                  <span className={`font-bold text-lg ${formData.manual_price ? 'text-warm-gray line-through' : 'text-green-700'}`}>
+                  <span className={`font-bold text-lg ${formData.manual_price ? 'text-warm-gray-500 line-through' : 'text-green-700'}`}>
                     ${calculatePromoPrice(formData.original_price || 0, formData.discount_type, formData.discount_amount).toFixed(2)}
                   </span>
                 </div>
@@ -1110,10 +1128,10 @@ export default function AdminPromotionsPage() {
               </div>
               <div className="flex items-center gap-3">
                 <div className="relative w-40">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray text-sm">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray-500 text-sm">$</span>
                   <input
                     type="number"
-                    className={`input pl-7 ${formData.manual_price ? '' : 'bg-beige-100 text-warm-gray'}`}
+                    className={`input pl-7 ${formData.manual_price ? '' : 'bg-beige-100 text-warm-gray-500'}`}
                     value={formData.price}
                     onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value ? parseFloat(e.target.value) : 0 }))}
                     readOnly={!formData.manual_price}
@@ -1121,7 +1139,7 @@ export default function AdminPromotionsPage() {
                     step="0.01"
                   />
                 </div>
-                <p className="text-xs text-warm-gray">
+                <p className="text-xs text-warm-gray-500">
                   {formData.manual_price
                     ? 'Este precio se usará tal cual — no se recalcula al cambiar servicios o descuento.'
                     : 'Precio calculado automáticamente (subtotal − descuento). Marca la casilla para fijarlo a mano.'}
@@ -1141,7 +1159,7 @@ export default function AdminPromotionsPage() {
                 readOnly
                 placeholder="Auto-calculado"
               />
-              <p className="text-xs text-warm-gray mt-1">Calculado automáticamente desde servicios</p>
+              <p className="text-xs text-warm-gray-500 mt-1">Calculado automáticamente desde servicios</p>
             </div>
           </div>
 

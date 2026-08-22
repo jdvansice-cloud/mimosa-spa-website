@@ -286,7 +286,7 @@ export default function AdminGiftCardIssuePage() {
         {!isLocationLocked && (
           <Link
             href="/admin/giftcards"
-            className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark mb-3"
+            className="inline-flex items-center gap-1 text-sm text-warm-gray-500 hover:text-dark mb-3"
           >
             <ArrowLeft className="h-4 w-4" /> Gift Cards
           </Link>
@@ -297,7 +297,7 @@ export default function AdminGiftCardIssuePage() {
           </div>
           <h1 className="text-3xl font-display font-semibold text-dark">Emitir Gift Card</h1>
         </div>
-        <p className="text-warm-gray">
+        <p className="text-warm-gray-500">
           {isLocationLocked
             ? `Ubicación: ${me?.locationName ?? '—'}. Define el monto, genera el serial e imprime la etiqueta.`
             : 'Selecciona la ubicación, define el monto y genera el serial para imprimir.'}
@@ -311,7 +311,7 @@ export default function AdminGiftCardIssuePage() {
             <CardHeader><CardTitle>Ubicación</CardTitle></CardHeader>
             <CardContent>
               {locations.length === 0 ? (
-                <div className="text-sm text-warm-gray">
+                <div className="text-sm text-warm-gray-500">
                   No hay ubicaciones activas.{' '}
                   <Link href="/admin/giftcards/config" className="text-gold hover:underline">
                     Crear una ubicación
@@ -333,7 +333,7 @@ export default function AdminGiftCardIssuePage() {
                 </select>
               )}
               {selectedLocation && (
-                <div className="text-xs text-warm-gray mt-2">
+                <div className="text-xs text-warm-gray-500 mt-2">
                   Prefijo: <span className="font-mono text-dark">{selectedLocation.prefix}</span>
                   {' · '}Próximo serial:{' '}
                   <span className="font-mono text-dark">
@@ -361,7 +361,7 @@ export default function AdminGiftCardIssuePage() {
                 />
                 <div>
                   <div className="font-medium text-dark">Monto directo</div>
-                  <div className="text-sm text-warm-gray">Ingresa el valor de la tarjeta.</div>
+                  <div className="text-sm text-warm-gray-500">Ingresa el valor de la tarjeta.</div>
                 </div>
               </label>
               <label className={`flex gap-3 p-4 rounded-lg border-2 cursor-pointer ${amountMode === 'treatments' ? 'border-gold bg-gold/5' : 'border-beige-300'}`}>
@@ -374,7 +374,7 @@ export default function AdminGiftCardIssuePage() {
                 />
                 <div>
                   <div className="font-medium text-dark">Por tratamientos</div>
-                  <div className="text-sm text-warm-gray">Suma tratamientos + ITBMS — referencia para el cliente.</div>
+                  <div className="text-sm text-warm-gray-500">Suma tratamientos + ITBMS — referencia para el cliente.</div>
                 </div>
               </label>
             </div>
@@ -396,11 +396,11 @@ export default function AdminGiftCardIssuePage() {
               <div className="space-y-4">
                 {/* Selected treatments */}
                 <div>
-                  <div className="text-xs uppercase tracking-widest text-warm-gray mb-2">
+                  <div className="text-xs uppercase tracking-widest text-warm-gray-500 mb-2">
                     Tratamientos seleccionados
                   </div>
                   {selectedTreatments.length === 0 ? (
-                    <div className="text-sm text-warm-gray italic">Ninguno todavía.</div>
+                    <div className="text-sm text-warm-gray-500 italic">Ninguno todavía.</div>
                   ) : (
                     <ul className="divide-y divide-beige-200 border border-beige-200 rounded-lg overflow-hidden">
                       {selectedTreatments.map(s => (
@@ -408,14 +408,14 @@ export default function AdminGiftCardIssuePage() {
                           <div className="flex-1">
                             <div className="text-dark">{s.service_name}</div>
                             {s.category && (
-                              <div className="text-xs text-warm-gray">{s.category}</div>
+                              <div className="text-xs text-warm-gray-500">{s.category}</div>
                             )}
                           </div>
                           <div className="text-dark font-medium mr-3">${s.price.toFixed(2)}</div>
                           <button
                             type="button"
                             onClick={() => removeTreatment(s.mindbody_service_id)}
-                            className="p-1 text-warm-gray hover:text-red-500"
+                            className="p-1 text-warm-gray-500 hover:text-red-500"
                             aria-label="Quitar"
                           >
                             <X className="h-4 w-4" />
@@ -428,11 +428,11 @@ export default function AdminGiftCardIssuePage() {
 
                 {/* Picker */}
                 <div>
-                  <div className="text-xs uppercase tracking-widest text-warm-gray mb-2">
+                  <div className="text-xs uppercase tracking-widest text-warm-gray-500 mb-2">
                     Agregar tratamiento
                   </div>
                   {servicesLoading ? (
-                    <div className="input flex items-center gap-2 text-warm-gray">
+                    <div className="input flex items-center gap-2 text-warm-gray-500">
                       <Loader2 className="h-4 w-4 animate-spin" /> Cargando tratamientos…
                     </div>
                   ) : servicesError ? (
@@ -448,13 +448,13 @@ export default function AdminGiftCardIssuePage() {
                       />
                       <div className="max-h-72 overflow-y-auto border border-beige-200 rounded-lg">
                         {visibleGroups.length === 0 ? (
-                          <div className="px-3 py-4 text-sm text-warm-gray text-center">
+                          <div className="px-3 py-4 text-sm text-warm-gray-500 text-center">
                             No hay resultados.
                           </div>
                         ) : (
                           visibleGroups.map(({ group, items }) => (
                             <div key={group}>
-                              <div className="px-3 py-1 bg-beige-100 text-xs uppercase tracking-widest text-warm-gray sticky top-0">
+                              <div className="px-3 py-1 bg-beige-100 text-xs uppercase tracking-widest text-warm-gray-500 sticky top-0">
                                 {GROUP_LABEL[group]}
                               </div>
                               {items.map(s => (
@@ -465,7 +465,7 @@ export default function AdminGiftCardIssuePage() {
                                   className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-beige-50 border-t border-beige-200"
                                 >
                                   <span className="text-dark text-left flex-1">{s.service_name}</span>
-                                  <span className="text-warm-gray mr-3">${s.price.toFixed(2)}</span>
+                                  <span className="text-warm-gray-500 mr-3">${s.price.toFixed(2)}</span>
                                   <Plus className="h-4 w-4 text-gold" />
                                 </button>
                               ))}
@@ -480,11 +480,11 @@ export default function AdminGiftCardIssuePage() {
                 {/* Totals */}
                 <div className="grid gap-4 md:grid-cols-3 pt-2 border-t border-beige-200">
                   <div>
-                    <div className="text-xs uppercase tracking-widest text-warm-gray">Subtotal</div>
+                    <div className="text-xs uppercase tracking-widest text-warm-gray-500">Subtotal</div>
                     <div className="text-dark font-medium mt-1">{formatMoney(treatmentSubtotalCents)}</div>
                   </div>
                   <div>
-                    <label className="text-xs uppercase tracking-widest text-warm-gray">ITBMS (%)</label>
+                    <label className="text-xs uppercase tracking-widest text-warm-gray-500">ITBMS (%)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -493,19 +493,19 @@ export default function AdminGiftCardIssuePage() {
                       value={itbmsPercent}
                       onChange={e => setItbmsPercent(e.target.value)}
                     />
-                    <div className="text-xs text-warm-gray mt-1">
+                    <div className="text-xs text-warm-gray-500 mt-1">
                       = {formatMoney(treatmentItbmsCents)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs uppercase tracking-widest text-warm-gray">Total</div>
+                    <div className="text-xs uppercase tracking-widest text-warm-gray-500">Total</div>
                     <div className="text-2xl font-display font-semibold text-gold mt-1">
                       {formatMoney(treatmentTotalCents)}
                     </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-warm-gray">
+                <p className="text-xs text-warm-gray-500">
                   Solo para referencia. La Gift Card se emite por el monto total —
                   los tratamientos seleccionados se imprimen en la etiqueta si lo deseas.
                 </p>
@@ -583,7 +583,7 @@ export default function AdminGiftCardIssuePage() {
         </Card>
 
         <div className="flex items-center justify-between gap-4">
-          <div className="text-sm text-warm-gray">
+          <div className="text-sm text-warm-gray-500">
             {computedAmountCents > 0
               ? <>Se emitirá por <span className="text-dark font-medium">{formatMoney(computedAmountCents)}</span></>
               : '—'}

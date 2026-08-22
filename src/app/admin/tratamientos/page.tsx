@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw, Star, ChevronDown, ChevronRight, ShoppingBag, GripVertical } from 'lucide-react'
+import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw, Star, ChevronDown, ChevronRight, ChevronUp, ShoppingBag, GripVertical } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
+import { AdminTable, CardField, type AdminColumn } from '@/components/admin/AdminTable'
 import { cn } from '@/lib/utils'
 import { PROGRAM_NAMES } from '@/lib/booking/constants'
 
@@ -127,6 +128,26 @@ export default function AdminTreatmentsPage() {
     setDropTarget(null)
   }
 
+  /**
+   * Move one treatment up or down inside its category. Drag-and-drop is
+   * mouse-only, so this is the path that works on a phone and by keyboard.
+   */
+  const moveTreatment = (category: string, id: number, direction: -1 | 1) => {
+    const list = [...(groupedTreatments[category] || [])]
+    const fromIdx = list.findIndex(t => t.mindbody_service_id === id)
+    const toIdx = fromIdx + direction
+    if (fromIdx === -1 || toIdx < 0 || toIdx >= list.length) return
+    const [moved] = list.splice(fromIdx, 1)
+    list.splice(toIdx, 0, moved)
+    const orderById = new Map(list.map((t, i) => [t.mindbody_service_id, i]))
+    setTreatments(prev => prev.map(t =>
+      orderById.has(t.mindbody_service_id)
+        ? { ...t, sort_order: orderById.get(t.mindbody_service_id)! }
+        : t
+    ))
+    setHasChanges(true)
+  }
+
   // Toggle visibility (menu pages)
   const toggleVisibility = (mindbodyServiceId: number) => {
     setTreatments(prev => prev.map(t =>
@@ -198,10 +219,152 @@ export default function AdminTreatmentsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-24">
         <Loader2 className="w-10 h-10 text-gold animate-spin mb-4" />
-        <p className="text-warm-gray">Cargando tratamientos desde Mindbody...</p>
+        <p className="text-warm-gray-500">Cargando tratamientos desde Mindbody...</p>
       </div>
     )
   }
+
+  const reorderCell = (category: string, list: Treatment[], t: Treatment) => {
+    const idx = list.findIndex(x => x.mindbody_service_id === t.mindbody_service_id)
+    return (
+      <div className="flex items-center gap-1">
+        <GripVertical
+          className={cn('w-4 h-4 text-warm-gray-500 shrink-0', canDrag ? 'cursor-grab active:cursor-grabbing' : 'opacity-30')}
+          aria-hidden="true"
+        />
+        <div className="flex flex-col">
+          <button
+            type="button"
+            onClick={() => moveTreatment(category, t.mindbody_service_id, -1)}
+            disabled={!canDrag || idx <= 0}
+            aria-label={`Subir ${t.service_name}`}
+            className="p-1 rounded text-warm-gray-500 hover:text-dark hover:bg-beige disabled:opacity-25"
+          >
+            <ChevronUp className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => moveTreatment(category, t.mindbody_service_id, 1)}
+            disabled={!canDrag || idx === list.length - 1}
+            aria-label={`Bajar ${t.service_name}`}
+            className="p-1 rounded text-warm-gray-500 hover:text-dark hover:bg-beige disabled:opacity-25"
+          >
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const onlineBadge = (t: Treatment) => (
+    t.is_online_bookable ? (
+      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+        <Calendar className="w-3 h-3 mr-1" /> Sí
+      </span>
+    ) : (
+      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-beige-300 text-warm-gray-600">No</span>
+    )
+  )
+
+  const visibilityBtn = (t: Treatment) => (
+    <button
+      onClick={() => toggleVisibility(t.mindbody_service_id)}
+      className={cn('p-2 rounded-lg transition-colors',
+        t.is_visible ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200')}
+      title={t.is_visible ? 'Ocultar del menú' : 'Mostrar en el menú'}
+      aria-label={`${t.is_visible ? 'Ocultar' : 'Mostrar'} ${t.service_name} en el menú`}
+    >
+      {t.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+    </button>
+  )
+
+  const widgetBtn = (t: Treatment) => (
+    t.is_online_bookable ? (
+      <button
+        onClick={() => toggleShowInBooking(t.mindbody_service_id)}
+        className={cn('p-2 rounded-lg transition-colors',
+          t.show_in_booking ? 'bg-purple-100 text-purple-800 hover:bg-purple-200' : 'bg-beige-200 text-warm-gray-500 hover:bg-beige-300')}
+        title={t.show_in_booking ? 'Ocultar del widget de reservas' : 'Mostrar en el widget de reservas'}
+        aria-label={`${t.show_in_booking ? 'Ocultar' : 'Mostrar'} ${t.service_name} en el widget`}
+      >
+        <ShoppingBag className="w-4 h-4" />
+      </button>
+    ) : (
+      <span className="inline-flex items-center p-2 rounded-lg bg-beige-100 text-beige-400"><ShoppingBag className="w-4 h-4" /></span>
+    )
+  )
+
+  const topPickBtn = (t: Treatment) => (
+    <button
+      onClick={() => toggleTopPick(t.mindbody_service_id)}
+      className={cn('p-2 rounded-lg transition-colors',
+        t.is_top_pick ? 'bg-gold-100 text-gold-700 hover:bg-gold-200' : 'bg-beige-100 text-beige-400 hover:bg-beige-200')}
+      title={t.is_top_pick ? 'Quitar de Top Picks' : 'Agregar a Top Picks'}
+      aria-label={`${t.is_top_pick ? 'Quitar de' : 'Agregar a'} Top Picks: ${t.service_name}`}
+    >
+      <Star className={cn('w-4 h-4', t.is_top_pick && 'fill-gold-500')} />
+    </button>
+  )
+
+  const bookingBtn = (t: Treatment) => (
+    t.is_online_bookable ? (
+      <button
+        onClick={() => toggleBookingButton(t.mindbody_service_id)}
+        className={cn('px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+          t.show_booking_button ? 'bg-gold text-dark hover:bg-gold/80' : 'bg-beige-200 text-warm-gray-500 hover:bg-beige-300')}
+        aria-label={`${t.show_booking_button ? 'Ocultar' : 'Mostrar'} botón de reservar en ${t.service_name}`}
+      >
+        {t.show_booking_button ? 'Activado' : 'Desactivado'}
+      </button>
+    ) : (
+      <span className="px-3 py-2 rounded-lg text-xs font-medium bg-beige-100 text-beige-400">N/A</span>
+    )
+  )
+
+  const treatmentColumns = (category: string, list: Treatment[]): Array<AdminColumn<Treatment>> => [
+    { key: 'drag', header: '', srHeader: 'Reordenar', render: t => reorderCell(category, list, t) },
+    {
+      key: 'name',
+      header: 'Tratamiento',
+      render: t => (
+        <div>
+          <p className="font-medium text-dark">{t.service_name}</p>
+          {t.description && (
+            <p className="text-xs text-warm-gray-500 mt-1 line-clamp-2"
+              dangerouslySetInnerHTML={{ __html: t.description }} />
+          )}
+        </div>
+      ),
+    },
+    { key: 'price', header: 'Precio', cellClassName: 'font-medium tabular-nums', render: t => `$${t.price}` },
+    { key: 'duration', header: 'Duración', cellClassName: 'text-warm-gray-500', render: t => `${t.duration} min` },
+    { key: 'online', header: 'Online', align: 'center', render: onlineBadge },
+    { key: 'menu', header: 'Menú', align: 'center', render: visibilityBtn },
+    { key: 'widget', header: 'Widget', align: 'center', render: widgetBtn },
+    { key: 'top', header: 'Top Pick', align: 'center', render: topPickBtn },
+    { key: 'book', header: 'Botón Reservar', align: 'center', render: bookingBtn },
+  ]
+
+  const treatmentCard = (category: string, list: Treatment[], t: Treatment) => (
+    <div className={cn(!t.is_visible && 'opacity-60')}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-medium text-dark">{t.service_name}</p>
+          <p className="text-sm text-warm-gray-500 tabular-nums">${t.price} · {t.duration} min</p>
+        </div>
+        {reorderCell(category, list, t)}
+      </div>
+      {/* Labelled rather than a row of bare icons — five toggles with one
+          trailing caption gave no way to tell which control was which. */}
+      <dl className="mt-3 space-y-2">
+        <CardField label="Online">{onlineBadge(t)}</CardField>
+        <CardField label="Menú">{visibilityBtn(t)}</CardField>
+        <CardField label="Widget">{widgetBtn(t)}</CardField>
+        <CardField label="Top Pick">{topPickBtn(t)}</CardField>
+        <CardField label="Reservar">{bookingBtn(t)}</CardField>
+      </dl>
+    </div>
+  )
 
   return (
     <div>
@@ -209,7 +372,7 @@ export default function AdminTreatmentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-display font-semibold text-dark">Tratamientos</h1>
-          <p className="text-warm-gray mt-1">
+          <p className="text-warm-gray-500 mt-1">
             Gestiona la visibilidad de los tratamientos en el menú y en el widget de reservas
           </p>
         </div>
@@ -242,7 +405,7 @@ export default function AdminTreatmentsPage() {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-warm-gray" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-warm-gray-500" />
             <input
               type="text"
               placeholder="Buscar tratamientos..."
@@ -269,35 +432,35 @@ export default function AdminTreatmentsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">Total</p>
+          <p className="text-sm text-warm-gray-500">Total</p>
           <p className="text-2xl font-semibold text-dark">{treatments.length}</p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">En Menú</p>
+          <p className="text-sm text-warm-gray-500">En Menú</p>
           <p className="text-2xl font-semibold text-green-600">
             {treatments.filter(t => t.is_visible).length}
           </p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">En Widget</p>
+          <p className="text-sm text-warm-gray-500">En Widget</p>
           <p className="text-2xl font-semibold text-purple-600">
             {treatments.filter(t => t.show_in_booking).length}
           </p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">Top Picks</p>
+          <p className="text-sm text-warm-gray-500">Top Picks</p>
           <p className="text-2xl font-semibold text-gold-600">
             {treatments.filter(t => t.is_top_pick).length}
           </p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">Online</p>
+          <p className="text-sm text-warm-gray-500">Online</p>
           <p className="text-2xl font-semibold text-blue-600">
             {treatments.filter(t => t.is_online_bookable).length}
           </p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-sm text-warm-gray">Ocultos</p>
+          <p className="text-sm text-warm-gray-500">Ocultos</p>
           <p className="text-2xl font-semibold text-red-600">
             {treatments.filter(t => !t.is_visible && !t.show_in_booking).length}
           </p>
@@ -308,14 +471,14 @@ export default function AdminTreatmentsPage() {
       <div className="flex justify-end gap-2 mb-4">
         <button
           onClick={expandAll}
-          className="text-sm text-warm-gray hover:text-dark transition-colors"
+          className="text-sm text-warm-gray-500 hover:text-dark transition-colors"
         >
           Expandir todo
         </button>
-        <span className="text-warm-gray">|</span>
+        <span className="text-warm-gray-500">|</span>
         <button
           onClick={collapseAll}
-          className="text-sm text-warm-gray hover:text-dark transition-colors"
+          className="text-sm text-warm-gray-500 hover:text-dark transition-colors"
         >
           Colapsar todo
         </button>
@@ -334,12 +497,12 @@ export default function AdminTreatmentsPage() {
           >
             <h2 className="font-semibold text-dark flex items-center gap-2">
               {isCollapsed ? (
-                <ChevronRight className="w-5 h-5 text-warm-gray" />
+                <ChevronRight className="w-5 h-5 text-warm-gray-500" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-warm-gray" />
+                <ChevronDown className="w-5 h-5 text-warm-gray-500" />
               )}
               {category}
-              <span className="text-sm font-normal text-warm-gray">
+              <span className="text-sm font-normal text-warm-gray-500">
                 ({categoryTreatments.length} tratamientos)
               </span>
               {topPicksInCategory > 0 && (
@@ -352,159 +515,32 @@ export default function AdminTreatmentsPage() {
           </button>
 
           {!isCollapsed && (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-beige-100 border-b border-beige-200">
-                <tr>
-                  <th className="w-8 p-3" title="Arrastra para ordenar" />
-                  <th className="text-left p-3 text-sm font-medium text-dark">Tratamiento</th>
-                  <th className="text-left p-3 text-sm font-medium text-dark">Precio</th>
-                  <th className="text-left p-3 text-sm font-medium text-dark">Duración</th>
-                  <th className="text-center p-3 text-sm font-medium text-dark">Online</th>
-                  <th className="text-center p-3 text-sm font-medium text-dark" title="Visible en páginas de menú">Menú</th>
-                  <th className="text-center p-3 text-sm font-medium text-dark" title="Visible en widget de reservas para selección directa">Widget</th>
-                  <th className="text-center p-3 text-sm font-medium text-dark">Top Pick</th>
-                  <th className="text-center p-3 text-sm font-medium text-dark">Botón Reservar</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-beige-100">
-                {categoryTreatments.map((treatment) => (
-                  <tr
-                    key={treatment.mindbody_service_id}
-                    draggable={canDrag}
-                    onDragStart={() => setDragged({ category, id: treatment.mindbody_service_id })}
-                    onDragOver={(e) => {
-                      if (dragged?.category === category) {
-                        e.preventDefault()
-                        setDropTarget(treatment.mindbody_service_id)
-                      }
-                    }}
-                    onDrop={() => handleDrop(category, treatment.mindbody_service_id)}
-                    onDragEnd={() => { setDragged(null); setDropTarget(null) }}
-                    className={cn(
-                      "hover:bg-beige-50 transition-colors",
-                      !treatment.is_visible && "opacity-50",
-                      dragged?.id === treatment.mindbody_service_id && "opacity-30",
-                      dropTarget === treatment.mindbody_service_id &&
-                        dragged?.id !== treatment.mindbody_service_id &&
-                        "border-t-2 border-gold"
-                    )}
-                  >
-                    <td className={cn("p-3 text-center", canDrag ? "cursor-grab active:cursor-grabbing" : "opacity-30")}
-                        title={canDrag ? 'Arrastra para ordenar' : 'Limpia la búsqueda para ordenar'}>
-                      <GripVertical className="w-4 h-4 text-warm-gray inline-block" />
-                    </td>
-                    <td className="p-3">
-                      <div>
-                        <p className="font-medium text-dark">{treatment.service_name}</p>
-                        {treatment.description && (
-                          <p
-                            className="text-xs text-warm-gray mt-1 line-clamp-2"
-                            dangerouslySetInnerHTML={{ __html: treatment.description }}
-                          />
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-3 text-dark font-medium">${treatment.price}</td>
-                    <td className="p-3 text-warm-gray">{treatment.duration} min</td>
-                    <td className="p-3 text-center">
-                      {treatment.is_online_bookable ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          Sí
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-500">
-                          No
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3 text-center">
-                      <button
-                        onClick={() => toggleVisibility(treatment.mindbody_service_id)}
-                        className={cn(
-                          "p-2 rounded-lg transition-colors",
-                          treatment.is_visible
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-red-100 text-red-700 hover:bg-red-200"
-                        )}
-                        title={treatment.is_visible ? 'Ocultar del menú' : 'Mostrar en el menú'}
-                      >
-                        {treatment.is_visible ? (
-                          <Eye className="w-4 h-4" />
-                        ) : (
-                          <EyeOff className="w-4 h-4" />
-                        )}
-                      </button>
-                    </td>
-                    <td className="p-3 text-center">
-                      {treatment.is_online_bookable ? (
-                        <button
-                          onClick={() => toggleShowInBooking(treatment.mindbody_service_id)}
-                          className={cn(
-                            "p-2 rounded-lg transition-colors",
-                            treatment.show_in_booking
-                              ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
-                              : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                          )}
-                          title={treatment.show_in_booking ? 'Ocultar del widget de reservas' : 'Mostrar en el widget de reservas'}
-                        >
-                          <ShoppingBag className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <span className="inline-flex items-center p-2 rounded-lg bg-gray-50 text-gray-300">
-                          <ShoppingBag className="w-4 h-4" />
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3 text-center">
-                      <button
-                        onClick={() => toggleTopPick(treatment.mindbody_service_id)}
-                        className={cn(
-                          "p-2 rounded-lg transition-colors",
-                          treatment.is_top_pick
-                            ? "bg-gold-100 text-gold-700 hover:bg-gold-200"
-                            : "bg-beige-100 text-beige-400 hover:bg-beige-200"
-                        )}
-                        title={treatment.is_top_pick ? 'Quitar de Top Picks' : 'Agregar a Top Picks'}
-                      >
-                        <Star
-                          className={cn(
-                            "w-4 h-4",
-                            treatment.is_top_pick && "fill-gold-500"
-                          )}
-                        />
-                      </button>
-                    </td>
-                    <td className="p-3 text-center">
-                      {treatment.is_online_bookable ? (
-                        <button
-                          onClick={() => toggleBookingButton(treatment.mindbody_service_id)}
-                          className={cn(
-                            "px-3 py-1 rounded-lg text-xs font-medium transition-colors",
-                            treatment.show_booking_button
-                              ? "bg-gold text-dark hover:bg-gold/80"
-                              : "bg-beige-200 text-warm-gray hover:bg-beige-300"
-                          )}
-                          title={
-                            treatment.show_booking_button
-                              ? 'Ocultar botón de reservar'
-                              : 'Mostrar botón de reservar'
-                          }
-                        >
-                          {treatment.show_booking_button ? 'Activado' : 'Desactivado'}
-                        </button>
-                      ) : (
-                        <span className="px-3 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-400">
-                          N/A
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            <AdminTable
+              rows={categoryTreatments}
+              columns={treatmentColumns(category, categoryTreatments)}
+              rowKey={t => String(t.mindbody_service_id)}
+              mobileCard={t => treatmentCard(category, categoryTreatments, t)}
+              empty="No hay tratamientos en esta categoría."
+              rowProps={t => ({
+                draggable: canDrag,
+                onDragStart: () => setDragged({ category, id: t.mindbody_service_id }),
+                onDragOver: e => {
+                  if (dragged?.category === category) {
+                    e.preventDefault()
+                    setDropTarget(t.mindbody_service_id)
+                  }
+                },
+                onDrop: () => handleDrop(category, t.mindbody_service_id),
+                onDragEnd: () => { setDragged(null); setDropTarget(null) },
+                className: cn(
+                  !t.is_visible && 'opacity-50',
+                  dragged?.id === t.mindbody_service_id && 'opacity-30',
+                  dropTarget === t.mindbody_service_id &&
+                    dragged?.id !== t.mindbody_service_id &&
+                    'border-t-2 border-gold',
+                ),
+              })}
+            />
           )}
         </Card>
         )
@@ -512,7 +548,7 @@ export default function AdminTreatmentsPage() {
 
       {filteredTreatments.length === 0 && (
         <Card variant="default" padding="lg" className="text-center">
-          <p className="text-warm-gray">No se encontraron tratamientos</p>
+          <p className="text-warm-gray-500">No se encontraron tratamientos</p>
         </Card>
       )}
 

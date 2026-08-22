@@ -222,7 +222,7 @@ function AgendaInner() {
           className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
             location === l.key
               ? 'bg-dark text-white border-dark'
-              : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+              : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
           }`}
         >
           {t(l.label)}
@@ -268,7 +268,7 @@ function AgendaInner() {
           </button>
           <div>
             <h1 className="text-xl font-display font-semibold text-dark capitalize leading-tight">{formatDateLang(selectedDate, lang)}</h1>
-            <p className="text-xs text-warm-gray">
+            <p className="text-xs text-warm-gray-500">
               {appts.length} {t('citas')}
               {!isFutureDay && <> · {appts.filter(a => a.noShow).length} {t('no-shows')}</>}
             </p>
@@ -292,7 +292,7 @@ function AgendaInner() {
                       sel ? 'bg-dark text-cream border-dark' : d === today ? 'border-gold bg-white' : 'border-beige-400 bg-white hover:bg-beige'
                     }`}
                   >
-                    <span className={`text-[9px] leading-none ${sel ? 'text-cream/70' : 'text-warm-gray'}`}>{WEEKDAYS[i]}</span>
+                    <span className={`text-[9px] leading-none ${sel ? 'text-cream/70' : 'text-warm-gray-500'}`}>{WEEKDAYS[i]}</span>
                     <span className="text-base font-bold leading-none tabular-nums">{Number(d.slice(8, 10))}</span>
                     <span className={`text-[9px] leading-none tabular-nums ${sel ? 'text-cream/70' : 'text-spa-green font-bold'}`}>
                       {count ?? '·'}
@@ -313,7 +313,7 @@ function AgendaInner() {
 
         {state?.status === 'ready' && (
           appts.length === 0 && availability.length === 0 ? (
-            <CardBox><p className="text-sm text-warm-gray">{t('Sin citas este día.')}</p></CardBox>
+            <CardBox><p className="text-sm text-warm-gray-500">{t('Sin citas este día.')}</p></CardBox>
           ) : (
             <CardBox className="p-0 overflow-hidden">
               <div className="overflow-x-auto">
@@ -337,7 +337,7 @@ function AgendaInner() {
                       {hours.map(h => (
                         <span
                           key={h}
-                          className="absolute right-1.5 -translate-y-1/2 text-[9px] text-warm-gray tabular-nums"
+                          className="absolute right-1.5 -translate-y-1/2 text-[9px] text-warm-gray-500 tabular-nums"
                           style={{ top: (h - startHour) * HOUR_PX }}
                         >
                           {h}:00
@@ -377,13 +377,13 @@ function AgendaInner() {
                             >
                               {compact ? (
                                 <p className={`text-[9px] leading-tight truncate ${a.noShow ? 'text-red-800 font-bold' : 'text-dark'}`}>
-                                  <span className="tabular-nums text-warm-gray">{a.startTime}</span>{' '}
+                                  <span className="tabular-nums text-warm-gray-500">{a.startTime}</span>{' '}
                                   {a.noShow && <b className="text-red-700">NS </b>}
                                   {a.clientName ?? '—'}
                                 </p>
                               ) : (
                                 <>
-                                  <p className={`text-[9px] leading-tight tabular-nums ${a.noShow ? 'text-red-700' : 'text-warm-gray'}`}>
+                                  <p className={`text-[9px] leading-tight tabular-nums ${a.noShow ? 'text-red-700' : 'text-warm-gray-500'}`}>
                                     {a.startTime}–{a.endTime}{a.noShow && <b> · NO-SHOW</b>}
                                   </p>
                                   <p className={`text-[10px] font-bold leading-tight truncate ${a.noShow ? 'text-red-800' : 'text-dark'}`}>
@@ -399,7 +399,7 @@ function AgendaInner() {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 px-3 py-2 border-t border-beige-200 text-[10px] text-warm-gray">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 px-3 py-2 border-t border-beige-200 text-[10px] text-warm-gray-500">
                 <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-spa-green/10 border border-spa-green/30 mr-1" />{t('horario disponible')}</span>
                 <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-white border border-beige-500 mr-1" />{t('sin llegar')}</span>
                 <span><span className="inline-block w-2.5 h-2.5 rounded-sm align-[-1px] bg-gold-100 border border-gold-500 mr-1" />{t('llegó')}</span>
@@ -422,7 +422,7 @@ function AgendaInner() {
           <LangToggle />
           <DictionaryLink />
         </div>
-        <p className="text-sm text-warm-gray mt-1">{t('Toca un día para ver el horario por terapeuta')}</p>
+        <p className="text-sm text-warm-gray-500 mt-1">{t('Toca un día para ver el horario por terapeuta')}</p>
       </div>
 
       {/* Sticky controls */}
@@ -466,13 +466,13 @@ function AgendaInner() {
               <span className="text-3xl font-bold text-dark tabular-nums">{data.totals.activeToDate.toLocaleString('en-US')}</span>
               <DeltaChip delta={deltaPct(data.totals.activeToDate, data.totals.lySameDates)} suffix={`vs ${lyYear}`} />
             </div>
-            <p className="text-xs text-warm-gray mt-1">
+            <p className="text-xs text-warm-gray-500 mt-1">
               {data.totals.lySameDates > 0
                 ? `${data.totals.lySameDates.toLocaleString('en-US')} ${t('citas en las mismas fechas de')} ${lyYear}`
                 : `${t('sin datos de')} ${lyYear} ${t('para comparar')}`}
             </p>
             {data.totals.lyFullMonth > 0 && (
-              <p className="text-xs text-warm-gray mt-0.5">
+              <p className="text-xs text-warm-gray-500 mt-0.5">
                 {t('Meta —')} {lang === 'es' ? `${MONTHS_LONG.es[m - 1]} ${lyYear} completo` : `full ${MONTHS_LONG.en[m - 1]} ${lyYear}`}: <b className="text-dark">{data.totals.lyFullMonth.toLocaleString('en-US')}</b>
               </p>
             )}
@@ -488,7 +488,7 @@ function AgendaInner() {
 
           {/* Calendar grid */}
           <CardBox>
-            <div className="grid grid-cols-7 text-center text-[10px] font-bold text-warm-gray mb-1">
+            <div className="grid grid-cols-7 text-center text-[10px] font-bold text-warm-gray-500 mb-1">
               {WEEKDAYS.map((d, i) => <span key={i} className="py-1">{d}</span>)}
             </div>
             <div className="grid grid-cols-7 gap-1">
@@ -530,13 +530,13 @@ function AgendaInner() {
                 )
               })}
             </div>
-            <div className="flex justify-between text-[10px] text-warm-gray mt-3">
+            <div className="flex justify-between text-[10px] text-warm-gray-500 mt-3">
               <span>■ {t('más intenso = más citas')}<InfoTip k="agenda_grid" /></span>
               <span><span className="text-spa-green font-bold">{t('verde')}</span> {t('= reservas futuras')}</span>
             </div>
           </CardBox>
 
-          <p className="text-center text-xs text-warm-gray pb-4">
+          <p className="text-center text-xs text-warm-gray-500 pb-4">
             {t('Hoy se actualiza al entrar y cada 5 min mientras la página esté abierta · reservas futuras ~60 días adelante')}
           </p>
         </div>

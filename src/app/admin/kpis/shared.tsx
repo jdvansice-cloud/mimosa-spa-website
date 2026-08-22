@@ -69,7 +69,7 @@ export function LoadingCard({ tall = false }: { tall?: boolean }) {
 
 export function DeltaChip({ delta, invert = false, suffix }: { delta: number | null; invert?: boolean; suffix?: string }) {
   const t = useT()
-  if (delta === null) return <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">{t('sin dato')} {suffix}</span>
+  if (delta === null) return <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray-500">{t('sin dato')} {suffix}</span>
   const up = delta >= 0
   const good = invert ? !up : up
   return (
@@ -81,7 +81,7 @@ export function DeltaChip({ delta, invert = false, suffix }: { delta: number | n
 
 export function Legend({ curLabel, prevLabel }: { curLabel: string; prevLabel: string }) {
   return (
-    <div className="flex gap-4 text-[11px] text-warm-gray mt-1">
+    <div className="flex gap-4 text-[11px] text-warm-gray-500 mt-1">
       <span className="flex items-center gap-1.5">
         <span className="inline-block w-3 h-0.5 rounded" style={{ background: GREEN }} /> {curLabel}
       </span>
@@ -173,7 +173,7 @@ export function DualLine({
           ) : null
         )}
       </svg>
-      <p className="text-[11px] tabular-nums text-warm-gray h-4 mt-0.5">
+      <p className="text-[11px] tabular-nums text-warm-gray-500 h-4 mt-0.5">
         {sel === null ? (
           <span className="italic">{t('Toca el gráfico para ver valores')}</span>
         ) : (
@@ -192,7 +192,7 @@ export function DualLine({
 
 export function Label({ children, info }: { children: React.ReactNode; info?: string }) {
   return (
-    <p className="text-[11px] font-bold tracking-widest uppercase text-warm-gray">
+    <p className="text-[11px] font-bold tracking-widest uppercase text-warm-gray-500">
       {children}
       {info && <InfoTip k={info} />}
     </p>

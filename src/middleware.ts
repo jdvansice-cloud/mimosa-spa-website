@@ -84,10 +84,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
 
-    // mobile_manager: access limited to the Mobile Manager section
+    // mobile_manager: access limited to the Mobile Manager section, minus the
+    // pages carrying owner-level financials (rent, planilla, accountant packet).
+    // The matching API routes enforce this too — middleware skips /api.
     if (roleRow.role === 'mobile_manager') {
       const inKpis = pathname === '/admin/kpis' || pathname.startsWith('/admin/kpis/')
-      if (!inKpis) {
+      const isOwnerOnly =
+        pathname === '/admin/kpis/negocio' || pathname.startsWith('/admin/kpis/negocio/')
+      if (!inKpis || isOwnerOnly) {
         return NextResponse.redirect(new URL('/admin/kpis', request.url))
       }
       return response
