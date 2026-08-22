@@ -210,6 +210,16 @@ export async function emitInvoiceForOrder(
       })
       .eq('id', invoiceRow!.id)
 
+    // Queue the paper CAFE. Deliberately after the document is safely
+    // authorized and recorded, and deliberately non-fatal: a printer problem
+    // must never fail an invoice that already exists at the DGI. Online orders
+    // are skipped inside the queue (their CAFE goes by email).
+    const { enqueueCafePrint } = await import('@/lib/print/queue')
+    const queued = await enqueueCafePrint(invoiceRow!.id, supabase)
+    if (!queued.ok) {
+      console.error(`No se pudo encolar la impresión de ${invoiceRow!.id}: ${queued.error}`)
+    }
+
     if (!isCredit) {
       await supabase
         .from('orders')

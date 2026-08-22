@@ -94,6 +94,52 @@ cards no genera factura (se factura el servicio al canjearla).
 - `/admin/facturas` permite descargar el CAFE (PDF), abrir el QR de la DGI,
   reintentar rechazados y anular documentos autorizados (motivo ≥10 caracteres).
 
+## Impresión del CAFE en el mostrador
+
+El cliente que paga en el spa debe salir con su CAFE impreso. La impresión es
+una **cola con confirmación**, no un "enviar y olvidar": si se atasca el rollo
+o la MUNBYN se cae del WiFi, nadie se enteraría hasta que el cliente ya se fue.
+
+```
+emisión → print_jobs(pending) → estación reclama(printing) → printed
+                                          └── error ──────→ failed → reimprimir
+```
+
+- **`/admin/impresion`** es la estación. Se activa **solo en la Mac del
+  mostrador** que tiene QZ Tray y la impresora; cualquier otra pantalla puede
+  abrir la misma página para *mirar* la cola sin reclamar trabajos.
+- Cada estación tiene un id propio, así que dos mostradores nunca imprimen el
+  mismo documento. Un trabajo reclamado que queda colgado más de 90 segundos
+  vuelve a la cola.
+- **Ver muestra** dibuja un CAFE de ejemplo en pantalla e **Imprimir prueba**
+  lo manda a la impresora — para calibrar el papel sin esperar a que llegue un
+  cliente.
+- Una **reimpresión crea una fila nueva** (`reprint_of`), no reinicia la
+  anterior: el rastro debe mostrar que un documento fiscal se imprimió dos
+  veces y por qué falló el primero.
+- Los **pedidos en línea no entran a la cola** — su CAFE va por correo.
+
+Detalles técnicos: el recibo se rasteriza a 576 puntos (72 mm útiles de un
+rollo de 80 mm) a los 203 dpi nativos de la impresora y QZ lo recibe con todo
+el escalado desactivado, igual que las etiquetas de gift card. Cualquier
+escalado en el camino es lo que vuelve **ilegible el QR**, y un QR que no
+escanea es un CAFE que el cliente no puede verificar ante la DGI.
+
+> ⚠️ **Antes de imprimir el primer CAFE** hay que llenar los datos del emisor,
+> que hasta ahora nunca hicieron falta (el PAC nos identifica por la API key,
+> pero el papel lleva razón social y RUC):
+>
+> ```sql
+> UPDATE efactura_config
+>    SET razon_social = '…', ruc = '…', dv = '…',
+>        direccion = '…', telefono = '…',
+>        receipt_footer = 'Gracias por su visita'
+>  WHERE location_id IN (1, 2);
+> ```
+>
+> La estación se niega a imprimir mientras falten `razon_social` o `ruc` — es
+> preferible un error visible a entregar un documento con un RUC inventado.
+
 ## Detalles que la DGI rechaza (ya resueltos en el código)
 
 | Regla | Implementación |
@@ -130,3 +176,7 @@ alguien confirma con **Ya registré el reembolso** (se guarda quién y cuándo).
   el contador si prefiere `08` (transferencia).
 - Facturación de las ventas del POS (mostrador). Hoy solo facturamos los
   pedidos en línea; el resto sigue saliendo por el puente hasta que se migre.
+  El mapeo ya existe (`src/lib/efactura/fromMindbodySale.ts`, validado con
+  `npm run efactura:pos-dryrun`) y la cola de impresión ya está lista; falta
+  resolver la diferencia de documentos contra el puente en modo sombra y
+  coordinar la fecha de corte con efacturapty.
