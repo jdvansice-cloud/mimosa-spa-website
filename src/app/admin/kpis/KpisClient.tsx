@@ -50,7 +50,7 @@ function YearBars({ cur, prev, labels }: { cur: Array<number | null>; prev: Arra
       </div>
       <div className="flex gap-1 mt-1">
         {labels.map((l, i) => (
-          <span key={i} className="flex-1 text-center text-[8px] text-warm-gray">{l}</span>
+          <span key={i} className="flex-1 text-center text-[8px] text-warm-gray-500">{l}</span>
         ))}
       </div>
     </div>
@@ -87,18 +87,18 @@ function ExpandableStat({
         className="w-full text-left p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-2xl"
       >
         <div className="flex items-start justify-between gap-2">
-          <Label>{label}{info && <Info className="h-3 w-3 inline ml-1.5 align-[-1px] text-warm-gray/60" />}</Label>
-          <ChevronDown className={`h-4 w-4 text-warm-gray shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <Label>{label}{info && <Info className="h-3 w-3 inline ml-1.5 align-[-1px] text-warm-gray-500/60" />}</Label>
+          <ChevronDown className={`h-4 w-4 text-warm-gray-500 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
         </div>
         <p className="text-2xl font-bold text-dark tabular-nums mt-1">{value}</p>
-        {sub && <p className="text-[10px] text-warm-gray tabular-nums">{sub}</p>}
+        {sub && <p className="text-[10px] text-warm-gray-500 tabular-nums">{sub}</p>}
         <div className="mt-1">{chip}</div>
-        {goal && <p className="text-[10px] text-warm-gray mt-1 tabular-nums">{goal}</p>}
+        {goal && <p className="text-[10px] text-warm-gray-500 mt-1 tabular-nums">{goal}</p>}
       </button>
       {open && (
         <div className="px-4 pb-4">
           {info && <ExplainText k={info} className="mb-2" />}
-          <p className="text-[11px] text-warm-gray">{t('Por mes')} · {curYear} vs {prevYear}</p>
+          <p className="text-[11px] text-warm-gray-500">{t('Por mes')} · {curYear} vs {prevYear}</p>
           <DualLine
             series={{ unit: 'month', labels: monthLabels, current: chart.cur, previous: chart.prev }}
             formatY={chartFormat}
@@ -209,7 +209,7 @@ function KpisInner() {
             <LangToggle />
           <DictionaryLink />
           </div>
-          <p className="text-sm text-warm-gray mt-1">
+          <p className="text-sm text-warm-gray-500 mt-1">
             {t('Ventas netas sin ITBMS, método de caja · comparado con las mismas fechas del año pasado')}
           </p>
           {data && (
@@ -241,7 +241,7 @@ function KpisInner() {
             className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
               period === p.key
                 ? 'bg-spa-green text-white border-spa-green'
-                : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
             }`}
           >
             {t(p.label)}
@@ -257,7 +257,7 @@ function KpisInner() {
             className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
               location === l.key
                 ? 'bg-dark text-white border-dark'
-                : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
             }`}
           >
             {t(l.label)}
@@ -269,7 +269,7 @@ function KpisInner() {
           className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
             gcMode
               ? 'bg-gold-600 text-white border-gold-600'
-              : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+              : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
           }`}
         >
           {t('Uso de gift cards')}
@@ -303,25 +303,25 @@ function KpisInner() {
               <span className="text-4xl font-bold text-dark tabular-nums">{money(data.sales.net)}</span>
               <DeltaChip delta={deltaPct(data.sales.net, data.sales.lyNet)} suffix={vsLabel} />
             </div>
-            <p className="text-xs text-warm-gray mt-1">
+            <p className="text-xs text-warm-gray-500 mt-1">
               {data.sales.lyNet > 0
                 ? `${money(data.sales.lyNet)} ${t('en las mismas fechas de')} ${lyYear} (${data.lyRange.start.slice(5)} → ${data.lyRange.end.slice(5)})`
                 : `${t('sin datos de')} ${lyYear} ${t('para comparar')}`}
             </p>
             {data.sales.lyPeriodTotal !== null && data.sales.lyPeriodTotal > 0 && (
-              <p className="text-xs text-warm-gray mt-0.5">
+              <p className="text-xs text-warm-gray-500 mt-0.5">
                 {t('Meta —')} {goalPeriodLabel}: <b className="text-dark">{money(data.sales.lyPeriodTotal)}</b>
               </p>
             )}
             {gcMode && (
-              <p className="text-xs text-warm-gray mt-0.5">
+              <p className="text-xs text-warm-gray-500 mt-0.5">
                 {data.sales.saleCount.toLocaleString('en-US')} {t('usos')} · {t('promedio')} {money(data.sales.avgTicket)} {t('por uso')}
               </p>
             )}
             {data.budget && (
               <div className="mt-3 rounded-xl bg-white/70 border border-gold-200 px-3 py-2">
                 <div className="flex items-baseline justify-between gap-2 text-xs">
-                  <span className="text-warm-gray">
+                  <span className="text-warm-gray-500">
                     {t('Presupuesto')} {data.budget.year}<InfoTip k="presupuesto" />
                     {data.period !== 'ytd' && <> · {MONTHS_LONG[lang][Number(data.range.start.slice(5, 7)) - 1]}</>}
                     : <b className="text-dark tabular-nums">{money(data.budget.periodTarget)}</b>
@@ -341,7 +341,7 @@ function KpisInner() {
                   )}
                 </div>
                 {data.budget.expectedToDate !== null && data.budget.expectedToDate > 0 && (
-                  <p className="text-[10px] text-warm-gray mt-1 tabular-nums">
+                  <p className="text-[10px] text-warm-gray-500 mt-1 tabular-nums">
                     {t('esperado a la fecha')}: {money(data.budget.expectedToDate)} · {t('ritmo')}:{' '}
                     <b className={data.sales.net >= data.budget.expectedToDate ? 'text-spa-green' : 'text-red-700'}>
                       {pct(data.sales.net / data.budget.expectedToDate)}
@@ -350,7 +350,7 @@ function KpisInner() {
                 )}
               </div>
             )}
-            <p className="text-[11px] text-warm-gray mt-3">{chartTitle(data)}</p>
+            <p className="text-[11px] text-warm-gray-500 mt-3">{chartTitle(data)}</p>
             <DualLine series={data.sales.series} formatY={moneyCompact} formatValue={money} />
             <Legend curLabel={String(data.monthly.curYear)} prevLabel={String(data.monthly.prevYear)} />
           </div>
@@ -434,19 +434,19 @@ function KpisInner() {
                 </p>
                 <div className="flex items-center gap-4 mt-2">
                   <span className="font-display font-semibold text-5xl text-spa-green leading-none">{pct(data.retention.rate)}</span>
-                  <span className="text-xs text-warm-gray leading-relaxed">
+                  <span className="text-xs text-warm-gray-500 leading-relaxed">
                     {data.retention.lyRate !== null
                       ? <>{t('mismo cohorte de')} {lyYear}: {pct(data.retention.lyRate)} ({data.retention.lyReturned} {t('de')} {data.retention.lyCohortSize})</>
                       : <>{t('sin cohorte comparable en')} {lyYear}</>}
                   </span>
                 </div>
                 <div className="flex gap-2 mt-3">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">{t('Industria 35%')}</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${data.retention.rate !== null && data.retention.rate >= 0.5 ? 'bg-green-100 text-green-800' : 'bg-beige text-warm-gray'}`}>{t('Meta 50%')}</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray-500">{t('Industria 35%')}</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${data.retention.rate !== null && data.retention.rate >= 0.5 ? 'bg-green-100 text-green-800' : 'bg-beige text-warm-gray-500'}`}>{t('Meta 50%')}</span>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-warm-gray mt-2">{t('Aún no hay datos del cohorte.')}</p>
+              <p className="text-sm text-warm-gray-500 mt-2">{t('Aún no hay datos del cohorte.')}</p>
             )}
           </CardBox>
 
@@ -455,12 +455,12 @@ function KpisInner() {
             <Label info="prebooked">{t('Ya reagendados')}</Label>
             <div className="flex items-center gap-4 mt-2">
               <span className="font-display font-semibold text-5xl text-spa-green leading-none">{pct(data.prebooked.rate)}</span>
-              <span className="text-xs text-warm-gray leading-relaxed">
+              <span className="text-xs text-warm-gray-500 leading-relaxed">
                 {data.prebooked.withNext} {t('de')} {data.prebooked.clientsSeen} {t('clientes del período')}<br />{t('ya tienen su próxima cita')}
               </span>
             </div>
             <div className="flex gap-2 mt-3">
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray">{t('Meta ≥50%')}</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-beige text-warm-gray-500">{t('Meta ≥50%')}</span>
             </div>
           </CardBox>
 
@@ -490,7 +490,7 @@ function KpisInner() {
                       <div key={s.label} className={s.cls} style={{ width: `${(100 * s.value) / total}%` }} />
                     ))}
                   </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-warm-gray">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-warm-gray-500">
                     {segs.map(s => (
                       <span key={s.label} className="flex items-center gap-1.5">
                         <span className={`inline-block w-2 h-2 rounded-full ${s.cls}`} />
@@ -500,7 +500,7 @@ function KpisInner() {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-warm-gray mt-2">{t('Sin ventas en el período.')}</p>
+                <p className="text-sm text-warm-gray-500 mt-2">{t('Sin ventas en el período.')}</p>
               )
             })()}
           </CardBox>
@@ -523,7 +523,7 @@ function KpisInner() {
                       const b = data.budget?.perLocation?.find(x => x.locationId === s.locationId)
                       if (!b || b.annual <= 0) return null
                       return (
-                        <p className="text-[10px] text-warm-gray mt-1 tabular-nums">
+                        <p className="text-[10px] text-warm-gray-500 mt-1 tabular-nums">
                           {t('Presupuesto')} {data.budget!.year} ({b.manager}): {money(b.annual)} ·{' '}
                           <b className={b.netYtd / b.annual >= (data.budget!.expectedToDate ?? 0) / data.budget!.annual ? 'text-spa-green' : 'text-dark'}>
                             {pct(b.netYtd / b.annual)}
@@ -541,10 +541,10 @@ function KpisInner() {
           <CardBox>
             <Label info="top_servicios">{t(gcMode ? 'Top servicios pagados con gift card' : 'Top servicios · neto del período')}</Label>
             <div className="mt-2 divide-y divide-dashed divide-beige-400">
-              {data.topServices.length === 0 && <p className="text-sm text-warm-gray py-2">{t('Sin servicios en el período.')}</p>}
+              {data.topServices.length === 0 && <p className="text-sm text-warm-gray-500 py-2">{t('Sin servicios en el período.')}</p>}
               {data.topServices.slice(0, showAllServices ? 25 : 5).map(s => (
                 <div key={s.name} className="flex justify-between items-center gap-3 py-2 text-sm">
-                  <span className="text-dark">{s.name} <span className="text-warm-gray">×{s.count}</span></span>
+                  <span className="text-dark">{s.name} <span className="text-warm-gray-500">×{s.count}</span></span>
                   <b className="tabular-nums text-dark shrink-0">{money(s.net)}</b>
                 </div>
               ))}
@@ -564,12 +564,12 @@ function KpisInner() {
           <CardBox>
             <Label info="top_clientes">{t(gcMode ? 'Top clientes · gift cards redimidas' : 'Top clientes · neto del período')}</Label>
             {data.topClients.length === 0 ? (
-              <p className="text-sm text-warm-gray py-2 mt-2">{t('Sin clientes en el período.')}</p>
+              <p className="text-sm text-warm-gray-500 py-2 mt-2">{t('Sin clientes en el período.')}</p>
             ) : (
               <>
                 <table className="w-full mt-2 text-sm">
                   <thead>
-                    <tr className="text-[10px] font-bold tracking-wider uppercase text-warm-gray">
+                    <tr className="text-[10px] font-bold tracking-wider uppercase text-warm-gray-500">
                       <th className="text-left font-bold py-1.5">{t('Cliente')}</th>
                       <th className="text-right font-bold py-1.5">{t('Visitas')}</th>
                       <th className="text-right font-bold py-1.5">{t('Neto')}</th>
@@ -579,7 +579,7 @@ function KpisInner() {
                     {data.topClients.slice(0, showAllClients ? 25 : 10).map((c, i) => (
                       <tr key={c.name + i} className="text-dark">
                         <td className="py-2 pr-2">
-                          <span className="text-warm-gray tabular-nums">{i + 1}.</span> {c.name}
+                          <span className="text-warm-gray-500 tabular-nums">{i + 1}.</span> {c.name}
                         </td>
                         <td className="py-2 px-2 text-right tabular-nums">{gcMode ? '—' : c.visits}</td>
                         <td className="py-2 pl-2 text-right tabular-nums font-bold">{money(c.net)}</td>
@@ -604,11 +604,11 @@ function KpisInner() {
           {!gcMode && <CardBox>
             <Label info="top_terapeutas">{t('Top 10 terapeutas · neto atribuido')}</Label>
             {data.staff.length === 0 ? (
-              <p className="text-sm text-warm-gray py-2 mt-2">{t('Sin visitas en el período.')}</p>
+              <p className="text-sm text-warm-gray-500 py-2 mt-2">{t('Sin visitas en el período.')}</p>
             ) : (
               <table className="w-full mt-2 text-sm">
                 <thead>
-                  <tr className="text-[10px] font-bold tracking-wider uppercase text-warm-gray">
+                  <tr className="text-[10px] font-bold tracking-wider uppercase text-warm-gray-500">
                     <th className="text-left font-bold py-1.5">{t('Terapeuta')}</th>
                     <th className="text-right font-bold py-1.5">{t('Tratam.')}</th>
                     <th className="text-right font-bold py-1.5">{t('Horas')}</th>
@@ -617,7 +617,7 @@ function KpisInner() {
                 </thead>
                 <tbody className="divide-y divide-dashed divide-beige-400">
                   {data.staff.map(s => (
-                    <tr key={s.name} className={s.name === 'Sin asignar' || s.name === 'Resto del equipo' ? 'text-warm-gray' : 'text-dark'}>
+                    <tr key={s.name} className={s.name === 'Sin asignar' || s.name === 'Resto del equipo' ? 'text-warm-gray-500' : 'text-dark'}>
                       <td className="py-2 pr-2">{t(s.name)}</td>
                       <td className="py-2 px-2 text-right tabular-nums">{s.visits}</td>
                       <td className="py-2 px-2 text-right tabular-nums">{s.hours}</td>
@@ -627,13 +627,13 @@ function KpisInner() {
                 </tbody>
               </table>
             )}
-            <p className="text-[10px] text-warm-gray mt-2">
+            <p className="text-[10px] text-warm-gray-500 mt-2">
               {t('Ingreso de servicios atribuido a la terapeuta de la cita del mismo día del cliente.')}{' '}
               {t('“Resto del equipo” incluye a las demás terapeutas y ventas sin cita asociada.')}
             </p>
           </CardBox>}
 
-          <p className="text-center text-xs text-warm-gray pb-4">
+          <p className="text-center text-xs text-warm-gray-500 pb-4">
             {data.range.start} → {data.range.end} · {t('comparado con')} {data.lyRange.start} → {data.lyRange.end}
           </p>
         </div>

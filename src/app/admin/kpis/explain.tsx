@@ -209,7 +209,7 @@ export function DictionaryLink() {
       href="/admin/kpis/diccionario"
       aria-label={lang === 'es' ? 'Diccionario de datos' : 'Data dictionary'}
       title={lang === 'es' ? 'Diccionario de datos' : 'Data dictionary'}
-      className="p-1.5 rounded-full border border-beige-400 bg-white text-warm-gray hover:text-dark hover:bg-beige transition-colors"
+      className="p-1.5 rounded-full border border-beige-400 bg-white text-warm-gray-500 hover:text-dark hover:bg-beige transition-colors"
     >
       <BookOpen className="h-4 w-4" />
     </Link>
@@ -240,7 +240,7 @@ export function InfoTip({ k }: { k: string }) {
         onClick={e => { e.stopPropagation(); setOpen(v => !v) }}
         aria-expanded={open}
         aria-label="Info"
-        className="inline-flex align-middle ml-1.5 text-warm-gray/70 hover:text-dark"
+        className="inline-flex align-middle ml-1.5 text-warm-gray-500/70 hover:text-dark"
       >
         <Info className="h-3.5 w-3.5" />
       </button>

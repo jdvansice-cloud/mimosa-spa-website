@@ -19,7 +19,7 @@ export async function POST(
   // Load the card so we know the serial to look up in Mindbody.
   const { data: card, error: loadError } = await supabase
     .from('gift_cards')
-    .select('id, serial, sold_at')
+    .select('id, serial, sold_at, redeemed_at')
     .eq('id', id)
     .single()
 
@@ -54,11 +54,19 @@ export async function POST(
     })
   }
 
-  const update = {
+  // Same state transitions as the hourly cron in /api/cron/sync-giftcards, so a
+  // card reaches the right status whether staff sync it by hand or the cron does:
+  //   sold     — the serial exists in Mindbody
+  //   redeemed — its balance has been fully consumed
+  const balanceCents = Math.round(balance.RemainingBalance * 100)
+  const update: Record<string, unknown> = {
     mindbody_barcode_id: balance.BarcodeId,
-    mindbody_remaining_balance_cents: Math.round(balance.RemainingBalance * 100),
+    mindbody_remaining_balance_cents: balanceCents,
     mindbody_synced_at: now,
     sold_at: card.sold_at ?? now,
+  }
+  if (balanceCents === 0 && !card.redeemed_at) {
+    update.redeemed_at = now
   }
 
   const { data: updated, error: updateError } = await supabase

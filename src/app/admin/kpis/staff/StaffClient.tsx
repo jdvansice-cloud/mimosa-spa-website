@@ -109,7 +109,7 @@ function StaffInner() {
     <th className={`py-1.5 font-bold whitespace-nowrap ${extra}`}>
       <button
         onClick={() => setSortKey(key)}
-        className={`inline-flex items-center gap-1 uppercase tracking-wider ${sortKey === key ? 'text-spa-green' : 'text-warm-gray'}`}
+        className={`inline-flex items-center gap-1 uppercase tracking-wider ${sortKey === key ? 'text-spa-green' : 'text-warm-gray-500'}`}
       >
         {label}<ArrowUpDown className="h-3 w-3" />
       </button>
@@ -124,7 +124,7 @@ function StaffInner() {
           <LangToggle />
           <DictionaryLink />
         </div>
-        <p className="text-sm text-warm-gray mt-1">{t('Rendimiento por terapeuta · neto sin ITBMS, método de caja')}</p>
+        <p className="text-sm text-warm-gray-500 mt-1">{t('Rendimiento por terapeuta · neto sin ITBMS, método de caja')}</p>
         {data && (
           <p className="text-xs font-bold text-spa-green mt-1">
             {t('Solo días completos — datos hasta el')} {formatDateLang(data.asOf, lang)}
@@ -141,7 +141,7 @@ function StaffInner() {
               onClick={() => setPeriod(p.key)}
               aria-pressed={period === p.key}
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
-                period === p.key ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                period === p.key ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
               }`}
             >
               {t(p.label)}
@@ -155,7 +155,7 @@ function StaffInner() {
               onClick={() => setLocation(l.key)}
               aria-pressed={location === l.key}
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
-                location === l.key ? 'bg-dark text-white border-dark' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                location === l.key ? 'bg-dark text-white border-dark' : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
               }`}
             >
               {t(l.label)}
@@ -181,28 +181,28 @@ function StaffInner() {
                   <Award className="h-3.5 w-3.5" />{t('Más solicitada')}<InfoTip k="podium" />
                 </div>
                 <p className="text-sm font-bold text-dark mt-1 leading-tight">{podium.requested.name.split(' ')[0]}</p>
-                <p className="text-xs text-warm-gray tabular-nums">{pct(podium.requested.requestedPct)} {t('de sus tratamientos')}</p>
+                <p className="text-xs text-warm-gray-500 tabular-nums">{pct(podium.requested.requestedPct)} {t('de sus tratamientos')}</p>
               </div>
               <div className="rounded-2xl border border-gold-200 bg-gold-50 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-gold-700">
                   <HandCoins className="h-3.5 w-3.5" />{t('Mejor propina')}
                 </div>
                 <p className="text-sm font-bold text-dark mt-1 leading-tight">{podium.tipped.name.split(' ')[0]}</p>
-                <p className="text-xs text-warm-gray tabular-nums">{podium.tipped.tipRate !== null ? pct(podium.tipped.tipRate) : '—'} {t('del neto')}</p>
+                <p className="text-xs text-warm-gray-500 tabular-nums">{podium.tipped.tipRate !== null ? pct(podium.tipped.tipRate) : '—'} {t('del neto')}</p>
               </div>
               <div className="rounded-2xl border border-gold-200 bg-gold-50 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-gold-700">
                   <Clock className="h-3.5 w-3.5" />{t('Más horas')}
                 </div>
                 <p className="text-sm font-bold text-dark mt-1 leading-tight">{podium.hours.name.split(' ')[0]}</p>
-                <p className="text-xs text-warm-gray tabular-nums">{podium.hours.hours} h</p>
+                <p className="text-xs text-warm-gray-500 tabular-nums">{podium.hours.hours} h</p>
               </div>
               <div className="rounded-2xl border border-gold-200 bg-gold-50 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-gold-700">
                   <ShoppingBag className="h-3.5 w-3.5" />{t('Venta cabina')}
                 </div>
                 <p className="text-sm font-bold text-dark mt-1 leading-tight">{podium.cabina.cabinaNet > 0 ? podium.cabina.name.split(' ')[0] : '—'}</p>
-                <p className="text-xs text-warm-gray tabular-nums">
+                <p className="text-xs text-warm-gray-500 tabular-nums">
                   {podium.cabina.cabinaNet > 0 ? `${money(podium.cabina.cabinaNet)} · ${podium.cabina.cabinaCount} ${t('extras')}` : t('sin ventas')}
                 </p>
               </div>
@@ -226,7 +226,7 @@ function StaffInner() {
               ].map(s => (
                 <div key={s.l}>
                   <p className="text-base font-bold text-dark tabular-nums leading-tight">{s.v}</p>
-                  <p className="text-[11px] text-warm-gray leading-tight">{s.l}</p>
+                  <p className="text-[11px] text-warm-gray-500 leading-tight">{s.l}</p>
                 </div>
               ))}
             </div>
@@ -240,7 +240,7 @@ function StaffInner() {
               <table className="w-full text-sm min-w-[680px]">
                 <thead>
                   <tr className="text-[10px] text-left border-b border-beige-300 bg-beige-100/60">
-                    <th className="sticky left-0 z-10 bg-beige-100 py-1.5 pl-4 pr-3 font-bold uppercase tracking-wider text-warm-gray border-r border-beige-200">
+                    <th className="sticky left-0 z-10 bg-beige-100 py-1.5 pl-4 pr-3 font-bold uppercase tracking-wider text-warm-gray-500 border-r border-beige-200">
                       {t('Terapeuta')}
                     </th>
                     {th('hours', t('Horas'), 'text-right px-2.5')}
@@ -265,7 +265,7 @@ function StaffInner() {
                 </tbody>
               </table>
             </div>
-            <p className="text-[10px] text-warm-gray px-4 py-2 border-t border-beige-200">
+            <p className="text-[10px] text-warm-gray-500 px-4 py-2 border-t border-beige-200">
               <InfoTip k="staff_tabla" />{' '}
               {t('Neto y propinas atribuidos por la cita del mismo día del cliente · Cabina = extras de la categoría “ventas en Cabina” vendidos durante el servicio · Solicitada = el cliente pidió a esa terapeuta · Fidelidad = clientes de hace 3–6 meses que volvieron con ella en 90 días (mín. 5)')}
             </p>
@@ -308,35 +308,35 @@ function StaffRow({ m, lyYear, open, onToggle }: { m: StaffMemberKpis; lyYear: s
               <span className="flex items-center gap-1.5">
                 <DeltaChip delta={deltaPct(m.hours, m.lyHours)} suffix={`${t('horas')} vs ${lyYear}`} />
               </span>
-              <span className="text-warm-gray tabular-nums">{t('visitas')}: <b className="text-dark">{m.clientVisits}</b></span>
-              <span className="text-warm-gray tabular-nums">{t('promedio')}/{t('tratamiento')}: <b className="text-dark">{money(m.avgPerVisit)}</b></span>
-              <span className="text-warm-gray tabular-nums">{t('primeras visitas')}: <b className="text-dark">{m.firstVisits}</b></span>
-              <span className="text-warm-gray tabular-nums">no-shows: <b className="text-dark">{pct(m.noShowRate)}</b></span>
+              <span className="text-warm-gray-500 tabular-nums">{t('visitas')}: <b className="text-dark">{m.clientVisits}</b></span>
+              <span className="text-warm-gray-500 tabular-nums">{t('promedio')}/{t('tratamiento')}: <b className="text-dark">{money(m.avgPerVisit)}</b></span>
+              <span className="text-warm-gray-500 tabular-nums">{t('primeras visitas')}: <b className="text-dark">{m.firstVisits}</b></span>
+              <span className="text-warm-gray-500 tabular-nums">no-shows: <b className="text-dark">{pct(m.noShowRate)}</b></span>
               {m.tipRate !== null && (
-                <span className="text-warm-gray tabular-nums">{t('propina')}: <b className="text-dark">{pct(m.tipRate)}</b> {t('del neto')}</span>
+                <span className="text-warm-gray-500 tabular-nums">{t('propina')}: <b className="text-dark">{pct(m.tipRate)}</b> {t('del neto')}</span>
               )}
               {m.utilizationPct !== null && (
-                <span className="text-warm-gray tabular-nums">
+                <span className="text-warm-gray-500 tabular-nums">
                   {t('ocupación')}: <b className="text-dark">{pct(m.utilizationPct)}</b> ({m.hours}h / {m.availableHours}h)
                 </span>
               )}
               {m.repeatRate !== null && (
-                <span className="text-warm-gray tabular-nums">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b> ({t('cohorte')} {m.repeatCohortSize})</span>
+                <span className="text-warm-gray-500 tabular-nums">{t('fidelidad')}: <b className="text-dark">{pct(m.repeatRate)}</b> ({t('cohorte')} {m.repeatCohortSize})</span>
               )}
               {m.cabinaCount > 0 && (
-                <span className="text-warm-gray tabular-nums">
+                <span className="text-warm-gray-500 tabular-nums">
                   {t('venta cabina')}: <b className="text-dark">{money(m.cabinaNet)}</b> · {m.cabinaCount} {t('extras')} · <b className="text-dark">{pct(m.cabinaAttach)}</b> {t('de sus tratamientos')}
                   {m.lyCabinaNet > 0 && <> · {lyYear}: {money(m.lyCabinaNet)}</>}
                 </span>
               )}
             </div>
             {m.topServices.length > 0 && (
-              <p className="text-xs text-warm-gray mt-2">
+              <p className="text-xs text-warm-gray-500 mt-2">
                 {t('Top servicios')}: {m.topServices.map(s => `${s.name} ×${s.count}`).join(' · ')}
               </p>
             )}
             {m.topCabina.length > 0 && (
-              <p className="text-xs text-warm-gray mt-1">
+              <p className="text-xs text-warm-gray-500 mt-1">
                 {t('Top venta cabina')}: {m.topCabina.map(s => `${s.name} ×${s.count}`).join(' · ')}
               </p>
             )}

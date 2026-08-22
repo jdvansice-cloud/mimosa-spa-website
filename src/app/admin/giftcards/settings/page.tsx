@@ -167,7 +167,7 @@ export default function AdminGiftCardsPage() {
           </div>
           <h1 className="text-3xl font-display font-semibold text-dark">Gift Cards</h1>
         </div>
-        <p className="text-warm-gray">Gestiona el contenido de la página de Gift Cards</p>
+        <p className="text-warm-gray-500">Gestiona el contenido de la página de Gift Cards</p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -182,7 +182,7 @@ export default function AdminGiftCardsPage() {
                 className="w-5 h-5 rounded border-beige-300 text-gold focus:ring-gold"
               />
               <span className="text-dark font-medium">Página activa</span>
-              <span className="text-sm text-warm-gray">
+              <span className="text-sm text-warm-gray-500">
                 (Si está desactivada, la página mostrará un mensaje de no disponible)
               </span>
             </label>
@@ -227,7 +227,7 @@ export default function AdminGiftCardsPage() {
                   />
                   <div className={`
                     flex flex-col items-center justify-center p-6 rounded-lg
-                    border-2 border-dashed border-beige-300 text-warm-gray
+                    border-2 border-dashed border-beige-300 text-warm-gray-500
                     hover:border-gold hover:text-gold transition-colors
                     ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
                   `}>
@@ -238,7 +238,7 @@ export default function AdminGiftCardsPage() {
                     <span className="text-sm mt-1">JPG, PNG, WebP (max. 5MB)</span>
                   </div>
                 </label>
-                <p className="text-xs text-warm-gray mt-2 flex items-center gap-1">
+                <p className="text-xs text-warm-gray-500 mt-2 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   Tamaño recomendado: 800 x 600 px
                 </p>

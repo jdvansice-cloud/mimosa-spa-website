@@ -87,7 +87,7 @@ function AsistenciaInner() {
           <h1 className="text-3xl font-display font-semibold text-dark">{t('Asistencia')}</h1>
           <LangToggle />
         </div>
-        <p className="text-sm text-warm-gray mt-1">
+        <p className="text-sm text-warm-gray-500 mt-1">
           {t('Marcaciones del reloj NGTeco vs horarios y citas de Mindbody · tardanzas, salidas y horas trabajadas')}
         </p>
       </div>
@@ -100,7 +100,7 @@ function AsistenciaInner() {
               onClick={() => { setMonth(m); load(m) }}
               aria-pressed={m === data?.month}
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors capitalize ${
-                m === data?.month ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                m === data?.month ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
               }`}
             >
               {monthLabel(m, lang)}
@@ -140,7 +140,7 @@ function AsistenciaInner() {
         </div>
       ) : empty ? (
         <CardBox>
-          <p className="text-sm text-warm-gray">
+          <p className="text-sm text-warm-gray-500">
             {t('Aún no hay marcaciones. En la app NGTeco Time ve a Reportes, exporta el Excel del período y súbelo aquí.')}
           </p>
         </CardBox>
@@ -203,15 +203,15 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
         }`}
       >
         {busy ? (
-          <div className="flex flex-col items-center gap-2 text-sm text-warm-gray">
+          <div className="flex flex-col items-center gap-2 text-sm text-warm-gray-500">
             <Loader2 className="h-6 w-6 animate-spin text-dark" />
             {t('Importando marcaciones…')}
           </div>
         ) : (
           <>
-            <FileUp className="h-6 w-6 mx-auto text-warm-gray" />
+            <FileUp className="h-6 w-6 mx-auto text-warm-gray-500" />
             <p className="text-sm text-dark mt-2 font-medium">{t('Arrastra aquí el export de NGTeco Time')}</p>
-            <p className="text-xs text-warm-gray mt-0.5">
+            <p className="text-xs text-warm-gray-500 mt-0.5">
               {t('xlsx, xls o csv · subir un período repetido corrige las marcaciones anteriores, no las duplica')}
             </p>
             <button
@@ -240,7 +240,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
             <li key={i} className="flex items-center gap-2">
               <span className={`px-2 py-0.5 rounded-full font-bold shrink-0 ${statusStyle(r.status)}`}>{statusLabel(r.status)}</span>
               <span className="text-dark truncate">{r.filename}</span>
-              <span className="text-warm-gray whitespace-nowrap ml-auto">
+              <span className="text-warm-gray-500 whitespace-nowrap ml-auto">
                 {r.status === 'imported'
                   ? `${r.periodStart} → ${r.periodEnd} · ${r.employees} ${t('personas')} · ${r.rows} ${t('marcaciones')}`
                   : r.detail}
@@ -284,7 +284,7 @@ function Dashboard({ data }: { data: AttendancePayload }) {
         <CardBox>
           <Label>{t('Horas trabajadas')}</Label>
           <p className="text-2xl font-display font-semibold text-dark mt-1">{fmtH(tot.workedMin)}</p>
-          <p className="text-xs text-warm-gray mt-0.5">
+          <p className="text-xs text-warm-gray-500 mt-0.5">
             {tot.schedMin > 0
               ? `${t('de')} ${fmtH(tot.schedMin)} ${t('programadas')}${coverage !== null ? ` · ${Math.round(coverage * 100)}%` : ''}`
               : t('sin horario Mindbody')}
@@ -293,19 +293,19 @@ function Dashboard({ data }: { data: AttendancePayload }) {
         <CardBox>
           <Label>{t('Horas en citas')}</Label>
           <p className="text-2xl font-display font-semibold text-dark mt-1">{fmtH(tot.apptMin)}</p>
-          <p className="text-xs text-warm-gray mt-0.5">
+          <p className="text-xs text-warm-gray-500 mt-0.5">
             {tot.workedMin > 0 ? `${Math.round((tot.apptMin / tot.workedMin) * 100)}% ${t('del tiempo presente')}` : '—'}
           </p>
         </CardBox>
         <CardBox>
           <Label>{t('Días con tardanza')}</Label>
           <p className={`text-2xl font-display font-semibold mt-1 ${tot.lateDays > 0 ? 'text-red-700' : 'text-dark'}`}>{tot.lateDays}</p>
-          <p className="text-xs text-warm-gray mt-0.5">{t('más de')} {GRACE_MIN} {t('min después del horario')}</p>
+          <p className="text-xs text-warm-gray-500 mt-0.5">{t('más de')} {GRACE_MIN} {t('min después del horario')}</p>
         </CardBox>
         <CardBox>
           <Label>{t('Incidencias')}</Label>
           <p className="text-2xl font-display font-semibold text-dark mt-1">{tot.missingOutDays + tot.absentDays}</p>
-          <p className="text-xs text-warm-gray mt-0.5">
+          <p className="text-xs text-warm-gray-500 mt-0.5">
             {tot.missingOutDays} {t('sin marcar salida')} · {tot.absentDays} {t('ausencias con horario')}
           </p>
         </CardBox>
@@ -327,7 +327,7 @@ function EmployeeCard({ emp }: { emp: AttendanceEmployee }) {
         <div className="flex items-center gap-2">
           <div className="min-w-0">
             <p className="font-display font-semibold text-dark text-lg truncate">{emp.name}</p>
-            <p className="text-xs text-warm-gray">
+            <p className="text-xs text-warm-gray-500">
               {emp.mbName
                 ? emp.mbName !== emp.name ? `Mindbody: ${emp.mbName}` : t('vinculado con Mindbody')
                 : t('sin match en Mindbody')}
@@ -335,15 +335,15 @@ function EmployeeCard({ emp }: { emp: AttendanceEmployee }) {
           </div>
           <div className="ml-auto text-right shrink-0">
             <p className="font-semibold text-dark">{fmtH(emp.workedMin)}</p>
-            <p className="text-xs text-warm-gray">
+            <p className="text-xs text-warm-gray-500">
               {emp.days} {t('días')}{coverage !== null ? ` · ${Math.round(coverage * 100)}% ${t('del horario')}` : ''}
             </p>
           </div>
-          <ChevronDown className={`h-4 w-4 text-warm-gray shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-4 w-4 text-warm-gray-500 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
         </div>
         <div className="flex flex-wrap gap-1.5 mt-2 text-[11px] font-bold">
           {emp.appts > 0 && (
-            <span className="px-2 py-0.5 rounded-full bg-beige text-warm-gray">
+            <span className="px-2 py-0.5 rounded-full bg-beige text-warm-gray-500">
               {fmtH(emp.apptMin)} {t('en')} {emp.appts} {t('citas')}
             </span>
           )}
@@ -368,7 +368,7 @@ function EmployeeCard({ emp }: { emp: AttendanceEmployee }) {
         <div className="mt-3 -mx-4 px-4 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-left text-warm-gray border-b border-beige-300">
+              <tr className="text-left text-warm-gray-500 border-b border-beige-300">
                 <th className="py-1.5 pr-2 font-semibold">{t('Fecha')}</th>
                 <th className="py-1.5 pr-2 font-semibold">{t('Entrada')}</th>
                 <th className="py-1.5 pr-2 font-semibold">{t('Salida')}</th>
@@ -405,10 +405,10 @@ function DayRow({ d }: { d: AttendanceDay }) {
         {early && d.earlyOutMin !== null && <span className="block text-[10px] font-bold">−{d.earlyOutMin} min</span>}
       </td>
       <td className="py-1.5 pr-2 text-right whitespace-nowrap text-dark font-semibold">{absent ? '—' : fmtHM(d.workedMin)}</td>
-      <td className="py-1.5 pr-2 whitespace-nowrap text-warm-gray">
+      <td className="py-1.5 pr-2 whitespace-nowrap text-warm-gray-500">
         {d.schedStart ? `${d.schedStart}–${d.schedEnd}` : d.firstAppt ? `${t('citas desde')} ${d.firstAppt}` : '—'}
       </td>
-      <td className="py-1.5 text-right whitespace-nowrap text-warm-gray">
+      <td className="py-1.5 text-right whitespace-nowrap text-warm-gray-500">
         {d.appts > 0 ? `${d.appts} · ${fmtHM(d.apptMin)}` : '—'}
       </td>
     </tr>

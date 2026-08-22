@@ -125,7 +125,7 @@ function NegocioInner() {
           <LangToggle />
           <DictionaryLink />
         </div>
-        <p className="text-sm text-warm-gray mt-1">
+        <p className="text-sm text-warm-gray-500 mt-1">
           {t('KPIs del negocio a partir del paquete contable mensual · ingresos, gastos, ratios vs industria')}
         </p>
       </div>
@@ -139,7 +139,7 @@ function NegocioInner() {
               onClick={() => { setMonth(m); load(m, location) }}
               aria-pressed={m === data?.month}
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors capitalize ${
-                m === data?.month ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                m === data?.month ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
               }`}
             >
               {monthLabel(m, lang)}
@@ -149,7 +149,7 @@ function NegocioInner() {
             onClick={() => { setMonth('ytd'); load('ytd', location) }}
             aria-pressed={data?.month === 'ytd'}
             className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
-              data?.month === 'ytd' ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+              data?.month === 'ytd' ? 'bg-spa-green text-white border-spa-green' : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
             }`}
           >
             {t('Año')}
@@ -171,7 +171,7 @@ function NegocioInner() {
               onClick={() => { setLocation(l.key); load(month, l.key) }}
               aria-pressed={location === l.key}
               className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
-                location === l.key ? 'bg-dark text-white border-dark' : 'bg-white text-warm-gray border-beige-400 hover:bg-beige'
+                location === l.key ? 'bg-dark text-white border-dark' : 'bg-white text-warm-gray-500 border-beige-400 hover:bg-beige'
               }`}
             >
               {t(l.label)}
@@ -191,7 +191,7 @@ function NegocioInner() {
         </div>
       ) : empty ? (
         <CardBox>
-          <p className="text-sm text-warm-gray">
+          <p className="text-sm text-warm-gray-500">
             {t('Aún no hay datos. Importa el paquete de archivos del mes (todos a la vez) para ver el tablero.')}
           </p>
         </CardBox>
@@ -235,7 +235,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
 
   const statusStyle = (s: string) =>
     s === 'imported' || s === 'superseded-replaced' ? 'bg-spa-green/15 text-spa-green' :
-    s === 'reference' ? 'bg-beige-200 text-warm-gray' :
+    s === 'reference' ? 'bg-beige-200 text-warm-gray-500' :
     s === 'duplicate' ? 'bg-gold/20 text-gold-700' :
     'bg-red-100 text-red-700'
 
@@ -257,15 +257,15 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
         }`}
       >
         {busy ? (
-          <div className="flex flex-col items-center gap-2 text-sm text-warm-gray">
+          <div className="flex flex-col items-center gap-2 text-sm text-warm-gray-500">
             <Loader2 className="h-6 w-6 animate-spin text-dark" />
             {t('Importando y verificando archivos…')}
           </div>
         ) : (
           <>
-            <FileUp className="h-6 w-6 mx-auto text-warm-gray" />
+            <FileUp className="h-6 w-6 mx-auto text-warm-gray-500" />
             <p className="text-sm text-dark mt-2 font-medium">{t('Arrastra aquí todos los archivos del mes')}</p>
-            <p className="text-xs text-warm-gray mt-0.5">
+            <p className="text-xs text-warm-gray-500 mt-0.5">
               {t('xlsx, xls y pdf · el tipo se detecta por contenido, el nombre puede variar · subir de nuevo un reporte reemplaza al anterior')}
             </p>
             <button
@@ -294,7 +294,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
             <li key={i} className="flex items-center gap-2">
               <span className={`px-2 py-0.5 rounded-full font-bold shrink-0 ${statusStyle(r.status)}`}>{statusLabel(r.status)}</span>
               <span className="text-dark truncate">{r.filename}</span>
-              <span className="text-warm-gray whitespace-nowrap ml-auto">
+              <span className="text-warm-gray-500 whitespace-nowrap ml-auto">
                 {t(DOC_LABELS[r.docType] ?? r.docType)}
                 {r.locationId ? ` · ${LOC_NAMES[String(r.locationId)]}` : ''}
                 {r.rows > 0 ? ` · ${r.rows}` : ''}
@@ -320,7 +320,7 @@ function Dashboard({ data }: { data: BizPayload }) {
       <CardBox>
         <Label info="ingresos_negocio">{t('Ingresos del mes · neto sin ITBMS')}</Label>
         <p className="text-3xl font-bold text-dark tabular-nums mt-1">{money(rev.total)}</p>
-        <div className="flex flex-wrap gap-x-5 gap-y-0.5 text-xs text-warm-gray tabular-nums mt-1">
+        <div className="flex flex-wrap gap-x-5 gap-y-0.5 text-xs text-warm-gray-500 tabular-nums mt-1">
           {Object.entries(rev.byLocation).map(([loc, v]) => (
             <span key={loc}>{LOC_NAMES[loc] ?? loc}: <b className="text-dark">{money(v)}</b></span>
           ))}
@@ -333,7 +333,7 @@ function Dashboard({ data }: { data: BizPayload }) {
                 style={{ width: `${Math.min(100, (budgetPct ?? 0) * 100)}%` }}
               />
             </div>
-            <p className="text-xs text-warm-gray tabular-nums mt-1">
+            <p className="text-xs text-warm-gray-500 tabular-nums mt-1">
               <b className="text-dark">{pct(budgetPct)}</b> {t('del presupuesto')} ({money(rev.budget)})
             </p>
           </div>
@@ -346,7 +346,7 @@ function Dashboard({ data }: { data: BizPayload }) {
           <Label info="gastos">{t('Gastos del mes')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.expenses.total)}</p>
           {data.expenses.unclassified > 0 && (
-            <p className="text-xs text-warm-gray tabular-nums">{money(data.expenses.unclassified)} {t('sin clasificar')}</p>
+            <p className="text-xs text-warm-gray-500 tabular-nums">{money(data.expenses.unclassified)} {t('sin clasificar')}</p>
           )}
         </CardBox>
         <CardBox>
@@ -354,7 +354,7 @@ function Dashboard({ data }: { data: BizPayload }) {
           <p className={`text-2xl font-bold tabular-nums mt-1 ${data.ratios.marginPct !== null && data.ratios.marginPct < 0 ? 'text-red-600' : 'text-dark'}`}>
             {pct1(data.ratios.marginPct)}
           </p>
-          <p className="text-xs text-warm-gray tabular-nums">{money(rev.total - data.expenses.total)} · {t('meta industria')} 8–15%</p>
+          <p className="text-xs text-warm-gray-500 tabular-nums">{money(rev.total - data.expenses.total)} · {t('meta industria')} 8–15%</p>
         </CardBox>
       </div>
 
@@ -367,7 +367,7 @@ function Dashboard({ data }: { data: BizPayload }) {
           <RatioBand label={t('Insumos')} value={data.ratios.suppliesPct} band={data.benchmarks.supplies} lowIsGood />
           <RatioBand label={t('Margen')} value={data.ratios.marginPct} band={data.benchmarks.margin} />
         </div>
-        <p className="text-[10px] text-warm-gray mt-3">
+        <p className="text-[10px] text-warm-gray-500 mt-3">
           {t('Bandas = referencia de la industria de spas/salones · % sobre ingresos netos del mes')}
         </p>
       </CardBox>
@@ -380,7 +380,7 @@ function Dashboard({ data }: { data: BizPayload }) {
             <div key={c.category}>
               <div className="flex justify-between text-xs">
                 <span className={c.category === 'Sin clasificar' ? 'text-gold-700 font-bold' : 'text-dark'}>{t(c.category)}</span>
-                <span className="tabular-nums text-dark"><b>{money(c.amount)}</b> <span className="text-warm-gray">· {pct(c.pct)}</span></span>
+                <span className="tabular-nums text-dark"><b>{money(c.amount)}</b> <span className="text-warm-gray-500">· {pct(c.pct)}</span></span>
               </div>
               <div className="h-2 rounded-full bg-beige-200 mt-0.5 overflow-hidden">
                 <div
@@ -392,12 +392,12 @@ function Dashboard({ data }: { data: BizPayload }) {
           ))}
         </div>
         {data.expenses.socioTotal > 0 && (
-          <p className="text-[10px] text-warm-gray mt-2">
+          <p className="text-[10px] text-warm-gray-500 mt-2">
             {t('Incluye')} {money(data.expenses.socioTotal)} {t('pagados por los socios (cxp Socios) · transferencias internas y pagos de tarjeta excluidos')}
           </p>
         )}
         {data.expenses.revenueShare !== null && data.expenses.sharedAllocated > 0 && (
-          <p className="text-[10px] text-warm-gray mt-1">
+          <p className="text-[10px] text-warm-gray-500 mt-1">
             {t('Incluye')} {money(data.expenses.sharedAllocated)} {t('de gastos compartidos (BAC, Visa, socios) asignados por participación en ingresos')} ({pct(data.expenses.revenueShare)})
           </p>
         )}
@@ -408,28 +408,28 @@ function Dashboard({ data }: { data: BizPayload }) {
         <CardBox>
           <Label info="propinas_negocio">{t('Propinas · tarjeta')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.tips.total)}</p>
-          <p className="text-xs text-warm-gray tabular-nums">
+          <p className="text-xs text-warm-gray-500 tabular-nums">
             {Object.entries(data.tips.byLocation).map(([l, v]) => `${LOC_NAMES[l]?.split(' ')[0] ?? l}: ${money(v)}`).join(' · ')}
           </p>
         </CardBox>
         <CardBox>
           <Label info="gc_flujo">{t('Gift cards · flujo del mes')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.giftCards.net)}</p>
-          <p className="text-xs text-warm-gray tabular-nums">
+          <p className="text-xs text-warm-gray-500 tabular-nums">
             {t('vendidas')} {money(data.giftCards.sold)} − {t('redimidas')} {money(data.giftCards.redeemed)}
           </p>
         </CardBox>
         <CardBox>
           <Label info="itbms_pos">{t('Posición ITBMS')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.itbms.position)}</p>
-          <p className="text-xs text-warm-gray tabular-nums">
+          <p className="text-xs text-warm-gray-500 tabular-nums">
             {t('cobrado')} {money(data.itbms.collected)} − {t('retenido')} {money(data.itbms.withheld)} − {t('crédito')} {money(data.itbms.socioCredit)}
           </p>
         </CardBox>
         <CardBox>
           <Label info="comisiones">{t('Comisiones bancarias')}</Label>
           <p className="text-2xl font-bold text-dark tabular-nums mt-1">{money(data.commissions.bank)}</p>
-          <p className="text-xs text-warm-gray tabular-nums">
+          <p className="text-xs text-warm-gray-500 tabular-nums">
             {data.commissions.pctOfCardSales !== null && <>{pct1(data.commissions.pctOfCardSales)} {t('de ventas con tarjeta')}</>}
           </p>
         </CardBox>
@@ -442,12 +442,12 @@ function Dashboard({ data }: { data: BizPayload }) {
           <div className="mt-2 space-y-1 text-sm tabular-nums">
             {data.balances.map(b => (
               <div key={b.accountKey} className="flex justify-between">
-                <span className="text-warm-gray">{b.accountKey}</span>
+                <span className="text-warm-gray-500">{b.accountKey}</span>
                 <b className="text-dark">{money(b.balance)}</b>
               </div>
             ))}
             <div className="flex justify-between border-t border-beige-300 pt-1 mt-1">
-              <span className="text-warm-gray font-bold">Total</span>
+              <span className="text-warm-gray-500 font-bold">Total</span>
               <b className="text-dark">{money(data.balances.reduce((s, b) => s + b.balance, 0))}</b>
             </div>
           </div>
@@ -466,7 +466,7 @@ function Dashboard({ data }: { data: BizPayload }) {
                   : <AlertTriangle className="h-4 w-4 text-gold-700 shrink-0 mt-0.5" />}
                 <div className="flex-1">
                   <p className="text-dark font-medium">{t(CHECK_LABELS[c.key] ?? c.key)}</p>
-                  <p className="text-warm-gray tabular-nums">
+                  <p className="text-warm-gray-500 tabular-nums">
                     {money(c.a)} {t('vs')} {money(c.b)} · {t('diferencia')} {money(c.diff)}
                   </p>
                 </div>
@@ -496,9 +496,9 @@ function RatioBand({ label, value, band, lowIsGood = false }: {
     <div>
       <div className="flex justify-between text-xs mb-1">
         <span className="text-dark font-medium">{label}</span>
-        <span className={`tabular-nums font-bold ${value === null ? 'text-warm-gray' : good ? 'text-spa-green' : 'text-gold-700'}`}>
+        <span className={`tabular-nums font-bold ${value === null ? 'text-warm-gray-500' : good ? 'text-spa-green' : 'text-gold-700'}`}>
           {pct1(value)}
-          <span className="text-warm-gray font-normal"> · {t('meta')} {Math.round(band[0] * 100)}–{Math.round(band[1] * 100)}%</span>
+          <span className="text-warm-gray-500 font-normal"> · {t('meta')} {Math.round(band[0] * 100)}–{Math.round(band[1] * 100)}%</span>
         </span>
       </div>
       <div className="relative h-3 rounded-full bg-beige-200">

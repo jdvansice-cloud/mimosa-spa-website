@@ -85,7 +85,7 @@ function CapacidadInner() {
         </h1>
         <LangToggle />
       </div>
-      <p className="text-xs text-warm-gray mb-4">
+      <p className="text-xs text-warm-gray-500 mb-4">
         {t('Espacios de tratamiento ocupados vs techo físico (camas + sillas), bloques de 30 min')}
       </p>
 
@@ -130,7 +130,7 @@ function LocationCard({ d }: { d: CapacityDay & { weekly: CapacityWeekday[] } })
       <div className="flex items-start justify-between mb-1">
         <div>
           <p className="font-bold text-dark">{LOC_NAME[d.location]}</p>
-          <p className="text-[11px] text-warm-gray">{LOC_DETAIL[d.location]} · {t('capacidad')} <b>{d.capacity}</b></p>
+          <p className="text-[11px] text-warm-gray-500">{LOC_DETAIL[d.location]} · {t('capacidad')} <b>{d.capacity}</b></p>
         </div>
         <div className="text-right">
           <Label>{t('Pico del día')}</Label>
@@ -155,7 +155,7 @@ function LocationCard({ d }: { d: CapacityDay & { weekly: CapacityWeekday[] } })
             )
           })}
         </div>
-        <div className="border-t border-beige-200 mt-[2px] pt-1 flex justify-between text-[10px] text-warm-gray">
+        <div className="border-t border-beige-200 mt-[2px] pt-1 flex justify-between text-[10px] text-warm-gray-500">
           <span>9am</span><span>11am</span><span>1pm</span><span>3pm</span><span>5pm</span><span>7pm</span>
         </div>
       </div>
@@ -170,13 +170,13 @@ function LocationCard({ d }: { d: CapacityDay & { weekly: CapacityWeekday[] } })
             const pct = d.capacity ? Math.round(100 * peak / d.capacity) : 0
             return (
               <div key={dow} className="rounded-lg bg-beige-50 py-1.5">
-                <p className="text-[10px] text-warm-gray">{DAYS[lang][dow]}</p>
+                <p className="text-[10px] text-warm-gray-500">{DAYS[lang][dow]}</p>
                 <p className={`text-xs font-bold ${pct >= 90 ? 'text-red-600' : pct >= 70 ? 'text-gold-600' : 'text-dark'}`}>{pct}%</p>
               </div>
             )
           })}
         </div>
-        <p className="text-[10px] text-warm-gray mt-1.5">
+        <p className="text-[10px] text-warm-gray-500 mt-1.5">
           {t('≥90% = al tope físico: solo crece con combos, horario extendido o llenando valles')}
         </p>
       </div>

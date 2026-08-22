@@ -46,8 +46,8 @@ function Preview({ title, subtitle, card }: { title: string; subtitle: string; c
       <CardContent>
         <div className="mb-3">
           <h2 className="text-lg font-semibold text-dark">{title}</h2>
-          <p className="text-xs text-warm-gray mt-1">{subtitle}</p>
-          <p className="text-xs text-warm-gray mt-1">
+          <p className="text-xs text-warm-gray-500 mt-1">{subtitle}</p>
+          <p className="text-xs text-warm-gray-500 mt-1">
             Vista previa a ≈2× tamaño real ({LABEL_WIDTH_IN}&quot; × {LABEL_HEIGHT_IN}&quot;)
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function AdminGiftCardTemplatesPage() {
       <div className="mb-8">
         <Link
           href="/admin/giftcards"
-          className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark mb-3"
+          className="inline-flex items-center gap-1 text-sm text-warm-gray-500 hover:text-dark mb-3"
         >
           <ArrowLeft className="h-4 w-4" /> Gift Cards
         </Link>
@@ -75,7 +75,7 @@ export default function AdminGiftCardTemplatesPage() {
           </div>
           <h1 className="text-3xl font-display font-semibold text-dark">Plantilla de Etiqueta</h1>
         </div>
-        <p className="text-warm-gray">
+        <p className="text-warm-gray-500">
           Plantilla única para etiquetas de 3&quot; × 2&quot; con línea negra — Omezizy D520 vía QZ Tray
           (bitmap a 203 dpi, ancho completo de 3&quot;). Datos de muestra.
         </p>
@@ -94,7 +94,7 @@ export default function AdminGiftCardTemplatesPage() {
         />
       </div>
 
-      <div className="mt-8 text-sm text-warm-gray max-w-2xl">
+      <div className="mt-8 text-sm text-warm-gray-500 max-w-2xl">
         Edita <code className="font-mono">src/components/admin/giftcards/labels/renderLabelCanvas.ts</code>
         {' '}para cambiar el diseño. Los datos de cada Gift Card emitida se renderizan en este formato.
       </div>

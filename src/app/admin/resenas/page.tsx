@@ -109,7 +109,7 @@ export default function AdminReviewsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-dark">Reseñas</h1>
-        <p className="text-warm-gray text-sm mt-1">
+        <p className="text-warm-gray-500 text-sm mt-1">
           Citas seleccionadas de Google que se muestran en el sitio público. El
           rating global (4.8 · 96) se edita en Configuración.
         </p>
@@ -215,7 +215,7 @@ export default function AdminReviewsPage() {
           {isLoading ? (
             <Spinner className="py-8" />
           ) : reviews.length === 0 ? (
-            <p className="text-warm-gray text-sm py-4">
+            <p className="text-warm-gray-500 text-sm py-4">
               Aún no hay reseñas. Agrega 3–4 citas destacadas de Google.
             </p>
           ) : (
@@ -239,7 +239,7 @@ export default function AdminReviewsPage() {
                         </span>
                       )}
                       {!r.is_active && (
-                        <span className="text-xs bg-beige text-warm-gray rounded-full px-2 py-0.5">
+                        <span className="text-xs bg-beige text-warm-gray-500 rounded-full px-2 py-0.5">
                           Oculta
                         </span>
                       )}
@@ -249,21 +249,21 @@ export default function AdminReviewsPage() {
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={() => toggleActive(r)}
-                      className="p-2 text-warm-gray hover:text-dark"
+                      className="p-2 text-warm-gray-500 hover:text-dark"
                       title={r.is_active ? 'Ocultar' : 'Mostrar'}
                     >
                       {r.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
                     <button
                       onClick={() => startEdit(r)}
-                      className="p-2 text-warm-gray hover:text-dark"
+                      className="p-2 text-warm-gray-500 hover:text-dark"
                       title="Editar"
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(r.id)}
-                      className="p-2 text-warm-gray hover:text-red-600"
+                      className="p-2 text-warm-gray-500 hover:text-red-600"
                       title="Eliminar"
                     >
                       <Trash2 className="h-4 w-4" />

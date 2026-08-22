@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Hash, Plus, Loader2, Trash2 } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
+import { AdminTable, CardField, type AdminColumn } from '@/components/admin/AdminTable'
 
 interface LocationConfig {
   id: string
@@ -117,12 +118,105 @@ export default function GiftCardConfigPage() {
     }
   }
 
+  const nameInput = (row: LocationConfig) => (
+    <input
+      type="text"
+      className="input w-48"
+      aria-label={`Nombre de ${row.location_name}`}
+      value={row.location_name}
+      onChange={e => updateLocal(row.id, { location_name: e.target.value })}
+      onBlur={() => saveRow(row, { location_name: row.location_name })}
+    />
+  )
+
+  const prefixInput = (row: LocationConfig) => (
+    <input
+      type="text"
+      className="input font-mono uppercase w-28"
+      maxLength={8}
+      aria-label={`Prefijo de ${row.location_name}`}
+      value={row.prefix}
+      onChange={e => updateLocal(row.id, {
+        prefix: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''),
+      })}
+      onBlur={() => saveRow(row, { prefix: row.prefix })}
+    />
+  )
+
+  const lengthInput = (row: LocationConfig) => (
+    <input
+      type="number"
+      min={4}
+      max={12}
+      className="input w-20"
+      aria-label={`Longitud del serial de ${row.location_name}`}
+      value={row.serial_length}
+      onChange={e => updateLocal(row.id, { serial_length: Number(e.target.value) })}
+      onBlur={() => saveRow(row, { serial_length: row.serial_length })}
+    />
+  )
+
+  const activeToggle = (row: LocationConfig) => (
+    <span className="inline-flex items-center gap-2">
+      <input
+        type="checkbox"
+        className="w-4 h-4 text-gold focus:ring-gold rounded"
+        aria-label={`Activar ${row.location_name}`}
+        checked={row.is_active}
+        onChange={e => {
+          const next = e.target.checked
+          updateLocal(row.id, { is_active: next })
+          saveRow(row, { is_active: next })
+        }}
+      />
+      {savingId === row.id && <Loader2 className="h-3 w-3 animate-spin text-warm-gray-500" />}
+    </span>
+  )
+
+  const deleteButton = (row: LocationConfig) => (
+    <button
+      onClick={() => handleDelete(row)}
+      className="h-11 w-11 inline-flex items-center justify-center rounded-lg text-warm-gray-500 hover:text-red-500 hover:bg-beige"
+      title="Eliminar"
+      aria-label={`Eliminar ${row.location_name}`}
+    >
+      <Trash2 className="h-4 w-4" />
+    </button>
+  )
+
+  const columns: Array<AdminColumn<LocationConfig>> = [
+    { key: 'name', header: 'Ubicación', render: nameInput },
+    { key: 'mbid', header: 'Mindbody ID', cellClassName: 'font-mono', render: row => row.mindbody_location_id },
+    { key: 'prefix', header: 'Prefijo', render: prefixInput },
+    { key: 'length', header: 'Longitud', render: lengthInput },
+    { key: 'next', header: 'Próximo serial', cellClassName: 'font-mono', render: previewNext },
+    { key: 'active', header: 'Activa', render: activeToggle },
+    { key: 'delete', header: '', srHeader: 'Eliminar', align: 'right', render: deleteButton },
+  ]
+
+  const mobileCard = (row: LocationConfig) => (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <div className="font-mono text-lg font-semibold text-dark">{row.prefix}</div>
+        {deleteButton(row)}
+      </div>
+      <p className="font-mono text-sm text-warm-gray-500">Próximo: {previewNext(row)}</p>
+      <dl className="mt-3 space-y-2">
+        <CardField label="Nombre">{nameInput(row)}</CardField>
+        <CardField label="Mindbody">{row.mindbody_location_id}</CardField>
+        <CardField label="Prefijo">{prefixInput(row)}</CardField>
+        <CardField label="Longitud">{lengthInput(row)}</CardField>
+        <CardField label="Activa">{activeToggle(row)}</CardField>
+      </dl>
+    </>
+  )
+
   return (
     <div>
       <div className="mb-8">
         <Link
           href="/admin/giftcards"
-          className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark mb-3"
+          className="inline-flex items-center gap-1 text-sm text-warm-gray-500 hover:text-dark mb-3"
         >
           <ArrowLeft className="h-4 w-4" /> Gift Cards
         </Link>
@@ -134,7 +228,7 @@ export default function GiftCardConfigPage() {
               </div>
               <h1 className="text-3xl font-display font-semibold text-dark">Ubicaciones y Seriales</h1>
             </div>
-            <p className="text-warm-gray">
+            <p className="text-warm-gray-500">
               Cada ubicación tiene su propio prefijo y contador. Asigna usuarios admin a una ubicación en Supabase
               (campo <code className="font-mono text-xs">profiles.gift_card_location_config_id</code>) para
               restringir su acceso a esa página.
@@ -213,101 +307,16 @@ export default function GiftCardConfigPage() {
         </Card>
       )}
 
-      <Card variant="default" padding="none">
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-gold" />
-            </div>
-          ) : error ? (
-            <div className="p-6 text-red-600">{error}</div>
-          ) : rows.length === 0 ? (
-            <div className="p-12 text-center text-warm-gray">
-              No hay ubicaciones todavía. Crea la primera con el botón &quot;Nueva ubicación&quot;.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-beige-100 text-left text-warm-gray uppercase text-xs">
-                  <tr>
-                    <th className="px-3 py-3">Ubicación</th>
-                    <th className="px-3 py-3">Mindbody ID</th>
-                    <th className="px-3 py-3">Prefijo</th>
-                    <th className="px-3 py-3">Longitud</th>
-                    <th className="px-3 py-3">Próximo serial</th>
-                    <th className="px-3 py-3">Activa</th>
-                    <th className="px-3 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map(row => (
-                    <tr key={row.id} className="border-t border-beige-200">
-                      <td className="px-3 py-3">
-                        <input
-                          type="text"
-                          className="input w-48"
-                          value={row.location_name}
-                          onChange={e => updateLocal(row.id, { location_name: e.target.value })}
-                          onBlur={() => saveRow(row, { location_name: row.location_name })}
-                        />
-                      </td>
-                      <td className="px-3 py-3 text-dark font-mono">{row.mindbody_location_id}</td>
-                      <td className="px-3 py-3">
-                        <input
-                          type="text"
-                          className="input font-mono uppercase w-28"
-                          maxLength={8}
-                          value={row.prefix}
-                          onChange={e => updateLocal(row.id, {
-                            prefix: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''),
-                          })}
-                          onBlur={() => saveRow(row, { prefix: row.prefix })}
-                        />
-                      </td>
-                      <td className="px-3 py-3">
-                        <input
-                          type="number"
-                          min={4}
-                          max={12}
-                          className="input w-20"
-                          value={row.serial_length}
-                          onChange={e => updateLocal(row.id, { serial_length: Number(e.target.value) })}
-                          onBlur={() => saveRow(row, { serial_length: row.serial_length })}
-                        />
-                      </td>
-                      <td className="px-3 py-3 font-mono text-dark">{previewNext(row)}</td>
-                      <td className="px-3 py-3">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 text-gold focus:ring-gold rounded"
-                          checked={row.is_active}
-                          onChange={e => {
-                            const next = e.target.checked
-                            updateLocal(row.id, { is_active: next })
-                            saveRow(row, { is_active: next })
-                          }}
-                        />
-                        {savingId === row.id && (
-                          <Loader2 className="h-3 w-3 animate-spin inline-block ml-2 text-warm-gray" />
-                        )}
-                      </td>
-                      <td className="px-3 py-3">
-                        <button
-                          onClick={() => handleDelete(row)}
-                          className="text-warm-gray hover:text-red-500"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <AdminTable
+        rows={rows}
+        columns={columns}
+        rowKey={row => row.id}
+        mobileCard={mobileCard}
+        loading={loading}
+        error={error}
+        empty={'No hay ubicaciones todavía. Crea la primera con el botón "Nueva ubicación".'}
+      />
+
     </div>
   )
 }

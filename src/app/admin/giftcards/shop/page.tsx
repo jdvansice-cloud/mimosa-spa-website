@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Save, Loader2, Eye, EyeOff } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent, Spinner } from '@/components/ui'
+import { AdminTable, CardField, type AdminColumn } from '@/components/admin/AdminTable'
 
 interface ShopSettings {
   shop_enabled: boolean
   occasion_slug: string | null
   default_mindbody_location_id: number
+  serial_config_id: string | null
   whatsapp_delivery_enabled: boolean
   notify_email: string | null
 }
@@ -23,15 +25,27 @@ interface CatalogItem {
   is_active: boolean
 }
 
+interface SerialConfig {
+  id: string
+  location_name: string
+  prefix: string
+  mindbody_location_id: number
+  is_active: boolean
+}
+
 export default function AdminGcShopPage() {
   const [settings, setSettings] = useState<ShopSettings | null>(null)
   const [catalog, setCatalog] = useState<CatalogItem[]>([])
+  const [serialConfigs, setSerialConfigs] = useState<SerialConfig[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
+      const cfgRes = await fetch('/api/admin/giftcards/config')
+      const cfgJson = await cfgRes.json().catch(() => ({}))
+      setSerialConfigs(cfgJson.data ?? [])
       const res = await fetch('/api/admin/giftcards/shop')
       if (res.ok) {
         const data = await res.json()
@@ -76,11 +90,75 @@ export default function AdminGcShopPage() {
 
   const inputCls = 'w-full border border-beige rounded-lg p-2 text-sm'
 
+  const mbIdInput = (i: CatalogItem) => (
+    <input
+      type="number"
+      className="w-28 border border-beige-400 rounded p-1.5 text-sm"
+      aria-label={`Mindbody Gift Card ID de ${i.name_es}`}
+      defaultValue={i.mindbody_giftcard_id ?? ''}
+      onBlur={e =>
+        patchItem(i.id, {
+          mindbody_giftcard_id: e.target.value === '' ? null : Number(e.target.value),
+        })
+      }
+    />
+  )
+
+  const visibilityToggle = (i: CatalogItem) => (
+    <button
+      onClick={() => patchItem(i.id, { is_active: !i.is_active })}
+      className="h-11 w-11 inline-flex items-center justify-center rounded-lg text-warm-gray-500 hover:text-dark hover:bg-beige"
+      title={i.is_active ? 'Ocultar' : 'Mostrar'}
+      aria-label={`${i.is_active ? 'Ocultar' : 'Mostrar'} ${i.name_es}`}
+    >
+      {i.is_active ? <Eye className="h-4 w-4 text-green-700" /> : <EyeOff className="h-4 w-4" />}
+    </button>
+  )
+
+  const catalogColumns: Array<AdminColumn<CatalogItem>> = [
+    { key: 'name', header: 'Artículo', cellClassName: 'font-medium', render: i => i.name_es },
+    {
+      key: 'kind',
+      header: 'Tipo',
+      cellClassName: 'text-warm-gray-500',
+      render: i => (i.kind === 'monetary' ? 'Monto' : 'Experiencia'),
+    },
+    {
+      key: 'price',
+      header: 'Precio',
+      cellClassName: 'tabular-nums',
+      render: i => `$${(i.amount_cents / 100).toFixed(0)}`,
+    },
+    { key: 'mbid', header: 'Mindbody GC ID', render: mbIdInput },
+    { key: 'visible', header: 'Visible', render: visibilityToggle },
+  ]
+
+  const catalogCard = (i: CatalogItem) => (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-medium text-dark">{i.name_es}</p>
+          <p className="text-sm text-warm-gray-500">
+            {i.kind === 'monetary' ? 'Monto' : 'Experiencia'}
+          </p>
+        </div>
+        {visibilityToggle(i)}
+      </div>
+      <p className="mt-1 text-2xl font-display font-semibold text-dark tabular-nums">
+        ${(i.amount_cents / 100).toFixed(0)}
+      </p>
+      <dl className="mt-3 space-y-1">
+        <CardField label="Mindbody">{mbIdInput(i)}</CardField>
+        <CardField label="Estado">{i.is_active ? 'Visible' : 'Oculto'}</CardField>
+      </dl>
+    </>
+  )
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-dark">Tienda Online de Gift Cards</h1>
-        <p className="text-warm-gray text-sm mt-1">
+        <p className="text-warm-gray-500 text-sm mt-1">
           La tienda se publica cuando el interruptor está activo Y las credenciales
           de Tilopay están configuradas en Vercel.
         </p>
@@ -140,6 +218,29 @@ export default function AdminGcShopPage() {
               />
             </div>
             <div>
+              <label className="label">Secuencia de seriales</label>
+              <select
+                className={inputCls}
+                value={settings.serial_config_id ?? ''}
+                onChange={(e) =>
+                  setSettings({ ...settings, serial_config_id: e.target.value || null })
+                }
+              >
+                <option value="">Serie heredada (MW-000001)</option>
+                {serialConfigs
+                  .filter((c) => c.is_active)
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.location_name} ({c.prefix}) · Mindbody {c.mindbody_location_id}
+                    </option>
+                  ))}
+              </select>
+              <p className="text-xs text-warm-gray-500 mt-1">
+                Las ubicaciones se crean en Gift Cards → Configuración. La venta
+                se registra en la sucursal Mindbody indicada arriba.
+              </p>
+            </div>
+            <div>
               <label className="label">Correo de notificaciones</label>
               <input
                 type="email"
@@ -154,7 +255,7 @@ export default function AdminGcShopPage() {
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               <span className="ml-2">Guardar ajustes</span>
             </Button>
-            {status && <span className="text-sm text-warm-gray">{status}</span>}
+            {status && <span className="text-sm text-warm-gray-500">{status}</span>}
           </div>
         </CardContent>
       </Card>
@@ -164,60 +265,17 @@ export default function AdminGcShopPage() {
           <CardTitle>Catálogo ({catalog.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xs text-warm-gray mb-4">
+          <p className="text-xs text-warm-gray-500 mb-4">
             Activa cada artículo cuando exista su producto de Gift Card en Mindbody y
             hayas anotado su ID (necesario para el registro automático de la venta).
           </p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs uppercase text-warm-gray border-b border-beige">
-                  <th className="py-2 pr-3">Artículo</th>
-                  <th className="py-2 pr-3">Tipo</th>
-                  <th className="py-2 pr-3">Precio</th>
-                  <th className="py-2 pr-3">Mindbody GC ID</th>
-                  <th className="py-2">Visible</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-beige">
-                {catalog.map((i) => (
-                  <tr key={i.id}>
-                    <td className="py-2.5 pr-3 font-medium">{i.name_es}</td>
-                    <td className="py-2.5 pr-3 text-warm-gray">
-                      {i.kind === 'monetary' ? 'Monto' : 'Experiencia'}
-                    </td>
-                    <td className="py-2.5 pr-3">${(i.amount_cents / 100).toFixed(0)}</td>
-                    <td className="py-2.5 pr-3">
-                      <input
-                        type="number"
-                        className="w-28 border border-beige rounded p-1.5 text-sm"
-                        defaultValue={i.mindbody_giftcard_id ?? ''}
-                        onBlur={(e) =>
-                          patchItem(i.id, {
-                            mindbody_giftcard_id:
-                              e.target.value === '' ? null : Number(e.target.value),
-                          })
-                        }
-                      />
-                    </td>
-                    <td className="py-2.5">
-                      <button
-                        onClick={() => patchItem(i.id, { is_active: !i.is_active })}
-                        className="p-1.5 text-warm-gray hover:text-dark"
-                        title={i.is_active ? 'Ocultar' : 'Mostrar'}
-                      >
-                        {i.is_active ? (
-                          <Eye className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <EyeOff className="h-4 w-4" />
-                        )}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AdminTable
+            rows={catalog}
+            columns={catalogColumns}
+            rowKey={i => i.id}
+            mobileCard={catalogCard}
+            empty="El catálogo está vacío."
+          />
         </CardContent>
       </Card>
     </div>

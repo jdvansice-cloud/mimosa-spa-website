@@ -57,7 +57,7 @@ export default function AdminGiftCardsHubPage() {
           </div>
           <h1 className="text-3xl font-display font-semibold text-dark">Gift Cards</h1>
         </div>
-        <p className="text-warm-gray">Emisión, historial, plantilla de impresión y contenido público.</p>
+        <p className="text-warm-gray-500">Emisión, historial, plantilla de impresión y contenido público.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -71,7 +71,7 @@ export default function AdminGiftCardsHubPage() {
                   </div>
                   <h2 className="text-lg font-semibold text-dark mt-1">{title}</h2>
                 </div>
-                <p className="text-sm text-warm-gray">{description}</p>
+                <p className="text-sm text-warm-gray-500">{description}</p>
               </CardContent>
             </Card>
           </Link>

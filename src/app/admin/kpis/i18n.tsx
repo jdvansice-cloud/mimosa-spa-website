@@ -385,7 +385,7 @@ export function LangToggle() {
           key={l}
           onClick={() => setLang(l)}
           aria-pressed={lang === l}
-          className={`px-2.5 py-1 transition-colors ${lang === l ? 'bg-dark text-cream' : 'text-warm-gray hover:bg-beige'}`}
+          className={`px-2.5 py-1 transition-colors ${lang === l ? 'bg-dark text-cream' : 'text-warm-gray-500 hover:bg-beige'}`}
         >
           {l.toUpperCase()}
         </button>

@@ -240,7 +240,7 @@ export default function AdminGalleryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-display font-semibold text-dark">Galería</h1>
-          <p className="text-warm-gray mt-1">Gestiona las imágenes de la galería ({images.length} imágenes)</p>
+          <p className="text-warm-gray-500 mt-1">Gestiona las imágenes de la galería ({images.length} imágenes)</p>
         </div>
         <Button onClick={() => setIsUploadModalOpen(true)} leftIcon={<Upload className="h-4 w-4" />}>
           Subir Imágenes
@@ -258,7 +258,7 @@ export default function AdminGalleryPage() {
                 'px-4 py-2 rounded-lg text-sm font-medium transition-all',
                 selectedCategory === category.value
                   ? 'bg-gold text-dark'
-                  : 'bg-beige text-warm-gray hover:bg-beige-300'
+                  : 'bg-beige text-warm-gray-500 hover:bg-beige-300'
               )}
             >
               {category.label}
@@ -288,7 +288,7 @@ export default function AdminGalleryPage() {
                     'p-2 rounded-full transition-colors',
                     image.is_featured
                       ? 'bg-gold text-dark'
-                      : 'bg-white/90 text-warm-gray hover:text-gold'
+                      : 'bg-white/90 text-warm-gray-500 hover:text-gold'
                   )}
                   aria-label={image.is_featured ? 'Quitar de destacados' : 'Marcar como destacado'}
                 >
@@ -296,7 +296,7 @@ export default function AdminGalleryPage() {
                 </button>
                 <button
                   onClick={() => handleDelete(image.id)}
-                  className="p-2 rounded-full bg-white/90 text-warm-gray hover:text-red-600 hover:bg-red-50 transition-colors"
+                  className="p-2 rounded-full bg-white/90 text-warm-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
                   aria-label="Eliminar"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -313,7 +313,7 @@ export default function AdminGalleryPage() {
             
             <div className="p-3">
               <p className="text-sm font-medium text-dark truncate">{image.title_es}</p>
-              <p className="text-xs text-warm-gray capitalize">{image.category}</p>
+              <p className="text-xs text-warm-gray-500 capitalize">{image.category}</p>
             </div>
           </Card>
         ))}
@@ -321,7 +321,7 @@ export default function AdminGalleryPage() {
 
       {filteredImages.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-warm-gray">No hay imágenes en esta categoría</p>
+          <p className="text-warm-gray-500">No hay imágenes en esta categoría</p>
         </div>
       )}
 
@@ -347,12 +347,12 @@ export default function AdminGalleryPage() {
           >
             <Upload className={cn(
               'h-12 w-12 mx-auto mb-4 transition-colors',
-              isDragging ? 'text-gold' : 'text-warm-gray'
+              isDragging ? 'text-gold' : 'text-warm-gray-500'
             )} />
             <p className="text-dark font-medium mb-1">
               Arrastra tus imágenes aquí
             </p>
-            <p className="text-sm text-warm-gray mb-4">
+            <p className="text-sm text-warm-gray-500 mb-4">
               o haz clic para seleccionar archivos (máx. 10MB por imagen)
             </p>
             <input
@@ -382,7 +382,7 @@ export default function AdminGalleryPage() {
                 <button
                   type="button"
                   onClick={clearFiles}
-                  className="text-sm text-warm-gray hover:text-red-600 transition-colors"
+                  className="text-sm text-warm-gray-500 hover:text-red-600 transition-colors"
                 >
                   Limpiar todo
                 </button>
