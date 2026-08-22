@@ -39,7 +39,10 @@ export default async function GiftViewPage({
     .single()
 
   const code = card.mindbody_barcode_id || card.serial
-  const amount = `$${(card.amount_cents / 100).toFixed(0)}`
+  // Split like the printed label does: big whole number, small raised $ and
+  // cents (renderLabelCanvas.ts uses Lato 700 with the sup at 52%).
+  const amountWhole = Math.floor(card.amount_cents / 100).toLocaleString('en-US')
+  const amountCents = card.amount_cents % 100
   const voided = !!card.voided_at
   const redeemed = !!card.redeemed_at
   const expiry = card.expires_at
@@ -89,7 +92,15 @@ export default async function GiftViewPage({
                         </p>
                       </>
                     ) : null}
-                    <p className="font-display text-4xl text-gold-600">{amount}</p>
+                    <p className="font-body font-bold text-5xl leading-none text-dark flex items-start justify-center gap-0.5">
+                      <span className="text-[52%] leading-none pt-[0.18em]">$</span>
+                      <span className="tabular-nums tracking-tight">{amountWhole}</span>
+                      {amountCents > 0 && (
+                        <span className="text-[52%] leading-none pt-[0.18em] tabular-nums">
+                          {String(amountCents).padStart(2, '0')}
+                        </span>
+                      )}
+                    </p>
                   </div>
 
                   {card.message && (
@@ -104,7 +115,8 @@ export default async function GiftViewPage({
                   ) : (
                     <div className="bg-beige/60 rounded-2xl p-5 mb-4">
                       <p className="text-xs text-warm-gray mb-3">
-                        Muestra este código el día de tu visita · Show this code at your visit
+                        Págalo en línea con este código o muéstralo en el spa · Pay
+                        online with this code, or show it at the spa
                       </p>
                       <GiftBarcode code={code} />
                       <p className="font-mono text-lg font-bold tracking-widest text-dark mt-2">
@@ -120,11 +132,16 @@ export default async function GiftViewPage({
                   )}
 
                   <Link
-                    href="/es/reservar"
+                    href={`/es/reservar?gc=${encodeURIComponent(code)}`}
                     className="inline-flex items-center justify-center px-8 py-3 bg-gold text-dark font-semibold rounded-full hover:bg-gold/90 transition-colors"
                   >
-                    Reservar mi cita
+                    Reservar y pagar con mi gift card
                   </Link>
+                  <p className="text-[11px] text-warm-gray mt-3 max-w-xs mx-auto">
+                    Elige tu tratamiento y tu hora: aplicamos el saldo automáticamente
+                    al pagar. · Choose your treatment and time — we apply the balance
+                    automatically at checkout.
+                  </p>
                 </>
               )}
             </div>

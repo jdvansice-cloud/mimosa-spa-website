@@ -2075,6 +2075,12 @@ export interface PurchaseGiftCardInput {
   giftCardId: number
   layoutId?: number
   purchaserClientId: string | number
+  /**
+   * Our own serial as the card number. Mindbody honours a supplied BarcodeId
+   * (sandbox-verified), so the printed serial and the redemption code match.
+   * Omit to let Mindbody mint one.
+   */
+  barcodeId?: string
   recipientName?: string
   recipientEmail?: string
   giftMessage?: string
@@ -2093,10 +2099,193 @@ export interface PurchaseGiftCardResult {
 
 /**
  * Register an online gift-card sale in Mindbody so POS redemption and the
- * balance sync work exactly like admin-issued cards. NOTE: Mindbody mints the
- * BarcodeId — we cannot supply our own serial; callers must store the returned
- * BarcodeId on the gift_cards row.
+ * balance sync work exactly like admin-issued cards. Pass `barcodeId` to make
+ * our serial the redemption code; Mindbody mints one only when it's omitted.
+ * Either way, store the RETURNED BarcodeId — that's what redemption accepts.
  */
+/**
+ * Tax identity from the client's Mindbody custom fields (RUC = field 2,
+ * DV = field 3). Business rule: a profile with only a RUC is a NATURAL person;
+ * RUC **and** DV means a company (jurídico). Absent RUC => consumidor final.
+ */
+export interface ClientTaxIds {
+  ruc: string | null
+  dv: string | null
+  isCompany: boolean
+}
+
+export async function getClientTaxIds(clientId: string | number): Promise<ClientTaxIds> {
+  const empty: ClientTaxIds = { ruc: null, dv: null, isCompany: false }
+  try {
+    const response = await mindbodyRequest<{
+      Clients?: Array<{ CustomClientFields?: Array<{ Id: number; Name?: string; Value?: string }> }>
+    }>('/client/clients', { params: { ClientIds: String(clientId) } })
+
+    const fields = response?.Clients?.[0]?.CustomClientFields ?? []
+    const valueOf = (id: number, name: RegExp) =>
+      fields.find(f => f.Id === id || (f.Name && name.test(f.Name)))?.Value?.trim() || null
+
+    const ruc = valueOf(2, /^ruc$/i)
+    const dv = valueOf(3, /^dv$/i)
+    if (!ruc) return empty
+    return { ruc, dv: dv || null, isCompany: !!dv }
+  } catch (e) {
+    // Never let a profile lookup block invoicing — fall back to consumidor final.
+    console.error('getClientTaxIds failed:', e)
+    return empty
+  }
+}
+
+// ============================================================================
+// Checkout (unified orders: settle appointments + retail with split tenders)
+// ============================================================================
+
+export interface PricingOptionMatch {
+  pricingOptionId: number
+  /** Raw Mindbody price in cents — TAX-INCLUSIVE, exactly what checkout charges. */
+  priceCents: number
+  name: string
+}
+
+/**
+ * The pricing option that pays for a session type, with its RAW price
+ * (unlike getServices(), which strips the included ITBMS for display).
+ * Checkout must charge and post this exact amount or Mindbody rejects the
+ * payment sum.
+ */
+export async function getPricingOptionForSessionType(
+  sessionTypeId: number,
+  locationId?: number
+): Promise<PricingOptionMatch | null> {
+  const response = await mindbodyRequest<{
+    Services?: Array<{ Id: string | number; Name?: string; Price?: number; Count?: number }>
+  }>('/sale/services', {
+    params: {
+      sessionTypeIds: sessionTypeId,
+      limit: 50,
+      ...(locationId ? { locationId } : {}),
+    },
+  })
+  const options = (response?.Services ?? []).filter(
+    s => typeof s.Price === 'number' && s.Price > 0
+  )
+  // Prefer single-session options (Count 1) — bundles/series also "pay for"
+  // the session type but are not what an online order sells.
+  const best = options.find(s => (s.Count ?? 1) === 1) ?? options[0]
+  if (!best) return null
+  return {
+    pricingOptionId: Number(best.Id),
+    priceCents: Math.round((best.Price as number) * 100),
+    name: best.Name ?? '',
+  }
+}
+
+export interface MindbodySaleSummary {
+  Id: number
+  SaleDateTime?: string
+  LocationId?: number
+  ClientId?: number | string
+  Payments?: Array<{ Type?: string; Amount?: number }>
+}
+
+/**
+ * Recent sales readback — the verify-on-timeout guard for checkoutshoppingcart
+ * (which has no request deduplication). Before any posting retry, callers scan
+ * today's sales for one matching the order's client + total.
+ */
+export async function getRecentSales(params: {
+  startSaleDateTime: string // ISO date or datetime
+  limit?: number
+}): Promise<MindbodySaleSummary[]> {
+  const response = await mindbodyRequest<{ Sales?: MindbodySaleSummary[] }>(
+    '/sale/sales',
+    { params: { startSaleDateTime: params.startSaleDateTime, limit: params.limit ?? 200 } }
+  )
+  return response?.Sales ?? []
+}
+
+export interface CheckoutCartItem {
+  /** 'Service' = pricing option (appointments); 'Product' reserved for retail. */
+  type: 'Service' | 'Product'
+  /** Pricing option id from GET /sale/services (NOT the session type id). */
+  metadataId: number
+  quantity?: number
+  /** Appointments this item settles (book-first-then-pay). */
+  appointmentIds?: number[]
+  /** Exact discount in dollars, computed by our promo engine — Mindbody never recomputes. */
+  discountAmount?: number
+  /** Carries the Tilopay tpt for reconciliation (Custom tenders have no notes field). */
+  salesNotes?: string
+}
+
+export type CheckoutPayment =
+  | { type: 'GiftCard'; cardNumber: string; amount: number }
+  | { type: 'Custom'; customPaymentMethodId: number; amount: number }
+  | { type: 'Cash'; amount: number }
+
+export interface CheckoutCartInput {
+  clientId: string | number
+  locationId: number
+  items: CheckoutCartItem[]
+  payments: CheckoutPayment[]
+  /** Test:true validates + returns server totals without committing anything. */
+  test?: boolean
+}
+
+export interface CheckoutCartResult {
+  SaleId?: number
+  SubTotal?: number
+  DiscountTotal?: number
+  TaxTotal?: number
+  GrandTotal?: number
+}
+
+/**
+ * POST /sale/checkoutshoppingcart. Two-step contract (sandbox-verified):
+ * call with test:true first and pay EXACTLY the returned GrandTotal — Mindbody
+ * rejects any payment sum that doesn't match its own computed total.
+ * InStore:true + explicit LocationId attributes the sale to the real location
+ * (1/2), not the "98 Online Store" bucket (spike sale 100170604/-06).
+ * WARNING: this endpoint has NO request deduplication — callers must be
+ * single-flight per order and verify via GET /sale/sales before any retry.
+ */
+export async function checkoutShoppingCart(
+  input: CheckoutCartInput
+): Promise<CheckoutCartResult> {
+  const response = await mindbodyRequest<{
+    ShoppingCart?: CheckoutCartResult
+    Appointments?: unknown[]
+  }>('/sale/checkoutshoppingcart', {
+    method: 'POST',
+    body: {
+      ClientId: String(input.clientId),
+      Test: input.test ?? false,
+      InStore: true,
+      LocationId: input.locationId,
+      SendEmail: false,
+      Items: input.items.map(item => ({
+        Item: { Type: item.type, Metadata: { Id: item.metadataId } },
+        Quantity: item.quantity ?? 1,
+        ...(item.appointmentIds?.length ? { AppointmentIds: item.appointmentIds } : {}),
+        ...(item.discountAmount ? { DiscountAmount: item.discountAmount } : {}),
+        ...(item.salesNotes ? { SalesNotes: item.salesNotes } : {}),
+      })),
+      Payments: input.payments.map(p => {
+        if (p.type === 'GiftCard') {
+          return { Type: 'GiftCard', Metadata: { CardNumber: p.cardNumber, Amount: p.amount } }
+        }
+        if (p.type === 'Custom') {
+          return { Type: 'Custom', Metadata: { Id: p.customPaymentMethodId, Amount: p.amount } }
+        }
+        return { Type: 'Cash', Metadata: { Amount: p.amount } }
+      }),
+    },
+  })
+  const cart = response?.ShoppingCart
+  if (!cart) throw new Error('checkoutshoppingcart: empty response')
+  return cart
+}
+
 export async function purchaseGiftCard(
   input: PurchaseGiftCardInput
 ): Promise<PurchaseGiftCardResult> {
@@ -2108,6 +2297,7 @@ export async function purchaseGiftCard(
       GiftCardId: input.giftCardId,
       ...(input.layoutId ? { LayoutId: input.layoutId } : {}),
       PurchaserClientId: input.purchaserClientId,
+      ...(input.barcodeId ? { BarcodeId: input.barcodeId } : {}),
       SendEmailReceipt: false,
       ...(input.recipientName ? { RecipientName: input.recipientName } : {}),
       ...(input.recipientEmail ? { RecipientEmail: input.recipientEmail } : {}),

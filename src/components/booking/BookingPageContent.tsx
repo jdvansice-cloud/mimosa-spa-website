@@ -47,6 +47,28 @@ function BookingPageInner() {
 
       // Deep-link preselection runs for EVERYONE — browsing no longer requires
       // an account (auth moved to the step before confirmation).
+      // A gift card's own page links here with ?gc=SERIAL, so the recipient
+      // books and pays with their card without typing the code anywhere.
+      const giftCode = searchParams.get('gc')
+      if (giftCode && /^[A-Za-z0-9-]{4,30}$/.test(giftCode)) {
+        try {
+          sessionStorage.setItem('mimosa-gc', giftCode.toUpperCase())
+        } catch {
+          // private mode / storage disabled — the code can still be typed
+        }
+      }
+
+      // Campaign links (/reservar?promo=CODE) carry the code to checkout,
+      // so the customer never has to type it.
+      const promoCode = searchParams.get('promo')
+      if (promoCode && /^[A-Za-z0-9_-]{3,32}$/.test(promoCode)) {
+        try {
+          sessionStorage.setItem('mimosa-promo', promoCode.toUpperCase())
+        } catch {
+          // private mode / storage disabled — the code can still be typed
+        }
+      }
+
       const promotionId = searchParams.get('promotionId')
       const serviceId = searchParams.get('serviceId')
       if (promotionId) {

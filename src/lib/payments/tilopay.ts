@@ -40,6 +40,13 @@ export interface TilopayPaymentInput {
   buyerPhone?: string
   buyerCountry?: string
   returnData?: string
+  /**
+   * 1 (default) = auth+capture in one step (gift shop).
+   * 0 = authorize only — checkout flow holds the amount, books the
+   * appointment in Mindbody, then captures (or voids on slot loss).
+   * The authorization auto-voids after ~5–7 days if never captured.
+   */
+  capture?: 0 | 1
 }
 
 /** Create a hosted-checkout payment; returns the URL to redirect the customer to. */
@@ -62,7 +69,7 @@ export async function createTilopayPayment(input: TilopayPaymentInput): Promise<
       amount: (input.amountCents / 100).toFixed(2),
       currency: 'USD',
       orderNumber: input.orderNumber,
-      capture: 1,
+      capture: input.capture ?? 1,
       redirect: input.redirectUrl,
       billToFirstName: firstName,
       billToLastName: lastName,
@@ -144,11 +151,12 @@ export function verifyTilopayHash(p: TilopayCallbackParams): boolean {
   }
 }
 
-/** Refund (type 2) or same-day reversal (type 3). */
-export async function refundTilopayPayment(
+// processModification types: 1 = capture a prior authorization,
+// 2 = refund, 3 = reversal/void.
+async function processModification(
   orderNumber: string,
   amountCents: number,
-  type: 2 | 3 = 2
+  type: 1 | 2 | 3
 ): Promise<{ ok: boolean; raw: unknown }> {
   const c = creds()
   if (!c) throw new Error('Tilopay not configured')
@@ -170,4 +178,23 @@ export async function refundTilopayPayment(
   })
   const raw = await res.json().catch(() => null)
   return { ok: res.ok, raw }
+}
+
+/** Capture a `capture: 0` authorization (amount ≤ authorized amount). */
+export function captureTilopayPayment(orderNumber: string, amountCents: number) {
+  return processModification(orderNumber, amountCents, 1)
+}
+
+/** Void an uncaptured authorization (slot lost after retries — nothing charged). */
+export function voidTilopayPayment(orderNumber: string, amountCents: number) {
+  return processModification(orderNumber, amountCents, 3)
+}
+
+/** Refund (type 2) or same-day reversal (type 3). */
+export function refundTilopayPayment(
+  orderNumber: string,
+  amountCents: number,
+  type: 2 | 3 = 2
+) {
+  return processModification(orderNumber, amountCents, type)
 }

@@ -1,9 +1,21 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { CheckCircle, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star, ArrowDown } from 'lucide-react'
+import { useRouter, useParams } from 'next/navigation'
+import { CheckCircle, MapPin, User, Calendar, Clock, Loader2, AlertTriangle, Star, ArrowDown, CreditCard } from 'lucide-react'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
 import { calculateCartPricing } from '@/lib/booking/pricing'
+import { useBagStore } from '@/lib/bag/store'
+import { FEATURES } from '@/lib/nav'
+
+interface CheckoutCfg {
+  enabled: boolean
+  allowPayAtSpa: boolean
+  peakPrepayRequired: boolean
+  peakDays: number[]
+  onlineDiscountActive: boolean
+  onlineDiscountPercent: number
+}
 
 export function ConfirmStep() {
   const {
@@ -34,6 +46,64 @@ export function ConfirmStep() {
   const totalDuration = useBookingStore(selectTotalDuration)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [displayClientName, setDisplayClientName] = useState<string>('')
+
+  // ---- Unified checkout (prepay) ----
+  const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'es'
+  const setBagSession = useBagStore(s => s.setSession)
+  const [checkoutCfg, setCheckoutCfg] = useState<CheckoutCfg | null>(null)
+
+  useEffect(() => {
+    if (!FEATURES.bag) return
+    fetch('/api/checkout/config')
+      .then(r => r.json())
+      .then(setCheckoutCfg)
+      .catch(() => setCheckoutCfg(null))
+  }, [])
+
+  // Promotions and appointment replacements keep the classic pay-at-spa flow
+  // (promo bundle prices aren't representable as per-line Mindbody prices yet).
+  const canPayOnline =
+    FEATURES.bag && !!checkoutCfg?.enabled && !activePromotion && !replaceAppointmentId
+
+  const isPeakSlot = useMemo(() => {
+    if (!checkoutCfg?.peakPrepayRequired || !selectedDate) return false
+    const day = new Date(`${selectedDate}T12:00:00`).getDay()
+    return (checkoutCfg.peakDays ?? []).includes(day)
+  }, [checkoutCfg, selectedDate])
+
+  const prepayRequired = canPayOnline && (isPeakSlot || !checkoutCfg?.allowPayAtSpa)
+
+  const goPayOnline = () => {
+    if (!selectedLocation || !selectedDate || !selectedTime) return
+    setBagSession({
+      locationId: selectedLocation.Id,
+      locationName: selectedLocation.Name,
+      services: [
+        ...selectedServices.map(s => ({
+          sessionTypeId: s.Id,
+          name: s.Name,
+          priceCents: Math.round((s.Price ?? 0) * 100),
+          durationMinutes: s.Duration,
+        })),
+        ...selectedAddons.map(s => ({
+          sessionTypeId: s.Id,
+          name: s.Name,
+          priceCents: Math.round((s.Price ?? 0) * 100),
+          durationMinutes: s.Duration,
+          isAddon: true,
+        })),
+      ],
+      staffId: selectedStaff?.Id,
+      staffRequested: !!selectedStaff,
+      staffName: selectedStaff
+        ? selectedStaff.DisplayName || `${selectedStaff.FirstName} ${selectedStaff.LastName}`.trim()
+        : undefined,
+      startDateTime: `${selectedDate}T${selectedTime}:00`,
+    })
+    router.push(`/${locale}/checkout`)
+  }
 
   // Fetch client name on mount if missing from store
   useEffect(() => {
@@ -532,17 +602,48 @@ export function ConfirmStep() {
           </div>
         )}
 
-        {/* Payment Notice - Compact */}
-        <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-amber-800 text-xs text-center">
-            El pago se realiza en el spa al momento de tu visita
-          </p>
-        </div>
+        {/* Payment: online prepay (when enabled) vs at the spa */}
+        {canPayOnline ? (
+          <div className="mt-3 space-y-2">
+            <button
+              onClick={goPayOnline}
+              disabled={isSubmitting || isLoading}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-gold px-5 py-3 text-sm font-semibold text-dark shadow-sm hover:bg-gold-600 transition-colors disabled:opacity-60"
+            >
+              <CreditCard className="h-4 w-4" />
+              Pagar ahora
+              {checkoutCfg?.onlineDiscountActive && checkoutCfg.onlineDiscountPercent > 0 && (
+                <span className="rounded-full bg-dark/10 px-2 py-0.5 text-[11px] font-bold">
+                  −{checkoutCfg.onlineDiscountPercent}%
+                </span>
+              )}
+            </button>
+            {prepayRequired ? (
+              <p className="text-center text-xs text-warm-gray">
+                Los horarios de fin de semana se confirman con pago en línea.
+              </p>
+            ) : (
+              <button
+                onClick={handleConfirmBooking}
+                disabled={isSubmitting || isLoading}
+                className="w-full rounded-lg border border-dark/20 px-5 py-2.5 text-sm font-medium text-dark hover:bg-dark/5 transition-colors disabled:opacity-60"
+              >
+                Pagar en el spa
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-amber-800 text-xs text-center">
+              El pago se realiza en el spa al momento de tu visita
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Hidden Confirm Button - Triggered by fixed bottom nav */}
       <button
-        onClick={handleConfirmBooking}
+        onClick={prepayRequired ? goPayOnline : handleConfirmBooking}
         disabled={isSubmitting || isLoading}
         className="hidden"
         id="mobile-confirm-btn"
