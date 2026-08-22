@@ -10,7 +10,10 @@
     "type-check": "tsc --noEmit",
     "check-all": "npm run lint && npm run type-check",
     "verify": "npm run build",
-    "efactura:dryrun": "node --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/efactura-dryrun.ts"
+    "efactura:dryrun": "node --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/efactura-dryrun.ts",
+    "efactura:pos-dryrun": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-invoice-dryrun.ts",
+    "efactura:pos-compare": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-june.ts",
+    "efactura:pos-daily": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-daily.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.0",
