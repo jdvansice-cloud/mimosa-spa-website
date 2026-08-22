@@ -11,7 +11,8 @@ import { ITBMS_7, ITBMS_EXENTO } from './constants'
  *   excluded   tips (pass-through, not revenue), gift cards, certificados and
  *              memberships (all stored value — invoiced at redemption), and
  *              account payments
- *   skipped    cortesía/invitado sales emit no factura at all
+ *   skipped    cortesía/invitado sales, and returns (negative totals), which
+              need a nota de crédito against the original CUFE instead
  *
  * Certificados and memberships live in Mindbody's "retail" bucket but are
  * prepaid value, not goods — invoicing them would repeat the very defect this
@@ -34,9 +35,18 @@ export type PosInvoiceDecision = PosInvoiceInput | PosInvoiceSkip
 
 const cents = (n: unknown) => Math.round(Number(n ?? 0) * 100)
 
-/** Stored value sold as if it were retail: certificados, memberships, bonos. */
+/**
+ * Stored value sold as if it were retail: certificados, memberships, bonos.
+ *
+ * `certi[fc]i[fc]ad` is not a typo on our side — it matches both "certificado"
+ * and "Certicifado", which is how the promo certificates are spelled in the
+ * Mindbody catalog (961 line items and counting). Matching only the correct
+ * spelling silently invoiced every one of them as taxable revenue.
+ */
 export function isStoredValue(description: string | null): boolean {
-  return /certificad|membres[ií]a|gift\s*card|tarjeta\s+de\s+regalo|bono/i.test(description ?? '')
+  return /certi[fc]i[fc]ad|membres[ií]a|gift\s*card|tarjeta\s+de\s+regalo|bono/i.test(
+    description ?? ''
+  )
 }
 
 /** A courtesy sale — no fiscal document is emitted for it. */
@@ -51,7 +61,9 @@ function lineDecision(bucket: string | null, description: string | null):
     return { include: false, reason: 'propina (no es ingreso)' }
   }
   if (b === 'giftcard') return { include: false, reason: 'gift card (valor almacenado)' }
-  if (/account|abono a cuenta|pago a cuenta/i.test(description ?? '')) {
+  // "Credito a Cliente" and "Payment on Account" are movements on the client's
+  // balance, not a sale — the invoice comes later, when the balance is spent.
+  if (/account|abono a cuenta|pago a cuenta|cr[eé]dito a cliente/i.test(description ?? '')) {
     return { include: false, reason: 'pago a cuenta' }
   }
   if (isStoredValue(description)) return { include: false, reason: 'valor almacenado (certificado/membresía)' }
@@ -72,6 +84,14 @@ export async function buildPosInvoiceInput(
   const paymentTypes: string[] = sale.payment_types ?? []
   if (isCourtesySale(paymentTypes, Number(sale.comp_paid ?? 0))) {
     return { emit: false, saleId, reason: 'cortesía — no se factura' }
+  }
+
+  // A negative total is a RETURN in Mindbody (135 of them in the data so far).
+  // The fiscal answer is a nota de crédito referencing the original factura's
+  // CUFE, never a factura with a negative total — the DGI has no such document.
+  // Emitting one is refused here rather than left to fail at the PAC.
+  if (cents(sale.total_paid) < 0) {
+    return { emit: false, saleId, reason: 'devolución — corresponde nota de crédito, no factura' }
   }
 
   const { data: items } = await supabase

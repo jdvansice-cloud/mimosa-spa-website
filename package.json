@@ -13,7 +13,8 @@
     "efactura:dryrun": "node --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/efactura-dryrun.ts",
     "efactura:pos-dryrun": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-invoice-dryrun.ts",
     "efactura:pos-compare": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-june.ts",
-    "efactura:pos-daily": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-daily.ts"
+    "efactura:pos-daily": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-daily.ts",
+    "efactura:pos-match": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-match-june.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.0",
