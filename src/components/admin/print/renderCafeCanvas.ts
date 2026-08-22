@@ -131,9 +131,19 @@ export async function renderCafeCanvas(payload: CafeReceiptPayload): Promise<HTM
 
   // Draw onto an over-tall canvas, then crop to the ink. Cheaper and far less
   // error-prone than running the whole layout twice just to measure it.
+  //
+  // The height is derived rather than a fixed constant: a receipt that ran past
+  // a magic number would be silently CLIPPED, and a CAFE missing its QR is
+  // worse than one that fails to print. The allowance per line is deliberately
+  // generous — the longest description in the data is 50 characters, which
+  // wraps to three lines at this width.
   const scratch = document.createElement('canvas')
   scratch.width = W
-  scratch.height = 6000
+  scratch.height =
+    1200 + // fixed furniture: header, totals, CUFE block, QR, footer
+    payload.lines.length * pt(60) +
+    payload.payments.length * pt(16) +
+    (qr?.height ?? 0)
   const ctx = scratch.getContext('2d')!
   ctx.imageSmoothingEnabled = false
   ctx.fillStyle = '#ffffff'
@@ -273,6 +283,14 @@ export async function renderCafeCanvas(payload: CafeReceiptPayload): Promise<HTM
 
   // Feed past the tear bar so the last line clears the cutter.
   y += pt(24)
+
+  if (y > scratch.height) {
+    // Unreachable with the allowance above, but a silent clip would hand the
+    // customer a document missing its QR — so say so instead.
+    throw new Error(
+      `El recibo (${y} puntos) excede el lienzo de ${scratch.height}: se habría cortado.`
+    )
+  }
 
   const out = document.createElement('canvas')
   out.width = W

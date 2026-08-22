@@ -77,8 +77,10 @@ export function buildCafeReceipt(args: {
   const lines: CafeReceiptLine[] = req.listaItems.map(it => ({
     description: it.descripcionProductoServicio,
     quantity: it.cantidadProductoServicio,
-    // sumaPrecioItem is net of tax; the customer reads a tax-inclusive line.
-    totalCents: toCents(it.grupoPrecios.sumaPrecioItem) + toCents(it.grupoITBMS.montoITBMS),
+    // sumaPrecioItem is ALREADY tax-inclusive (buildInvoice sets it to
+    // net + tax); precioItem is the net one. Adding montoITBMS here charged
+    // the customer's eye the tax twice on every taxed line.
+    totalCents: toCents(it.grupoPrecios.sumaPrecioItem),
     taxRateCode: it.grupoITBMS.tasaITBMSAplicable,
     taxCents: toCents(it.grupoITBMS.montoITBMS),
   }))
