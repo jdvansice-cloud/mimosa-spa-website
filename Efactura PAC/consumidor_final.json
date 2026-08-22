@@ -1,0 +1,54 @@
+{
+    "datosGenerales": {
+        "informacionReceptor": {
+            "tipoReceptorFe": "02",
+            "paisReceptor": "PA"
+        }
+    },
+    "listaItems": [
+        {
+            "numeroSecuenciaItem": 1,
+            "descripcionProductoServicio": "PRODUCTO O SERVICIO #1",
+            "codigoInternoItem": "F987654",
+            "cantidadProductoServicio": 10,
+            "grupoPrecios": {
+                "precioUnitarioTransferencia": 5.00,
+                "precioItem": 50.00,
+                "sumaPrecioItem": 53.50
+            },
+            "grupoITBMS": {
+                "tasaITBMSAplicable": "01",
+                "montoITBMS": 3.50
+            }
+        },
+        {
+            "numeroSecuenciaItem": 2,
+            "descripcionProductoServicio": "PRODUCTO O SERVICIO #2",
+            "codigoInternoItem": "F987654",
+            "cantidadProductoServicio": 1,
+            "grupoPrecios": {
+                "precioUnitarioTransferencia": 50.00,
+                "precioItem": 50.00,
+                "sumaPrecioItem": 53.50
+            },
+            "grupoITBMS": {
+                "tasaITBMSAplicable": "01",
+                "montoITBMS": 3.50
+            }
+        }
+    ],
+    "totales": {
+        "totalNeto": 100.00,
+        "valorTotalFactura": 107.00,
+        "sumaValoresRecibidos": 107.00,
+        "tiempoPago": 1,
+        "numeroTotalItems": 2,
+        "totalTodosItems": 107.00,
+        "grupoFormasPago": [
+            {
+                "formaPago": "02",
+                "valorCuotaPagada": 107.00
+            }
+        ]
+    }
+}
