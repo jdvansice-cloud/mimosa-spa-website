@@ -54,20 +54,28 @@ export function isCourtesySale(paymentTypes: string[], compPaid: number): boolea
   return compPaid > 0 || paymentTypes.some(t => /cortes[ií]a|invitad|comp\b/i.test(t ?? ''))
 }
 
-function lineDecision(bucket: string | null, description: string | null):
-  { include: boolean; reason?: string } {
+/**
+ * Why this line is not invoiceable, or null if it is.
+ *
+ * Shared with the credit-note path on purpose: a return must be excluded on
+ * exactly the same grounds as the sale. If the two ever drift, we would credit
+ * something we never invoiced (or fail to credit something we did), and the
+ * fiscal record would stop reconciling against the POS.
+ */
+export function isExcludedFromInvoice(
+  bucket: string | null,
+  description: string | null
+): string | null {
   const b = (bucket ?? '').toLowerCase()
-  if (b === 'tip' || /propina/i.test(description ?? '')) {
-    return { include: false, reason: 'propina (no es ingreso)' }
-  }
-  if (b === 'giftcard') return { include: false, reason: 'gift card (valor almacenado)' }
+  if (b === 'tip' || /propina/i.test(description ?? '')) return 'propina (no es ingreso)'
+  if (b === 'giftcard') return 'gift card (valor almacenado)'
   // "Credito a Cliente" and "Payment on Account" are movements on the client's
   // balance, not a sale — the invoice comes later, when the balance is spent.
   if (/account|abono a cuenta|pago a cuenta|cr[eé]dito a cliente/i.test(description ?? '')) {
-    return { include: false, reason: 'pago a cuenta' }
+    return 'pago a cuenta'
   }
-  if (isStoredValue(description)) return { include: false, reason: 'valor almacenado (certificado/membresía)' }
-  return { include: true }
+  if (isStoredValue(description)) return 'valor almacenado (certificado/membresía)'
+  return null
 }
 
 export async function buildPosInvoiceInput(
@@ -104,11 +112,11 @@ export async function buildPosInvoiceInput(
   const excluded: PosInvoiceInput['excluded'] = []
 
   for (const it of items ?? []) {
-    const decision = lineDecision(it.bucket, it.description)
-    if (!decision.include) {
+    const excludedReason = isExcludedFromInvoice(it.bucket, it.description)
+    if (excludedReason) {
       excluded.push({
         description: it.description ?? '', bucket: it.bucket,
-        cents: cents(it.total_amount), reason: decision.reason!,
+        cents: cents(it.total_amount), reason: excludedReason,
       })
       continue
     }
