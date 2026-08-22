@@ -19,18 +19,6 @@
 //  · Barcode modules are exact printer-dot multiples; `scaleContent:
 //    false` + `density: 203` + nearest-neighbor keep them that way. Any
 //    scaling anywhere is the #1 cause of unscannable barcodes.
-//  · qz-tray 2.2.x signing: setSignaturePromise MUST use the
-//    resolver-factory form `(toSign) => (resolve) => {…}` — returning a
-//    Promise throws "Promise resolver #<Promise> is not a function"
-//    (@types/qz-tray wrongly allows it). A REJECTED cert/signature promise
-//    aborts every call client-side, so always RESOLVE — empty falls back
-//    to QZ's "Allow" prompt instead of silent printing.
-//
-// Signing backend: /api/admin/qz/cert + /sign (QZ_TRAY_CERTIFICATE /
-// QZ_TRAY_PRIVATE_KEY env). Silent printing additionally requires the
-// public cert installed as ~/Library/Application Support/qz/override.crt
-// on each front-desk machine.
-
 import {
   LabelCard,
   LabelPrinterProfile,
@@ -39,65 +27,15 @@ import {
 } from '@/components/admin/giftcards/labels/types'
 import { renderLabelCanvas } from '@/components/admin/giftcards/labels/renderLabelCanvas'
 import { renderTestCanvas } from '@/components/admin/giftcards/labels/renderTestLabel'
+import { Qz, QzError, connect, getQz } from '@/lib/qz/client'
+
+export { QzError, listPrinters } from '@/lib/qz/client'
 
 const DPI = 203
 
 // v2: bumped when the D520 replaced the Star as primary so a stale saved
 // Star choice doesn't shadow the new resolution order.
 const PRINTER_STORAGE_KEY = 'giftcard-qz-printer-v2'
-
-export class QzError extends Error {
-  kind: 'connect' | 'printer' | 'print'
-  /** On kind='printer': every printer QZ can see, for a manual picker. */
-  printers?: string[]
-  constructor(kind: QzError['kind'], message: string, printers?: string[]) {
-    super(message)
-    this.kind = kind
-    this.printers = printers
-  }
-}
-
-// ---------------------------------------------------------------------------
-// QZ connection + signing (module singleton — one websocket per tab)
-// ---------------------------------------------------------------------------
-
-type Qz = typeof import('qz-tray')
-
-let qzPromise: Promise<Qz> | null = null
-
-function getQz(): Promise<Qz> {
-  if (!qzPromise) {
-    qzPromise = import('qz-tray').then((mod) => {
-      const qz = mod.default ?? mod
-      qz.security.setCertificatePromise((resolve: (v?: string) => void) => {
-        fetch('/api/admin/qz/cert')
-          .then((r) => (r.ok ? r.text().then(resolve) : resolve(undefined)))
-          .catch(() => resolve(undefined))
-      })
-      qz.security.setSignatureAlgorithm('SHA512')
-      qz.security.setSignaturePromise((toSign: string) => (resolve: (v?: string) => void) => {
-        fetch('/api/admin/qz/sign', { method: 'POST', body: toSign })
-          .then((r) => (r.ok ? r.text() : ''))
-          .then(resolve)
-          .catch(() => resolve(''))
-      })
-      return qz
-    })
-  }
-  return qzPromise
-}
-
-async function connect(qz: Qz): Promise<void> {
-  if (qz.websocket.isActive()) return
-  try {
-    await qz.websocket.connect({ retries: 3, delay: 1 })
-  } catch {
-    throw new QzError(
-      'connect',
-      'No se pudo conectar con QZ Tray. Verifica que esté instalado y ejecutándose (icono junto al reloj).'
-    )
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Printer resolution
@@ -117,13 +55,6 @@ export function savePrinter(name: string): void {
   } catch {
     // localStorage unavailable — the printer just won't be remembered
   }
-}
-
-export async function listPrinters(): Promise<string[]> {
-  const qz = await getQz()
-  await connect(qz)
-  const found = await qz.printers.find()
-  return Array.isArray(found) ? found : [found]
 }
 
 /** Geometry profile for a printer name (D520 assumed for unknown names). */

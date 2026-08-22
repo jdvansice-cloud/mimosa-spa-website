@@ -21,6 +21,7 @@ import {
   Ticket,
   Clock,
   Building2,
+  Printer,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -91,6 +92,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Sistema',
     items: [
       { href: '/admin/facturas', label: 'Facturación electrónica', icon: Receipt },
+      { href: '/admin/impresion', label: 'Impresión de facturas', icon: Printer },
       { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
     ],
   },
