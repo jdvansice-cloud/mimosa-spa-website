@@ -15,7 +15,10 @@
     "wati:mine": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/mine-chats.ts",
     "wati:redact": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/redact-names.ts",
     "wati:evals": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/evals/run.ts",
-    "efactura:dryrun": "node --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/efactura-dryrun.ts"
+    "efactura:dryrun": "node --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/efactura-dryrun.ts",
+    "efactura:pos-dryrun": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-invoice-dryrun.ts",
+    "efactura:pos-compare": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-june.ts",
+    "efactura:pos-daily": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-compare-daily.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",

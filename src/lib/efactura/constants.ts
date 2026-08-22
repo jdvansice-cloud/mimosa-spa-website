@@ -88,12 +88,16 @@ export function mapPaymentForma(tender: string | null | undefined): string {
   const v = (tender ?? '').trim()
   if (/^\d{2}$/.test(v)) return v
   const s = v.toLowerCase()
+  // Order matters: CLAVE (Panama's debit network) must beat the generic card
+  // rule, and "Gift Card" must beat it too.
   if (/gift|regalo/.test(s)) return FORMA_PAGO.tarjetaRegalo
   if (/yappy/.test(s)) return FORMA_PAGO.otro
   if (/efectivo|cash/.test(s)) return FORMA_PAGO.efectivo
   if (/d[eé]bito|debit|clave/.test(s)) return FORMA_PAGO.tarjetaDebito
   if (/cheque|check/.test(s)) return FORMA_PAGO.cheque
-  if (/transfer|ach|dep[oó]sito/.test(s)) return FORMA_PAGO.transferencia
+  // "link pago" is the bank's remote payment link — the money lands as a
+  // deposit, so it is a transferencia rather than a card charge.
+  if (/transfer|ach|dep[oó]sito|link/.test(s)) return FORMA_PAGO.transferencia
   if (/tarjeta|card|visa|master|amex|american/.test(s)) return FORMA_PAGO.tarjetaCredito
   return FORMA_PAGO.otro
 }
