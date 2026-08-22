@@ -44,7 +44,11 @@ for (let from = 0; ; from += 1000) {
   if (page.length < 1000) break
 }
 const bridge = bridgeRows.filter(r => (r.issued_at||'').startsWith(month))
-const bAmount = bridge.reduce((a,r)=>a+Number(r.amount||0),0)
+// biz_invoices.amount is the NET taxable base and `itbms` sits alongside it
+// (verified: amount 129.00 + itbms 9.03 = a $138.03 sale). Our figure is
+// tax-INCLUSIVE, so the comparable total is the sum of the two. Comparing
+// against `amount` alone invents an ~$11k "surplus" that is pure basis error.
+const bAmount = bridge.reduce((a,r)=>a+Number(r.amount||0)+Number(r.itbms||0),0)
 const bItbms  = bridge.reduce((a,r)=>a+Number(r.itbms||0),0)
 
 const $ = (n:number) => '$'+n.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})
