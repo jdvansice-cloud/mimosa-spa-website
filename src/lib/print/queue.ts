@@ -40,7 +40,7 @@ export async function enqueueCafePrint(
   try {
     const { data: invoice } = await db
       .from('electronic_invoices')
-      .select('id, order_id, location_id, doc_type, numero_documento, cufe, qr_content, protocolo_autorizacion, fecha_autorizacion, environment, codigo_sucursal, request_payload, status')
+      .select('id, order_id, mindbody_sale_id, location_id, doc_type, numero_documento, cufe, qr_content, protocolo_autorizacion, fecha_autorizacion, environment, codigo_sucursal, request_payload, status')
       .eq('id', invoiceId)
       .maybeSingle()
 
@@ -63,23 +63,26 @@ export async function enqueueCafePrint(
 
     if (!config) return { ok: false, error: `Sin configuración de facturación para la sede ${locationId}` }
 
-    let order: { order_number: string | null; mindbody_sale_id: number | null } | null = null
+    // Reference printed on the receipt so staff can tie paper back to a
+    // record. Counter documents have no order — they ARE a Mindbody sale.
+    let referencia: string | null = invoice.mindbody_sale_id
+      ? `Venta ${invoice.mindbody_sale_id}`
+      : null
     if (invoice.order_id) {
       const { data } = await db
         .from('orders')
         .select('order_number, mindbody_sale_id')
         .eq('id', invoice.order_id)
         .maybeSingle()
-      order = data
+      referencia =
+        data?.order_number ?? (data?.mindbody_sale_id ? `Venta ${data.mindbody_sale_id}` : referencia)
     }
 
     const payload = buildCafeReceipt({
       invoice,
       emisor: config,
       sucursalNombre: LOCATION_NAMES[locationId] ?? `Sede ${locationId}`,
-      referencia:
-        order?.order_number ??
-        (order?.mindbody_sale_id ? `Venta ${order.mindbody_sale_id}` : null),
+      referencia,
     })
 
     const { data: job, error } = await db
