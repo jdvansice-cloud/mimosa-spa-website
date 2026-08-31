@@ -1279,6 +1279,8 @@ export async function getScheduleItems(params: {
         Id: number
         StartDateTime: string
         EndDateTime: string
+        // Reason label set in Mindbody (e.g. "ALMUERZO"); not always present.
+        Description?: string | null
       }>
     }>
   }

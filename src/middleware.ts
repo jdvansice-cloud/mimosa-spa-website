@@ -39,6 +39,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // TV displays (therapist work-area agenda): no locale prefix, token-gated
+  // by the page/API themselves (the TV browser has no admin session)
+  if (pathname.startsWith('/tv/')) {
+    return NextResponse.next()
+  }
+
   // Protect admin routes: require a valid session with role=admin
   if (pathname.startsWith('/admin')) {
     let response = NextResponse.next({ request })
