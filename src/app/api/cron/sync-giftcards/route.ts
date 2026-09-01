@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardBalance } from '@/lib/booking/mindbody'
+import { findGiftCardSale } from '@/lib/giftcards/saleLookup'
 
 /**
  * GET /api/cron/sync-giftcards
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const { data: cards, error: queryError } = await supabase
     .from('gift_cards')
-    .select('id, serial, sold_at, mindbody_remaining_balance_cents, redeemed_at, mindbody_barcode_id')
+    .select('id, serial, sold_at, mindbody_remaining_balance_cents, redeemed_at, mindbody_barcode_id, sold_payment_method, mindbody_sale_id')
     .is('voided_at', null)
     .or('sold_at.is.null,mindbody_remaining_balance_cents.is.null,mindbody_remaining_balance_cents.gt.0')
     .is('redeemed_at', null)
@@ -55,7 +56,10 @@ export async function GET(request: NextRequest) {
   let sold = 0
   let balanceUpdates = 0
   let redeemed = 0
+  let paymentsFound = 0
   let errors = 0
+  // One sales fetch per day per RUN, no matter how many cards flip.
+  const salesDayCache = new Map()
 
   for (const card of cards) {
     checked++
@@ -70,9 +74,16 @@ export async function GET(request: NextRequest) {
       continue
     }
 
-    if (!balance) {
-      // Card not in Mindbody yet — record the attempt so it rotates to the
-      // back of the queue and we don't keep retrying the same one this hour.
+    const newBalanceCents = balance ? Math.round(balance.RemainingBalance * 100) : 0
+
+    // Mindbody's giftcardbalance ECHOES unknown barcodes as balance 0 instead
+    // of erroring (verified 2026-09-01: "ZZ999999" comes back {RemainingBalance:
+    // 0}). A zero therefore proves nothing on its own — it once marked every
+    // unsold card in the table as sold-and-used. Evidence rules:
+    //   sold      = a POSITIVE balance was seen (the echo can't fake that)
+    //   redeemed  = balance is 0 on a card we previously saw positive
+    //   otherwise = still just issued; only stamp the sync attempt
+    if (!balance || (newBalanceCents === 0 && !(card.mindbody_remaining_balance_cents! > 0))) {
       await supabase
         .from('gift_cards')
         .update({ mindbody_synced_at: now })
@@ -80,7 +91,6 @@ export async function GET(request: NextRequest) {
       continue
     }
 
-    const newBalanceCents = Math.round(balance.RemainingBalance * 100)
     const wasPending = !card.sold_at
     const wasRedeemed = !!card.redeemed_at
 
@@ -100,6 +110,24 @@ export async function GET(request: NextRequest) {
       redeemed++
     }
 
+    // Payment method of the sale that sold the card. The balance endpoint
+    // can't tell us; the sales feed links back via GiftCardBarcodeId. Only
+    // fresh sales are worth scanning — after a week the sale predates the
+    // window and retrying every hour forever would just burn API quota.
+    const soldAtMs = Date.parse((card.sold_at ?? update.sold_at ?? now) as string)
+    if (!card.sold_payment_method && Date.now() - soldAtMs < 7 * 86400000) {
+      try {
+        const sale = await findGiftCardSale([card.serial, balance.BarcodeId], 7, salesDayCache)
+        if (sale) {
+          update.sold_payment_method = sale.paymentMethod
+          if (!card.mindbody_sale_id) update.mindbody_sale_id = String(sale.saleId)
+          paymentsFound++
+        }
+      } catch (e) {
+        console.error(`sync-giftcards: ${card.serial} sale lookup failed:`, e)
+      }
+    }
+
     if (card.mindbody_remaining_balance_cents !== newBalanceCents) {
       balanceUpdates++
     }
@@ -116,7 +144,7 @@ export async function GET(request: NextRequest) {
   }
 
   console.log(
-    `sync-giftcards: checked=${checked} sold=${sold} balance_updates=${balanceUpdates} redeemed=${redeemed} errors=${errors}`
+    `sync-giftcards: checked=${checked} sold=${sold} balance_updates=${balanceUpdates} redeemed=${redeemed} payments=${paymentsFound} errors=${errors}`
   )
 
   return NextResponse.json({

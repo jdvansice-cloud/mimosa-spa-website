@@ -48,6 +48,7 @@ interface CardDetail {
   notes: string | null
   mindbody_barcode_id: string | null
   mindbody_sale_id: string | null
+  sold_payment_method: string | null
   mindbody_location_id: number | null
   mindbody_remaining_balance_cents: number | null
   mindbody_synced_at: string | null
@@ -202,6 +203,7 @@ export default function GiftCardDetailPage() {
           </Row>
           <Row label="Barcode ID">{card.mindbody_barcode_id && <span className="font-mono">{card.mindbody_barcode_id}</span>}</Row>
           <Row label="Venta">{card.mindbody_sale_id}</Row>
+          <Row label="Forma de pago">{card.sold_payment_method}</Row>
           <Row label="Sede Mindbody">{card.mindbody_location_id}</Row>
           <Row label="Vendida">{when(card.sold_at)}</Row>
           <Row label="Usada">{when(card.redeemed_at)}</Row>
