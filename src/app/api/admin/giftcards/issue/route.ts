@@ -24,6 +24,8 @@ interface IssuePayload {
   print_recipient: boolean
   print_treatments: boolean
   notes?: string | null
+  promotion_id?: string | null
+  promotion_name?: string | null
 }
 
 export async function POST(request: NextRequest) {
@@ -114,6 +116,10 @@ export async function POST(request: NextRequest) {
     print_recipient: body.print_recipient,
     print_treatments: body.print_treatments,
     notes: body.notes?.trim() || null,
+    // Snapshot alongside the reference: the card must still name the promo
+    // after the promotion itself is edited or deleted.
+    promotion_id: body.promotion_id || null,
+    promotion_name: body.promotion_name?.trim() || null,
     issued_by: ctx.userId,
   }
 
