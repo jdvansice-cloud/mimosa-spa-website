@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -36,6 +37,13 @@ interface AdminTableProps<T> {
   stickyFirstColumn?: boolean
   /** Extra props for each desktop `<tr>` — drag handlers, state classes. */
   rowProps?: (row: T) => React.HTMLAttributes<HTMLTableRowElement> & { draggable?: boolean }
+  /**
+   * Inline expansion: when `expandedKey` matches a row's key, `renderExpanded`
+   * is rendered right under it — a full-width panel on desktop, appended to
+   * the card on mobile. Details stay in the list instead of a page jump.
+   */
+  expandedKey?: string | null
+  renderExpanded?: (row: T) => React.ReactNode
 }
 
 const ALIGN: Record<'left' | 'right' | 'center', string> = {
@@ -61,6 +69,8 @@ export function AdminTable<T>({
   empty = 'No hay datos.',
   stickyFirstColumn = false,
   rowProps,
+  expandedKey = null,
+  renderExpanded,
 }: AdminTableProps<T>) {
   if (loading && rows.length === 0) {
     return (
@@ -94,6 +104,9 @@ export function AdminTable<T>({
           {rows.map(row => (
             <li key={rowKey(row)} className="bg-white border border-beige-300 rounded-xl p-4">
               {mobileCard(row)}
+              {renderExpanded && expandedKey === rowKey(row) && (
+                <div className="mt-4 border-t border-beige-200 pt-4">{renderExpanded(row)}</div>
+              )}
             </li>
           ))}
         </ul>
@@ -128,8 +141,8 @@ export function AdminTable<T>({
               {rows.map(row => {
                 const extra = rowProps?.(row) ?? {}
                 return (
+                <React.Fragment key={rowKey(row)}>
                 <tr
-                  key={rowKey(row)}
                   {...extra}
                   className={cn('border-t border-beige-200 hover:bg-beige-50 group', extra.className)}
                 >
@@ -149,6 +162,14 @@ export function AdminTable<T>({
                     </td>
                   ))}
                 </tr>
+                {renderExpanded && expandedKey === rowKey(row) && (
+                  <tr key={`${rowKey(row)}-detail`} className="border-t border-beige-200">
+                    <td colSpan={columns.length} className="px-4 py-4 bg-beige-50/50">
+                      {renderExpanded(row)}
+                    </td>
+                  </tr>
+                )}
+                </React.Fragment>
                 )
               })}
             </tbody>

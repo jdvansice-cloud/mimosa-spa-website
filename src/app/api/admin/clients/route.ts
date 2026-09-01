@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const { data, error } = await query.order('first_appointment_date', { ascending: false, nullsFirst: false }).limit(8)
+  const { data, error } = await query.order('first_appointment_date', { ascending: false, nullsFirst: false }).limit(20)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: data ?? [] })
 }
