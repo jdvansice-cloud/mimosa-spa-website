@@ -49,7 +49,6 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/kpis/agenda', label: 'Agenda', icon: CalendarDays },
       { href: '/admin/giftcards', label: 'Gift Cards', icon: Gift },
-      { href: '/admin/pedidos', label: 'Pedidos en línea', icon: ShoppingBag },
       { href: '/admin/resenas', label: 'Reseñas', icon: MessageSquareQuote },
     ],
   },
@@ -74,7 +73,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
       { href: '/admin/promociones', label: 'Promociones', icon: Tag },
       { href: '/admin/ofertas', label: 'Ofertas y Precios', icon: BadgePercent },
-      { href: '/admin/promocodes', label: 'Códigos de descuento', icon: Ticket },
       { href: '/admin/membresia', label: 'Membresía', icon: Award },
     ],
   },
@@ -90,7 +88,6 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'sistema',
     label: 'Sistema',
     items: [
-      { href: '/admin/facturas', label: 'Facturación electrónica', icon: Receipt },
       { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
     ],
   },
