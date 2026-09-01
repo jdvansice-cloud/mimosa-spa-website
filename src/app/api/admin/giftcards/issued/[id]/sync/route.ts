@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardBalance } from '@/lib/booking/mindbody'
+import { findGiftCardSale } from '@/lib/giftcards/saleLookup'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -19,7 +20,7 @@ export async function POST(
   // Load the card so we know the serial to look up in Mindbody.
   const { data: card, error: loadError } = await supabase
     .from('gift_cards')
-    .select('id, serial, sold_at, redeemed_at')
+    .select('id, serial, sold_at, redeemed_at, sold_payment_method, mindbody_sale_id, mindbody_remaining_balance_cents')
     .eq('id', id)
     .single()
 
@@ -39,6 +40,14 @@ export async function POST(
   }
 
   const now = new Date().toISOString()
+
+  // giftcardbalance echoes unknown barcodes as balance 0 (see the cron for the
+  // full note), so zero on a never-positive card means "not sold", not "used".
+  const echoedZero =
+    balance &&
+    Math.round(balance.RemainingBalance * 100) === 0 &&
+    !((card.mindbody_remaining_balance_cents ?? 0) > 0)
+  if (echoedZero) balance = null
 
   if (!balance) {
     // Card not in Mindbody yet — record the sync attempt so the UI can show
@@ -67,6 +76,21 @@ export async function POST(
   }
   if (balanceCents === 0 && !card.redeemed_at) {
     update.redeemed_at = now
+  }
+
+  // Manual sync also recovers the tender of the selling sale. Wider window
+  // than the cron: staff pressing the button on an old card is exactly the
+  // case where a deeper scan is worth the API calls.
+  if (!card.sold_payment_method) {
+    try {
+      const sale = await findGiftCardSale([card.serial, balance.BarcodeId], 14)
+      if (sale) {
+        update.sold_payment_method = sale.paymentMethod
+        if (!card.mindbody_sale_id) update.mindbody_sale_id = String(sale.saleId)
+      }
+    } catch (e) {
+      console.error('gift card sale lookup failed:', e)
+    }
   }
 
   const { data: updated, error: updateError } = await supabase
