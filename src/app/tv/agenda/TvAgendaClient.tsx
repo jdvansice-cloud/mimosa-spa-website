@@ -34,10 +34,54 @@ function serviceColor(a: TvAppointment) {
   return SERVICE_COLORS[Math.abs(key) % SERVICE_COLORS.length]
 }
 
+interface MergedAppt extends TvAppointment {
+  /** Add-on services absorbed into this block (same client, overlapping time). */
+  addons: string[]
+}
+
 interface PlacedAppt {
-  a: TvAppointment
+  a: MergedAppt
   lane: number
   lanes: number
+}
+
+/** "Mimosa Relax - 60 min" → "Mimosa Relax"; the block's height already says the duration. */
+function stripDuration(name: string): string {
+  // Catches "- 60 min", "(10 min)" and the bare "45 min" some names use.
+  return name
+    .replace(/\s*[-–]?\s*\(?\s*\d+\s*min\.?\s*\)?\s*$/i, '')
+    .trim()
+}
+
+/**
+ * Fold add-ons into their parent service. Mindbody books an "Extra Piedras
+ * Calientes (10 min)" as its own overlapping appointment, which on the TV
+ * became a second cramped block stealing half the column width. Any shorter
+ * appointment of the SAME client that overlaps (or starts within 5 min of)
+ * a longer one is absorbed: the parent block stretches to cover it and lists
+ * it as a "+ …" line. Different clients never merge — a true double booking
+ * must stay visible as two blocks.
+ */
+function mergeAddons(appts: TvAppointment[]): MergedAppt[] {
+  const sorted = [...appts].sort((x, y) => (y.endMin - y.startMin) - (x.endMin - x.startMin))
+  const out: MergedAppt[] = []
+  for (const a of sorted) {
+    const parent = a.clientName
+      ? out.find(p =>
+          p.clientName === a.clientName &&
+          a.startMin < p.endMin + 5 && a.endMin > p.startMin - 5
+        )
+      : undefined
+    if (parent) {
+      parent.addons.push(stripDuration(a.serviceName))
+      parent.startMin = Math.min(parent.startMin, a.startMin)
+      parent.endMin = Math.max(parent.endMin, a.endMin)
+      // Completed/NoShow on the parent wins; an add-on never downgrades it.
+    } else {
+      out.push({ ...a, addons: [] })
+    }
+  }
+  return out
 }
 
 /**
@@ -45,7 +89,7 @@ interface PlacedAppt {
  * overlap (add-ons in cabina) share the width instead of painting on top of
  * each other. Same approach as the KPIs agenda.
  */
-function layoutColumn(appts: TvAppointment[]): PlacedAppt[] {
+function layoutColumn(appts: MergedAppt[]): PlacedAppt[] {
   const sorted = [...appts].sort(
     (x, y) => x.startMin - y.startMin || (y.endMin - y.startMin) - (x.endMin - x.startMin)
   )
@@ -219,20 +263,25 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
               <div key={m} className="absolute inset-x-0 border-t border-[#e2dacb]" style={{ top: y(m) }} />
             ))}
             {/* Unavailabilities (lunch, blocks) — labeled white cards */}
+            {/* Unavailabilities read as "not here", not as events: a hatched
+                gray band with one small label. The grid already shows when. */}
             {c.unavailabilities.map((u, i) => (
               <div
                 key={`un${i}`}
-                className="absolute inset-x-0.5 z-10 overflow-hidden rounded-sm border border-[#cfc6b5] bg-[#faf7f0] px-1 py-0.5"
-                style={{ top: y(Math.max(u.startMin, windowStartMin)), height: Math.max((Math.min(u.endMin, windowEndMin) - Math.max(u.startMin, windowStartMin)) * pxPerMin, 12) }}
+                className="absolute inset-x-0 z-10 flex items-start justify-center overflow-hidden"
+                style={{
+                  top: y(Math.max(u.startMin, windowStartMin)),
+                  height: Math.max((Math.min(u.endMin, windowEndMin) - Math.max(u.startMin, windowStartMin)) * pxPerMin, 12),
+                  background: 'repeating-linear-gradient(-45deg, #eae4d8 0 8px, #f3eee4 8px 16px)',
+                }}
               >
-                <p className="truncate text-[11px] font-bold leading-tight text-[#4a4336]">{u.label}</p>
-                <p className="text-[10px] leading-tight text-[#8b8170]">
-                  {label12h(u.startMin)}–{label12h(u.endMin)}
-                </p>
+                <span className="mt-0.5 truncate px-1 text-[10px] font-bold uppercase tracking-wide text-[#8b8170]">
+                  {u.label}
+                </span>
               </div>
             ))}
             {/* Appointments */}
-            {layoutColumn(c.appointments).map(({ a, lane, lanes }) => {
+            {layoutColumn(mergeAddons(c.appointments)).map(({ a, lane, lanes }) => {
               const color = serviceColor(a)
               const h = Math.max((a.endMin - a.startMin) * pxPerMin, 16)
               const compact = h < 40
@@ -266,12 +315,17 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
                       NO SHOW
                     </span>
                   )}
-                  <p className="truncate pr-4 text-[12px] font-bold leading-tight">
-                    {a.serviceName}
+                  <p className="truncate pr-4 text-[13px] font-bold leading-tight">
+                    {stripDuration(a.serviceName)}
                   </p>
-                  <p className="truncate text-[11px] font-semibold leading-tight opacity-95">
+                  <p className="truncate text-[12px] font-semibold leading-tight opacity-95">
                     {a.clientName ?? '—'}
                   </p>
+                  {a.addons.length > 0 && (
+                    <p className="truncate text-[10px] font-medium leading-tight opacity-90">
+                      + {a.addons.join(' · + ')}
+                    </p>
+                  )}
                   {!compact && (
                     <p className="truncate text-[10px] leading-tight opacity-85 tabular-nums">
                       {label12h(a.startMin)}–{label12h(a.endMin)}
