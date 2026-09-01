@@ -232,7 +232,16 @@ function IssuedList() {
       : null
 
   const columns: Array<AdminColumn<IssuedRow>> = [
-    { key: 'serial', header: 'Serial', cellClassName: 'font-mono', render: r => r.serial },
+    {
+      key: 'serial',
+      header: 'Serial',
+      cellClassName: 'font-mono',
+      render: r => (
+        <Link href={`/admin/giftcards/issued/${r.id}`} className="text-dark underline decoration-beige-400 underline-offset-2 hover:decoration-gold">
+          {r.serial}
+        </Link>
+      ),
+    },
     { key: 'buyer', header: 'Comprador', render: r => r.buyer_name },
     { key: 'recipient', header: 'Destinatario', render: r => r.recipient_name },
     { key: 'amount', header: 'Monto', cellClassName: 'tabular-nums', render: r => formatMoney(r.amount_cents) },
@@ -294,7 +303,12 @@ function IssuedList() {
     return (
       <>
         <div className="flex items-start justify-between gap-3">
-          <div className="font-mono text-lg font-semibold text-dark break-all">{row.serial}</div>
+          <Link
+            href={`/admin/giftcards/issued/${row.id}`}
+            className="font-mono text-lg font-semibold text-dark break-all underline decoration-beige-400 underline-offset-2"
+          >
+            {row.serial}
+          </Link>
           <StatusPill tone={st.tone}>{st.label}</StatusPill>
         </div>
         <div className="mt-1 text-2xl font-display font-semibold text-dark tabular-nums">
@@ -366,7 +380,7 @@ function IssuedList() {
             inputMode="search"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar serial, comprador o destinatario…"
+            placeholder="Buscar serial, nombre, correo, teléfono, mensaje…"
             aria-label="Buscar gift cards"
             className="w-full min-h-[44px] pl-10 pr-10 py-2 rounded-lg border border-beige-400 bg-white text-dark placeholder:text-warm-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold [&::-webkit-search-cancel-button]:hidden"
           />

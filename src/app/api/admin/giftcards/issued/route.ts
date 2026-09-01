@@ -46,10 +46,19 @@ export async function GET(request: NextRequest) {
       q2 = q2.eq('gift_card_serial_config_id', filterConfigId)
     }
 
-    // Staff search by the serial on the physical card, or by whoever's name they remember.
+    // Staff search by whatever they have in hand: the serial on the card, a
+    // name, an email, a phone number, the printed message, a treatment, or a
+    // Mindbody id. One box, every text field — nobody should need to know
+    // which field the data lived in.
     if (q) {
       const needle = `%${escapeForOr(q)}%`
-      q2 = q2.or(`serial.ilike.${needle},buyer_name.ilike.${needle},recipient_name.ilike.${needle}`)
+      q2 = q2.or(
+        [
+          'serial', 'buyer_name', 'buyer_email', 'buyer_phone',
+          'recipient_name', 'recipient_email', 'message', 'treatment_name',
+          'notes', 'mindbody_barcode_id', 'mindbody_sale_id',
+        ].map(col => `${col}.ilike.${needle}`).join(','),
+      )
     }
 
     if (status === 'emitida') {

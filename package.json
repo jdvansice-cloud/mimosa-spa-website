@@ -17,7 +17,9 @@
     "efactura:pos-match": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-match-june.ts",
     "efactura:pos-returns": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/pos-returns-dryrun.ts",
     "efactura:cafe-dryrun": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/cafe-payload-dryrun.ts",
-    "efactura:verify-schema": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/verify-schema.ts"
+    "efactura:verify-schema": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/verify-schema.ts",
+    "analytics:booking-trend": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/booking-trend.ts",
+    "analytics:conversion": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/conversion-by-source.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.0",

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Gift, ArrowLeft, Loader2, Plus, X } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
+import { ClientLookupInput, type ClientSuggestion } from '@/components/admin/ClientLookupInput'
 
 interface Treatment {
   mindbody_service_id: number
@@ -84,9 +85,13 @@ export default function AdminGiftCardIssuePage() {
   const [treatmentsSearch, setTreatmentsSearch] = useState('')
 
   const [buyerName, setBuyerName] = useState('')
+  // Set only by picking from the lookup; any manual edit of the name clears
+  // it, so a card never claims a Mindbody identity the staff typed over.
+  const [buyerClientId, setBuyerClientId] = useState<number | null>(null)
   const [buyerEmail, setBuyerEmail] = useState('')
   const [buyerPhone, setBuyerPhone] = useState('')
   const [recipientName, setRecipientName] = useState('')
+  const [recipientClientId, setRecipientClientId] = useState<number | null>(null)
   const [recipientEmail, setRecipientEmail] = useState('')
   const [message, setMessage] = useState('')
   const [printAmount, setPrintAmount] = useState(true)
@@ -232,9 +237,11 @@ export default function AdminGiftCardIssuePage() {
     const payload = {
       gift_card_serial_config_id: configId,
       buyer_name: buyerName.trim(),
+      buyer_mindbody_client_id: buyerClientId,
       buyer_email: buyerEmail.trim() || null,
       buyer_phone: buyerPhone.trim() || null,
       recipient_name: recipientName.trim(),
+      recipient_mindbody_client_id: recipientClientId,
       recipient_email: recipientEmail.trim() || null,
       amount_cents: computedAmountCents,
       gift_treatment_names: includeTreatments
@@ -520,8 +527,22 @@ export default function AdminGiftCardIssuePage() {
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="label">Nombre <span className="text-red-500">*</span></label>
-                <input type="text" className="input" value={buyerName} onChange={e => setBuyerName(e.target.value)} required />
+                <label className="label" htmlFor="buyer-name">Nombre <span className="text-red-500">*</span></label>
+                <ClientLookupInput
+                  id="buyer-name"
+                  value={buyerName}
+                  onChange={v => { setBuyerName(v); setBuyerClientId(null) }}
+                  onSelect={(c: ClientSuggestion) => {
+                    setBuyerClientId(Number(c.id) || null)
+                    if (c.email) setBuyerEmail(prev => prev || c.email!)
+                    if (c.phone) setBuyerPhone(prev => prev || c.phone!)
+                  }}
+                  required
+                  placeholder="Buscar cliente o escribir un nombre"
+                />
+                {buyerClientId && (
+                  <p className="mt-1 text-xs text-warm-gray-500">Cliente Mindbody #{buyerClientId}</p>
+                )}
               </div>
               <div>
                 <label className="label">Email</label>
@@ -541,8 +562,21 @@ export default function AdminGiftCardIssuePage() {
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="label">Nombre <span className="text-red-500">*</span></label>
-                <input type="text" className="input" value={recipientName} onChange={e => setRecipientName(e.target.value)} required />
+                <label className="label" htmlFor="recipient-name">Nombre <span className="text-red-500">*</span></label>
+                <ClientLookupInput
+                  id="recipient-name"
+                  value={recipientName}
+                  onChange={v => { setRecipientName(v); setRecipientClientId(null) }}
+                  onSelect={(c: ClientSuggestion) => {
+                    setRecipientClientId(Number(c.id) || null)
+                    if (c.email) setRecipientEmail(prev => prev || c.email!)
+                  }}
+                  required
+                  placeholder="Buscar cliente o escribir un nombre"
+                />
+                {recipientClientId && (
+                  <p className="mt-1 text-xs text-warm-gray-500">Cliente Mindbody #{recipientClientId}</p>
+                )}
               </div>
               <div>
                 <label className="label">Email (opcional)</label>
