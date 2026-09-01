@@ -152,6 +152,7 @@ export async function GET(request: NextRequest) {
     sold,
     balance_updates: balanceUpdates,
     redeemed,
+    payments: paymentsFound,
     errors,
   })
 }
