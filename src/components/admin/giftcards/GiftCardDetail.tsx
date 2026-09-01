@@ -98,7 +98,7 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
       <div className="flex flex-wrap items-end gap-x-10 gap-y-3 bg-white border border-beige-300 rounded-lg p-4">
         <div>
           <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">Monto</div>
-          <div className="text-3xl font-display font-semibold text-dark tabular-nums">{money(card.amount_cents)}</div>
+          <div className="text-3xl font-bold text-dark tabular-nums">{money(card.amount_cents)}</div>
           {card.base_amount_cents != null && (
             <div className="text-xs text-warm-gray-500 mt-0.5">
               {money(card.base_amount_cents)} + {money(card.tax_cents ?? 0)} ITBMS
@@ -107,7 +107,7 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
         </div>
         <div>
           <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">Saldo en Mindbody</div>
-          <div className="text-3xl font-display font-semibold tabular-nums text-dark">
+          <div className="text-3xl font-bold tabular-nums text-dark">
             {card.mindbody_remaining_balance_cents != null
               ? money(card.mindbody_remaining_balance_cents)
               : <span className="text-lg font-body font-normal text-warm-gray-500">Sin sincronizar</span>}
@@ -115,7 +115,7 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
         </div>
         <div>
           <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">Para</div>
-          <div className="text-xl font-display text-dark">{card.recipient_name}</div>
+          <div className="text-xl font-semibold text-dark">{card.recipient_name}</div>
           <div className="text-xs text-warm-gray-500 mt-0.5">de {card.buyer_name}</div>
         </div>
       </div>

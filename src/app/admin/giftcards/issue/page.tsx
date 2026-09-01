@@ -603,7 +603,7 @@ export default function AdminGiftCardIssuePage() {
                   </div>
                   <div>
                     <div className="text-xs uppercase tracking-widest text-warm-gray-500">Total</div>
-                    <div className="text-2xl font-display font-semibold text-gold mt-1">
+                    <div className="text-2xl font-bold text-gold mt-1 tabular-nums">
                       {formatMoney(treatmentTotalCents)}
                     </div>
                   </div>
