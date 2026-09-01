@@ -5,10 +5,11 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import {
   Gift, ArrowLeft, Plus, Printer, Loader2, RefreshCw, Search, X,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { AdminTable, CardField, StatusPill, type AdminColumn } from '@/components/admin/AdminTable'
+import { GiftCardDetail, type GiftCardDetailData } from '@/components/admin/giftcards/GiftCardDetail'
 
 interface IssuedRow {
   id: string
@@ -107,6 +108,10 @@ function IssuedList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [syncingId, setSyncingId] = useState<string | null>(null)
+  // Inline detail expansion: id of the open row, plus a cache so re-opening a
+  // card doesn't refetch. Row-list reloads keep the cache — it's tiny.
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [detailCache, setDetailCache] = useState<Record<string, GiftCardDetailData | 'loading' | 'error'>>({})
   const [toast, setToast] = useState<string | null>(null)
 
   // Filters
@@ -205,6 +210,32 @@ function IssuedList() {
     }
   }
 
+  const toggleDetail = async (id: string) => {
+    if (expandedId === id) { setExpandedId(null); return }
+    setExpandedId(id)
+    if (detailCache[id] && detailCache[id] !== 'error') return
+    setDetailCache(c => ({ ...c, [id]: 'loading' }))
+    try {
+      const res = await fetch(`/api/admin/giftcards/issued/${id}`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Error')
+      setDetailCache(c => ({ ...c, [id]: data.data }))
+    } catch {
+      setDetailCache(c => ({ ...c, [id]: 'error' }))
+    }
+  }
+
+  const renderExpanded = (row: IssuedRow) => {
+    const d = detailCache[row.id]
+    if (!d || d === 'loading') {
+      return <div className="flex justify-center py-6"><Loader2 className="h-6 w-6 animate-spin text-gold-600" /></div>
+    }
+    if (d === 'error') {
+      return <div className="py-4 text-sm text-red-700">No se pudo cargar el detalle. Intenta de nuevo.</div>
+    }
+    return <GiftCardDetail card={d} />
+  }
+
   const hasFilters = !!debouncedSearch || !!status || !!configId
   const clearFilters = () => { setSearch(''); setStatus(''); setConfigId(''); setPage(1) }
 
@@ -237,9 +268,17 @@ function IssuedList() {
       header: 'Serial',
       cellClassName: 'font-mono',
       render: r => (
-        <Link href={`/admin/giftcards/issued/${r.id}`} className="text-dark underline decoration-beige-400 underline-offset-2 hover:decoration-gold">
+        <button
+          type="button"
+          onClick={() => toggleDetail(r.id)}
+          aria-expanded={expandedId === r.id}
+          className="inline-flex items-center gap-1.5 text-dark underline decoration-beige-400 underline-offset-2 hover:decoration-gold"
+        >
+          {expandedId === r.id
+            ? <ChevronDown className="h-4 w-4 text-gold-600" />
+            : <ChevronRight className="h-4 w-4 text-warm-gray-400" />}
           {r.serial}
-        </Link>
+        </button>
       ),
     },
     { key: 'buyer', header: 'Comprador', render: r => r.buyer_name },
@@ -303,12 +342,14 @@ function IssuedList() {
     return (
       <>
         <div className="flex items-start justify-between gap-3">
-          <Link
-            href={`/admin/giftcards/issued/${row.id}`}
-            className="font-mono text-lg font-semibold text-dark break-all underline decoration-beige-400 underline-offset-2"
+          <button
+            type="button"
+            onClick={() => toggleDetail(row.id)}
+            aria-expanded={expandedId === row.id}
+            className="font-mono text-lg font-semibold text-dark break-all underline decoration-beige-400 underline-offset-2 text-left"
           >
             {row.serial}
-          </Link>
+          </button>
           <StatusPill tone={st.tone}>{st.label}</StatusPill>
         </div>
         <div className="mt-1 text-2xl font-display font-semibold text-dark tabular-nums">
@@ -446,6 +487,8 @@ function IssuedList() {
 
 
       <AdminTable
+        expandedKey={expandedId}
+        renderExpanded={renderExpanded}
         rows={rows}
         columns={columns}
         rowKey={row => row.id}

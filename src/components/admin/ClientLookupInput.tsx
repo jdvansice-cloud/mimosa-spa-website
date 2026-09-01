@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Loader2, UserRound } from 'lucide-react'
 
 /**
@@ -8,8 +8,17 @@ import { Loader2, UserRound } from 'lucide-react'
  *
  * Free text always wins: this is a plain input that happens to offer
  * suggestions, so a buyer who isn't a client yet is just typed in — no mode
- * switch, no "custom name" checkbox. Picking a suggestion hands the full
- * client to onSelect so the form can prefill email/phone.
+ * switch. Picking a suggestion hands the full client to onSelect so the form
+ * can prefill email/phone.
+ *
+ * The list renders position:FIXED against the viewport, not absolute inside
+ * the field: the form's Card has overflow-hidden, which clipped an absolute
+ * dropdown to a one-line sliver with its own scrollbar. Fixed positioning is
+ * immune to every ancestor's overflow.
+ *
+ * Every match is listed (up to the API's 20) with the Mindbody id — several
+ * clients legitimately share a name, and the id + contact line is how staff
+ * tell them apart.
  */
 
 export interface ClientSuggestion {
@@ -43,10 +52,13 @@ export function ClientLookupInput({
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [highlight, setHighlight] = useState(-1)
+  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null)
   // Suppress the lookup for the value we just selected — retriggering the
   // dropdown right after a pick reads as the UI refusing to accept it.
   const selectedRef = useRef<string | null>(null)
   const boxRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
     const q = value.trim()
@@ -74,7 +86,24 @@ export function ClientLookupInput({
     return () => clearTimeout(t)
   }, [value])
 
-  // Close on outside click.
+  // Anchor the fixed list under the input, and follow it through scrolling.
+  useLayoutEffect(() => {
+    if (!open) return
+    const measure = () => {
+      const r = inputRef.current?.getBoundingClientRect()
+      if (r) setRect({ top: r.bottom + 4, left: r.left, width: r.width })
+    }
+    measure()
+    window.addEventListener('scroll', measure, true)
+    window.addEventListener('resize', measure)
+    return () => {
+      window.removeEventListener('scroll', measure, true)
+      window.removeEventListener('resize', measure)
+    }
+  }, [open])
+
+  // Close on outside interaction (the list lives outside boxRef in layout
+  // terms but inside it in the DOM, so contains() still covers both).
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (!boxRef.current?.contains(e.target as Node)) setOpen(false)
@@ -95,6 +124,7 @@ export function ClientLookupInput({
     <div ref={boxRef} className="relative">
       <input
         id={id}
+        ref={inputRef}
         type="text"
         className="input w-full"
         value={value}
@@ -116,10 +146,12 @@ export function ClientLookupInput({
       {loading && (
         <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-warm-gray-400" />
       )}
-      {open && (
+      {open && rect && (
         <ul
+          ref={listRef}
           role="listbox"
-          className="absolute z-20 mt-1 w-full max-h-72 overflow-auto rounded-lg border border-beige-300 bg-white shadow-lg"
+          style={{ position: 'fixed', top: rect.top, left: rect.left, width: rect.width }}
+          className="z-50 max-h-80 overflow-auto rounded-lg border border-beige-300 bg-white shadow-xl"
         >
           {suggestions.map((c, i) => (
             <li key={c.id} role="option" aria-selected={i === highlight}>
@@ -133,11 +165,11 @@ export function ClientLookupInput({
                 <UserRound className="h-4 w-4 mt-0.5 shrink-0 text-warm-gray-400" />
                 <span className="min-w-0">
                   <span className="block text-sm text-dark truncate">{fullName(c) || '(sin nombre)'}</span>
-                  {(c.email || c.phone) && (
-                    <span className="block text-xs text-warm-gray-500 truncate">
-                      {[c.email, c.phone].filter(Boolean).join(' · ')}
-                    </span>
-                  )}
+                  <span className="block text-xs text-warm-gray-500 truncate">
+                    #{c.id}
+                    {c.email ? ` · ${c.email}` : ''}
+                    {c.phone ? ` · ${c.phone}` : ''}
+                  </span>
                 </span>
               </button>
             </li>
