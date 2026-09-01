@@ -263,7 +263,10 @@ export default function AdminGiftCardIssuePage() {
         : 'Monto inválido')
     }
 
-    const includeTreatments = amountMode === 'treatments' && selectedTreatments.length > 0
+    // A promo counts as treatments: a card built from a promo alone must
+    // still carry (and print) the promo's included treatments.
+    const includeTreatments =
+      amountMode === 'treatments' && (selectedTreatments.length > 0 || !!selectedPromo)
 
     const payload = {
       gift_card_serial_config_id: configId,
