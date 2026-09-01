@@ -352,7 +352,7 @@ function IssuedList() {
           </button>
           <StatusPill tone={st.tone}>{st.label}</StatusPill>
         </div>
-        <div className="mt-1 text-2xl font-display font-semibold text-dark tabular-nums">
+        <div className="mt-1 text-2xl font-bold text-dark tabular-nums">
           {formatMoney(row.amount_cents)}
           {balance(row) && (
             <span className="ml-2 text-sm font-body font-normal text-warm-gray-500">
