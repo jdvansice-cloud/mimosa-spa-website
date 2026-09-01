@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Gift, ArrowLeft, Loader2, Plus, X } from 'lucide-react'
+import { Gift, ArrowLeft, Loader2, Plus, X , ChevronRight, ChevronDown } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { ClientLookupInput, type ClientSuggestion } from '@/components/admin/ClientLookupInput'
 
@@ -16,6 +16,13 @@ interface Treatment {
 }
 
 type TreatmentGroup = 'body' | 'facial' | 'addon'
+
+interface ActivePromo {
+  id: string
+  title_es: string
+  services: string[]
+  price: number
+}
 
 const GROUP_LABEL: Record<TreatmentGroup, string> = {
   body: 'Masajes',
@@ -83,6 +90,27 @@ export default function AdminGiftCardIssuePage() {
   const [selectedTreatmentIds, setSelectedTreatmentIds] = useState<number[]>([])
   const [itbmsPercent, setItbmsPercent] = useState(String(DEFAULT_ITBMS_PERCENT))
   const [treatmentsSearch, setTreatmentsSearch] = useState('')
+  // Categories start COLLAPSED — reception scans headers, opens the one they
+  // need. An active search overrides this and shows only matching items.
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+  const [promos, setPromos] = useState<ActivePromo[]>([])
+  const [promosOpen, setPromosOpen] = useState(false)
+  const [selectedPromo, setSelectedPromo] = useState<ActivePromo | null>(null)
+
+  useEffect(() => {
+    fetch('/api/promotions')
+      .then(r => r.json())
+      .then(d => {
+        const rows = (Array.isArray(d) ? d : d.data ?? []) as Array<Record<string, unknown>>
+        setPromos(rows.map(r => ({
+          id: String(r.id),
+          title_es: String(r.title_es ?? ''),
+          services: Array.isArray(r.services) ? (r.services as string[]) : [],
+          price: Number(r.price) || 0,
+        })).filter(p => p.price > 0))
+      })
+      .catch(() => { /* promos are optional — the picker still works without them */ })
+  }, [])
 
   const [buyerName, setBuyerName] = useState('')
   // Set only by picking from the lookup; any manual edit of the name clears
@@ -94,6 +122,7 @@ export default function AdminGiftCardIssuePage() {
   const [recipientClientId, setRecipientClientId] = useState<number | null>(null)
   const [recipientEmail, setRecipientEmail] = useState('')
   const [message, setMessage] = useState('')
+  const [staffNote, setStaffNote] = useState('')
   const [printAmount, setPrintAmount] = useState(true)
   const [printMessage, setPrintMessage] = useState(true)
   const [printTreatments, setPrintTreatments] = useState(true)
@@ -180,8 +209,10 @@ export default function AdminGiftCardIssuePage() {
   )
 
   const treatmentSubtotalCents = useMemo(
-    () => selectedTreatments.reduce((acc, s) => acc + Math.round(s.price * 100), 0),
-    [selectedTreatments],
+    () =>
+      selectedTreatments.reduce((acc, s) => acc + Math.round(s.price * 100), 0) +
+      (selectedPromo ? Math.round(selectedPromo.price * 100) : 0),
+    [selectedTreatments, selectedPromo],
   )
 
   const treatmentItbmsCents = useMemo(() => {
@@ -245,7 +276,7 @@ export default function AdminGiftCardIssuePage() {
       recipient_email: recipientEmail.trim() || null,
       amount_cents: computedAmountCents,
       gift_treatment_names: includeTreatments
-        ? selectedTreatments.map(s => s.service_name)
+        ? [...(selectedPromo?.services ?? []), ...selectedTreatments.map(s => s.service_name)]
         : null,
       base_amount_cents: includeTreatments ? treatmentSubtotalCents : null,
       tax_cents: includeTreatments ? treatmentItbmsCents : null,
@@ -254,6 +285,9 @@ export default function AdminGiftCardIssuePage() {
       print_message: printMessage,
       print_recipient: false,
       print_treatments: includeTreatments && printTreatments,
+      notes: staffNote.trim() || null,
+      promotion_id: selectedPromo?.id ?? null,
+      promotion_name: selectedPromo?.title_es ?? null,
     }
 
     setSubmitting(true)
@@ -406,7 +440,24 @@ export default function AdminGiftCardIssuePage() {
                   <div className="text-xs uppercase tracking-widest text-warm-gray-500 mb-2">
                     Tratamientos seleccionados
                   </div>
-                  {selectedTreatments.length === 0 ? (
+                  {selectedPromo && (
+                    <div className="mb-2 flex items-start justify-between rounded-lg border border-gold/40 bg-gold/5 px-3 py-2 text-sm">
+                      <div className="flex-1">
+                        <div className="text-dark font-medium">{selectedPromo.title_es}
+                          <span className="ml-2 text-[10px] uppercase tracking-wide text-gold-700 bg-gold/10 rounded px-1.5 py-0.5">Promo</span>
+                        </div>
+                        {selectedPromo.services.length > 0 && (
+                          <div className="text-xs text-warm-gray-500 mt-0.5">{selectedPromo.services.join(' · ')}</div>
+                        )}
+                      </div>
+                      <div className="text-dark font-medium mr-3">${selectedPromo.price.toFixed(2)}</div>
+                      <button type="button" onClick={() => setSelectedPromo(null)}
+                        className="p-1 text-warm-gray-500 hover:text-red-500" aria-label="Quitar promoción">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                  {selectedTreatments.length === 0 && !selectedPromo ? (
                     <div className="text-sm text-warm-gray-500 italic">Ninguno todavía.</div>
                   ) : (
                     <ul className="divide-y divide-beige-200 border border-beige-200 rounded-lg overflow-hidden">
@@ -453,18 +504,63 @@ export default function AdminGiftCardIssuePage() {
                         value={treatmentsSearch}
                         onChange={e => setTreatmentsSearch(e.target.value)}
                       />
-                      <div className="max-h-72 overflow-y-auto border border-beige-200 rounded-lg">
+                      <div className="max-h-96 overflow-y-auto border border-beige-200 rounded-lg">
+                        {/* Active site promotions: their treatments at the promo price. */}
+                        {!treatmentsSearch.trim() && promos.length > 0 && !selectedPromo && (
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => setPromosOpen(o => !o)}
+                              aria-expanded={promosOpen}
+                              className="w-full flex items-center justify-between px-3 py-2 bg-gold/10 text-xs uppercase tracking-widest text-gold-700 font-bold"
+                            >
+                              <span>Promociones activas ({promos.length})</span>
+                              {promosOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            </button>
+                            {promosOpen && promos.map(promo => (
+                              <button
+                                key={promo.id}
+                                type="button"
+                                onClick={() => { setSelectedPromo(promo); setPromosOpen(false) }}
+                                className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gold/5 border-t border-beige-200"
+                              >
+                                <span className="text-left flex-1 min-w-0">
+                                  <span className="block text-dark">{promo.title_es}</span>
+                                  {promo.services.length > 0 && (
+                                    <span className="block text-xs text-warm-gray-500 truncate">{promo.services.join(' · ')}</span>
+                                  )}
+                                </span>
+                                <span className="text-warm-gray-500 mx-3 shrink-0">${promo.price.toFixed(2)}</span>
+                                <Plus className="h-4 w-4 text-gold shrink-0" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         {visibleGroups.length === 0 ? (
                           <div className="px-3 py-4 text-sm text-warm-gray-500 text-center">
                             No hay resultados.
                           </div>
                         ) : (
-                          visibleGroups.map(({ group, items }) => (
+                          visibleGroups.map(({ group, items }) => {
+                            // Searching shows matches directly; otherwise each
+                            // category opens on demand so the list starts short.
+                            const searching = !!treatmentsSearch.trim()
+                            const open = searching || !!openGroups[group]
+                            return (
                             <div key={group}>
-                              <div className="px-3 py-1 bg-beige-100 text-xs uppercase tracking-widest text-warm-gray-500 sticky top-0">
-                                {GROUP_LABEL[group]}
-                              </div>
-                              {items.map(s => (
+                              <button
+                                type="button"
+                                onClick={() => setOpenGroups(g => ({ ...g, [group]: !g[group] }))}
+                                aria-expanded={open}
+                                disabled={searching}
+                                className="w-full flex items-center justify-between px-3 py-2 bg-beige-100 text-xs uppercase tracking-widest text-warm-gray-500 font-bold sticky top-0"
+                              >
+                                <span>{GROUP_LABEL[group]} ({items.length})</span>
+                                {!searching && (open
+                                  ? <ChevronDown className="h-4 w-4" />
+                                  : <ChevronRight className="h-4 w-4" />)}
+                              </button>
+                              {open && items.map(s => (
                                 <button
                                   key={s.mindbody_service_id}
                                   type="button"
@@ -477,7 +573,8 @@ export default function AdminGiftCardIssuePage() {
                                 </button>
                               ))}
                             </div>
-                          ))
+                            )
+                          })
                         )}
                       </div>
                     </>
@@ -593,6 +690,16 @@ export default function AdminGiftCardIssuePage() {
             <div>
               <label className="label">Mensaje / Dedicatoria</label>
               <textarea rows={3} className="input" value={message} onChange={e => setMessage(e.target.value)} />
+            </div>
+            <div>
+              <label className="label">Nota interna</label>
+              <textarea
+                rows={2}
+                className="input"
+                value={staffNote}
+                onChange={e => setStaffNote(e.target.value)}
+                placeholder="Solo la ve el personal — nunca se imprime ni se envía al cliente."
+              />
             </div>
             <div className="space-y-2">
               <label className="flex items-center gap-2 cursor-pointer">
