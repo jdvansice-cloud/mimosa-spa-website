@@ -34,5 +34,23 @@ export async function GET(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  return NextResponse.json({ data })
+  // Resolve the two UUIDs the detail view would otherwise show raw: who
+  // issued the card and which sede's serial series it belongs to.
+  let issuedByEmail: string | null = null
+  if (data.issued_by) {
+    const { data: prof } = await supabase
+      .from('profiles').select('email').eq('id', data.issued_by).maybeSingle()
+    issuedByEmail = prof?.email ?? null
+  }
+  let locationName: string | null = null
+  if (data.gift_card_serial_config_id) {
+    const { data: cfg } = await supabase
+      .from('gift_card_serial_config')
+      .select('location_name, prefix')
+      .eq('id', data.gift_card_serial_config_id)
+      .maybeSingle()
+    locationName = cfg ? `${cfg.location_name} (${cfg.prefix})` : null
+  }
+
+  return NextResponse.json({ data: { ...data, issued_by_email: issuedByEmail, location_label: locationName } })
 }

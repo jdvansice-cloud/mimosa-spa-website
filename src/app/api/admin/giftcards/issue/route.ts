@@ -10,6 +10,8 @@ interface IssuePayload {
   buyer_name: string
   buyer_email?: string | null
   buyer_phone?: string | null
+  buyer_mindbody_client_id?: number | null
+  recipient_mindbody_client_id?: number | null
   recipient_name: string
   recipient_email?: string | null
   amount_cents: number
@@ -94,9 +96,13 @@ export async function POST(request: NextRequest) {
     gift_card_serial_config_id: config.id,
     mindbody_location_id: config.mindbody_location_id,
     buyer_name: body.buyer_name.trim(),
+    // Present only when staff picked the client from the lookup — a typed
+    // custom name carries no id, and that distinction is the point.
+    buyer_mindbody_client_id: body.buyer_mindbody_client_id ?? null,
     buyer_email: body.buyer_email?.trim() || null,
     buyer_phone: body.buyer_phone?.trim() || null,
     recipient_name: body.recipient_name.trim(),
+    recipient_mindbody_client_id: body.recipient_mindbody_client_id ?? null,
     recipient_email: body.recipient_email?.trim() || null,
     amount_cents: body.amount_cents,
     base_amount_cents: body.base_amount_cents ?? null,

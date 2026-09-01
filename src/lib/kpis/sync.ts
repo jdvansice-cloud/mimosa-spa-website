@@ -294,6 +294,9 @@ interface MbClient {
   Id: string
   FirstName: string | null
   LastName: string | null
+  Email: string | null
+  MobilePhone: string | null
+  BirthDate: string | null
   CreationDate: string | null
   FirstAppointmentDate: string | null
   ReferredBy: string | null
@@ -322,10 +325,16 @@ export async function syncClients(modifiedSince?: string) {
     const res = await mindbodyRequest<ClientsResponse>('/client/clients', { params })
     const page = res.Clients || []
 
+    // Contact fields included since 2026-09: the original mapping dropped
+    // them, which left ~20k historical clients with name-only rows and made
+    // the gift-card buyer lookup useless for exactly the people it's for.
     const rows = page.map(c => ({
       id: String(c.Id),
       first_name: c.FirstName || null,
       last_name: c.LastName || null,
+      email: c.Email || null,
+      phone: c.MobilePhone || null,
+      birth_date: c.BirthDate ? c.BirthDate.slice(0, 10) : null,
       creation_date: c.CreationDate ? localStamp(c.CreationDate) : null,
       first_appointment_date: c.FirstAppointmentDate ? localStamp(c.FirstAppointmentDate) : null,
       referred_by: c.ReferredBy || null,
