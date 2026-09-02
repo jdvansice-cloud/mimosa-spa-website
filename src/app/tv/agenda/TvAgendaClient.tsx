@@ -26,11 +26,13 @@ const KIND_COLORS: Record<Kind, { bg: string; fg: string }> = {
   foot:    { bg: '#c9a15f', fg: '#2e2005' }, // gold
 }
 /**
- * Status overrides kind: a finished visit fades to gray so the eye skips it,
- * a no-show turns red so nobody keeps a cabina waiting for it. Only live
- * (upcoming / arrived) visits keep their kind color.
+ * Status overrides kind: an arrived client turns the tile green (they're
+ * here — go), a finished visit fades to gray so the eye skips it, a no-show
+ * turns red so nobody keeps a cabina waiting. Only UPCOMING visits keep
+ * their kind color.
  */
 const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
+  Arrived:   { bg: '#4f9a6e', fg: '#ffffff' }, // client is here — go
   Completed: { bg: '#cfcac0', fg: '#5a544a' }, // done — recede
   NoShow:    { bg: '#c94a4a', fg: '#ffffff' }, // didn't come — shout
 }
@@ -384,7 +386,9 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
                     <span className="absolute right-1 top-0.5 text-[12px] font-black leading-none" title="Completada">✓</span>
                   )}
                   {a.status === 'Arrived' && (
-                    <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-1 ring-white/70" title="Llegó" />
+                    <span className="absolute right-1 top-0.5 rounded bg-white/90 px-1 text-[9px] font-black leading-tight text-[#2f6b47]">
+                      LLEGÓ
+                    </span>
                   )}
                   {a.status === 'NoShow' && (
                     <span className="absolute right-1 top-0.5 rounded bg-white px-1 text-[9px] font-black leading-tight text-[#c94a4a]">
