@@ -25,8 +25,17 @@ const KIND_COLORS: Record<Kind, { bg: string; fg: string }> = {
   facial:  { bg: '#7fb8a4', fg: '#0f2b22' }, // teal
   foot:    { bg: '#c9a15f', fg: '#2e2005' }, // gold
 }
+/**
+ * Status overrides kind: a finished visit fades to gray so the eye skips it,
+ * a no-show turns red so nobody keeps a cabina waiting for it. Only live
+ * (upcoming / arrived) visits keep their kind color.
+ */
+const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
+  Completed: { bg: '#cfcac0', fg: '#5a544a' }, // done — recede
+  NoShow:    { bg: '#c94a4a', fg: '#ffffff' }, // didn't come — shout
+}
 function visitColor(v: Visit) {
-  return KIND_COLORS[v.items[0]?.kind ?? 'massage']
+  return STATUS_COLORS[v.status] ?? KIND_COLORS[v.items[0]?.kind ?? 'massage']
 }
 
 /**
@@ -354,11 +363,9 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
                     width: `calc(${laneW}% - 4px)`,
                     background: color.bg,
                     color: color.fg,
-                    borderLeft: a.status === 'NoShow' ? '4px solid #dc2626' : `4px solid rgba(0,0,0,0.25)`,
-                    // No-shows stay fully visible, marked with red stripes + badge
-                    backgroundImage: a.status === 'NoShow'
-                      ? 'repeating-linear-gradient(45deg, rgba(220,38,38,0.28) 0 6px, transparent 6px 14px)'
-                      : undefined,
+                    borderLeft: `4px solid rgba(0,0,0,0.25)`,
+                    // Completed visits also drop their shadow so they sit flat
+                    opacity: a.status === 'Completed' ? 0.85 : 1,
                   }}
                 >
                   {a.status === 'Completed' && (
@@ -368,7 +375,7 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
                     <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-1 ring-white/70" title="Llegó" />
                   )}
                   {a.status === 'NoShow' && (
-                    <span className="absolute right-1 top-0.5 rounded bg-red-600 px-1 text-[9px] font-black leading-tight text-white">
+                    <span className="absolute right-1 top-0.5 rounded bg-white px-1 text-[9px] font-black leading-tight text-[#c94a4a]">
                       NO SHOW
                     </span>
                   )}
