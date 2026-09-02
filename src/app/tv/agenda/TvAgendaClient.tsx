@@ -14,38 +14,63 @@ import type { TvAgenda, TvAppointment } from '@/lib/tv/agenda'
 // ===========================================
 
 const REFRESH_MS = 2 * 60_000 // refetch from Mindbody every 2 min
-const HEADER_H = 44 // staff header row px
+const HEADER_H = 52 // staff header row px (name + working hours)
 const GUTTER_W = 64 // time gutter px
 
-/** Stable muted palette keyed by session type, echoing Mindbody's per-service colors. */
-const SERVICE_COLORS = [
-  { bg: '#8ea8c3', fg: '#10222f' }, // slate blue
-  { bg: '#b5657f', fg: '#ffffff' }, // rose
-  { bg: '#7fb8a4', fg: '#0f2b22' }, // teal
-  { bg: '#b39ddb', fg: '#231a3a' }, // lavender
-  { bg: '#c9a15f', fg: '#2e2005' }, // gold
-  { bg: '#9d7fb8', fg: '#ffffff' }, // purple
-  { bg: '#6f9fbf', fg: '#ffffff' }, // steel
-  { bg: '#c98a8a', fg: '#331111' }, // clay
-] as const
 
-function serviceColor(a: TvAppointment) {
-  const key = a.sessionTypeId ?? 0
-  return SERVICE_COLORS[Math.abs(key) % SERVICE_COLORS.length]
+/** Color by the visit's leading kind, so a glance says "massage" vs "facial". */
+const KIND_COLORS: Record<Kind, { bg: string; fg: string }> = {
+  massage: { bg: '#b5657f', fg: '#ffffff' }, // rose
+  extra:   { bg: '#8ea8c3', fg: '#10222f' }, // slate
+  facial:  { bg: '#7fb8a4', fg: '#0f2b22' }, // teal
+  foot:    { bg: '#c9a15f', fg: '#2e2005' }, // gold
+}
+function visitColor(v: Visit) {
+  return KIND_COLORS[v.items[0]?.kind ?? 'massage']
 }
 
-interface MergedAppt extends TvAppointment {
-  /** Add-on services absorbed into this block (same client, overlapping time). */
-  addons: string[]
+/**
+ * The four kinds of work a therapist sees on the board, in the order the
+ * spa runs them: massages first, then extras, facials, and foot massage.
+ * Classified from the service name — Mindbody's own categories aren't on
+ * the appointment payload.
+ */
+type Kind = 'massage' | 'extra' | 'facial' | 'foot'
+const KIND_ORDER: Record<Kind, number> = { massage: 0, extra: 1, facial: 2, foot: 3 }
+
+function kindOf(serviceName: string): Kind {
+  const n = serviceName.toLowerCase()
+  if (/^extra\b|adicional|add[- ]?on/.test(n)) return 'extra'
+  if (/\bpies?\b|\bfoot\b|reflexolog|pedicur/.test(n)) return 'foot'
+  if (/facial|mascarilla|limpieza|hidrataci|antiedad|peeling|microderm/.test(n) && !/corporal/.test(n)) return 'facial'
+  return 'massage'
+}
+
+interface VisitItem {
+  name: string
+  kind: Kind
+  minutes: number
+  startMin: number
+}
+
+/** One box on the board: everything a client is having in one sitting. */
+interface Visit {
+  id: number
+  clientName: string | null
+  startMin: number
+  endMin: number
+  status: string
+  resourceName: string | null
+  items: VisitItem[]
 }
 
 interface PlacedAppt {
-  a: MergedAppt
+  a: Visit
   lane: number
   lanes: number
 }
 
-/** "Mimosa Relax - 60 min" → "Mimosa Relax"; the block's height already says the duration. */
+/** "Mimosa Relax - 60 min" → "Mimosa Relax"; the minutes are shown separately. */
 function stripDuration(name: string): string {
   // Catches "- 60 min", "(10 min)" and the bare "45 min" some names use.
   return name
@@ -53,43 +78,70 @@ function stripDuration(name: string): string {
     .trim()
 }
 
-/**
- * Fold add-ons into their parent service. Mindbody books an "Extra Piedras
- * Calientes (10 min)" as its own overlapping appointment, which on the TV
- * became a second cramped block stealing half the column width. Any shorter
- * appointment of the SAME client that overlaps (or starts within 5 min of)
- * a longer one is absorbed: the parent block stretches to cover it and lists
- * it as a "+ …" line. Different clients never merge — a true double booking
- * must stay visible as two blocks.
- */
-function mergeAddons(appts: TvAppointment[]): MergedAppt[] {
-  const sorted = [...appts].sort((x, y) => (y.endMin - y.startMin) - (x.endMin - x.startMin))
-  const out: MergedAppt[] = []
-  for (const a of sorted) {
-    const parent = a.clientName
-      ? out.find(p =>
-          p.clientName === a.clientName &&
-          a.startMin < p.endMin + 5 && a.endMin > p.startMin - 5
-        )
-      : undefined
-    if (parent) {
-      parent.addons.push(stripDuration(a.serviceName))
-      parent.startMin = Math.min(parent.startMin, a.startMin)
-      parent.endMin = Math.max(parent.endMin, a.endMin)
-      // Completed/NoShow on the parent wins; an add-on never downgrades it.
-    } else {
-      out.push({ ...a, addons: [] })
-    }
-  }
-  return out
+/** Whichever status matters most for the floor wins for the whole visit. */
+function visitStatus(statuses: string[]): string {
+  if (statuses.includes('NoShow')) return 'NoShow'
+  if (statuses.every(x => x === 'Completed')) return 'Completed'
+  if (statuses.includes('Arrived')) return 'Arrived'
+  return statuses[0] ?? ''
 }
 
 /**
- * Side-by-side lanes within one therapist column: appointments whose times
- * overlap (add-ons in cabina) share the width instead of painting on top of
- * each other. Same approach as the KPIs agenda.
+ * Group a therapist's appointments into VISITS: every appointment of the
+ * same client that overlaps or follows within a short gap joins one box, no
+ * matter its length. Mindbody books a 150-min Day Spa as three or four
+ * separate appointments — the therapist needs to see one block with the
+ * whole list, not four fragments. Unnamed appointments and different
+ * clients never merge, so a real double booking stays visibly split.
  */
-function layoutColumn(appts: MergedAppt[]): PlacedAppt[] {
+const VISIT_GAP_MIN = 10
+
+function buildVisits(appts: TvAppointment[]): Visit[] {
+  const sorted = [...appts].sort((x, y) => x.startMin - y.startMin)
+  const visits: Visit[] = []
+  const statuses = new Map<number, string[]>()
+
+  for (const a of sorted) {
+    const v = a.clientName
+      ? visits.find(
+          x => x.clientName === a.clientName && a.startMin <= x.endMin + VISIT_GAP_MIN && a.endMin >= x.startMin - VISIT_GAP_MIN
+        )
+      : undefined
+    const item: VisitItem = {
+      name: stripDuration(a.serviceName),
+      kind: kindOf(a.serviceName),
+      minutes: a.endMin - a.startMin,
+      startMin: a.startMin,
+    }
+    if (v) {
+      v.items.push(item)
+      v.startMin = Math.min(v.startMin, a.startMin)
+      v.endMin = Math.max(v.endMin, a.endMin)
+      v.resourceName = v.resourceName ?? a.resourceName
+      statuses.get(v.id)!.push(a.status)
+    } else {
+      visits.push({
+        id: a.id,
+        clientName: a.clientName,
+        startMin: a.startMin,
+        endMin: a.endMin,
+        status: a.status,
+        resourceName: a.resourceName,
+        items: [item],
+      })
+      statuses.set(a.id, [a.status])
+    }
+  }
+
+  for (const v of visits) {
+    v.status = visitStatus(statuses.get(v.id) ?? [])
+    // The spa's running order, then chronological within a kind.
+    v.items.sort((x, y) => KIND_ORDER[x.kind] - KIND_ORDER[y.kind] || x.startMin - y.startMin)
+  }
+  return visits
+}
+
+function layoutColumn(appts: Visit[]): PlacedAppt[] {
   const sorted = [...appts].sort(
     (x, y) => x.startMin - y.startMin || (y.endMin - y.startMin) - (x.endMin - x.startMin)
   )
@@ -221,8 +273,13 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
             key={c.staffId}
             className="flex min-w-0 flex-1 items-center justify-center border-b border-r border-[#d8cfc0] bg-[#3a342b] px-1 text-center"
           >
-            <span className="truncate text-[13px] font-semibold leading-tight text-white">
-              {c.staffName}
+            <span className="flex min-w-0 flex-col items-center leading-tight">
+              <span className="truncate text-[13px] font-semibold text-white">{c.staffName}</span>
+              <span className="truncate text-[10px] tabular-nums text-[#f8c471]">
+                {c.availability.length > 0
+                  ? c.availability.map(b => `${label12h(b.startMin)}–${label12h(b.endMin)}`).join(' · ')
+                  : 'sin horario'}
+              </span>
             </span>
           </div>
         ))}
@@ -281,10 +338,10 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
               </div>
             ))}
             {/* Appointments */}
-            {layoutColumn(mergeAddons(c.appointments)).map(({ a, lane, lanes }) => {
-              const color = serviceColor(a)
+            {layoutColumn(buildVisits(c.appointments)).map(({ a, lane, lanes }) => {
+              const color = visitColor(a)
               const h = Math.max((a.endMin - a.startMin) * pxPerMin, 16)
-              const compact = h < 40
+              const compact = h < 56
               const laneW = 100 / lanes
               return (
                 <div
@@ -315,22 +372,29 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
                       NO SHOW
                     </span>
                   )}
-                  <p className="truncate pr-4 text-[13px] font-bold leading-tight">
-                    {stripDuration(a.serviceName)}
+                  {/* When they're booked — the first thing the eye lands on */}
+                  <p className="truncate pr-14 text-[13px] font-black leading-tight tabular-nums">
+                    {label12h(a.startMin)}–{label12h(a.endMin)}
+                    {a.resourceName ? <span className="font-medium opacity-80"> · {a.resourceName}</span> : null}
                   </p>
                   <p className="truncate text-[12px] font-semibold leading-tight opacity-95">
                     {a.clientName ?? '—'}
                   </p>
-                  {a.addons.length > 0 && (
-                    <p className="truncate text-[10px] font-medium leading-tight opacity-90">
-                      + {a.addons.join(' · + ')}
+                  {/* What to do, in running order: massages → extras → facials → pies */}
+                  {compact ? (
+                    <p className="truncate text-[10px] leading-tight opacity-90">
+                      {a.items.map(i => i.name).join(' · ')}
                     </p>
-                  )}
-                  {!compact && (
-                    <p className="truncate text-[10px] leading-tight opacity-85 tabular-nums">
-                      {label12h(a.startMin)}–{label12h(a.endMin)}
-                      {a.resourceName ? ` · ${a.resourceName}` : ''}
-                    </p>
+                  ) : (
+                    <ul className="mt-0.5 space-y-px">
+                      {a.items.map((i, idx) => (
+                        <li key={idx} className="flex items-baseline gap-1 truncate text-[11px] leading-tight">
+                          <span className="opacity-70">▸</span>
+                          <span className="truncate">{i.name}</span>
+                          <span className="ml-auto shrink-0 pl-1 text-[10px] tabular-nums opacity-75">{i.minutes}′</span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
               )
