@@ -198,13 +198,20 @@ const label12h = (min: number): string => {
   return `${h12}:${String(mm).padStart(2, '0')} ${h24 < 12 ? 'a.m.' : 'p.m.'}`
 }
 
-/** "02-09" — the board only ever shows today, so day-month is all it needs to say. */
-function dayMonth(): string {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'America/Panama', day: '2-digit', month: '2-digit',
+/**
+ * "Mié 02 Sep" — the board only ever shows today. Hand-rolled Spanish
+ * abbreviations: ICU's es short forms come out as "sept." / "mié." with
+ * locale-dependent dots and casing, and the TV needs one fixed look.
+ */
+const DOW_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+const MON_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+function dayLabel(): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Panama', weekday: 'short', day: '2-digit', month: 'numeric',
   }).formatToParts(new Date())
   const get = (t: string) => parts.find(p => p.type === t)?.value ?? ''
-  return `${get('day')}-${get('month')}`
+  const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday'))
+  return `${DOW_ES[dow] ?? ''} ${get('day')} ${MON_ES[Number(get('month')) - 1] ?? ''}`
 }
 
 export function TvAgendaClient({ location, token }: { location: number; token: string }) {
@@ -280,7 +287,7 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           style={{ width: GUTTER_W }}
         >
           <span className="text-[19px] font-black tabular-nums">{label12h(nowMin)}</span>
-          <span className="text-[17px] font-bold tabular-nums text-[#f8c471]">{dayMonth()}</span>
+          <span className="text-[17px] font-bold tabular-nums text-[#f8c471]">{dayLabel()}</span>
         </div>
         {columns.map(c => (
           <div
