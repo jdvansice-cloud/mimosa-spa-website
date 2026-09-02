@@ -14,8 +14,8 @@ import type { TvAgenda, TvAppointment } from '@/lib/tv/agenda'
 // ===========================================
 
 const REFRESH_MS = 2 * 60_000 // refetch from Mindbody every 2 min
-const HEADER_H = 52 // staff header row px (name + working hours)
-const GUTTER_W = 64 // time gutter px
+const HEADER_H = 56 // staff header row px (clock + date / name + working hours)
+const GUTTER_W = 96 // time gutter px — wide enough to read the clock from across the room
 
 
 /** Color by the visit's leading kind, so a glance says "massage" vs "facial". */
@@ -279,8 +279,8 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           className="flex shrink-0 flex-col items-center justify-center border-b border-r border-[#d8cfc0] bg-[#2b2620] leading-tight text-[#f6f1e7]"
           style={{ width: GUTTER_W }}
         >
-          <span className="text-[13px] font-bold tabular-nums">{label12h(nowMin)}</span>
-          <span className="text-[13px] font-bold tabular-nums text-[#f8c471]">{dayMonth()}</span>
+          <span className="text-[19px] font-black tabular-nums">{label12h(nowMin)}</span>
+          <span className="text-[17px] font-bold tabular-nums text-[#f8c471]">{dayMonth()}</span>
         </div>
         {columns.map(c => (
           <div
@@ -311,7 +311,7 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           {hours.map(m => (
             <span
               key={m}
-              className="absolute right-1.5 -translate-y-1/2 whitespace-nowrap text-[11px] font-medium tabular-nums text-[#7a6f5d]"
+              className="absolute right-2 -translate-y-1/2 whitespace-nowrap text-[14px] font-semibold tabular-nums text-[#7a6f5d]"
               style={{ top: y(m) }}
             >
               {label12h(m)}
