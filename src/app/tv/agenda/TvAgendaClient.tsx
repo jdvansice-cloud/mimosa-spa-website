@@ -198,9 +198,14 @@ const label12h = (min: number): string => {
   return `${h12}:${String(mm).padStart(2, '0')} ${h24 < 12 ? 'a.m.' : 'p.m.'}`
 }
 
-const DAY_LABEL = new Intl.DateTimeFormat('es-PA', {
-  timeZone: 'America/Panama', weekday: 'long', day: 'numeric', month: 'long',
-})
+/** "02-09" — the board only ever shows today, so day-month is all it needs to say. */
+function dayMonth(): string {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Panama', day: '2-digit', month: '2-digit',
+  }).formatToParts(new Date())
+  const get = (t: string) => parts.find(p => p.type === t)?.value ?? ''
+  return `${get('day')}-${get('month')}`
+}
 
 export function TvAgendaClient({ location, token }: { location: number; token: string }) {
   const [data, setData] = useState<TvAgenda | null>(null)
@@ -275,7 +280,7 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           style={{ width: GUTTER_W }}
         >
           <span className="text-[13px] font-bold tabular-nums">{label12h(nowMin)}</span>
-          <span className="text-[9px] capitalize opacity-70">{DAY_LABEL.format(new Date())}</span>
+          <span className="text-[13px] font-bold tabular-nums text-[#f8c471]">{dayMonth()}</span>
         </div>
         {columns.map(c => (
           <div
