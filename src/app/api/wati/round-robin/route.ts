@@ -21,12 +21,16 @@ export const maxDuration = 15
 
 type Team = 'cde' | 'sfc'
 
+// Accepts the secret as a Bearer header or as ?token= (WATI's Webhook node
+// makes headers fiddly; a token in the URL is the same pattern as the TV agenda).
 function authorized(request: NextRequest): boolean {
   const secret = process.env.WATI_ROUND_ROBIN_SECRET
   if (!secret) return false
   const header = request.headers.get('authorization') || ''
   const bearer = header.replace(/^Bearer\s+/i, '').trim()
-  return bearer === secret
+  if (bearer === secret) return true
+  const token = new URL(request.url).searchParams.get('token')?.trim()
+  return token === secret
 }
 
 function cleanPhone(raw: unknown): string {
@@ -53,8 +57,9 @@ async function handle(request: NextRequest, phoneRaw: unknown) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
   // WATI sends the raw variable; an unresolved "{{phone}}" or blank still gets
-  // a turn so the chat is never left in the default pool.
-  const phone = cleanPhone(phoneRaw) || 'unknown'
+  // a turn so the chat is never left in the default pool. Unknown phones get a
+  // unique key so they don't all share one team via the 24 h stickiness.
+  const phone = cleanPhone(phoneRaw) || `unknown-${Date.now()}`
 
   try {
     const result = await pick(phone)
