@@ -62,6 +62,21 @@ Team Inbox → Teams. Do **not** also select the default team.
 
 Publish the flow.
 
+## Alternative: route by status code (no Condition node)
+
+If the saved variable never reaches the Condition node, add `&mode=status` to
+the Webhook URL. The endpoint then answers **200 for Costa del Este** and
+**202 for San Francisco** (body unchanged). In the Webhook node turn
+**Response Routing** on and add:
+
+| Status | Go to |
+|---|---|
+| `200` | Assign Team Costa del Este |
+| `202` | Assign Team San Francisco |
+| other | Assign Team San Francisco |
+
+Remove the Condition node; "Save Responses as Variables" can stay off.
+
 ## Test
 
 1. From a phone not in the inbox, message the number and skip the location
