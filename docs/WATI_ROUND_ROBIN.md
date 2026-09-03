@@ -41,8 +41,8 @@ does **not** choose (timeout / "other" / free text), replace the current
 | Field | Value |
 |---|---|
 | Method | `GET` |
-| URL | `https://mimosaretreat.com/api/wati/round-robin?phone={{phone}}` (use the **Variables** button to insert `phone`) |
-| Customize Headers | ON. Key `Authorization`, value `Bearer <WATI_ROUND_ROBIN_SECRET>` |
+| URL | `https://www.mimosaretreat.com/api/wati/round-robin?token=<WATI_ROUND_ROBIN_SECRET>&phone={{phone}}` (use the **Variables** button to insert `phone`). Must be `www.` — the bare domain redirects and WATI won't follow it |
+| Customize Headers | OFF. (A header `Authorization: Bearer <secret>` also works, but the token in the URL avoids header formatting problems in WATI) |
 | Test Your Request | ON, set `phone` = your own number, click **Test the request**. Expect `{"team":"cde"...}` or `{"team":"sfc"...}` |
 | Save Responses as Variables | ON. Response key `team` → variable `team` |
 | Response Routing | ON. Route status `200` to the Condition node; route "other" straight to one Assign Team node (San Francisco) so failures still land somewhere |
@@ -82,6 +82,6 @@ Reset the counter: `update wati_round_robin_state set last_team = 'sfc';`
 
 `GET|POST /api/wati/round-robin` — `src/app/api/wati/round-robin/route.ts`
 
-- Auth: `Authorization: Bearer <WATI_ROUND_ROBIN_SECRET>` (401 otherwise, 503 if unset)
+- Auth: `?token=<WATI_ROUND_ROBIN_SECRET>` or `Authorization: Bearer <secret>` (401 otherwise, 503 if unset)
 - Input: `?phone=` or JSON `{ "phone": "..." }`
 - Output: `{ "team": "cde" | "sfc", "reused": boolean, "fallback"?: true }`
