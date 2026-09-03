@@ -11,6 +11,9 @@ import { createClient } from '@supabase/supabase-js'
  * Auth:   Authorization: Bearer <WATI_ROUND_ROBIN_SECRET>
  * Body:   { "phone": "50761234567" }   (WATI variable {{phone}})
  * Reply:  { "team": "cde" | "sfc", "reused": boolean }
+ *         With ?mode=status the HTTP status also encodes the team:
+ *         200 = cde, 202 = sfc, so WATI's Response Routing can branch on it
+ *         without saving a variable.
  *
  * Alternates strictly between the two teams. A phone routed in the last 24 h
  * gets the same team again, so retries don't burn a turn.
@@ -61,14 +64,17 @@ async function handle(request: NextRequest, phoneRaw: unknown) {
   // unique key so they don't all share one team via the 24 h stickiness.
   const phone = cleanPhone(phoneRaw) || `unknown-${Date.now()}`
 
+  const statusMode = new URL(request.url).searchParams.get('mode') === 'status'
+  const statusFor = (team: Team) => (statusMode && team === 'sfc' ? 202 : 200)
+
   try {
     const result = await pick(phone)
     console.log(`WATI round-robin: ${phone} -> ${result.team}${result.reused ? ' (reused)' : ''}`)
-    return NextResponse.json(result)
+    return NextResponse.json(result, { status: statusFor(result.team) })
   } catch (err) {
     console.error('WATI round-robin failed:', err)
     // Never leave the bot hanging: fall back to a fixed team on DB trouble.
-    return NextResponse.json({ team: 'sfc', reused: false, fallback: true }, { status: 200 })
+    return NextResponse.json({ team: 'sfc', reused: false, fallback: true }, { status: statusFor('sfc') })
   }
 }
 
