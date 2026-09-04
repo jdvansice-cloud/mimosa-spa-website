@@ -52,9 +52,18 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         const a = appts.find(x => x.id === input.appointment_id)
         if (!a) return { result: 'Cita no encontrada.', isError: true }
         const pol = checkNoticePolicy(a.start, d.now); if (pol) return { result: pol, isError: true }
-        const ok = await d.mb.cancelAppointment(a.id); if (!ok) return { result: 'Mindbody no pudo cancelar.', isError: true }
-        if (name === 'cancel') return { result: 'cancelada' }
-        const r = await d.mb.book({ clientId: d.conv.mindbody_client_id!, sucursal: d.conv.sucursal ?? (a.location === 'Costa del Este' ? 'cde' : 'sfc'), date: input.date, time: input.time, serviceIds: [a.sessionTypeId], people: 1, origin: d.origin, clientName: d.conv.client_name ?? '', phone })
+        if (name === 'cancel') {
+          const ok = await d.mb.cancelAppointment(a.id); if (!ok) return { result: 'Mindbody no pudo cancelar.', isError: true }
+          return { result: 'cancelada' }
+        }
+        let r
+        try {
+          r = await d.mb.book({ clientId: d.conv.mindbody_client_id!, sucursal: d.conv.sucursal ?? (a.location === 'Costa del Este' ? 'cde' : 'sfc'), date: input.date, time: input.time, serviceIds: [a.sessionTypeId], people: 1, origin: d.origin, clientName: d.conv.client_name ?? '', phone })
+        } catch (e) {
+          return { result: `No se pudo mover la cita; su cita original sigue en pie. ${String(e)}`, isError: true }
+        }
+        const ok = await d.mb.cancelAppointment(a.id)
+        if (!ok) return { result: `Se creó la nueva cita pero no se pudo liberar la anterior. Nueva cita: ${json(r)}`, isError: true }
         return { result: json(r) }
       }
       case 'handoff': { await performHandoff({ store: d.store, wati: d.wati, conv: d.conv, motivo: input.motivo || 'modelo', resumen: input.resumen || '', shadow: d.shadow, env: env() }); return { result: 'handoff hecho', endTurn: true } }
