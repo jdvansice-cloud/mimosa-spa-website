@@ -26,6 +26,21 @@ describe('buildSystem', () => {
     expect((blocks[1] as any).text).toContain('Muy buenas tardes')
   })
 
+  it('states the tightened voice rules in the stable block', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('≤ 2 líneas cortas')
+    expect(t).toContain('Nunca uses listas')
+    expect(t).toContain('máximo 3 en una sola frase')
+    expect(t).toContain('Precios solo si el cliente pregunta')
+    expect(t).toContain('le esperamos 🌼')
+  })
+
+  it('volatile block ends with the Recuerda section', () => {
+    const t = (blocks[1] as any).text
+    expect(t).toContain('## Recuerda')
+    expect(t.trimEnd().endsWith('Precios solo si preguntan.')).toBe(true)
+  })
+
   it('states the confirmation and handoff rules', () => {
     expect((blocks[0] as any).text).toMatch(/customer_confirmation/)
     expect((blocks[0] as any).text).toMatch(/handoff/)

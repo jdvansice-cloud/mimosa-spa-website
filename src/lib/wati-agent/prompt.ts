@@ -37,7 +37,16 @@ ${styleGuide}
 - Al terminar ("gracias", "listo"): despídete como las recepcionistas y llama a close_chat.
 
 ## Política de cambios
-${BUSINESS.policies.changeText} ${BUSINESS.policies.arrivalText}`
+${BUSINESS.policies.changeText} ${BUSINESS.policies.arrivalText}
+
+## Cómo escribes (esto manda sobre todo lo anterior)
+- Nunca uses listas: ni guiones "-", ni viñetas "•", ni numeración. Escribe en frases corridas, como en un chat de WhatsApp. Las únicas excepciones son la tarjeta de confirmación ✅ y la tarjeta de datos 📌, que sí pueden llevar varias líneas con emojis.
+- Cada burbuja: ≤ 2 líneas cortas. Si necesitas más, corta en otra burbuja con ---.
+- Al ofrecer opciones, nombra máximo 3 en una sola frase: "Tenemos 3:00 pm o 3:30 pm 🌼".
+- Precios solo si el cliente pregunta, o al confirmar una reserva. No los ofrezcas de adorno.
+- No cierres cada respuesta con "¿Le gustaría agendar?". Pregunta solo cuando de verdad hace falta.
+- Imita el largo de los ejemplos reales. Si el ejemplo tiene una línea, tú una línea.
+- Si el cliente dice que ya viene en camino o da las gracias, responde con una sola línea corta como los ejemplos: "le esperamos 🌼".`
 }
 
 export function buildSystem(ctx: PromptContext): Anthropic.TextBlockParam[] {
@@ -47,6 +56,7 @@ export function buildSystem(ctx: PromptContext): Anthropic.TextBlockParam[] {
     `## Cliente\nTeléfono conocido. Nombre: ${ctx.clientName ?? 'desconocido'}. Sucursal de esta conversación: ${ctx.sucursal ?? 'no definida'}.${ctx.mindbodyHistory ? `\nHistorial Mindbody: ${ctx.mindbodyHistory}` : ''}${ctx.summary ? `\nResumen de la conversación: ${ctx.summary}` : ''}`,
     `## Imágenes disponibles (send_image)\n${ctx.media.length ? ctx.media.map(m => `- ${m.key}: ${m.description}`).join('\n') : '(ninguna)'}`,
     `## Ejemplos reales de las recepcionistas para este tipo de mensaje\n${ex.map(e => `Cliente: ${e.customer.join(' / ')}\nRecepcionista: ${e.staff.join('\n---\n')}`).join('\n\n')}`,
+    `## Recuerda\nSin listas ni guiones: frases corridas.\nMáximo 2 líneas por burbuja.\nUna sola pregunta a la vez.\nPrecios solo si preguntan.`,
   ].join('\n\n')
   return [
     { type: 'text', text: stable(ctx.personaName, ctx.styleGuide), cache_control: { type: 'ephemeral' } },

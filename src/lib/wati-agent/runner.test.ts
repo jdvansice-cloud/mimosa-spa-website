@@ -64,6 +64,20 @@ describe('runTurn', () => {
     const call = d.store.logEvent.mock.calls.find((c: any) => c[1] === 'error' && c[2]?.where === 'sendText')
     expect(call).toBeTruthy()
   })
+  it('never leaves the customer in silence when the model replies with nothing', async () => {
+    const d = deps(fakeAnthropic([{ stop_reason: 'end_turn', content: [], usage: {} }]))
+    d.wati.updateAttributes = vi.fn(async () => ({ ok: true }))
+    d.wati.assignOperator = vi.fn(async () => ({ ok: true }))
+    d.wati.sendButtons = vi.fn(async () => ({ ok: true }))
+    d.wati.startChatbot = vi.fn(async () => ({ ok: true }))
+    const r = await runTurn('507', false, d)
+    expect(r.handedOff).toBe(true)
+    expect(r.bubbles).toEqual([])
+    expect(d.sent[0]).toBe('Un momento por favor 🌼')
+    const call = d.store.logEvent.mock.calls.find((c: any) => c[1] === 'error' && c[2]?.error === 'empty reply')
+    expect(call).toBeTruthy()
+  })
+
   it('refreshes summary when camila message count crosses a multiple of 6', async () => {
     const d = deps(fakeAnthropic([text('Hola\n---\n¿En qué le ayudo?'), text('Resumen actualizado')]))
     d.store.recentMessages = vi.fn(async () => [
