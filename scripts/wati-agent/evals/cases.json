@@ -8,7 +8,7 @@
           "Hola.  Estan abiertos hoy?"
         ],
         "staff": [
-          "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Karen 🌼 \n¿Como podemos ayudarle?"
+          "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es {nombre} 🌼 \n¿Como podemos ayudarle?"
         ]
       },
       {
@@ -17,7 +17,7 @@
           "Para saber si estaban abiertos hoy?"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Adriana 🌼 \nsi, estamos abiertos, hasta las 6 pm"
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es {nombre} 🌼 \nsi, estamos abiertos, hasta las 6 pm"
         ]
       },
       {
@@ -26,14 +26,14 @@
           "Quisiera una cita para hoy 60 min masaje para soltar nudos"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Nilka 🌼 \nSi hay disponibilidad",
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  {nombre} 🌼 \nSi hay disponibilidad",
           "desde la 12:00 md en adelante"
         ]
       },
       {
         "customer": [
           "3:30 porfa",
-          "Denise Toledano"
+          "{nombre} {nombre}"
         ],
         "staff": [
           "desea de 60 o 90"
@@ -70,7 +70,7 @@
           "Si"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Nilka 🌼 \n¿Como podemos ayudarle?"
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  {nombre} 🌼 \n¿Como podemos ayudarle?"
         ]
       },
       {
@@ -107,13 +107,13 @@
           "Costa del Este"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Adriana 🌼 \n¿Como podemos ayudarle?"
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es {nombre} 🌼 \n¿Como podemos ayudarle?"
         ]
       },
       {
         "customer": [
           "Tendrás espacio para hoy 2 pm? Para 2 personas. Cabinas separadas",
-          "Si puede ser con Rocío, genial"
+          "Si puede ser con {nombre}, genial"
         ],
         "staff": [
           "si, con mucho gusto",
@@ -172,13 +172,13 @@
           "Si"
         ],
         "staff": [
-          "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es  Mary🌼 \nCon gusto, para que fecha desea agendar su cita?",
+          "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es  {nombre}🌼 \nCon gusto, para que fecha desea agendar su cita?",
           "quedamos a su orden para agendarle"
         ]
       },
       {
         "customer": [
-          "Hola Mary",
+          "Hola {nombre}",
           "Quiero agendar para marzo",
           "Tengo un certificado que me regaló mi hijo"
         ],
@@ -205,7 +205,7 @@
       },
       {
         "customer": [
-          "{nombre} Coronado",
+          "{nombre} {nombre}",
           "{correo}",
           "Disculpa es que estoy a 6 horas de diferencia y me fui a pasear 🤣🤣"
         ],
@@ -223,16 +223,16 @@
       },
       {
         "customer": [
-          "Hola buenas tardes te saluda {nombre} Coronado, crees que me puedas cambiar la cita del 7 para el sábado 14 a la misma hora por favor? Gracias",
+          "Hola buenas tardes te saluda {nombre} {nombre}, crees que me puedas cambiar la cita del 7 para el sábado 14 a la misma hora por favor? Gracias",
           "San Francisco"
         ],
         "staff": [
-          "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es  Yasi🌼 \nSi, con gusto"
+          "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es  {nombre}🌼 \nSi, con gusto"
         ]
       },
       {
         "customer": [
-          "Gracias Yasi"
+          "Gracias {nombre}"
         ],
         "staff": [
           "Se ha reagendado su cita para el sábado 14 de marzo 10am"
@@ -290,7 +290,7 @@
           "Queria saber si tenian promociones este mes"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \nsi, con mucho gusto le compartimos",
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  {nombre}🌼 \nsi, con mucho gusto le compartimos",
           "57d16b5a_2346_4528_3248_0768c608602b-b4c2f3f9-6a95-4405-b30d-38fb1809b3f4.png Caption: Le enviamos las promos del mes de Julio. Válido para compras hasta el 31 de julio. Precios no incluyen Itbms. No aplica con otras promociones o descuentos."
         ]
       },
@@ -308,7 +308,7 @@
           "Costa del Este"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Nilka   🌼 \n¿Como podemos ayudarle?",
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es {nombre}   🌼 \n¿Como podemos ayudarle?",
           "estamos atentos"
         ]
       },
@@ -325,7 +325,7 @@
       },
       {
         "customer": [
-          "Jaqueline Faarup",
+          "{nombre} {nombre}",
           "Costa del Este"
         ],
         "staff": [
@@ -376,7 +376,7 @@
       },
       {
         "customer": [
-          "Y Gloria Marquez",
+          "Y {nombre}",
           "Mi mamà",
           "Sesion mamà e hijo",
           "Me confirma pls"
@@ -545,7 +545,7 @@
           "Hola"
         ],
         "staff": [
-          "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Karen 🌼 \n¿Como podemos ayudarle?"
+          "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es {nombre} 🌼 \n¿Como podemos ayudarle?"
         ]
       },
       {
@@ -577,7 +577,7 @@
         "customer": [
           "Costa del Este",
           "Si",
-          "Tengo un certificado de regalo a nombre de {nombre} Vargas",
+          "Tengo un certificado de regalo a nombre de {nombre} {nombre}",
           "Quería saber si tienen espacio mañana"
         ],
         "staff": [
@@ -595,7 +595,7 @@
       },
       {
         "customer": [
-          "{nombre} Vargas \n{correo}"
+          "{nombre} {nombre} \n{correo}"
         ],
         "staff": [
           "Su cita está confirmada! ✅\n📅 Fecha: 03 de mayo\n⏰ Hora: 12:00 md\n🍃Tratamiento:  Masaje relajante + masaje de pies 90 minutos \n🌼Lugar: Mimosa Spa Retreat,  Star Plaza, Costa del Este"
@@ -616,7 +616,7 @@
           "Tienes espacio mañana para masaje relajante 2pm?"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Maritza 🌼 \n¿Como podemos ayudarle?"
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es {nombre} 🌼 \n¿Como podemos ayudarle?"
         ]
       },
       {
@@ -640,7 +640,7 @@
       {
         "customer": [
           "Ok",
-          "Cristina Vargas \n{correo}",
+          "{nombre} {nombre} \n{correo}",
           "Ella es la que va pero yo te pago acá de una vez"
         ],
         "staff": [
@@ -682,7 +682,7 @@
           "Buenas tardes"
         ],
         "staff": [
-          "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es  Yasi🌼 \n¿Como podemos ayudarle?"
+          "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es  {nombre}🌼 \n¿Como podemos ayudarle?"
         ]
       },
       {
@@ -698,7 +698,7 @@
       {
         "customer": [
           "Quisiera consultar si es posible agendar una cita para masaje Liberador de Tensión, hoy a las 6pm en la sucursal de San Francisco?",
-          "{nombre} Yanisselly \n\n{correo}",
+          "{nombre} {nombre} \n\n{correo}",
           "Es un certificado de Regalo de parte de Lynk & Co"
         ],
         "staff": [
@@ -743,7 +743,7 @@
       },
       {
         "customer": [
-          "Nombre: Aarón Hernández Romero\nCorreo: {correo}"
+          "Nombre: {nombre} {nombre} {nombre}\nCorreo: {correo}"
         ],
         "staff": [
           "🌼Su cita ha sido agendada!🌼\n📆 Día: Viernes 22 de mayo \n🕓Hora: 2:00 pm \n🌼Tratamiento: Liberador de tensión 45 min \n📍San Francisco, Calle 74 este detrás de la delta de Calle 50."
@@ -818,7 +818,7 @@
       },
       {
         "customer": [
-          "{nombre} Nielsen"
+          "{nombre} {nombre}"
         ],
         "staff": [
           "Su cita está confirmada! ✅\n📅 Fecha: HOY 30 agosto \n⏰ Hora: 3:00 pm ( terp. Catalina)\n🍃Tratamiento:  30 minutos pues + 60 minutos masaje relajante\n🌼Lugar: Mimosa Spa Retreat,  Star Plaza, Costa del Este"
@@ -870,7 +870,7 @@
       {
         "customer": [
           "Ok",
-          "{nombre} Patricia Lee"
+          "{nombre} {nombre} {nombre}"
         ],
         "staff": [
           "me permite sus datos, con gusto le agendamos"
@@ -886,8 +886,8 @@
       },
       {
         "customer": [
-          "Lee Varela",
-          "Nombre: {nombre} Patricia"
+          "{nombre} {nombre}",
+          "Nombre: {nombre} {nombre}"
         ],
         "staff": [
           "con gusto",
@@ -997,7 +997,7 @@
       {
         "customer": [
           "e8915186-c0a1-4dc1-8b33-0aa6f5ea9e5b.jpg Caption: Tengo una pregunta puede ser el viernes sábado o domingo o cualquier otro día? Jajaja estoy confundida",
-          "Si {nombre} Ochoa"
+          "Si {nombre} {nombre}"
         ],
         "staff": [
           "jaja no se preocupe entendemos"
@@ -1117,12 +1117,12 @@
           "Costa del Este"
         ],
         "staff": [
-          "✨  Buenos Días Bienvenido a Mimosa Spa. Costa del este 🌼\nMi nombre es  : Nilka, como podemos atenderle?'"
+          "✨  Buenos Días Bienvenido a Mimosa Spa. Costa del este 🌼\nMi nombre es  : {nombre}, como podemos atenderle?'"
         ]
       },
       {
         "customer": [
-          "Hola nilka"
+          "Hola {nombre}"
         ],
         "staff": [
           "buenas tardes , 😊"
@@ -1141,7 +1141,7 @@
       },
       {
         "customer": [
-          "Clementina garcia"
+          "{nombre}"
         ],
         "staff": [
           "gracias"
@@ -1169,12 +1169,12 @@
           "Me avisas :)"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \nsi, con mucho gusto"
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  {nombre}🌼 \nsi, con mucho gusto"
         ]
       },
       {
         "customer": [
-          "Gracias Adriana"
+          "Gracias {nombre}"
         ],
         "staff": [
           "si, el nos puede escribir o llamar el dia que desee agendar",
@@ -1183,7 +1183,7 @@
       },
       {
         "customer": [
-          "Perfecto gracias Adriana",
+          "Perfecto gracias {nombre}",
           "Como hago para pagar? El sitio web me hace escoger una fecha :("
         ],
         "staff": [
@@ -1203,7 +1203,7 @@
         "customer": [
           "Mil gracias!",
           "Me puedes enviar el certificado a mi correo? {correo}",
-          "El certificado es para el señor Rogelio Arosemena"
+          "El certificado es para el señor {nombre}"
         ],
         "staff": [
           "Si, se lo enviamos"
@@ -1219,11 +1219,11 @@
       },
       {
         "customer": [
-          "De parte de Jo-Ann, Jaime, Rogelio y {nombre} Carlos",
+          "De parte de {nombre}, {nombre}, {nombre} y {nombre} {nombre}",
           ":)"
         ],
         "staff": [
-          "d15824f5-bfe5-460d-bb36-808d88d0476e.pdf Caption: Rogelio .pdf",
+          "d15824f5-bfe5-460d-bb36-808d88d0476e.pdf Caption: {nombre} .pdf",
           "se lo enviamos a su correo tambien"
         ]
       },
@@ -1245,12 +1245,12 @@
     "turns": [
       {
         "customer": [
-          "Buenos dias es Souhaila Russell rato sin hablarles con quién hablo allá",
+          "Buenos dias es {nombre} {nombre} rato sin hablarles con quién hablo allá",
           "Costa del Este",
           "Deseo hablar directo allá"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \n¿Como podemos ayudarle?\nSaludos Sra Souhaila"
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \n¿Como podemos ayudarle?\nSaludos Sra {nombre}"
         ]
       },
       {
@@ -1296,7 +1296,7 @@
     "turns": [
       {
         "customer": [
-          "Buenos días, me gustaría hacer una cita para un masaje profundo tienen disponibilidad hoy? Muchas gracias Anna Maria Brennan",
+          "Buenos días, me gustaría hacer una cita para un masaje profundo tienen disponibilidad hoy? Muchas gracias {nombre} {nombre} {nombre}",
           "Costa del Este",
           "So",
           "Si para un masaje"
@@ -1326,7 +1326,7 @@
       },
       {
         "customer": [
-          "Y en la tarde? Anna Maria Brennan, {correo}"
+          "Y en la tarde? {nombre} {nombre} {nombre}, {correo}"
         ],
         "staff": [
           "le agendo a las 11:30 am"
@@ -1595,7 +1595,7 @@
           "tienen masaje liberador de tensión disponible a las 2pm?"
         ],
         "staff": [
-          "✨  Buenas Tardes Bienvenido a Mimosa Spa. Costa del este 🌼\nMi nombre es  : Nilka, como le podemos ayudar?"
+          "✨  Buenas Tardes Bienvenido a Mimosa Spa. Costa del este 🌼\nMi nombre es  : {nombre}, como le podemos ayudar?"
         ]
       },
       {
@@ -1629,7 +1629,7 @@
           "Costa del Este"
         ],
         "staff": [
-          "✨ Muy buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼",
+          "✨ Muy buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  {nombre}🌼",
           "Disponibilidad 1:00 pm en adelante",
           "Hola, se nos acaba de abrir un espacio",
           "9:45, 10:00 am",
@@ -1679,7 +1679,7 @@
           "si"
         ],
         "staff": [
-          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana 🌼",
+          "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  {nombre} 🌼",
           "si, con mucho gusto, mantenemos disponibilidad",
           "desea de 30 o 45 minutos?"
         ]
@@ -1704,7 +1704,7 @@
           "Good morning. I’d like to book for the weeken if possible."
         ],
         "staff": [
-          "Good morning, Welcome Mimosa Spa \nMy name is Yasi🌼 \nYess, Of course",
+          "Good morning, Welcome Mimosa Spa \nMy name is {nombre}🌼 \nYess, Of course",
           "What massage do you like?"
         ]
       },
@@ -1846,7 +1846,7 @@
       },
       {
         "customer": [
-          "{nombre} Bakke \n{correo}"
+          "{nombre} {nombre} \n{correo}"
         ],
         "staff": [
           "Relaxing massage?"
@@ -2104,7 +2104,7 @@
       },
       {
         "customer": [
-          "Buenos días voy a tener que cancelarlo 😞! Pero creo que lo podríamos pasar para el próximo domingo 🙏🏽❤️🥰 igualmente con la señora Guadalupe. Me avisa qué horarios tiene disponibilidad. Gracias y disculpen el cambio"
+          "Buenos días voy a tener que cancelarlo 😞! Pero creo que lo podríamos pasar para el próximo domingo 🙏🏽❤️🥰 igualmente con la señora {nombre}. Me avisa qué horarios tiene disponibilidad. Gracias y disculpen el cambio"
         ],
         "staff": [
           "Gracias por avisar"
@@ -2129,7 +2129,7 @@
       },
       {
         "customer": [
-          "Hola Adriana un gusto saludarte",
+          "Hola {nombre} un gusto saludarte",
           "Viernes a las 11:00"
         ],
         "staff": [
@@ -2180,12 +2180,12 @@
       {
         "customer": [
           "Hola",
-          "Buen dia mi nombre es {nombre} Urriola. Le escribo\nPara sacar una cita para masaje.\nPreferiblemente sabado 24 de enero",
+          "Buen dia mi nombre es {nombre} {nombre}. Le escribo\nPara sacar una cita para masaje.\nPreferiblemente sabado 24 de enero",
           "San Francisco",
-          "Buen dia mi nombre es {nombre} Urriola. Le escribo\nPara sacar una cita para masaje.\nPreferiblemente sabado 24 de enero"
+          "Buen dia mi nombre es {nombre} {nombre}. Le escribo\nPara sacar una cita para masaje.\nPreferiblemente sabado 24 de enero"
         ],
         "staff": [
-          "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es  Yasi🌼\nCuenta con algún certificado que debamos verificar?"
+          "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es  {nombre}🌼\nCuenta con algún certificado que debamos verificar?"
         ]
       },
       {
@@ -2198,7 +2198,7 @@
       },
       {
         "customer": [
-          "{nombre} Urriola\n{nombre}o/agruposedes.com\n\n\nGracias"
+          "{nombre} {nombre}\n{nombre}o/agruposedes.com\n\n\nGracias"
         ],
         "staff": [
           "para el dia sábado 24 tenemos espacio 9:15 a.m 9:30 a.m y 10: 00 a.m"

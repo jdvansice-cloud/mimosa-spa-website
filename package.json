@@ -22,7 +22,8 @@
     "efactura:verify-schema": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/verify-schema.ts",
     "analytics:booking-trend": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/booking-trend.ts",
     "analytics:conversion": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/conversion-by-source.ts",
-    "wati:mine": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/mine-chats.ts"
+    "wati:mine": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/mine-chats.ts",
+    "wati:redact": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/redact-names.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
