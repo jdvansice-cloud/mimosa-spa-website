@@ -27,6 +27,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 export function createWatiClient(opts: { baseUrl: string; token: string; channelPhone?: string; fetchImpl?: typeof fetch }): WatiClient {
   const base = opts.baseUrl.replace(/\/$/, '')
+  const root = base.replace(/\/\d+$/, '')
   const f = opts.fetchImpl ?? fetch
   const auth = { Authorization: `Bearer ${opts.token}` }
 
@@ -37,8 +38,9 @@ export function createWatiClient(opts: { baseUrl: string; token: string; channel
       headers['Content-Type'] = 'application/json'
       body = JSON.stringify(init.json)
     }
+    const origin = path.startsWith('/api/ext/') ? root : base
     try {
-      const res = await f(`${base}${path}`, { ...init, headers, body })
+      const res = await f(`${origin}${path}`, { ...init, headers, body })
       const text = await res.text()
       let data: unknown = null
       try {

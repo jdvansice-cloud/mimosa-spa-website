@@ -84,6 +84,7 @@ Código: `src/lib/wati-agent/` (lógica), `src/app/api/wati/agent/{inbound,sent,
 | `WATI_AGENT_MODE` | `off` / `shadow` / `whitelist` / `live` |
 | `WATI_AGENT_WHITELIST` | Teléfonos separados por coma, solo se usa en modo `whitelist`. Se normalizan igual que los entrantes: se aceptan números de 8 dígitos (`6612-4546`), a los que se les antepone `507` |
 | `WATI_AGENT_MODEL` | Por defecto `claude-sonnet-5` |
+| `WATI_API_URL` | `https://live-mt-server.wati.io/<accountId>`. El path del accountId se conserva para las llamadas `/api/v1/...`; las llamadas `/api/ext/v3/...` lo quitan automáticamente (viven en la raíz del host) |
 
 Reutiliza `WATI_API_URL`, `WATI_ACCESS_TOKEN`/`WATI_API_KEY`, y las variables
 existentes de Mindbody y Supabase (`src/lib/wati-agent/config/env.ts`).
