@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "VITE_CONFIG_NATIVE_IGNORE_WARNING=true vitest run",
+    "test:watch": "VITE_CONFIG_NATIVE_IGNORE_WARNING=true vitest",
     "type-check": "tsc --noEmit",
     "check-all": "npm run lint && npm run type-check",
     "verify": "npm run build",
@@ -22,9 +24,11 @@
     "analytics:conversion": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/spikes/conversion-by-source.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
     "@supabase/ssr": "^0.6.0",
     "@supabase/supabase-js": "^2.48.0",
     "@types/qrcode": "^1.5.6",
+    "@vercel/functions": "^3.9.5",
     "framer-motion": "^11.15.0",
     "imapflow": "^1.7.0",
     "jsbarcode": "^3.11.6",
@@ -52,6 +56,7 @@
     "eslint-config-next": "16.1.1",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^5.0.0"
   }
 }
