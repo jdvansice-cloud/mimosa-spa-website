@@ -8,8 +8,8 @@ import fs from 'node:fs'
 const STAFF_NAMES = ['Karen', 'Nilka', 'Adriana', 'Yasi', 'Mary', 'Maritza']
 
 type Turn = { customer: string[]; staff: string[] }
-type Case = { id: string; sucursal: string; turns: Turn[] }
-type Exemplar = { intent: string; sucursal: string; customer: string[]; staff: string[] }
+type Case = { id: string; sucursal: string | null; turns: Turn[] }
+type Exemplar = { intent: string; sucursal: string | null; customer: string[]; staff: string[] }
 
 function buildPattern(name: string): RegExp {
   // Unicode-aware boundary: not preceded/followed by a letter, tolerant of an
