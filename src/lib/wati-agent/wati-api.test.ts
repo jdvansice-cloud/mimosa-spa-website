@@ -16,7 +16,7 @@ describe('wati client', () => {
     const c = createWatiClient({ baseUrl: 'https://x.wati.io/123', token: 'T', fetchImpl: f })
     const r = await c.sendText('50766124546', 'Hola')
     expect(r.ok).toBe(true)
-    expect(calls[0].url).toBe('https://x.wati.io/123/api/ext/v3/conversations/messages/text')
+    expect(calls[0].url).toBe('https://x.wati.io/api/ext/v3/conversations/messages/text')
     expect((calls[0].init.headers as Record<string, string>).Authorization).toBe('Bearer T')
     expect(JSON.parse(String(calls[0].init.body))).toEqual({ target: '50766124546', text: 'Hola' })
   })
@@ -26,11 +26,24 @@ describe('wati client', () => {
     await c.assignOperator('507', null)
     expect(calls[0].url).toBe('https://x/api/v1/assignOperator?whatsappNumber=507')
   })
-  it('startChatbot body', async () => {
+  it('assignOperator keeps the account id path under v1', async () => {
+    const { f, calls } = mockFetch()
+    const c = createWatiClient({ baseUrl: 'https://x.wati.io/123', token: 'T', fetchImpl: f })
+    await c.assignOperator('507', null)
+    expect(calls[0].url).toBe('https://x.wati.io/123/api/v1/assignOperator?whatsappNumber=507')
+  })
+  it('startChatbot strips the account id path for ext/v3', async () => {
+    const { f, calls } = mockFetch()
+    const c = createWatiClient({ baseUrl: 'https://x.wati.io/123', token: 'T', fetchImpl: f })
+    await c.startChatbot('507', 'abc')
+    expect(calls[0].url).toBe('https://x.wati.io/api/ext/v3/chatbots/start')
+    expect(JSON.parse(String(calls[0].init.body))).toEqual({ chatbot_id: 'abc', target: '507' })
+  })
+  it('baseUrl without an account segment is unchanged for ext/v3', async () => {
     const { f, calls } = mockFetch()
     const c = createWatiClient({ baseUrl: 'https://x', token: 'T', fetchImpl: f })
     await c.startChatbot('507', 'abc')
-    expect(JSON.parse(String(calls[0].init.body))).toEqual({ chatbot_id: 'abc', target: '507' })
+    expect(calls[0].url).toBe('https://x/api/ext/v3/chatbots/start')
   })
   it('non-2xx returns ok:false with error', async () => {
     const { f } = mockFetch(401, { error: 'nope' })
