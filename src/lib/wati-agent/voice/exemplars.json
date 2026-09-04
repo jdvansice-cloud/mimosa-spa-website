@@ -2,85 +2,2618 @@
   {
     "intent": "saludo",
     "sucursal": "cde",
-    "customer": ["Hola buenas"],
-    "staff": ["✨ Muy buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Camila 🌼\ncon mucho gusto"]
+    "customer": [
+      "Hola"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Nilka 🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "Buenos dias"
+    ],
+    "staff": [
+      "✨ Muy buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "Hola buenos días"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana 🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "Inbound Call"
+    ],
+    "staff": [
+      "✨ Buenas tardes  bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \n¿Como podemos ayudarle?",
+      "1a68348c_4f88_4d4d_59fb_27485d76db98-c1e7a275-04c0-45e5-8ef7-6c1560eec30a.png Caption: Le enviamos las promos del mes de Junio. Promociones válidas hasta el 30 de junio del 2026. Precios no incluyen ITBMS."
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "Hola",
+      "Costa del Este"
+    ],
+    "staff": [
+      "✨ Buenas tardes, bienvenido a Mimosa Spa Costa Del Este Mi nombre es Adriana 🌼 ¿Como podemos ayudarle?",
+      "Estamos a la orden"
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "Hola buenas tardes"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Maritza 🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "Costa del Este"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Yessenia  🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "hola",
+      "Costa del Este",
+      "si"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es Adriana 🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "Buenas tardes",
+      "Costa del Este"
+    ],
+    "staff": [
+      "✨ Muy buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es   Nilka🌼 \n¿Como podemos ayudarle"
+    ]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": [
+      "Hola buenas tardes",
+      "Costa del Este",
+      "Si"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es Adriana  🌼 \n¿Como podemos ayudarle?"
+    ]
   },
   {
     "intent": "saludo",
     "sucursal": "sfc",
-    "customer": ["Buenas tardes"],
-    "staff": ["Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Camila 🌼\n¿Como podemos ayudarle?"]
+    "customer": [
+      "Hola buenas tardes",
+      "San Francisco",
+      "Si"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es  Yasi🌼 \n¿Como podemos ayudarle?"
+    ]
   },
   {
-    "intent": "reservar",
+    "intent": "saludo",
     "sucursal": "sfc",
-    "customer": ["Si dos masajes para hoy a las 6 pm / Cabina separada"],
-    "staff": ["que masaje desean?", "Me permite los datos de las 2 personas por favor", "por favor compartir los siguientes datos:\n\n📌 Nombre y Apellido:\n\n📌 Correo electrónico:\n\nMuchas gracias 🌼"]
+    "customer": [
+      "Gracias",
+      "Homa"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Mary 🌼 \n¿Como podemos ayudarle?",
+      "quedamos a su orden"
+    ]
   },
   {
-    "intent": "reservar",
+    "intent": "saludo",
     "sucursal": "sfc",
-    "customer": ["Listos dos de esos"],
-    "staff": ["Su cita está confirmada! ✅\n📅 Fecha: hoy 01 de junio\n⏰ Hora: 6:00 pm\n🍃Tratamiento: 2 Liberador de tensión + piedras calientes\n🌼Lugar: Mimosa Spa Retreat,  Star Plaza, Costa del Este"]
+    "customer": [
+      "Gracias",
+      "Hola",
+      "San Francisco"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es Yasi 🌼 \n¿Como podemos ayudarle?"
+    ]
   },
   {
-    "intent": "reservar",
-    "sucursal": "cde",
-    "customer": ["este fin"],
-    "staff": ["estamos desde las 9 am", "que tratamiento seria?"]
+    "intent": "saludo",
+    "sucursal": "sfc",
+    "customer": [
+      "Gracias",
+      "Hola",
+      "San Francisco"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa \n\n¿Como podemos ayudarle?"
+    ]
   },
   {
-    "intent": "reservar",
-    "sucursal": null,
-    "customer": ["Creo lo voy a dejar para proximo sabado"],
-    "staff": ["No se preocupe, de igual manera podemos ir agendando ... ya que los fines de semana la agenda se nos llena bastante rapidito"]
+    "intent": "saludo",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola saludos"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre esKaren  🌼 \n¿Como podemos ayudarle?"
+    ]
   },
   {
-    "intent": "cambiar",
-    "sucursal": null,
-    "customer": ["Puedes cambiarla para las 5 pm?"],
-    "staff": ["Si", "le cambiamos"]
+    "intent": "saludo",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola, buenos días!"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es  Karen🌼 \n¿Como podemos ayudarle?",
+      "Buenas tardes Sra {nombre}, quedamos a su disposicion"
+    ]
   },
   {
-    "intent": "cambiar",
-    "sucursal": null,
-    "customer": ["Necesito cancelar los masajes de hoy y pasarlos para miercoles"],
-    "staff": ["Buenas tardes", "Que hora desea para el miercoles?"]
+    "intent": "saludo",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Mary 🌼 \n¿Como podemos ayudarle?",
+      "Estamos a su orden si tiene alguna consulta"
+    ]
   },
   {
-    "intent": "horario",
-    "sucursal": null,
-    "customer": ["queria saber si abren mañana"],
-    "staff": ["Si señora, el dia de mañana estaremos abiertos de 9am a 6pm"]
+    "intent": "saludo",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es  Mary🌼 \n¿Como podemos ayudarle?"
+    ]
   },
   {
-    "intent": "pago",
-    "sucursal": null,
-    "customer": ["Cuanto es total? Psra hacerte Yappy"],
-    "staff": ["Serian 100.00", "En YAPPY nos busca en el directorio como MIMOSA y aparecemos con el logo, la flor amarilla..🌼"]
+    "intent": "saludo",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola",
+      "San Francisco",
+      "Si"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es Yasi 🌼 \n¿Como podemos ayudarle?"
+    ]
   },
   {
-    "intent": "cierre",
-    "sucursal": null,
-    "customer": ["Gracias"],
-    "staff": ["A la orden", "Ha sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"]
-  },
-  {
-    "intent": "otro",
-    "sucursal": null,
-    "customer": ["El tráfico nos tiene capturadas llegamos como 5 y 30"],
-    "staff": ["Disculpe, para las 2 personas serian 6:30 pm", "para 1 persona 5:30 pm"]
+    "intent": "saludo",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola! Buenas tardes 💖",
+      "Costa del Este"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Karen 🌼 \n¿Como podemos ayudarle?",
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Nilka 🌼 \n¿Como podemos ayudarle?"
+    ]
   },
   {
     "intent": "ubicacion",
     "sucursal": "cde",
-    "customer": ["Me pueden compartir la ubicación?"],
-    "staff": ["Con gusto 🌼", "Estamos en Star Plaza, Costa del Este", "Le comparto la ubicación por Waze 👇"]
+    "customer": [
+      "Costa del Este"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "cde",
+    "customer": [
+      "{nombre} Singh",
+      "{correo}",
+      "Please send me the location"
+    ],
+    "staff": [
+      "Relaxing or a little stronger?",
+      "We are located in Star Plaza, across from Riba Smith, ground floor.\nCosta del Este.\n\nSource: Waze https://share.google/vaXwDpgTYrwCQh1kU"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "cde",
+    "customer": [
+      "Súper gracias",
+      "Voy saliendo do",
+      "Me manda la ubicación porfa"
+    ],
+    "staff": [
+      "Estamos Ubicados en Star Plaza,  Frente a Riba Smith planta baja. Costa del Este.  \n Waze https://share.google/vaXwDpgTYrwCQh1kU"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "cde",
+    "customer": [
+      "Costa del Este",
+      "Si es en costa del este es otro número?"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Nilka 🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "cde",
+    "customer": [
+      "Buenas tardes",
+      "Costa del Este"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "Ok we can keep 3pm",
+      "Can you send me the location please"
+    ],
+    "staff": [
+      "Of course",
+      "📍San Francisco, Calle 74 este, behind the Delta gas station of Calle 50.\nhttps://maps.app.goo.gl/zc5tqjZW5rZLCaiv5?g_st=ipc"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "No"
+    ],
+    "staff": [
+      "📍San Francisco, Calle 74 este, el local detrás de la estación Delta de Calle 50.\nhttps://maps.app.goo.gl/zc5tqjZW5rZLCaiv5?g_st=ipc",
+      "gracias",
+      "🌼Su cita ha sido agendada!🌼\n📆 Día: Hoy, 25 de julio\n🕓Hora: 4:40pm\n🌼Tratamiento: Facial express 30mins + Liberador de tension 30mins \n📍San Francisco, Calle 74 este detrás de la delta de Calle 50."
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "{nombre} & Mahdiya",
+      "Can you send me the address"
+    ],
+    "staff": [
+      "San Francisco, East 74th Street, behind the Delta gas station",
+      "Hi, Good afternoon",
+      "Remember your's appointment today 3:00 pm"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "Ok me podrías enviar la dirección"
+    ],
+    "staff": [
+      "📍San Francisco, Calle 74 este, el local detrás de la delta de Calle 50.\nhttps://maps.app.goo.gl/zc5tqjZW5rZLCaiv5?g_st=ipc",
+      "🌼Su cita ha sido agendada!🌼\n📆 Día: sabado 18 de julio\n🕓Hora: 2:00pm\n🌼Tratamiento: masaje relax + masaje craneofacial 80 minutos\n📍San Francisco, Calle 74 este detrás de la delta de Calle 50."
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "Ustedes dónde están ubicados"
+    ],
+    "staff": [
+      "San Francisco, calle 74",
+      "pero si gusta podemos enviarle el certificado digital"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola buen día ok",
+      "Me regala la dirección por favor"
+    ],
+    "staff": [
+      "📍San Francisco, Calle 74 este, el local detrás de la delta de Calle 50.\nhttps://maps.app.goo.gl/zc5tqjZW5rZLCaiv5?g_st=ipc",
+      "Hola, buenas tardes",
+      "Le esperamos 🏵️"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "Si ahi"
+    ],
+    "staff": [
+      "con gusto, le transfiero a Cde",
+      "✨  Buenos Días Bienvenido a Mimosa Spa. Costa del este 🌼\nMi nombre es  : Nilka, como le podemos atender"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola",
+      "San Francisco",
+      "En qué parte de San Francisco están ubicados? \nQuisiera ir a comprar un certificado de regalo de masaje relajante para mi esposo.",
+      "Tienen alguna promoción navideña?"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es  Yasi🌼\nCon gusto, ya le envio nuestras promos",
+      "📍San Francisco, Calle 74 este, detrás de la delta de Calle 50.\nhttps://maps.app.goo.gl/zc5tqjZW5rZLCaiv5?g_st=ipc"
+    ]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "sfc",
+    "customer": [
+      "Donde estan ubicados?"
+    ],
+    "staff": [
+      "📍San Francisco, Calle 74 este, el local detrás de la delta de Calle 50.\nhttps://maps.app.goo.gl/zc5tqjZW5rZLCaiv5?g_st=ipc"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "Super",
+      "Qué horas me ofreces este sábado o domingo?"
+    ],
+    "staff": [
+      "Contamos con disponibilidad 9:00, 10:00, 11:30",
+      "y en la tarde\n1:00, 2:00"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "El renueva tu calma"
+    ],
+    "staff": [
+      "disculpe hoy cerramos 6:00 pm\nnuestra disponibilidad seria 90 minutos"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "Buenas",
+      "Costa del Este",
+      "Hola q tal para saber si tienen disponibilidad?"
+    ],
+    "staff": [
+      "✨  Buenas Tardes Bienvenido a Mimosa Spa. Costa del este 🌼\nMi nombre es  : Nilka,",
+      "si hay disponibilidad"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "Le voy a avisar ahora",
+      "Hasta qué hora estén abierto ?"
+    ],
+    "staff": [
+      "lunes a viernes estamos hasta las 8 pm"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "En la tarde, por favor"
+    ],
+    "staff": [
+      "3:00, 4:00"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "Es el único horario ?"
+    ],
+    "staff": [
+      "y 2:00 pm",
+      "si, con marianelis"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "Oki a q hora tiene disponible para 60 min"
+    ],
+    "staff": [
+      "hoy disponibilidad 1:00 pm .4:00 pm , 4:30"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "Ok que tal si",
+      "Me das hora para el"
+    ],
+    "staff": [
+      "ultima cita para su paquete de 2 hora puede ser 5:45 pm"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "Hola, en la tarde en que horarios?"
+    ],
+    "staff": [
+      "tiene de 1:30 pm en adelante , 2:00 , 3:00 , 4:00 pm"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "cde",
+    "customer": [
+      "Buen día. ¿Puedes decirme quién, si es que hay alguien? ¿Está disponible a las 12:30?",
+      "Costa del Este",
+      "Buen día. ¿Puedes decirme quién, si es que hay alguien? ¿Está disponible a las 12:30?"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es  Adriana 🌼 \nDisponibilidad a partir de 1:00 pm",
+      "Rocio, ilka"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "Ah y para mañana en la tarde tienen?"
+    ],
+    "staff": [
+      "tendríamos disponibilidad para su tratamietno 12:30 con gussto",
+      "nos indica y con gusto le agendamos"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "alguna que atendia en nuestra oficina",
+      "no se si tengo el nombre bien",
+      "guadalupe perdon"
+    ],
+    "staff": [
+      "Le quedaria en 67.62$ con el descuento",
+      "si! ya le indico los horarios que mantiene Guadalupe disponible",
+      "tengo 11:40am, 1:05pm, 1:30pm, 2:00pm, 3:00pm, 3:20pm",
+      "para el dia de hoy"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "I am looking for a massage"
+    ],
+    "staff": [
+      "Good afternoon , of course!",
+      "We are available tomorrow",
+      "9am and 3:30pm for 60 minutes",
+      "and if you are near, we have an space at 5:00pm"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "Están abiertos hoy domingo"
+    ],
+    "staff": [
+      "Si estamos abiertos, sería para agendar una cita?"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "Atenta a su respuesta"
+    ],
+    "staff": [
+      "Disculpe buenas tardes",
+      "el lunes con gusto tenemos disponibilidad a partir de las 11:30am"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "Para el sabado tienen espacio?"
+    ],
+    "staff": [
+      "Si mantenemos, a partir de las 9am"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "Tendrán espacio para hoy",
+      "Para masajes?"
+    ],
+    "staff": [
+      "de momento tenemos en este momento para 30min o a las 5:25 para 30min",
+      "para mañana si contamos con mayor disponibilidad",
+      "Buenos días un gusto, contamos con disponibilidad para el día de hoy en Sucursal San Francisco 🌼"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "En la otra sucursal tampoco tienen luz?"
+    ],
+    "staff": [
+      "se nos habilito un espacito hoy 11:30am, por si gusta tomarlo Sra {nombre}"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "Tendrán cita disponible para hoy?"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Yasi 🌼\nDisculpe, para el día de hoy no tenemos disponibilidad\nCon gusto para el día de mañana con gustoo"
+    ]
+  },
+  {
+    "intent": "horario",
+    "sucursal": "sfc",
+    "customer": [
+      "Manana"
+    ],
+    "staff": [
+      "para mañana tenemos disponibilidad 9am, 10am y de 1pm en adelante"
+    ]
   },
   {
     "intent": "precios",
-    "sucursal": null,
-    "customer": ["Cuanto cuesta un facial?"],
-    "staff": ["Con gusto le comparto los precios 🌼", "Le comparto la lista de tratamientos y precios 👇"]
+    "sucursal": "cde",
+    "customer": [
+      "Puede ser el masaje relax de 60 min",
+      "Tienen espacio para este sábado en la tarde?"
+    ],
+    "staff": [
+      "si ese es d e79.00 +7% = 84.53"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Hola buenas tarde me das sus precios",
+      "Costa del Este",
+      "Soy de colon y me gustaría saber que precio tiene"
+    ],
+    "staff": [
+      "✨ Muy buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Adriana 🌼 \ncon gusto le compartimos",
+      "27d85e08-1f31-{telefono}-76b8bff8d618{nombre}png Caption: Estos son los tratamientos mas solicitados por nuestros clientes.  Si desea ver la lista completa, visitenos en https://www{nombre}mimosaretreat{nombre}com/menu",
+      "Y todos los meses contamos con promociones",
+      "52483e37_1fe9_8be8_ffb8_55f8ff38d898-5c811184-f35c-4463-ad33-b052ba1dba28{nombre}JPEG Caption: Le enviamos las promos del mes de Mayo. Promociones válidas hasta el 31 de mayo del 2026. Precios no incluyen ITBMS."
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Ok entonces así como queda el total"
+    ],
+    "staff": [
+      "serian 4 de este paquete o solo 1?",
+      "4 paquetes de momento mimosa 423.72",
+      "3 masajes profundos 60 minutos 285.69\n1 momento mimosa 105.93\ntotal 391.62"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Para 90 mins?"
+    ],
+    "staff": [
+      "solo para 60 min 9.00 am",
+      "estamos atentos"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Una consulta, yo quisiera llevar a emilia en mi turno y hacerlo juntas",
+      "Es posible hacerlo con ella , mañana a las 2pm?"
+    ],
+    "staff": [
+      "✨ Muy buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Adriana  🌼 \nlos precios le aplican de lunes a jueves, hoy seria a precio regular 63.13"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Hola!! quisiera saber que precios tienen y si tienen alguna promocion?"
+    ],
+    "staff": [
+      "con mucho gusto ,le compartimos las promociones y nuestro menu",
+      "{codigo}_14cc_1878_eeb8_cca922fd8148-033a8909-bf00-4cfe-9b54-f2045fbd3d7e.png Caption: Le enviamos las promos del mes de Agosto. Válido para compras hasta el 31 de Agosto, 2026. Precios no incluyen Itbms. No aplica con otras promociones o descuentos."
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Relajante y cuanto cuesta"
+    ],
+    "staff": [
+      "masaje presion media a suave  hay de 60 min 84..53 y. 90 min 116 .63"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Me pueden mandar los paquetes de Facial y masajes"
+    ],
+    "staff": [
+      "Si, con mucho gusto",
+      "27d85e08-1f31-{telefono}-76b8bff8d618.png Caption: Estos son los tratamientos mas solicitados por nuestros clientes.  Si desea ver la lista completa, visitenos en https://www.mimosaretreat.com/menu",
+      "57d16b5a_2346_4528_3248_0768c608602b-b4c2f3f9-6a95-4405-b30d-38fb1809b3f4.png Caption: Le enviamos las promos del mes de Julio. Válido para compras hasta el 31 de julio. Precios no incluyen Itbms. No aplica con otras promociones o descuentos.",
+      "Estamos atentas si tiene alguna consulta"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Buenos días que cuesta una limpieza facial"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \n¿Como podemos ayudarle?",
+      "Limpieza facial profunda 63.13"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "cde",
+    "customer": [
+      "Buenas tardes, tienen paquetes de cumpleaños para 7-10 personas?"
+    ],
+    "staff": [
+      "✨ Buenas Tardes, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Adriana 🌼",
+      "Si, con mucho gusto le podemos realizar una cotización\nel mínimo para evento seria 10 personas"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "Me mandas el menu porfa"
+    ],
+    "staff": [
+      "27d85e08-1f31-{telefono}-76b8bff8d618.png Caption: Estos son los tratamientos mas solicitados por nuestros clientes.  Si desea ver la lista completa, visitenos en https://www.mimosaretreat.com/menu"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "Gracias ! Me podrían recordar el costo porfavor ? :)"
+    ],
+    "staff": [
+      "el drenaje linfatic tiene un valor de 73.83"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "Sería para mañana, pero me podrías confirmar que precio tiene?"
+    ],
+    "staff": [
+      "cada uno esta 84.53 ya con impuestos incluidos",
+      "quedamos a su orden para agendarle"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "1 hr para mañana?",
+      "Y cuánto sale?"
+    ],
+    "staff": [
+      "le gustaria relajante o profundo de 1hr?"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "Oki",
+      "Cuanto seria",
+      "?",
+      "Mas el impuesto"
+    ],
+    "staff": [
+      "105.93 con impuesto incluido"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "me pudieras dar precio de masaje relajantes?"
+    ],
+    "staff": [
+      "Con gusto, \n60 minutos: 79+ itbms = 84.53\n90 minutos: 109+ itbms = 116.63"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "🙏🏼🙏🏼🙏🏼",
+      "Hola Nilka",
+      "Buenas tardes",
+      "Qué cuesta un facial para un caballero ?"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Karen 🌼 \n¿Como podemos ayudarle?",
+      "con gusto le comparto nuestro menu de faciales"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "Hay otro más barato que vi"
+    ],
+    "staff": [
+      "este es el precio de el masaje relajante de 60 min"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "Creo que la chica que me dió masajes la última vez que hizo un recorrido y me dijo que hacían algo de eso",
+      "Adicional quiero un facial",
+      "Me podrías compartir los servicios",
+      "Para agendar hoy mira que estoy libre y quiero consentirme la semana pasada fue muy pesada para mí"
+    ],
+    "staff": [
+      "Con mucho gusto Sra {nombre}",
+      "La exfoliacion corporal es muy buena despues de un masajito, le exfoliamos todo el cuerpo, despues usted ingresa a la ducha y al final se le coloca un aceite hidratante para sellar",
+      "de igual manera le comparto el menu completo"
+    ]
+  },
+  {
+    "intent": "precios",
+    "sucursal": "sfc",
+    "customer": [
+      "Quería saber de los paquetes que tienen para masajes"
+    ],
+    "staff": [
+      "27d85e08-1f31-{telefono}-76b8bff8d618.png Caption: Estos son los tratamientos mas solicitados por nuestros clientes.  Si desea ver la lista completa, visitenos en https://www.mimosaretreat.com/menu"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "Hola buenos dias",
+      "Costa del Este",
+      "que promociones tendran en julio?"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Nilka 🌼 \nse las compartimos , con mucho gusto",
+      "1a68348c_4f88_4d4d_59fb_27485d76db98-c1e7a275-04c0-45e5-8ef7-6c1560eec30a.png Caption: Le enviamos las promos del mes de Junio. Promociones válidas hasta el 30 de junio del 2026. Precios no incluyen ITBMS."
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "Responder",
+      "Hola tienes alguna promoción en masajes ?"
+    ],
+    "staff": [
+      "✨  Buenos Días Bienvenido a Mimosa Spa. Costa del este 🌼\nMi nombre es  : Nilka",
+      "se las comparto",
+      "8fec0c83-e398-f16f-1368-bbf1c74a0ac1.JPEG Caption: Le enviamos las promos del mes de abril. Promoción válido hasta el 30 de abril del 2026. Precio no incluye ITBM."
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "Hola buenas tardes",
+      "Costa del Este",
+      "Quiero comprar paquete"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Adriana 🌼",
+      "Si, con mucho gusto\npaquete de promocion?"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "No hay promo?"
+    ],
+    "staff": [
+      "57d16b5a_2346_4528_3248_0768c608602b-b4c2f3f9-6a95-4405-b30d-38fb1809b3f4.png Caption: Le enviamos las promos del mes de Julio. Válido para compras hasta el 31 de julio. Precios no incluyen Itbms. No aplica con otras promociones o descuentos.",
+      "Si desea una de las promos tenemos disponibilidad 11:30, 12:00"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "Que promos tienen este mes",
+      "Que le pueda funcionar a una mujer encinta"
+    ],
+    "staff": [
+      "57d16b5a_2346_4528_3248_0768c608602b-b4c2f3f9-6a95-4405-b30d-38fb1809b3f4.png Caption: Le enviamos las promos del mes de Julio. Válido para compras hasta el 31 de julio. Precios no incluyen Itbms. No aplica con otras promociones o descuentos.",
+      "pero no le recomiendo esos paquetes"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "Quisiera saber que paquetes tienes para junio. Tengo aniversario pronto y queria ver si puedo regalar algo"
+    ],
+    "staff": [
+      "1a68348c_4f88_4d4d_59fb_27485d76db98-c1e7a275-04c0-45e5-8ef7-6c1560eec30a.png Caption: Le enviamos las promos del mes de Junio. Promociones válidas hasta el 30 de junio del 2026. Precios no incluyen ITBMS."
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "La promoción de $99"
+    ],
+    "staff": [
+      "57d16b5a_2346_4528_3248_0768c608602b-b4c2f3f9-6a95-4405-b30d-38fb1809b3f4.png Caption: Le enviamos las promos del mes de Julio. Válido para compras hasta el 31 de julio. Precios no incluyen Itbms. No aplica con otras promociones o descuentos.",
+      "Momento mimosa de 80 minutos?",
+      "disponibilidad 5:30, 6:00 pm"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "Sí que tienes para esta tarde para 2 personas"
+    ],
+    "staff": [
+      "le compartimos las promociones del mes",
+      "{codigo}_14cc_1878_eeb8_cca922fd8148-033a8909-bf00-4cfe-9b54-f2045fbd3d7e.png Caption: Le enviamos las promos del mes de Agosto. Válido para compras hasta el 31 de Agosto, 2026. Precios no incluyen Itbms. No aplica con otras promociones o descuentos.",
+      "e9d66f2c-13a4-4dd8-90bc-88b5454295b1.jpg Caption: tenemos ,estas  de 80 min para 2"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "Promo de este mes?"
+    ],
+    "staff": [
+      "le comparto nuestras promociones del mes"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "cde",
+    "customer": [
+      "Perdon alivio integral de la promo",
+      "Ambos de 60min q cuestan $79 cierto?",
+      "Para el sábado 25 de julio a las 1030am",
+      "Puede ser ambas en la misma cabina?"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \ncorrecto, ambos son de 79+7%",
+      "Con mucho gusto, le agendamos \nsi, puede ser en la misma cabina",
+      "por favor compartir los siguientes datos:\n\n📌 Nombre y Apellido:\n\n📌 Correo electrónico:\n\nMuchas gracias 🌼",
+      "nos comparte los nombre de las 2 personas por favor"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "Como así?",
+      "Pago $60 y la persona recibe $75?"
+    ],
+    "staff": [
+      "Si, correcto",
+      "es una promoción del -20% off"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "Y para qué tienen?"
+    ],
+    "staff": [
+      "8fec0c83-e398-f16f-1368-bbf1c74a0ac1.JPEG Caption: Le enviamos las promos del mes de abril. Promoción válido hasta el 30 de abril del 2026. Precio no incluye ITBM."
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "Saludo Mary",
+      "Si para dos",
+      "Que promo tiene este mes?",
+      "Esa"
+    ],
+    "staff": [
+      "Perfecto, le agendamos"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "Ok",
+      "No hay problema",
+      "Tienen alguna oferta ?"
+    ],
+    "staff": [
+      "🌼Su cita ha sido agendada!🌼\n📆 Día: Hoy 18 de junio\n🕓Hora: 6:30pm\n🌼Tratamiento: Mimosa Relax 60min \n📍San Francisco, Calle 74 este detrás de la delta de Calle 50.",
+      "1a68348c_4f88_4d4d_59fb_27485d76db98-c1e7a275-04c0-45e5-8ef7-6c1560eec30a.png Caption: Le enviamos las promos del mes de Junio. Promociones válidas hasta el 30 de junio del 2026. Precios no incluyen ITBMS."
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "San Francisco",
+      "4ab51b8b-1fbb-4b94-bafc-{codigo}ffc5.jpg Caption: Quería saber sobre esta promocion hasta qué fecha era y en tal caso para reservar dia",
+      "Sería la de 129",
+      "Bueno ya vi que hasta el 10"
+    ],
+    "staff": [
+      "Buenos días, si correcto la tenemos disponible hasta el 10 de diciembre para compra",
+      "luego de la fecha de compra tiene 3 meses para utilizarle"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola buenos días",
+      "San Francisco",
+      "e7db21df-aec5-489b-8620-ddb5c26a5868.jpg Caption: Quería consultar sobre esta promo"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es Mary 🌼 \nSi con mucho gusto",
+      "La promo funciona así",
+      "Paga $60.00 y recibe un gift card de $ 75.00\n\nPaga  80.00 y  recibe un gift card de $100.00\n\nPaga $100.00 y recibe un gift card de  $125.00"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola buenas tardes, una consulta quiero saber cuánto sería el descuento de copa? Mi esposo es piloto y me comentó que habían descuentos con ustedes. O si tienes alguna promoción ahora para San Valentín para parejas"
+    ],
+    "staff": [
+      "Claro que sí, el descuento de copa es del 30% para el colaborador y se asiste con algún acompañante, también se le daría el descuento",
+      "De igual manera le enviamos las promociones para este mes, el descuento no aplicaría para promociones, ya que tienen descuentos aplicados",
+      "bd480e97-344f-3398-3de8-30a8921c134d.png Caption: Aqui le envio las promos del mes de febrero. Promoción válido hasta el 28 de febrero del 2026. Precio no incluye ITBM."
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "Tienen algun cupo de 80 min hoy?",
+      "Con este especial/\n\nLe puedo ofrecer la promocion del mes de 90 minutos \nincluye masaje relax + oriental de pies"
+    ],
+    "staff": [
+      "Ya le indico, para el dia de hoy"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "Mañana es posible pareja",
+      "Ir tarde q promoción hay",
+      "San Francisco",
+      "Relajante"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Karen 🌼 \nCon mucho gusto Sra {nombre}",
+      "le envio las promos del mes",
+      "83f8c75c_2478_d048_ae18_05febdb618b8-f3cc7a8e-6899-447a-a829-04e82d7fba15.png Caption: Le enviamos las promos del mes de Septiembre. Válido para compras hasta el 30 de Septiembre, 2026. Precios no incluyen Itbms. No aplica con otras promociones o descuentos.",
+      "para el dia de mañana tengo disponibilidad para 11:30am para masajito de 60mins en pareja, y luego a las 1:55pm para hacer una promo de mas tiempo en pareja"
+    ]
+  },
+  {
+    "intent": "promo",
+    "sucursal": "sfc",
+    "customer": [
+      "{nombre} Yerina Sánchez",
+      "Respondiendo a la promoción que me llegó"
+    ],
+    "staff": [
+      "su cita quedo agendada para mañana sabd",
+      "para mañana sabado a las 3:00 pm en nuestra nueva sucursal en san francisco"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "Que tal nilka",
+      "Tienen disponibilidad este sabado de casualidsd?"
+    ],
+    "staff": [
+      "si contamos , con disponibilidad",
+      "que masaje ,desea agendar ??"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "Y mañana con Marianelis?"
+    ],
+    "staff": [
+      "si, mañana mantiene disponibilidad  11:30 am en adelante"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "{nombre} Gadala",
+      "Quería programar un masaje para hoy"
+    ],
+    "staff": [
+      "Con mucho gusto disponibilidad 1:00 pm en adelante",
+      "Que masaje desea?"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "Confirmar",
+      "Hola \nQuería agendar un masaje de 60 minutos para el sábado en la mañana por favor. \nQue disponibilidad tiene?",
+      "Costa del Este"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Nilka 🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "Tienen espacio para el sábado 22 en la mañana?"
+    ],
+    "staff": [
+      "si, desde las 9 am en adelante",
+      "estamos atentos",
+      "para agendarle"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "Que día tiene disponible"
+    ],
+    "staff": [
+      "me indica el día y la hora que desea ser atendida"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "Ese puede ser",
+      "Siii me lo reservas por favor 10 am",
+      "Estefania Osorio"
+    ],
+    "staff": [
+      "🌼Su cita ha sido agendada!🌼\n📆 Día: 28 de febrero\n🕓Hora: 10:00 am\n🌼Tratamiento: Paquete pareja 80 minutos cada uno\n📍Star Plaza, costa del este."
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "Perfectoo"
+    ],
+    "staff": [
+      "que masaje desea?"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "super"
+    ],
+    "staff": [
+      "que hora desea?"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": [
+      "Costa del Este",
+      "Hola. Quiero un masaje de 45 mins que se llama liberador de tension en su menu",
+      "Hoy",
+      "Es posible?"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana 🌼",
+      "Si, sr {nombre} con mucho gusto",
+      "que hora desea?"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "Nop"
+    ],
+    "staff": [
+      "contamos con espacio 9:15, 10:00 11:00 a.m",
+      "nos deja saber y con gusto le agendamos"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola. Para dos personas?"
+    ],
+    "staff": [
+      "si"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "Can we do it Tuesday at 6:30 🙏"
+    ],
+    "staff": [
+      "Sure"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "Cualquiera que tengas disponibilidad para las 3 para dos personas"
+    ],
+    "staff": [
+      "En sucursal San Francisco lastimosamente no contamos con disponibilidad para dos personas en este horario, con musho gusto le transferimos a Costa del Este para que puedan indicarle los horarios disponibles",
+      "feliz tarde🌼"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "{nombre} de Chapman \n{correo}"
+    ],
+    "staff": [
+      "🌼Su cita ha sido agendada!🌼\n📆 Día: Lunes, 29 de dic\n🕓Hora: 11:30 a.m \n🌼Tratamiento: Masaje profundo 60 min\n📍San Francisco, Calle 74 este detrás de la delta de Calle 50."
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "Si! Queremos conocerla"
+    ],
+    "staff": [
+      "con gusto, le podemos agendar 2pm le parece?"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola, me interesa un masaje profundo y masaje de pies",
+      "Me recomendó Astrid Ferreira",
+      "Si"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa  \nCon gusto, en que sucursal desea ser atendida?"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "A las 1 \nMasaje de piernas",
+      "Ya está pago puedes verificar cuál es",
+      "{nombre} Sullivan"
+    ],
+    "staff": [
+      "Contamos con espacio disponible 3:00 pm, 4:10 pm, 4:45 pm"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "Buen día quisiera agendar para un masaje en sucursal de San Francisco el viernes temprano",
+      "Pero me podrian guiar de cual seria mejor para mi, quiero relajarme y siento la espalda y cuello tenso"
+    ],
+    "staff": [
+      "con gusto",
+      "tenemos disponibilidad desde las 11:15am"
+    ]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": [
+      "es conmigo",
+      "ambas"
+    ],
+    "staff": [
+      "Muchas gracias, es que no mantenemos registrado en sistema el numero de telefono de la sra Maria y no teniamos comon confirmar la cita",
+      "Nos gustaria confirmar, seria 1 relajante y 1 profundo de 60mins"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Perdón puede ser 6:30?"
+    ],
+    "staff": [
+      "Buenas tardes, si le cambiamos 6:30"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Hola Adriana",
+      "Me regalaron un cráneo facial pero quiero cambiarlo\nPor una limpieza\nProfunda y pagar la\nDiferencia",
+      "Se\nPuede?"
+    ],
+    "staff": [
+      "Si, lo puede realizar"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Reagendar",
+      "Puede ser un poco más tarde mañana . Tendrán espacio ?"
+    ],
+    "staff": [
+      "puede ser 10;00 am"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Si  por favor",
+      "Sale del Shiatsu para el facial",
+      "🙏🏼🙏🏼🙏🏼"
+    ],
+    "staff": [
+      "Correcto"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Reagendar mi cita",
+      "La tenia esta semana\nVoy a cambiad al 3 de Sept"
+    ],
+    "staff": [
+      "Con gusto, le cambiamos"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Si tiene otro día a las 5pm me avisa"
+    ],
+    "staff": [
+      "Mañana o martes"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Gracias",
+      "Hola. No llegaré a las 5 el tráfico está horrible",
+      "Me la pueden correr para las 5:39",
+      "5:30 por favor"
+    ],
+    "staff": [
+      "Si, le esperamos"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Hola",
+      "Que penas pero mi mama no me puede llevar hasta las 5"
+    ],
+    "staff": [
+      "le puedo ofrecer a Las 5:30 para 60 minutos o a las 6:30 para los 90 minutos",
+      "la esperamos a las 5:00 pm para los 90 minutos",
+      "nos confirma sra mariana si desea a las 5 y con gusto le agendamos",
+      "estamos atentas"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "No llego a las 230 , muy justo",
+      "Y 30 minutos de pies y una hora masaje ?"
+    ],
+    "staff": [
+      "3:00 pm para 90 min , le funcionaria??"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "cde",
+    "customer": [
+      "Hola Adriana pregunta",
+      "Tengo cita a las 10",
+      "Hay espacio para retrasat a las 11?"
+    ],
+    "staff": [
+      "Si",
+      "le cambiamos 11:00 am"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "Podríamos cambiar a 2:30pm? ☺️y disculpa ?"
+    ],
+    "staff": [
+      "Si con mucho gusto",
+      "Le cambiamos la cita 2:30pm"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "Buenos dias Yasi!",
+      "Es para ver si de casualidad podia agregar una 3era cita",
+      "Y que nos atiendan a las 3?",
+      "Y cambiar la hora a las 3 pm?"
+    ],
+    "staff": [
+      "me indica el tercer tratamiento que desea añadir, por favioir"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "gracias",
+      "hola es posible moverla para las 2:30pm?",
+      "el masaje",
+      "consultar"
+    ],
+    "staff": [
+      "Hola buenas tardes Sr {nombre}",
+      "claro, cuenteme",
+      "disculpe, no tenemos disponibilidad 2:30pm"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "Gracias!",
+      "Disculpe lo puedo mover a las 5?"
+    ],
+    "staff": [
+      "4:30 con gusto le podemos atender",
+      "nos indica y le corremos la cita",
+      "🌼"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "reagendar"
+    ],
+    "staff": [
+      "con gusto, nos indica cuando desea reagendar?",
+      "Quedamos pendientes para reagendar su cita",
+      "o nos indica si usted se vuelve a comunicar con nosotros"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "Gracias Yasi"
+    ],
+    "staff": [
+      "Se ha reagendado su cita para el sábado 14 de marzo 10am"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "solo una persona",
+      "yo",
+      "se agendó doble... nunca entendí por qué"
+    ],
+    "staff": [
+      "oh es solo una persona entendido",
+      "corregimos la cita"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "Yasi ya concerté otra cita. Otro día será en el de San Francisco"
+    ],
+    "staff": [
+      "con gusto Sra {nombre}"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "buen día",
+      "San Francisco",
+      "cambiar una cita"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa \nMi nombre es Mary 🌼 \n¿Como podemos ayudarle?"
+    ]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": "sfc",
+    "customer": [
+      "En camino, algo de trafico.",
+      "Podria llegar algo atrasado, esta bien?"
+    ],
+    "staff": [
+      "le esperamos"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "cde",
+    "customer": [
+      "Disculpa",
+      "Tendre que cancelar el masaje",
+      "Se me presento un inconveniente",
+      "Mil disculpas 🙈"
+    ],
+    "staff": [
+      "Comprendo sra {nombre}",
+      "no se preocupe, gracias por informarnos"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "cde",
+    "customer": [
+      "Esta bien",
+      "Lo cancelo ya",
+      "Le mando el comprobante un segundo",
+      "Le puedo poner algun nombre o mensaje?"
+    ],
+    "staff": [
+      "Nos debe compartir el nombre de cada persona que corresponde a cada masaje",
+      "Le podemos colocar un pequeño mensaje"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "cde",
+    "customer": [
+      "Buenos días perdón, tuve un inconveniente,  debo cancelar"
+    ],
+    "staff": [
+      "gracias"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "cde",
+    "customer": [
+      "Me cancelas entonces la que hiciste para que me salga Rocio? Porque revisé y no me sale"
+    ],
+    "staff": [
+      "Si, ya se la cancele"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "cde",
+    "customer": [
+      "Inbound Call",
+      "Me puede cancelar la cita porfa",
+      "No podre asistir"
+    ],
+    "staff": [
+      "Desea para más tarde?"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "cde",
+    "customer": [
+      "Hello! Sorry tuve un contratiempo, no podré llegar nada.. en la semana les escribo para agendas nuevamente"
+    ],
+    "staff": [
+      "gracias",
+      "le cancelamos",
+      "quedamos atentas para reprogramar"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "cde",
+    "customer": [
+      "Hola\nDisculpa",
+      "Tengo que cancelar hoy"
+    ],
+    "staff": [
+      "✨ Buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana 🌼 \nGracias, le cancelamos\nla desea reagendar para mañana ?"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "sfc",
+    "customer": [
+      "Inbound Call",
+      "Disculpeeee!! Estoy de camino",
+      "Se me pasó la hora",
+      "Estoy en 5!"
+    ],
+    "staff": [
+      "Disculpe",
+      "no contamos con la disponibilidad"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "sfc",
+    "customer": [
+      "Buenos días",
+      "San Francisco",
+      "Cancelar cita"
+    ],
+    "staff": [
+      "Buen dia Sra {nombre}",
+      "Usted mantiene alguna cita agendada en Sn Francisco?"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "sfc",
+    "customer": [
+      "nooo😭😭😭",
+      "entonces no voy a poder hoy 😭",
+      "gracias"
+    ],
+    "staff": [
+      "🥹",
+      "tenemos en estos horarios y 4:30pm solamente, desea que consulte con suc. costa del este?"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "sfc",
+    "customer": [
+      "No, voy a tener que cancelar",
+      "Voy a reprogramar para más adelante"
+    ],
+    "staff": [
+      "Nos deja saber y con gusto le agendamos",
+      "quizas para el proximo fin de semana"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola buenas tardes , voy a tener que cancelar, tengo una situación con la nana de mi hija y ya no lograré llegar a tiempo",
+      "Sorry porque estoy apenada pero cosas que pasan fuera del control"
+    ],
+    "staff": [
+      "Entendemos, nos deja saber para cuando le gustaria reagendar"
+    ]
+  },
+  {
+    "intent": "cancelar",
+    "sucursal": "sfc",
+    "customer": [
+      "hola, voy a tener que cancelar la cita para el martes que viene. Disculpen.",
+      "San Francisco"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es  Yasi🌼 \nambas citas?"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "A las 10:00 estaría bien.\nA nombre de \n{nombre} Gudiño\nAminta Wesley"
+    ],
+    "staff": [
+      "me comparte foto de los certificados por favor",
+      "desean cabinas compartidas ?"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "Me regalaron un certificado de regalo, quisiera saber cuanto tiempo tengo para utilizarlo?"
+    ],
+    "staff": [
+      "Los certificados tienen 12 meses de vigencia"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "Buenos días! \nRecibí de cumpleaños un spa gift certificate",
+      "Quisiera saber: \n1. Cuánto tiempo sería la sesión incluyendo lo que indica\n2. ⁠En qué horarios están los fines de semana"
+    ],
+    "staff": [
+      "Su tratamiento es de 1 hora y 20 minutos",
+      "Nuestro horario\n🕒 Lunes a Viernes: 9:00 a.m | 8:00 p.m\n📅 Sábados, Domingos y Festivos: 9:00 a.m | 6:00 p.m"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "Tengo un certificado con uds ya hace un rato adquirido si",
+      "Mi nombre {nombre} Martinez"
+    ],
+    "staff": [
+      "Sii",
+      "Desea agendar?",
+      "Nos puede enviar una fotito de su certificado por favor"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "Hola adriana",
+      "Quiero comprar un Certificado de regalo",
+      "Pero no encuentro donde"
+    ],
+    "staff": [
+      "Con mucho gusto\nlo desea por un masaje o por un monto ?",
+      "Usted paga \n\nPaga $ 40.00 y recibe  un gift card de $50.00 \n\nPaga $60.00 y recibe un gift card de $ 75.00\n\nPaga  80.00 y  recibe un gift card de $100.00j\n\nPaga $100.00 y recibe un gift card de  $125.00\n\n*Aplicables a nuestro menú de precios regulares \n* no aplica con otras promociones"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "Va para alla",
+      "Ya le mando comprobante\nEl voucher del regalo me lo puede mandar por esta via virtual?"
+    ],
+    "staff": [
+      "si le enviamos una cartita virtual"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "Costa del Este",
+      "Buenas tardes, para agendar cita, tengo un certificado de regalo"
+    ],
+    "staff": [
+      "✨ Buenas tardes bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana🌼 \ncon gusto",
+      "Para que dia lo desea?"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "María Ramos",
+      "Perfecto muchísimas gracias 😊"
+    ],
+    "staff": [
+      "me indica el nombre de la persona que retira la tarjeta"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "Preferiría físico , tienen en Costa del este ? Así paso por el más tarde"
+    ],
+    "staff": [
+      "si estamos hasta las 6:00 pm , puede pagarlo y se lo tenemos listo"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "cde",
+    "customer": [
+      "Buen día, mi nombre es Zuhaira",
+      "Pero estoy haciendo eeserva de un certificado que regale",
+      "Este",
+      "11am"
+    ],
+    "staff": [
+      "le agendamos"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola",
+      "San Francisco",
+      "Tendrán disponibilidad para mañ{nombre} para un certificado que tengo x un masaje de 80mins?",
+      "Este"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es  Yasi🌼\nDisculpe, puede ser martes 23 de dic"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola qué tal? Tengo un gift card para un mimosa relax y quisiera utilizarlo. Me podrías ayudar a agendar una cita por favor?",
+      "San Francisco",
+      "Hola qué tal? Tengo un gift card para un mimosa relax y quisiera utilizarlo. Me podrías ayudar a agendar una cita por favor?"
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Karen 🌼 \nCon gusto",
+      "me regala una fotito de su certificado"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Manuel Pinzón\nDe: {nombre} Sofía"
+    ],
+    "staff": [
+      "8590dad2-9c0f-48f7-a81e-512aec654f29.jpg Caption: Se ha registrado todo a nombre de Manuel Pinzón"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Waoooo",
+      "Pensé que era solo el gift card",
+      "En este sentido qué me recomiendas?",
+      "Lo que entiendo es que tengo un masaje aromatico más el crédito?"
+    ],
+    "staff": [
+      "No, disculpe, usted mantiene un certificado De un masaje de aromaterapia de 50mins",
+      "por un valor de 73.83$"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Si"
+    ],
+    "staff": [
+      "Tengo disponible un espacio 9am",
+      "seria tan amable de compartirme una fotito de su certificado porfavor",
+      "debe tener un codigo en la parte de atras o en la parte derecha inferior"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Si."
+    ],
+    "staff": [
+      "Fue comprado en diciembre 2025, aun esta vigente"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Lo pagué en CDE"
+    ],
+    "staff": [
+      "correcto, esas 2 tarjetitas son sus certificados",
+      "solo quería ver si nos las podían enviar para poder registrarlas"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola Karen quisiera comprar un certificado de regalo"
+    ],
+    "staff": [
+      "Con mucho gusto Sra {nombre}, ya sabe que tratamiento desea regalar?"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Claro"
+    ],
+    "staff": [
+      "con gusto, el código que tiene atras, me lo puede enviar por favor",
+      "por favor compartir los siguientes datos:\n\n📌 Nombre y Apellido:\n\n📌 Correo electrónico:\n\nMuchas gracias 🌼"
+    ]
+  },
+  {
+    "intent": "certificado",
+    "sucursal": "sfc",
+    "customer": [
+      "Hola",
+      "La cita es para mi suegra, yo le compre un certificado de 120 mins"
+    ],
+    "staff": [
+      "Ohh entiendo si, para 120 min tendriamos a las 10am sra {nombre}",
+      "me indica y con gusto le agendo"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "Este es el email de mi amiga: su nombre es Isaura {correo}",
+      "El monto que voy a transferir es $84.53"
+    ],
+    "staff": [
+      "por favor compartir los siguientes datos:\n\n📌 Para Nombre y Apellido:\n📌 De:\nMuchas gracias 🌼",
+      "nos comparte estos datos ,por favor"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "Si, apenas los escoja le comunico",
+      "El pago lo puedo hacer por aca o debo ir ese dia?"
+    ],
+    "staff": [
+      "por aquí , si gusta , y le enviamos una cartita virtual",
+      "En YAPPY nos busca en el directorio como MIMOSA y aparecemos con el logo, la flor amarilla..🌼 y el nombre Relax Cala\n\nCuenta Corriente\nRelax Cala S A\n0343 {codigo} 56 6\nBanco General \n\nLink pago tarjetas : nombre y apellido y correo electrónico del tarjetahabiente",
+      "cuando elija ,nos avisa ,para  darle total"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "Me gustaría saber si se puede pagar con tarjeta de crédito."
+    ],
+    "staff": [
+      "Si"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "Ok",
+      "Me envía el número de yappy"
+    ],
+    "staff": [
+      "En YAPPY nos busca en el directorio como MIMOSA y aparecemos con el logo, la flor amarilla..🌼 y el nombre Relax Cala",
+      "seria  de  esta forma",
+      "si gusta le podemos llamar , para ayudarle"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "Okk",
+      "No tienes link de pago??"
+    ],
+    "staff": [
+      "Si\nLink pago tarjetas : nombre y apellido y correo electrónico del tarjetahabiente"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "{nombre} Quadri\n{correo}",
+      "Aqui esta"
+    ],
+    "staff": [
+      "ya se lo envio",
+      "Ya se le envio ,el link"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "Hola",
+      "Me apoyan mandando otro link de pago aquí:",
+      "Alfonso Veltman \n{correo}"
+    ],
+    "staff": [
+      "Hola",
+      "Si, se lo enviamos"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "Ah no mejor este"
+    ],
+    "staff": [
+      "Con gusto, masaje relajante 84.53",
+      "En YAPPY nos busca en el directorio como MIMOSA y aparecemos con el logo, la flor amarilla..🌼 y el nombre Relax Cala\n\nCuenta Corriente\nRelax Cala S A\n0343 {codigo} 56 6\nBanco General \n\nLink pago tarjetas : nombre y apellido y correo electrónico del tarjetahabiente",
+      "Buenos días , estamos atentos , para seguir ayudándole con su compra 😌"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "No problem we will give you $10 when we come next week"
+    ],
+    "staff": [
+      "thank you",
+      "It’s a shame, but I need it to finalize the massage package today; otherwise, I’d be happy to.\nWe accept Yappy or ACH if you prefer, or a payment link."
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "cde",
+    "customer": [
+      "Listo el pago"
+    ],
+    "staff": [
+      "por favor compartir los siguientes datos:\n\n📌 Para Nombre y Apellido:\n📌 De:\nMuchas gracias 🌼",
+      "nos comparte  estos datos por favor"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "Luis Álvarez lo pasará a buscar"
+    ],
+    "staff": [
+      "Si, con gusto",
+      "Nos compaarte el comprobantes"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "El de 99",
+      "Ok"
+    ],
+    "staff": [
+      "Super, serian en total 105.93$",
+      "YAPPY: \nPuedes ubicarnos en el directorio como MIMOSA y nos encontrarás con el logo de la flor amarilla..🌼 y el nombre Relax Cala\n\nACH:\nCuenta Ahorros\nRelax Cala S A\n04-43-00-{codigo}-1\nBanco General \n\nLink de Pago para Tarjetas:\nPor favor compártenos el nombre, apellido y correo electrónico del tarjetahabiente para enviarte el link",
+      "Me regala porfis a nombre de quien seria el certificado y si gusta colocarle de parte de quien va"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "Me deja saber cómo si tienen link o yappy"
+    ],
+    "staff": [
+      "el total sería de 136.96 ya con el impuesto",
+      "En YAPPY nos busca en el directorio como MIMOSA y aparecemos con el logo, la flor amarilla..🌼 y el nombre Relax Cala\n\nCuenta Ahorros\nRelax Cala S A\n04-43-00-{codigo}-1\nBanco General \n\nLink pago tarjetas : Enviarnos nombre,  apellido y correo electrónico del tarjetahabiente",
+      "Disculpe, sabrá en que tiempo llegaría? es que tenemos la agenda apretadira hoy"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "Ya te lo paso",
+      "Pásame la cuenta para mandarte un Yappy"
+    ],
+    "staff": [
+      "En yappy nos enxuentra en el directorio como MIMOSA",
+      "le va a aparecer la flor amarilla y Relax Cala"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "Katheryne Villalobos \n{correo}"
+    ],
+    "staff": [
+      "Enseguida se lo facturamos",
+      "Listo, en un momento le debe llegar la factura al correo",
+      "será un gusto atenderle 🌼"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "Realizado",
+      "Es mañana viernes"
+    ],
+    "staff": [
+      "Seia ta amable de compartirnos el comprobante de pago por este medio",
+      "Disculpe, enseguida le agendo mañana"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "Responder"
+    ],
+    "staff": [
+      "Buenos dias sra {nombre}",
+      "Es para confirmarle que la devolución fue realizada el día de ayer",
+      "a15c5de3-920d-4e37-ab6d-a96316bcf4d7.png Caption: Adjunto comprobante"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "A nombre Dennis Mendez"
+    ],
+    "staff": [
+      "el total sería 59.17"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "{nombre} Castillo\n{nombre}o/aeveryologist.com"
+    ],
+    "staff": [
+      "Enseguida se lo envío",
+      "Ha sido enviado al correo brindado",
+      "Por este medio nos comparte el comprobanyte"
+    ]
+  },
+  {
+    "intent": "pago",
+    "sucursal": "sfc",
+    "customer": [
+      "si estoy en espera que mi jefa realice la trasferencia"
+    ],
+    "staff": [
+      "Gracias",
+      "Estamos a su orden para ayudarle con su compra",
+      "Nos indica si desea el certificado disculpe, ya lo hemos preparado como indicó"
+    ]
+  },
+  {
+    "intent": "queja",
+    "sucursal": "cde",
+    "customer": [
+      "Tengo cita a la 1pm",
+      "Pro no llegó",
+      "😔😮‍💨"
+    ],
+    "staff": [
+      "desea para mas tarde?"
+    ]
+  },
+  {
+    "intent": "queja",
+    "sucursal": "sfc",
+    "customer": [
+      "Hi",
+      "Hola. Quiero presentar una queja formal y muy seria con respecto al masaje détox que recibí ayer en su centro.\n\nNo es la primera vez que me realizo un masaje détox con ustedes, por lo que sé perfectamente qué esperar de este tipo de tratamiento. Sin embargo, lo que ocurrió ayer fue completamente inadmisible.\n\nEn primer lugar, durante prácticamente toda la sesión, la persona que realizó el masaje estuvo suspirando repetidamente y mostrando claramente una actitud de molestia o descontento. Esto hizo que la experiencia fuera sumamente incómoda y poco profesional.\n\nPero lo más grave fue la forma en que se realizó el masaje. La presión aplicada fue excesiva hasta el punto de dejarme hematomas, especialmente en el abdomen. En esa zona le pedí de manera expresa que disminuyera la presión. Ella me indicó que había entendido, pero continuó aplicando prácticamente la misma fuerza.\n\nHoy tengo el cuerpo completamente adolorido y varios hematomas. Estoy perfectamente acostumbrada a masajes con presión y sé que determinados tratamientos pueden ser intensos, pero existe una diferencia muy clara entre aplicar presión terapéutica y ejercer una fuerza desproporcionada que termina lesionando al paciente.\n\nAdemás, entiendo perfectamente que la sesión era de 45 minutos y que existe un tiempo limitado. Sin embargo, eso no justifica trabajar una parte de una pierna y una parte diferente de la otra. El tratamiento debe realizarse de manera equilibrada y coherente en ambos lados del cuerpo.\n\nPor mi formación en el área de la salud, sé perfectamente que aplicar más fuerza no significa realizar un tratamiento más efectivo. La presión debe aplicarse de manera precisa y controlada. Ejercer una fuerza excesiva, sin respetar la respuesta del cuerpo y, sobre todo, después de que el paciente haya pedido expresamente que se reduzca, no es aceptable.\n\nConsidero esta situación muy seria y espero una explicación clara por parte del centro sobre lo ocurrido y sobre cómo piensan manejar esta situación."
+    ],
+    "staff": [
+      "Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Karen 🌼 \nLamentamos que su experiencia no haya sido la esperada y enseguida vamos a elevar la situación para investigar lo que sucedió.",
+      "Seria tan amable de regalarme su nombre completo y en que sucursal fue atendida porfavor"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "gracias! nos vemos mañana"
+    ],
+    "staff": [
+      "muchas gracias"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "Gracias"
+    ],
+    "staff": [
+      "a la orden, ha  sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "Gracias"
+    ],
+    "staff": [
+      "a la orden"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "Gracias confirmado"
+    ],
+    "staff": [
+      "Su cita está confirmada! ✅\n📅 Fecha: hoy 27 de julio \n⏰ Hora: 5:00 pm\n🍃Tratamiento:  Masaje relajante 60 minutos\n🌼Lugar: Mimosa Spa Retreat,  Star Plaza, Costa del Este"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "Perfecto voy para alla"
+    ],
+    "staff": [
+      "Gracias, le esperamos"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "Gracias"
+    ],
+    "staff": [
+      "Su cita está confirmada! ✅\n📅 Fecha: hoy 11 de julio\n⏰ Hora: 3:00 pm\n🍃Tratamiento:  Calma profunda 110 minutos\n🌼Lugar: Mimosa Spa Retreat,  Star Plaza, Costa del Este"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "60 min"
+    ],
+    "staff": [
+      "les esperamos , muchas gracias"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "Mil gracias",
+      "Vamos en camino",
+      "Estamos llegando 12:15 disculpe"
+    ],
+    "staff": [
+      "Gracias, le esperamos"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "🙏🏼🙏🏼🙏🏼"
+    ],
+    "staff": [
+      "a usted"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "cde",
+    "customer": [
+      "Ok"
+    ],
+    "staff": [
+      "Ha sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "Yeiii gracias mil"
+    ],
+    "staff": [
+      "🌼"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "Confirmar"
+    ],
+    "staff": [
+      "Agradecemos su confirmación"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "Gracias ❤️"
+    ],
+    "staff": [
+      "a su orden, le esperamos!"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "Confirmar"
+    ],
+    "staff": [
+      "Muchas gracias, le esperamos"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "Gracias"
+    ],
+    "staff": [
+      "Ha sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "responde",
+      "Gracias"
+    ],
+    "staff": [
+      "Ha sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "Oki",
+      "Confirmado"
+    ],
+    "staff": [
+      "Le esperamos 🏵️"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "gracias!"
+    ],
+    "staff": [
+      "Ha sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "Ok perfecto"
+    ],
+    "staff": [
+      "Ha sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"
+    ]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": "sfc",
+    "customer": [
+      "Gracias !"
+    ],
+    "staff": [
+      "Tenemos el gusto con la sra {nombre}?"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "Que puede ser?",
+      "Que tienes disponible?"
+    ],
+    "staff": [
+      "masaje de 60 minutos",
+      "relajante, profundo"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "Si en camino"
+    ],
+    "staff": [
+      "disculpe, en que tiempo llegria?",
+      "llegaria"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "Si igual le voy escribiendo le parece ?"
+    ],
+    "staff": [
+      "Nos puede ir comentando",
+      "estaremos atentas"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "What is the perfect oval treatment?"
+    ],
+    "staff": [
+      "We no longer offer that treatment."
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "Buenas tardes, mi nombre es   Laura Soto, soy colombiana y escribo para saber si están solicitando Masajistas?"
+    ],
+    "staff": [
+      "Buenas tardes",
+      "Con mucho gusto puede enviar su hoja de vida al siguiente correo \nmmarino/amimosaretreat{nombre}com"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "holaaa okiis gracias"
+    ],
+    "staff": [
+      "Un obsequio de parte de la Sra Giovanna",
+      "le envía este Stickers"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "Estoy oor town center pero no se mueve estas calles 🤦🏾‍♀️",
+      "5eb34831-3c07-4f4f-b90b-f71565d619d3.jpg Caption: No se mueve costa del este imposible 😭 mejor me doy vuelta perdona"
+    ],
+    "staff": [
+      "Entendemos",
+      "✨ Buenas tardes bienvenido a Mimosa Spa Costa Del Este\nMi nombre es  Adriana 🌼 \nSra {nombre} hoy contamos con disponibilidad, si desea agendar"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "Pero si no los harían juntos en el mismo cuarto"
+    ],
+    "staff": [
+      "si solo debe hacer la cita y decir que desea cabina juntos"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "A ok, no hay paquete comp tal de cumpleaños"
+    ],
+    "staff": [
+      "No, por el momento no"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "cde",
+    "customer": [
+      "2ba8fc53-8e04-4685-979a-b394a97d97d7.jpg Caption: Ese detox es lo mismo que esto o no ?"
+    ],
+    "staff": [
+      "No, el detox le combina masaje drenaje+ masaje moldeador , es un poquito mas fuerte",
+      "el drenaje linfático serian movimientos suaves y lentos \nambos se realizan en abdomen, brazos y piernas"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "masaje de pies con cual lo puedo mezclar?"
+    ],
+    "staff": [
+      "podría ser con un masaje de espalda o con un facial express"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "👍"
+    ],
+    "staff": [
+      "ya le estamos atendiendo a la sra Karla🏵️"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "solo para notificarle que voy de camino, me retrase un poco con el trafico!"
+    ],
+    "staff": [
+      "Gracias por notificar"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "Yenny Alvarado"
+    ],
+    "staff": [
+      "gracias"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "Cuánto sería el precio?",
+      "Es para yo realizar un tratamiento estoy buscando cabina en alquiler por hora"
+    ],
+    "staff": [
+      "Disculpa, no alquilamos las instalaciones del spa a personal externo"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "{nombre}{correo}"
+    ],
+    "staff": [
+      "enseguida le envio, permitame",
+      "listo mi señora, enviado"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "¿Qué terapeuta?"
+    ],
+    "staff": [
+      "Cristina, full recomendada"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "No, pero no se si le guste jajaja"
+    ],
+    "staff": [
+      "En este caso le podriamos ofrecer un craneofacial de 50mins + piernas cansadas de 20mins",
+      "porque el paquete que usted desea incluye masaje profundo de espalda y adicional piedras calientes y no creo que sea muy recomendable la terapia de calor para ella"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "No hay problema"
+    ],
+    "staff": [
+      "le contactaré en cuanto tenga respuesta"
+    ]
+  },
+  {
+    "intent": "otro",
+    "sucursal": "sfc",
+    "customer": [
+      "Ok, consiguen atender 2 personas al mismo tiempo? Disculpa es que acabo de llegar de viaje y estoy mala jajaja"
+    ],
+    "staff": [
+      "una disculpa, no tendriamos disponibilidad para 2 personas",
+      "solo contamos con espacio para 1 persona por 60min"
+    ]
   }
 ]
