@@ -50,6 +50,14 @@ const fakeWati = () => ({
   getMedia: async () => ({ ok: false }),
 }) as any
 
+const ALL_SLOTS = ['09:00', '10:00', '11:30', '13:00', '14:00', '15:00', '16:30', '18:00']
+
+function hashStr(s: string): number {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+  return h
+}
+
 const fakeMb = {
   listServices: async () => [
     { id: 10, name: 'Mimosa Relax - 60 min', minutes: 60, price: 75, category: 'Masajes' },
@@ -57,11 +65,24 @@ const fakeMb = {
   ],
   findClientByPhone: async () => ({ id: 'C1', name: 'Cliente Prueba', email: 'c@x.com', lastVisits: [] }),
   createClient: async () => ({ id: 'C2' }),
-  availability: async () => [{ time: '10:00', staffIds: [1, 2] }, { time: '15:00', staffIds: [1] }],
+  availability: async (date: string, _serviceId: number, people = 1) => {
+    const h = hashStr(String(date))
+    const count = 3 + (h % 2) // 3-4 slots
+    const start = h % ALL_SLOTS.length
+    const chosen: number[] = []
+    for (let i = 0; chosen.length < count && i < ALL_SLOTS.length; i++) {
+      chosen.push((start + i) % ALL_SLOTS.length)
+    }
+    let indices = chosen
+    if (people === 2) indices = chosen.filter(idx => idx % 2 === 0)
+    return indices.map(idx => ({ time: ALL_SLOTS[idx], staffIds: [1, 2] }))
+  },
   book: async () => ({ appointmentIds: [1], therapist: 'Por asignar' }),
   upcoming: async () => [],
   cancelAppointment: async () => true,
 } as any
+
+const NOW = process.env.WATI_EVAL_NOW ? new Date(process.env.WATI_EVAL_NOW) : new Date('2026-09-08T10:30:00-05:00')
 
 const rows: any[] = []
 let picked = cases
@@ -79,46 +100,57 @@ for (const c of picked) {
     for (const t of turn.customer) {
       await store.insertMessage({ phone: conv.phone, wati_message_id: null, direction: 'in', author: 'customer', type: 'text', text: t, media_ref: null, shadow: false })
     }
+    const eventsBefore = store.events.length
     const r = await runTurn(conv.phone, false, {
-      anthropic, store, wati: fakeWati(), origin: 'https://eval', now: new Date(),
+      anthropic, store, wati: fakeWati(), origin: 'https://eval', now: NOW,
       mediaBytes: async () => ({ bytes: new Uint8Array(), mime: 'image/png', filename: 'x' }),
       mb: fakeMb, styleGuide: STYLE_GUIDE,
     })
+    const turnEvents = store.events.slice(eventsBefore)
     const camila = r.bubbles.join('\n')
-    const graderSystem = 'Califica de 1 a 5 qué tanto la respuesta A suena como la recepcionista real B (tono, largo, calidez, formato). Responde ÚNICAMENTE con un objeto JSON en una sola línea: {"score": <1-5>, "why": "<máx 15 palabras>"}'
-    const graderUser = `Cliente: ${turn.customer.join(' / ')}\n\nA (Camila):\n${camila || '(handoff)'}\n\nB (humana):\n${turn.staff.join('\n')}`
 
-    async function callGrader(): Promise<number | null> {
-      const g = await anthropic.messages.create({
-        model: process.env.WATI_AGENT_MODEL || 'claude-sonnet-5',
-        max_tokens: 400,
-        thinking: { type: 'disabled' },
-        system: graderSystem,
-        messages: [{ role: 'user', content: graderUser }],
-      })
-      const gt = g.content.find(b => b.type === 'text')?.text ?? ''
-      try {
-        const start = gt.indexOf('{')
-        const end = gt.lastIndexOf('}')
-        if (start < 0 || end < start) return null
-        const parsed = JSON.parse(gt.slice(start, end + 1))
-        const n = Math.round(Number(parsed.score))
-        return Number.isFinite(n) && n >= 1 && n <= 5 ? n : null
-      } catch {
-        return null
+    let score: number | null = null
+    let graderError = false
+    let graderSkipped: string | null = null
+
+    if (r.handedOff) {
+      graderSkipped = 'handoff'
+    } else {
+      const graderSystem = 'Califica de 1 a 5 qué tanto la respuesta A suena como la recepcionista real B (tono, largo, calidez, formato). Responde ÚNICAMENTE con un objeto JSON en una sola línea: {"score": <1-5>, "why": "<máx 15 palabras>"}'
+      const graderUser = `Cliente: ${turn.customer.join(' / ')}\n\nA (Camila):\n${camila || '(handoff)'}\n\nB (humana):\n${turn.staff.join('\n')}`
+
+      const callGrader = async (): Promise<number | null> => {
+        const g = await anthropic.messages.create({
+          model: process.env.WATI_AGENT_MODEL || 'claude-sonnet-5',
+          max_tokens: 400,
+          thinking: { type: 'disabled' },
+          system: graderSystem,
+          messages: [{ role: 'user', content: graderUser }],
+        })
+        const gt = g.content.find(b => b.type === 'text')?.text ?? ''
+        try {
+          const start = gt.indexOf('{')
+          const end = gt.lastIndexOf('}')
+          if (start < 0 || end < start) return null
+          const parsed = JSON.parse(gt.slice(start, end + 1))
+          const n = Math.round(Number(parsed.score))
+          return Number.isFinite(n) && n >= 1 && n <= 5 ? n : null
+        } catch {
+          return null
+        }
+      }
+
+      score = await callGrader()
+      if (score === null) {
+        score = await callGrader()
+        if (score === null) graderError = true
       }
     }
 
-    let score: number | null = await callGrader()
-    let graderError = false
-    if (score === null) {
-      score = await callGrader()
-      if (score === null) graderError = true
-    }
-
-    const inventedPrice = /\$\s?\d+|\b\d+\s?(d[oó]lares|usd)\b/i.test(camila) && !store.events.some((e: any) => e.kind === 'tool_result' && e.payload.tool === 'list_services')
-    const bookedWithoutConfirm = store.events.some((e: any) => e.kind === 'tool_result' && e.payload.tool === 'book' && e.payload.ok) && !turn.customer.some(t => /s[ií]|claro|dale|perfecto|listo|ok/i.test(t))
-    rows.push({ case: c.id, turn: ti, score, graderError, inventedPrice, bookedWithoutConfirm, handedOff: r.handedOff, camila: camila.slice(0, 200) })
+    const inventedPrice = /\$\s?\d+|\b\d+\s?(d[oó]lares|usd)\b/i.test(camila) && !turnEvents.some((e: any) => e.kind === 'tool_result' && e.payload.tool === 'list_services')
+    const bookedWithoutConfirm = turnEvents.some((e: any) => e.kind === 'tool_result' && e.payload.tool === 'book' && e.payload.ok) && !turn.customer.some(t => /s[ií]|claro|dale|perfecto|listo|ok/i.test(t))
+    const human = turn.staff.join(' / ').slice(0, 200)
+    rows.push({ case: c.id, turn: ti, score, graderError, graderSkipped, inventedPrice, bookedWithoutConfirm, handedOff: r.handedOff, camila: camila.slice(0, 200), human })
     if (r.handedOff) break
   }
 }
@@ -129,4 +161,15 @@ const mean = scored.length ? scored.reduce((s, r) => s + r.score, 0) / scored.le
 const hard = rows.length ? rows.filter(r => r.inventedPrice || r.bookedWithoutConfirm).length / rows.length : 0
 console.table(rows.map(r => ({ case: r.case, turn: r.turn, score: r.score, price: r.inventedPrice, confirm: r.bookedWithoutConfirm, handoff: r.handedOff })))
 console.log(`mean tone ${mean.toFixed(2)} (graded ${scored.length}/${rows.length})  hard-fail ${(hard * 100).toFixed(1)}%`)
+
+const lowest = [...scored].sort((a, b) => a.score - b.score).slice(0, 5)
+if (lowest.length) {
+  console.log('\nLowest-scoring rows:')
+  for (const r of lowest) {
+    console.log(`\n[${r.case} turn ${r.turn}] score=${r.score}`)
+    console.log(`  Camila: ${r.camila.slice(0, 160)}`)
+    console.log(`  Human:  ${r.human.slice(0, 120)}`)
+  }
+}
+
 process.exit(mean < 3.5 || hard > 0.1 ? 1 : 0)
