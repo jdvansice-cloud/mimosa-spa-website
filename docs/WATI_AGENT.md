@@ -70,6 +70,44 @@ WATI ──webhook "conversation status"───▶ /api/wati/agent/status   (t
 Código: `src/lib/wati-agent/` (lógica), `src/app/api/wati/agent/{inbound,sent,status}`
 (rutas), `src/app/admin/wati-agent` (panel).
 
+## Memoria por contacto ("perfil")
+
+Camila recuerda a cada número entre conversaciones.
+
+**Qué se guarda**
+
+- `wati_agent_conversations.profile` (jsonb): `nombre`, `correo`, `sucursal_preferida`
+  (`cde`/`sfc`), `tratamientos[]`, `preferencias[]`, `notas[]` y `ultima_actualizacion`.
+  Los arreglos se unen sin duplicados; los textos se sobrescriben.
+- `wati_agent_conversation_log`: una fila por conversación terminada, con `outcome`
+  (`booked` / `handoff` / `closed` / `idle`) y un resumen de máximo 3 líneas.
+
+**Cómo se llena**
+
+- La herramienta `note_to_self` ahora acepta un campo `perfil`: Camila anota ahí lo que
+  el cliente le dice y valga la pena recordar. Los campos vacíos significan "sin cambio".
+- `find_client` y `create_client` guardan nombre y correo automáticamente.
+- Al cerrar una conversación (reserva hecha, `close_chat` o handoff), `closeAndRemember`
+  (`src/lib/wati-agent/memory.ts`) le pide a Claude un resumen + los datos del perfil y
+  los guarda. Hay una guarda de 10 minutos para no registrar la misma conversación dos veces.
+
+**Cómo se usa**
+
+Al inicio de cada turno el perfil y los últimos 3 resúmenes entran en el bloque volátil
+del system prompt (`## Cliente` → "Perfil" y "Conversaciones anteriores"), junto con el
+historial de Mindbody cuando ya conocemos al cliente. La regla del prompt le pide saludar
+por su nombre y proponer en vez de preguntar desde cero.
+
+**Cómo editarlo**
+
+En `/admin/wati-agent`, al abrir una conversación aparece la tarjeta **Perfil** con los
+datos, las notas y las últimas conversaciones, y un campo para agregar una nota permanente.
+Por API: `POST /api/admin/wati-agent/conversations/<phone>` con
+`{ "action": "profile", "profile": { "notas": ["alergia al eucalipto"] } }`.
+
+**Migración a correr:** `supabase/migrations/20260905_wati_agent_profile.sql`
+(en el SQL editor de Supabase). Es idempotente.
+
 ## 2. Variables de entorno
 
 | Variable | Para qué sirve |

@@ -15,7 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
-import type { Conversation, ConversationMode, StoredMessage, EventKind } from '@/lib/wati-agent/types'
+import type { ClientProfile, Conversation, ConversationLogEntry, ConversationMode, StoredMessage, EventKind } from '@/lib/wati-agent/types'
 import type { BusinessOverrides, LocationOverride } from '@/lib/wati-agent/config/business'
 
 type Tab = 'conversaciones' | 'imagenes' | 'ajustes'
@@ -324,6 +324,8 @@ function ConversationPanel({
   const [events, setEvents] = useState<EventRow[]>([])
   const [eventsOpen, setEventsOpen] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [profile, setProfile] = useState<ClientProfile>({})
+  const [logs, setLogs] = useState<ConversationLogEntry[]>([])
 
   const load = useCallback(async () => {
     try {
@@ -333,6 +335,8 @@ function ConversationPanel({
         setConversation(data.conversation)
         setMessages(data.messages ?? [])
         setEvents(data.events ?? [])
+        setProfile(data.profile ?? {})
+        setLogs(data.logs ?? [])
       }
     } catch (e) {
       console.error('conversation fetch failed', e)
@@ -342,6 +346,20 @@ function ConversationPanel({
   useEffect(() => {
     load()
   }, [load])
+
+  const addNota = async (nota: string) => {
+    setBusy(true)
+    try {
+      const res = await fetch(`/api/admin/wati-agent/conversations/${phone}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'profile', profile: { notas: [nota] } }),
+      })
+      if (res.ok) setProfile((await res.json()).profile ?? profile)
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const doAction = async (action: 'pause' | 'resume' | 'handoff') => {
     setBusy(true)
@@ -385,6 +403,8 @@ function ConversationPanel({
           </Button>
         </div>
 
+        <ProfileCard profile={profile} logs={logs} busy={busy} onAddNota={addNota} />
+
         <div className="max-h-[420px] space-y-2 overflow-y-auto rounded-lg bg-gray-50 p-3">
           {messages.length === 0 && <p className="text-center text-xs text-gray-400">Sin mensajes.</p>}
           {messages.map(m => (
@@ -416,6 +436,99 @@ function ConversationPanel({
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+const SUCURSAL_LABEL: Record<string, string> = { cde: 'Costa del Este', sfc: 'San Francisco' }
+
+function ProfileCard({
+  profile,
+  logs,
+  busy,
+  onAddNota,
+}: {
+  profile: ClientProfile
+  logs: ConversationLogEntry[]
+  busy: boolean
+  onAddNota: (nota: string) => Promise<void>
+}) {
+  const [nota, setNota] = useState('')
+  const rows: Array<[string, string]> = []
+  if (profile.nombre) rows.push(['Nombre', profile.nombre])
+  if (profile.correo) rows.push(['Correo', profile.correo])
+  if (profile.sucursal_preferida) rows.push(['Sucursal habitual', SUCURSAL_LABEL[profile.sucursal_preferida] ?? profile.sucursal_preferida])
+  if (profile.tratamientos?.length) rows.push(['Tratamientos', profile.tratamientos.join(', ')])
+  if (profile.preferencias?.length) rows.push(['Preferencias', profile.preferencias.join(', ')])
+
+  const submit = async () => {
+    const t = nota.trim()
+    if (!t) return
+    await onAddNota(t)
+    setNota('')
+  }
+
+  return (
+    <div className="rounded-lg border border-gray-200 p-3">
+      <div className="flex items-baseline justify-between">
+        <h4 className="text-sm font-semibold text-gray-700">Perfil</h4>
+        {profile.ultima_actualizacion && (
+          <span className="text-[11px] text-gray-400">
+            actualizado {new Date(profile.ultima_actualizacion).toLocaleDateString('es-PA')}
+          </span>
+        )}
+      </div>
+
+      {rows.length === 0 ? (
+        <p className="mt-1 text-xs text-gray-400">Todavía no sabemos nada de este contacto.</p>
+      ) : (
+        <dl className="mt-2 space-y-1 text-xs">
+          {rows.map(([k, v]) => (
+            <div key={k} className="flex gap-2">
+              <dt className="w-32 shrink-0 text-gray-400">{k}</dt>
+              <dd className="text-gray-700">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      {profile.notas?.length ? (
+        <ul className="mt-2 space-y-0.5 text-xs text-gray-700">
+          {profile.notas.map((n, i) => (
+            <li key={`${i}-${n}`} className="rounded bg-yellow-50 px-2 py-1">{n}</li>
+          ))}
+        </ul>
+      ) : null}
+
+      <div className="mt-2 flex gap-2">
+        <textarea
+          value={nota}
+          onChange={e => setNota(e.target.value)}
+          rows={2}
+          placeholder="Agregar una nota permanente (alergias, preferencias…)"
+          className="flex-1 rounded border border-gray-200 px-2 py-1 text-xs"
+        />
+        <Button size="sm" variant="outline" disabled={busy || !nota.trim()} onClick={submit}>
+          Guardar
+        </Button>
+      </div>
+
+      <h5 className="mt-3 text-xs font-semibold text-gray-600">Conversaciones anteriores</h5>
+      {logs.length === 0 ? (
+        <p className="text-xs text-gray-400">Ninguna registrada.</p>
+      ) : (
+        <ul className="mt-1 space-y-1 text-xs text-gray-600">
+          {logs.slice(0, 3).map((l, i) => (
+            <li key={l.id ?? i}>
+              <span className="text-gray-400">
+                {new Date(l.ended_at ?? l.started_at).toLocaleDateString('es-PA')}
+                {l.outcome ? ` · ${l.outcome}` : ''}
+              </span>{' '}
+              {l.summary}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 
