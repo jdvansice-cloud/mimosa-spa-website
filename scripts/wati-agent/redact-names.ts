@@ -11,8 +11,10 @@ const BATCH_SIZE = 60
 
 const SYSTEM_INSTRUCTION =
   'Recibes un JSON array de mensajes de WhatsApp de un spa. Devuelve SOLO un JSON array del mismo largo ' +
-  'donde cada nombre propio de persona (nombres y apellidos de clientes, acompañantes, destinatarios de ' +
-  'regalos) se reemplaza por {nombre}. NO reemplaces nombres de marcas, sucursales (Costa del Este, San ' +
+  'donde cada nombre propio de persona se reemplaza según su rol: el nombre de la recepcionista/staff que ' +
+  'firma o se presenta (ej. "Soy Karen", "Gracias, Adriana!") se reemplaza por Camila, el nombre del ' +
+  'personaje/persona de la asistente virtual del spa; los nombres de clientes, acompañantes o destinatarios ' +
+  'de regalos se reemplazan por {nombre}. NO reemplaces nombres de marcas, sucursales (Costa del Este, San ' +
   'Francisco), tratamientos, bancos, plazas, ni las palabras Mimosa, Camila, Yappy. Conserva todo lo demás ' +
   'intacto (emojis, saltos de línea, mayúsculas).'
 

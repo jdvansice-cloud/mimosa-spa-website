@@ -6,6 +6,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { parseExport, buildExchanges, type Exchange } from '../../src/lib/wati-agent/voice/parse-export'
 import { scrub } from '../../src/lib/wati-agent/voice/scrub'
 import { redactNames } from './redact-names'
+import { replaceStaffNamesInCases, replaceStaffNamesInExemplars } from './replace-staff-names'
 
 const INTENTS = ['saludo','ubicacion','horario','precios','promo','reservar','cambiar','cancelar','certificado','pago','queja','cierre','otro'] as const
 type Intent = typeof INTENTS[number]
@@ -197,9 +198,15 @@ async function main() {
       staff: t.staff.map(() => redactedCaseStrings[ci++]),
     })),
   }))
-  fs.writeFileSync('src/lib/wati-agent/voice/exemplars.json', JSON.stringify(redactedExemplars, null, 2))
-  fs.writeFileSync('scripts/wati-agent/evals/cases.json', JSON.stringify(redactedCases, null, 2))
+  // 10. Deterministic pass: replace real receptionist names with the persona name (Camila)
+  const staffNameCounts: Record<string, number> = {}
+  const finalExemplars2 = replaceStaffNamesInExemplars(redactedExemplars, staffNameCounts)
+  const finalCases2 = replaceStaffNamesInCases(redactedCases, staffNameCounts)
+
+  fs.writeFileSync('src/lib/wati-agent/voice/exemplars.json', JSON.stringify(finalExemplars2, null, 2))
+  fs.writeFileSync('scripts/wati-agent/evals/cases.json', JSON.stringify(finalCases2, null, 2))
   console.log('redact-names: applied to exemplars.json and cases.json')
+  console.log('replace-staff-names: counts per name:', staffNameCounts)
 }
 
 main().catch(err => { console.error(err); process.exit(1) })
