@@ -1,5 +1,41 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import type { Conversation, ConversationMode, EventKind, MediaAsset, StoredMessage } from './types'
+import type { ClientProfile, Conversation, ConversationLogEntry, ConversationMode, EventKind, MediaAsset, StoredMessage } from './types'
+
+const PROFILE_ARRAY_KEYS = ['tratamientos', 'preferencias', 'notas'] as const
+const PROFILE_ARRAY_LIMIT = 20
+
+/**
+ * Arrays are unioned (case-insensitive, order preserved, capped); scalars overwrite
+ * when the patch actually carries a value. Empty strings/arrays mean "no change",
+ * which is how the model signals an untouched field in the strict tool schema.
+ */
+export function mergeProfiles(base: ClientProfile, patch: Partial<ClientProfile>, nowIso: string): ClientProfile {
+  const out: ClientProfile = { ...base }
+  for (const key of ['nombre', 'correo', 'sucursal_preferida'] as const) {
+    const v = patch[key]
+    if (typeof v === 'string' && v.trim()) (out as Record<string, unknown>)[key] = v.trim()
+  }
+  for (const key of PROFILE_ARRAY_KEYS) {
+    const incoming = (patch[key] ?? []).map(s => String(s).trim()).filter(Boolean)
+    if (!incoming.length) continue
+    const merged = [...(base[key] ?? [])]
+    const seen = new Set(merged.map(s => s.toLowerCase()))
+    for (const item of incoming) {
+      if (seen.has(item.toLowerCase())) continue
+      seen.add(item.toLowerCase()); merged.push(item)
+    }
+    out[key] = merged.slice(-PROFILE_ARRAY_LIMIT)
+  }
+  out.ultima_actualizacion = nowIso
+  return out
+}
+
+/** True when the patch carries nothing but empty strings/arrays. */
+export function isEmptyProfilePatch(patch: Partial<ClientProfile>): boolean {
+  const merged = mergeProfiles({}, patch, 'x')
+  delete merged.ultima_actualizacion
+  return Object.keys(merged).length === 0
+}
 
 export interface AgentStore {
   getConversation(phone: string): Promise<Conversation | null>
@@ -15,6 +51,10 @@ export interface AgentStore {
   eventsFor(phone: string, limit: number): Promise<Array<{ id: number; kind: EventKind; payload: unknown; created_at: string }>>
   stats(sinceIso: string): Promise<{ handled: number; booked: number; handoffs: Record<string, number>; shadow: number }>
   recentOutboundExists(phone: string, text: string, withinMs: number): Promise<boolean>
+  getProfile(phone: string): Promise<ClientProfile>
+  mergeProfile(phone: string, patch: Partial<ClientProfile>): Promise<ClientProfile>
+  logConversation(entry: { phone: string; started_at: string; outcome: ConversationLogEntry['outcome']; summary: string }): Promise<void>
+  recentConversationLogs(phone: string, limit?: number): Promise<ConversationLogEntry[]>
 }
 
 export function createStore(sb: SupabaseClient): AgentStore {
@@ -81,6 +121,27 @@ export function createStore(sb: SupabaseClient): AgentStore {
       const since = new Date(Date.now() - withinMs).toISOString()
       const { data, error } = await sb.from('wati_agent_messages').select('id').eq('phone', phone).eq('direction', 'out').eq('text', text).gte('created_at', since).limit(1)
       fail('recentOutboundExists', error); return (data ?? []).length > 0
+    },
+    async getProfile(phone) {
+      const { data, error } = await sb.from('wati_agent_conversations').select('profile').eq('phone', phone).maybeSingle()
+      fail('getProfile', error); return ((data?.profile ?? {}) as ClientProfile)
+    },
+    async mergeProfile(phone, patch) {
+      const { data, error } = await sb.from('wati_agent_conversations').select('profile').eq('phone', phone).maybeSingle()
+      fail('mergeProfile', error)
+      const next = mergeProfiles((data?.profile ?? {}) as ClientProfile, patch, new Date().toISOString())
+      const { error: upErr } = await sb.from('wati_agent_conversations')
+        .upsert({ phone, profile: next, updated_at: new Date().toISOString() }, { onConflict: 'phone' })
+      fail('mergeProfile/upsert', upErr)
+      return next
+    },
+    async logConversation(entry) {
+      const { error } = await sb.from('wati_agent_conversation_log').insert({ ...entry, ended_at: new Date().toISOString() })
+      if (error) console.error('logConversation failed', error.message)
+    },
+    async recentConversationLogs(phone, limit = 3) {
+      const { data, error } = await sb.from('wati_agent_conversation_log').select('*').eq('phone', phone).order('ended_at', { ascending: false }).limit(limit)
+      fail('recentConversationLogs', error); return (data ?? []) as ConversationLogEntry[]
     },
   }
 }

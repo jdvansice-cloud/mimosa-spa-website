@@ -35,6 +35,11 @@ function memStore(conv: Conversation) {
     listConversations: async () => [],
     eventsFor: async () => [],
     stats: async () => ({ handled: 0, booked: 0, handoffs: {}, shadow: 0 }),
+    recentOutboundExists: async () => false,
+    getProfile: async () => conv.profile ?? {},
+    mergeProfile: async (_p: string, patch: any) => { conv.profile = { ...(conv.profile ?? {}), ...patch }; return conv.profile },
+    logConversation: async () => {},
+    recentConversationLogs: async () => [],
   } as any
 }
 
@@ -117,7 +122,7 @@ for (const c of picked) {
   const conv: Conversation = {
     phone: '50700000000', wati_contact_id: null, ticket_id: null, mode: 'agent', sucursal: c.sucursal,
     mindbody_client_id: null, client_name: null, summary: null, handoff_reason: null,
-    human_since: null, last_inbound_at: null, last_outbound_at: null, audio_count: 0,
+    human_since: null, last_inbound_at: null, last_outbound_at: null, audio_count: 0, profile: {},
   }
   const store = memStore(conv)
   for (const [ti, turn] of c.turns.entries()) {
