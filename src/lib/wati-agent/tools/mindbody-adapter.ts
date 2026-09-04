@@ -118,8 +118,16 @@ export async function book(i: {
 
   if (i.people === 2) {
     const secondStaffId = slot.staffIds.find(id => id !== firstStaffId) ?? slot.staffIds[1]
-    const secondResult = await addMultipleAppointments(chain(secondStaffId))
-    if (!secondResult.success) throw new Error(`No se pudo reservar la segunda persona: ${secondResult.error}`)
+    let secondResult: Awaited<ReturnType<typeof addMultipleAppointments>> | undefined
+    try {
+      secondResult = await addMultipleAppointments(chain(secondStaffId))
+    } catch {
+      secondResult = undefined
+    }
+    if (!secondResult || !secondResult.success) {
+      await Promise.all(appointments.map(a => removeAppointment(a.Id)))
+      throw new Error('No se pudo reservar la segunda cabina; se liberó la primera')
+    }
     appointments = [...appointments, ...secondResult.appointments]
   }
 
