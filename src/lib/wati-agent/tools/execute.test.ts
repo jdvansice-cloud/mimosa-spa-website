@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { executeTool } from './execute'
+import { performHandoff } from '../handoff'
+
+vi.mock('../handoff', () => ({ performHandoff: vi.fn(async () => {}) }))
 
 const deps = (over: Partial<any> = {}) => ({
   store: { logEvent: vi.fn(async () => {}), upsertConversation: vi.fn(async (c: any) => c), getSetting: vi.fn(async (_k: string, f: any) => f) },
@@ -117,5 +120,28 @@ describe('executeTool', () => {
     expect(order).toEqual(['book', 'cancel'])
     expect(r.isError).toBeUndefined()
     expect(r.result).toContain('42')
+  })
+  it('list_services returns convPatch.sucursal when a valid sucursal differs from the conversation', async () => {
+    const d = deps({ conv: { phone: '507', sucursal: null, mindbody_client_id: 'C1', client_name: 'Ana', summary: null } })
+    const r = await executeTool('list_services', { sucursal: 'sfc', query: 'masaje' }, d)
+    expect(r.convPatch).toEqual({ sucursal: 'sfc' })
+  })
+  it('list_services omits convPatch when the sucursal matches the conversation', async () => {
+    const r = await executeTool('list_services', { sucursal: 'cde', query: 'masaje' }, deps())
+    expect(r.convPatch).toBeUndefined()
+  })
+  it('handoff upserts the sucursal before calling performHandoff when it was unknown', async () => {
+    const d = deps({ conv: { phone: '507', sucursal: null, mindbody_client_id: 'C1', client_name: 'Ana', summary: null } })
+    const r = await executeTool('handoff', { motivo: 'queja', resumen: 'resumen', sucursal: 'sfc' }, d)
+    expect(d.store.upsertConversation).toHaveBeenCalledWith(expect.objectContaining({ phone: '507', sucursal: 'sfc' }))
+    expect(performHandoff).toHaveBeenCalledWith(expect.objectContaining({ conv: expect.objectContaining({ sucursal: 'sfc' }) }))
+    expect(r.convPatch).toEqual({ sucursal: 'sfc' })
+    expect(r.endTurn).toBe(true)
+  })
+  it('handoff does not touch the sucursal when it is already known', async () => {
+    const d = deps()
+    await executeTool('handoff', { motivo: 'queja', resumen: 'resumen', sucursal: '' }, d)
+    expect(d.store.upsertConversation).not.toHaveBeenCalled()
+    expect(performHandoff).toHaveBeenCalledWith(expect.objectContaining({ conv: expect.objectContaining({ sucursal: 'cde' }) }))
   })
 })

@@ -4,7 +4,7 @@ export interface WatiResult {
 }
 
 export interface WatiClient {
-  sendText(phone: string, text: string): Promise<{ ok: boolean; messageId?: string; error?: string }>
+  sendText(phone: string, text: string): Promise<{ ok: boolean; messageId?: string; whatsappMessageId?: string; error?: string }>
   sendFile(phone: string, file: { bytes: Uint8Array; filename: string; mime: string }, caption?: string): Promise<{ ok: boolean; error?: string }>
   sendButtons(phone: string, body: string, buttons: string[], footer?: string): Promise<{ ok: boolean; error?: string }>
   updateAttributes(phone: string, attrs: Record<string, string>): Promise<{ ok: boolean; error?: string }>
@@ -64,11 +64,15 @@ export function createWatiClient(opts: { baseUrl: string; token: string; channel
     async sendText(phone, text) {
       const r = await call('/api/ext/v3/conversations/messages/text', { method: 'POST', json: { target: phone, text } })
       let messageId: string | undefined
+      let whatsappMessageId: string | undefined
       if (isRecord(r.data)) {
         if (typeof r.data.id === 'string') messageId = r.data.id
         else if (isRecord(r.data.message) && typeof r.data.message.id === 'string') messageId = r.data.message.id
+        if (typeof r.data.whatsappMessageId === 'string') whatsappMessageId = r.data.whatsappMessageId
+        else if (isRecord(r.data.message) && typeof r.data.message.whatsappMessageId === 'string') whatsappMessageId = r.data.message.whatsappMessageId
+        else if (typeof r.data.messageId === 'string') whatsappMessageId = r.data.messageId
       }
-      return { ok: r.ok, messageId, error: r.error }
+      return { ok: r.ok, messageId: whatsappMessageId ?? messageId, whatsappMessageId, error: r.error }
     },
     async sendFile(phone, file, caption) {
       const fd = new FormData()

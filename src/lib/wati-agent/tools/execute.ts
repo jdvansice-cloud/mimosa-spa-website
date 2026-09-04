@@ -12,6 +12,12 @@ export interface ToolOutcome { result: string; isError?: boolean; endTurn?: bool
 
 const json = (v: unknown) => JSON.stringify(v)
 
+const sucursalPatch = (input: any, current: Conversation['sucursal']): Partial<Conversation> | undefined => {
+  const suc = input?.sucursal
+  if ((suc === 'cde' || suc === 'sfc') && suc !== current) return { sucursal: suc }
+  return undefined
+}
+
 export async function executeTool(name: string, input: any, d: ToolDeps): Promise<ToolOutcome> {
   const phone = d.conv.phone
   try {
@@ -21,11 +27,11 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         const l = BUSINESS.locations[suc]
         // Owner-editable overrides win over the bundled defaults.
         const o = (await d.store.getSetting<BusinessOverrides>('business_overrides', {}))?.[suc] ?? {}
-        return { result: json({ nombre: l.name, plaza: l.plaza, direccion: o.address || l.address, waze: o.wazeUrl || l.wazeUrl, maps: o.mapsUrl || l.mapsUrl, estacionamiento: o.parking || l.parking }) }
+        return { result: json({ nombre: l.name, plaza: l.plaza, direccion: o.address || l.address, waze: o.wazeUrl || l.wazeUrl, maps: o.mapsUrl || l.mapsUrl, estacionamiento: o.parking || l.parking }), convPatch: sucursalPatch(input, d.conv.sucursal) }
       }
       case 'get_hours': return { result: BUSINESS.hours.text }
       case 'get_payment_info': return { result: json({ yappy: BUSINESS.payment.yappyText, transferencia: BUSINESS.payment.transferText }) }
-      case 'list_services': return { result: json(await d.mb.listServices(input.sucursal, input.query)) }
+      case 'list_services': return { result: json(await d.mb.listServices(input.sucursal, input.query)), convPatch: sucursalPatch(input, d.conv.sucursal) }
       case 'send_image': {
         const asset = (await d.store.activeMedia(panamaDate(d.now))).find(m => m.key === input.key)
         if (!asset) return { result: `No existe la imagen "${input.key}"`, isError: true }
@@ -48,7 +54,7 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         const note = c.existing ? 'cliente existente encontrado por correo' : 'cliente creado'
         return { result: json({ ...c, nota: note }), convPatch: { mindbody_client_id: c.id, client_name: `${input.first_name} ${input.last_name}` } }
       }
-      case 'check_availability': { const s = await d.mb.availability({ sucursal: input.sucursal, date: input.date, serviceIds: input.service_ids, people: input.people, origin: d.origin, phone }); return { result: json({ horas: s.map(x => x.time).slice(0, 12) }) } }
+      case 'check_availability': { const s = await d.mb.availability({ sucursal: input.sucursal, date: input.date, serviceIds: input.service_ids, people: input.people, origin: d.origin, phone }); return { result: json({ horas: s.map(x => x.time).slice(0, 12) }), convPatch: sucursalPatch(input, d.conv.sucursal) } }
       case 'book': {
         const err = requireConfirmation(input, d.recentInbound); if (err) return { result: err, isError: true }
         if (!d.conv.mindbody_client_id) return { result: 'Primero identifica al cliente con find_client o create_client.', isError: true }
@@ -77,7 +83,15 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         if (!ok) return { result: `Se creó la nueva cita pero no se pudo liberar la anterior. Nueva cita: ${json(r)}`, isError: true }
         return { result: json(r) }
       }
-      case 'handoff': { await performHandoff({ store: d.store, wati: d.wati, conv: d.conv, motivo: input.motivo || 'modelo', resumen: input.resumen || '', shadow: d.shadow, env: env() }); return { result: 'handoff hecho', endTurn: true } }
+      case 'handoff': {
+        let conv = d.conv
+        const patch = sucursalPatch(input, d.conv.sucursal)
+        if (patch?.sucursal && !d.conv.sucursal) {
+          conv = await d.store.upsertConversation({ ...d.conv, ...patch, phone })
+        }
+        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: input.motivo || 'modelo', resumen: input.resumen || '', shadow: d.shadow, env: env() })
+        return { result: 'handoff hecho', endTurn: true, convPatch: patch }
+      }
       case 'close_chat': { if (!d.shadow) await d.wati.updateChatStatus(phone, 'SOLVED'); return { result: 'cerrado', endTurn: true } }
       case 'note_to_self': return { result: 'anotado', convPatch: { summary: [d.conv.summary, input.text].filter(Boolean).join(' · ').slice(-800) } }
       default: return { result: `Herramienta desconocida ${name}`, isError: true }

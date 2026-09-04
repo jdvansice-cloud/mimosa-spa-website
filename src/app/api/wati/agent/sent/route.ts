@@ -18,7 +18,13 @@ export async function POST(request: NextRequest) {
     const human = isHumanOperator(ev, e.operatorEmail, apiLabels)
     // Skip the insert when no conversation row exists yet (foreign key).
     if (conv) {
-      await store.insertMessage({ phone: ev.phone, wati_message_id: ev.messageId || null, direction: 'out', author: human ? 'human' : 'camila', type: 'text', text: ev.text, media_ref: null, shadow: false }).catch(() => ({ inserted: false }))
+      // Camila/API messages are already inserted by the runner when it sends them
+      // (with the ext/v3 message id); this webhook fires again for the same bubble
+      // with WATI's own whatsappMessageId, so skip the duplicate unless it's a human agent.
+      const dup = !human && ev.text != null && (await store.recentOutboundExists(ev.phone, ev.text, 5 * 60_000).catch(() => false))
+      if (!dup) {
+        await store.insertMessage({ phone: ev.phone, wati_message_id: ev.messageId || null, direction: 'out', author: human ? 'human' : 'camila', type: 'text', text: ev.text, media_ref: null, shadow: false }).catch(() => ({ inserted: false }))
+      }
     }
     if (human && conv && conv.mode === 'agent') {
       // In shadow the operator always replies; taking over would end the conversation

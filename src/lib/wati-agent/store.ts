@@ -14,6 +14,7 @@ export interface AgentStore {
   listConversations(opts: { mode?: ConversationMode; limit: number }): Promise<Conversation[]>
   eventsFor(phone: string, limit: number): Promise<Array<{ id: number; kind: EventKind; payload: unknown; created_at: string }>>
   stats(sinceIso: string): Promise<{ handled: number; booked: number; handoffs: Record<string, number>; shadow: number }>
+  recentOutboundExists(phone: string, text: string, withinMs: number): Promise<boolean>
 }
 
 export function createStore(sb: SupabaseClient): AgentStore {
@@ -75,6 +76,11 @@ export function createStore(sb: SupabaseClient): AgentStore {
       const handoffs: Record<string, number> = {}
       for (const r of rows.filter(r => r.kind === 'handoff')) handoffs[r.payload?.motivo ?? '?'] = (handoffs[r.payload?.motivo ?? '?'] ?? 0) + 1
       return { handled, booked, handoffs, shadow: rows.filter(r => r.kind === 'shadow_reply').length }
+    },
+    async recentOutboundExists(phone, text, withinMs) {
+      const since = new Date(Date.now() - withinMs).toISOString()
+      const { data, error } = await sb.from('wati_agent_messages').select('id').eq('phone', phone).eq('direction', 'out').eq('text', text).gte('created_at', since).limit(1)
+      fail('recentOutboundExists', error); return (data ?? []).length > 0
     },
   }
 }

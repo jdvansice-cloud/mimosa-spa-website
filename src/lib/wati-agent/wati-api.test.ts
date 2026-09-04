@@ -20,6 +20,13 @@ describe('wati client', () => {
     expect((calls[0].init.headers as Record<string, string>).Authorization).toBe('Bearer T')
     expect(JSON.parse(String(calls[0].init.body))).toEqual({ target: '50766124546', text: 'Hola' })
   })
+  it('sendText prefers whatsappMessageId over id when both are present', async () => {
+    const { f } = mockFetch(200, { id: 'internal-1', whatsappMessageId: 'wamid.ABC123' })
+    const c = createWatiClient({ baseUrl: 'https://x', token: 'T', fetchImpl: f })
+    const r = await c.sendText('507', 'Hola')
+    expect(r.whatsappMessageId).toBe('wamid.ABC123')
+    expect(r.messageId).toBe('wamid.ABC123')
+  })
   it('assignOperator without email assigns to bot', async () => {
     const { f, calls } = mockFetch()
     const c = createWatiClient({ baseUrl: 'https://x', token: 'T', fetchImpl: f })
