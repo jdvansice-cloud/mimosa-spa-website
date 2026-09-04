@@ -18,6 +18,7 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
     switch (name) {
       case 'get_location_info': { const l = BUSINESS.locations[input.sucursal as 'cde' | 'sfc']; return { result: json({ nombre: l.name, plaza: l.plaza, direccion: l.address, waze: l.wazeUrl, maps: l.mapsUrl, estacionamiento: l.parking }) } }
       case 'get_hours': return { result: BUSINESS.hours.text }
+      case 'get_payment_info': return { result: json({ yappy: BUSINESS.payment.yappyText, transferencia: BUSINESS.payment.transferText }) }
       case 'list_services': return { result: json(await d.mb.listServices(input.sucursal, input.query)) }
       case 'send_image': {
         const asset = (await d.store.activeMedia(panamaDate(d.now))).find(m => m.key === input.key)

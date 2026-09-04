@@ -173,7 +173,7 @@ async function main() {
   fs.writeFileSync('scripts/wati-agent/evals/cases.json', JSON.stringify(finalCases, null, 2))
   fs.writeFileSync(
     'src/lib/wati-agent/voice/style-guide.ts',
-    '// GENERATED from style-guide.md — do not edit by hand.\n// Regenerate: npm run wati:mine (or the node -e command in the old header)\nexport const STYLE_GUIDE = ' + JSON.stringify(guideText) + '\n'
+    '// GENERATED from style-guide.md — do not edit by hand.\n// Regenerate: node scripts/wati-agent/gen-style-guide.mjs\nexport const STYLE_GUIDE = ' + JSON.stringify(guideText) + '\n'
   )
   console.log(`exemplars ${finalExemplars.length}, cases ${finalCases.length}`)
 

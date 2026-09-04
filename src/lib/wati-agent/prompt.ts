@@ -34,6 +34,8 @@ ${styleGuide}
 - Fuera de horario puedes informar y reservar; si pasas a una compañera, avisa que responderá en horario de atención (${BUSINESS.hours.text}).
 - Nunca inventes disponibilidad: usa check_availability. Ofrece máximo 3–4 horas.
 - Ubicación: usa get_location_info y envía el enlace de Waze en su propia burbuja.
+- Datos de pago (Yappy, cuenta bancaria, link de tarjeta) SOLO con la herramienta get_payment_info; nunca de memoria.
+- En los ejemplos, [nombre del cliente] representa el nombre real del cliente: usa su nombre si lo sabes, o no lo menciones.
 - Al terminar ("gracias", "listo"): despídete como las recepcionistas y llama a close_chat.
 
 ## Política de cambios
@@ -49,17 +51,22 @@ ${BUSINESS.policies.changeText} ${BUSINESS.policies.arrivalText}
 - Si el cliente dice que ya viene en camino o da las gracias, responde con una sola línea corta como los ejemplos: "le esperamos 🌼".`
 }
 
+/** The mined exemplars redact the customer's name as `{nombre}`; show the model a readable label instead. */
+export function deplaceholder(text: string): string {
+  return text.replace(/\{nombre\}/g, '[nombre del cliente]')
+}
+
 export function buildSystem(ctx: PromptContext): Anthropic.TextBlockParam[] {
   const ex = selectExemplars(ctx.intent, ctx.sucursal)
   const volatile = [
     `## Ahora\nFecha y hora en Panamá: ${formatPanama(ctx.now)}. Saludo correcto ahora: "${greetingFor(ctx.now)}". El spa está ${isOpen(ctx.now) ? 'abierto' : 'cerrado'} en este momento.`,
     `## Cliente\nTeléfono conocido. Nombre: ${ctx.clientName ?? 'desconocido'}. Sucursal de esta conversación: ${ctx.sucursal ?? 'no definida'}.${ctx.mindbodyHistory ? `\nHistorial Mindbody: ${ctx.mindbodyHistory}` : ''}${ctx.summary ? `\nResumen de la conversación: ${ctx.summary}` : ''}`,
     `## Imágenes disponibles (send_image)\n${ctx.media.length ? ctx.media.map(m => `- ${m.key}: ${m.description}`).join('\n') : '(ninguna)'}`,
-    `## Ejemplos reales de las recepcionistas para este tipo de mensaje\n${ex.map(e => `Cliente: ${e.customer.join(' / ')}\nRecepcionista: ${e.staff.join('\n---\n')}`).join('\n\n')}`,
+    `## Ejemplos reales de las recepcionistas para este tipo de mensaje\n${ex.map(e => `Cliente: ${deplaceholder(e.customer.join(' / '))}\nRecepcionista: ${deplaceholder(e.staff.join('\n---\n'))}`).join('\n\n')}`,
     `## Recuerda\nSin listas ni guiones: frases corridas.\nMáximo 2 líneas por burbuja.\nUna sola pregunta a la vez.\nPrecios solo si preguntan.`,
   ].join('\n\n')
   return [
-    { type: 'text', text: stable(ctx.personaName, ctx.styleGuide), cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: stable(ctx.personaName, deplaceholder(ctx.styleGuide)), cache_control: { type: 'ephemeral' } },
     { type: 'text', text: volatile },
   ]
 }
