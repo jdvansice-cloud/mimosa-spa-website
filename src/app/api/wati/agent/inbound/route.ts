@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
 import Anthropic from '@anthropic-ai/sdk'
-import fs from 'node:fs'
-import path from 'node:path'
-import { authorized, parseInbound, shouldDebounceSkip } from '@/lib/wati-agent/webhook'
+import { authorized, parseInbound, shouldDebounceSkip, fallbackMessageId } from '@/lib/wati-agent/webhook'
 import { env } from '@/lib/wati-agent/config/env'
 import { storeFromEnv } from '@/lib/wati-agent/store'
 import { watiFromEnv } from '@/lib/wati-agent/wati-api'
@@ -13,17 +11,11 @@ import { performHandoff, resumeAgent } from '@/lib/wati-agent/handoff'
 import { runTurn } from '@/lib/wati-agent/runner'
 import { mediaBytesFromStorage } from '@/lib/wati-agent/media-bytes'
 import * as mb from '@/lib/wati-agent/tools/mindbody-adapter'
+import { STYLE_GUIDE } from '@/lib/wati-agent/voice/style-guide'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 const DEBOUNCE_MS = 6000
-
-let STYLE_GUIDE = ''
-try {
-  STYLE_GUIDE = fs.readFileSync(path.join(process.cwd(), 'src/lib/wati-agent/voice/style-guide.md'), 'utf8')
-} catch {
-  STYLE_GUIDE = ''
-}
 
 export async function POST(request: NextRequest) {
   const e = env()
@@ -31,7 +23,9 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const ev = parseInbound(body)
   if (!ev) return NextResponse.json({ ok: true, ignored: 'no waId' })
-  const origin = `${request.nextUrl.protocol}//${request.headers.get('host')}`
+  const proto = request.headers.get('x-forwarded-proto') ?? request.nextUrl.protocol.replace(':', '')
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host
+  const origin = `${proto}://${host}`
   waitUntil(handleInbound(ev, origin).catch(err => console.error('wati-agent inbound failed', err)))
   return NextResponse.json({ ok: true })
 }
@@ -48,7 +42,7 @@ async function handleInbound(ev: NonNullable<ReturnType<typeof parseInbound>>, o
     conv = (await store.getConversation(ev.phone))!
   }
   if (ev.owner) return
-  const { inserted } = await store.insertMessage({ phone: ev.phone, wati_message_id: ev.messageId || null, direction: 'in', author: 'customer', type: ev.type, text: ev.text, media_ref: ev.mediaRef, shadow: false })
+  const { inserted } = await store.insertMessage({ phone: ev.phone, wati_message_id: ev.messageId || fallbackMessageId(ev), direction: 'in', author: 'customer', type: ev.type, text: ev.text, media_ref: ev.mediaRef, shadow: false })
   if (!inserted) return
   const audioCount = ev.type === 'audio' || ev.type === 'voice' ? conv.audio_count + 1 : conv.audio_count
   conv = await store.upsertConversation({ phone: ev.phone, last_inbound_at: new Date().toISOString(), ticket_id: ev.ticketId ?? conv.ticket_id, audio_count: audioCount })
@@ -60,7 +54,7 @@ async function handleInbound(ev: NonNullable<ReturnType<typeof parseInbound>>, o
   }
   const myId = await store.newestInboundId(ev.phone)
   await new Promise(r => setTimeout(r, DEBOUNCE_MS))
-  if (shouldDebounceSkip(await store.newestInboundId(ev.phone), myId!)) return
+  if (shouldDebounceSkip(await store.newestInboundId(ev.phone), myId)) return
   if (!g.shadow && e.operatorEmail) await wati.assignOperator(ev.phone, e.operatorEmail)
   const trig = checkTriggers({ type: ev.type, text: ev.text, audioCount })
   if (trig.handoff) {
