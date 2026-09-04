@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import type { Conversation, ConversationMode, StoredMessage, EventKind } from '@/lib/wati-agent/types'
+import type { BusinessOverrides, LocationOverride } from '@/lib/wati-agent/config/business'
 
 type Tab = 'conversaciones' | 'imagenes' | 'ajustes'
 
@@ -589,6 +590,13 @@ function ImagesTab() {
   )
 }
 
+const LOCATION_FIELDS: Array<[keyof LocationOverride, string]> = [
+  ['address', 'Dirección'],
+  ['parking', 'Estacionamiento'],
+  ['wazeUrl', 'Waze'],
+  ['mapsUrl', 'Google Maps'],
+]
+
 function SettingsTab({
   enabled,
   onEnabledChange,
@@ -598,6 +606,7 @@ function SettingsTab({
 }) {
   const [personaName, setPersonaName] = useState('Camila')
   const [operatorLabels, setOperatorLabels] = useState('')
+  const [overrides, setOverrides] = useState<BusinessOverrides>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -609,6 +618,7 @@ function SettingsTab({
         onEnabledChange(Boolean(data.enabled))
         setPersonaName(data.persona_name ?? 'Camila')
         setOperatorLabels((data.api_operator_labels ?? []).join(', '))
+        setOverrides(data.business_overrides ?? {})
       })
       .catch(e => console.error('settings fetch failed', e))
       .finally(() => setLoading(false))
@@ -629,6 +639,7 @@ function SettingsTab({
             .split(',')
             .map(s => s.trim())
             .filter(Boolean),
+          business_overrides: overrides,
         }),
       })
       setSaved(true)
@@ -674,6 +685,23 @@ function SettingsTab({
             className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
           />
         </label>
+        {(['cde', 'sfc'] as const).map(suc => (
+          <div key={suc} className="space-y-2 rounded-md border border-gray-200 p-3">
+            <p className="text-sm font-semibold">{suc === 'cde' ? 'Costa del Este' : 'San Francisco'}</p>
+            {LOCATION_FIELDS.map(([field, label]) => (
+              <label key={field} className="block space-y-1">
+                <span className="text-xs text-gray-500">{label}</span>
+                <input
+                  type="text"
+                  value={overrides[suc]?.[field] ?? ''}
+                  placeholder="(usar el valor por defecto)"
+                  onChange={e => setOverrides(prev => ({ ...prev, [suc]: { ...prev[suc], [field]: e.target.value } }))}
+                  className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                />
+              </label>
+            ))}
+          </div>
+        ))}
         <Button onClick={save} disabled={saving}>
           {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
           {saved ? 'Guardado' : 'Guardar'}

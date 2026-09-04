@@ -1,4 +1,4 @@
-import { BUSINESS } from '../config/business'
+import { BUSINESS, type BusinessOverrides } from '../config/business'
 import { requireConfirmation, checkNoticePolicy } from './validate'
 import { performHandoff } from '../handoff'
 import { env } from '../config/env'
@@ -16,7 +16,13 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
   const phone = d.conv.phone
   try {
     switch (name) {
-      case 'get_location_info': { const l = BUSINESS.locations[input.sucursal as 'cde' | 'sfc']; return { result: json({ nombre: l.name, plaza: l.plaza, direccion: l.address, waze: l.wazeUrl, maps: l.mapsUrl, estacionamiento: l.parking }) } }
+      case 'get_location_info': {
+        const suc = input.sucursal as 'cde' | 'sfc'
+        const l = BUSINESS.locations[suc]
+        // Owner-editable overrides win over the bundled defaults.
+        const o = (await d.store.getSetting<BusinessOverrides>('business_overrides', {}))?.[suc] ?? {}
+        return { result: json({ nombre: l.name, plaza: l.plaza, direccion: o.address || l.address, waze: o.wazeUrl || l.wazeUrl, maps: o.mapsUrl || l.mapsUrl, estacionamiento: o.parking || l.parking }) }
+      }
       case 'get_hours': return { result: BUSINESS.hours.text }
       case 'get_payment_info': return { result: json({ yappy: BUSINESS.payment.yappyText, transferencia: BUSINESS.payment.transferText }) }
       case 'list_services': return { result: json(await d.mb.listServices(input.sucursal, input.query)) }

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { executeTool } from './execute'
 
 const deps = (over: Partial<any> = {}) => ({
-  store: { logEvent: vi.fn(async () => {}), upsertConversation: vi.fn(async (c: any) => c) },
+  store: { logEvent: vi.fn(async () => {}), upsertConversation: vi.fn(async (c: any) => c), getSetting: vi.fn(async (_k: string, f: any) => f) },
   wati: { sendText: vi.fn(async () => ({ ok: true })), sendFile: vi.fn(async () => ({ ok: true })), sendButtons: vi.fn(async () => ({ ok: true })), updateChatStatus: vi.fn(async () => ({ ok: true })) },
   conv: { phone: '507', sucursal: 'cde', mindbody_client_id: 'C1', client_name: 'Ana', summary: null },
   origin: 'https://x', shadow: false, now: new Date('2026-09-05T08:00:00-05:00'), recentInbound: ['si, confirmo'],
@@ -38,6 +38,34 @@ describe('executeTool', () => {
   it('get_location_info returns waze', async () => {
     const r = await executeTool('get_location_info', { sucursal: 'sfc' }, deps())
     expect(r.result).toContain('waze')
+  })
+  it('get_location_info merges business_overrides over the bundled defaults', async () => {
+    const d = deps({
+      store: {
+        logEvent: vi.fn(async () => {}),
+        upsertConversation: vi.fn(async (c: any) => c),
+        getSetting: vi.fn(async (k: string, f: any) =>
+          k === 'business_overrides' ? { sfc: { address: 'Calle 74 este detrás de la delta de Calle 50', parking: 'Estacionamiento propio' } } : f
+        ),
+      },
+    })
+    const r = JSON.parse((await executeTool('get_location_info', { sucursal: 'sfc' }, d)).result)
+    expect(r.direccion).toBe('Calle 74 este detrás de la delta de Calle 50')
+    expect(r.estacionamiento).toBe('Estacionamiento propio')
+    // Unset fields fall back to BUSINESS.
+    expect(r.waze).toContain('waze.com')
+    expect(r.nombre).toBe('San Francisco')
+  })
+  it('get_location_info is unaffected by an override for the other location', async () => {
+    const d = deps({
+      store: {
+        logEvent: vi.fn(async () => {}),
+        upsertConversation: vi.fn(async (c: any) => c),
+        getSetting: vi.fn(async (k: string, f: any) => (k === 'business_overrides' ? { sfc: { address: 'X' } } : f)),
+      },
+    })
+    const r = JSON.parse((await executeTool('get_location_info', { sucursal: 'cde' }, d)).result)
+    expect(r.direccion).toContain('Star Plaza')
   })
   it('get_payment_info returns the payment text from BUSINESS', async () => {
     const r = await executeTool('get_payment_info', {}, deps())
