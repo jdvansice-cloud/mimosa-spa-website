@@ -11,7 +11,8 @@
     "test:watch": "VITE_CONFIG_NATIVE_IGNORE_WARNING=true vitest",
     "type-check": "tsc --noEmit",
     "check-all": "npm run lint && npm run type-check",
-    "verify": "npm run build"
+    "verify": "npm run build",
+    "wati:mine": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/mine-chats.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
