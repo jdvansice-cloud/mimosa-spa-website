@@ -23,4 +23,12 @@ describe('store', () => {
     const s = createStore(fakeSupabase({ wati_agent_settings: { data: null, error: null } }))
     expect(await s.getSetting('enabled', true)).toBe(true)
   })
+  it('recentOutboundExists true when a matching row is found', async () => {
+    const s = createStore(fakeSupabase({ wati_agent_messages: { data: [{ id: 1 }], error: null } }))
+    expect(await s.recentOutboundExists('507123', 'hola', 5 * 60_000)).toBe(true)
+  })
+  it('recentOutboundExists false when no matching row is found', async () => {
+    const s = createStore(fakeSupabase({ wati_agent_messages: { data: [], error: null } }))
+    expect(await s.recentOutboundExists('507123', 'hola', 5 * 60_000)).toBe(false)
+  })
 })

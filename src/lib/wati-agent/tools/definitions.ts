@@ -19,7 +19,7 @@ export const TOOLS: Anthropic.Tool[] = [
   tool('list_my_appointments', 'Próximas citas del cliente.', {}),
   tool('reschedule', 'Mueve una cita. Requiere confirmación del cliente.', { appointment_id: { type: 'integer' }, date: { type: 'string' }, time: { type: 'string' }, customer_confirmation: { type: 'string' } }, ['appointment_id', 'date', 'time', 'customer_confirmation']),
   tool('cancel', 'Cancela una cita. Requiere confirmación del cliente.', { appointment_id: { type: 'integer' }, customer_confirmation: { type: 'string' } }, ['appointment_id', 'customer_confirmation']),
-  tool('handoff', 'Pasa la conversación a una recepcionista humana. resumen: 2 líneas con lo que quiere el cliente y lo ya recopilado.', { motivo: { type: 'string' }, resumen: { type: 'string' } }, ['motivo', 'resumen']),
+  tool('handoff', 'Pasa la conversación a una recepcionista humana. resumen: 2 líneas con lo que quiere el cliente y lo ya recopilado.', { motivo: { type: 'string' }, resumen: { type: 'string' }, sucursal: { type: 'string', enum: ['cde', 'sfc', ''], description: 'cde, sfc o cadena vacía si no se conoce' } }, ['motivo', 'resumen', 'sucursal']),
   tool('close_chat', 'Marca la conversación como resuelta después de despedirte.', {}),
   tool('note_to_self', 'Guarda un dato útil para el resto de la conversación (preferencias, sucursal, etc.).', { text: { type: 'string' } }, ['text']),
 ]
