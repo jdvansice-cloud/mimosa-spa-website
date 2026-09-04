@@ -82,7 +82,7 @@ Código: `src/lib/wati-agent/` (lógica), `src/app/api/wati/agent/{inbound,sent,
 | `WATI_CITAS_SFC_EMAIL` | Email de "Citas San Francisco", fallback si el flujo falla |
 | `WATI_CHANNEL_PHONE` | Número de WhatsApp del negocio, solo dígitos |
 | `WATI_AGENT_MODE` | `off` / `shadow` / `whitelist` / `live` |
-| `WATI_AGENT_WHITELIST` | Teléfonos separados por coma, solo se usa en modo `whitelist` |
+| `WATI_AGENT_WHITELIST` | Teléfonos separados por coma, solo se usa en modo `whitelist`. Se normalizan igual que los entrantes: se aceptan números de 8 dígitos (`6612-4546`), a los que se les antepone `507` |
 | `WATI_AGENT_MODEL` | Por defecto `claude-sonnet-5` |
 
 Reutiliza `WATI_API_URL`, `WATI_ACCESS_TOKEN`/`WATI_API_KEY`, y las variables
@@ -143,9 +143,11 @@ Dos formas de detener todo de inmediato, sin tocar código:
 2. Vercel env `WATI_AGENT_MODE=off` (redeploy o edge config, según cómo esté
    servida la variable).
 
-Por chat: un atributo de contacto `ai_modo=off` en WATI excluye a esa
-clienta permanentemente (la puerta de entrada en `gate()` respeta
-`conversationMode !== 'agent'`).
+Por chat: en el panel `/admin/wati-agent`, el botón **Pausar** de la
+conversación pone su `mode` en `off` en `wati_agent_conversations`, y la
+puerta de entrada (`gate()`) deja de responder ese chat. No existe ningún
+atributo de contacto en WATI que pause a Camila: el agente nunca lee los
+atributos de contacto de vuelta.
 
 ## 5. Spike (hacer antes de pasar a shadow)
 
@@ -210,7 +212,8 @@ correr el comando después de cualquier cambio en
    respondió la receptionista real, y ajustar `style-guide.md` /
    `exemplars.json` según lo que falle.
 3. **`whitelist`**. Cargar los teléfonos del dueño y los socios en
-   `WATI_AGENT_WHITELIST`. Solo esos chats reciben respuestas reales de
+   `WATI_AGENT_WHITELIST` (se aceptan de 8 dígitos, con o sin guiones).
+   Solo esos chats reciben respuestas reales de
    Camila; el resto sigue en shadow/off según `WATI_AGENT_MODE`. Revisar en
    el panel que las reservas y handoffs de esos chats sean correctos.
 4. **`live`**. Todos los chats. La primera semana mantener el inbox de WATI

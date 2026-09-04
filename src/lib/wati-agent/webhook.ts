@@ -88,3 +88,14 @@ export function shouldDebounceSkip(newestId: number | null, myId: number | null)
   if (myId == null) return false
   return newestId !== null && newestId > myId
 }
+
+const ALLOWED_HOST = /^(www\.)?mimosaretreat\.com$|\.vercel\.app$|^localhost(:\d+)?$/
+const DEFAULT_ORIGIN = 'https://www.mimosaretreat.com'
+
+/** Only trust the forwarded host when it is one of ours; otherwise pin production. */
+export function resolveOrigin(proto: string | null | undefined, host: string | null | undefined): string {
+  const h = (host ?? '').trim().toLowerCase()
+  if (!h || !ALLOWED_HOST.test(h)) return DEFAULT_ORIGIN
+  const p = (proto ?? '').trim().toLowerCase()
+  return `${p === 'http' || p === 'https' ? p : 'https'}://${h}`
+}

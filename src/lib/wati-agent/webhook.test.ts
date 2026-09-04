@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { authorized, parseInbound, parseSent, isHumanOperator, shouldDebounceSkip, fallbackMessageId } from './webhook'
+import { authorized, parseInbound, parseSent, isHumanOperator, shouldDebounceSkip, fallbackMessageId, resolveOrigin } from './webhook'
 
 describe('webhook', () => {
   it('authorizes by token query', () => expect(authorized('https://x/api?token=abc', 'abc')).toBe(true))
@@ -33,5 +33,25 @@ describe('webhook', () => {
     expect(parseSent({ contact: { waId: '50766124546' }, whatsappMessageId: 'w1', owner: true })).toMatchObject({ phone: '50766124546' })
     expect(parseSent({ contact: { phone: '50766124546' }, whatsappMessageId: 'w2', owner: true })).toMatchObject({ phone: '50766124546' })
     expect(parseSent({ phone: '50766124546', whatsappMessageId: 'w3', owner: true })).toMatchObject({ phone: '50766124546' })
+  })
+})
+
+describe('resolveOrigin', () => {
+  it('accepts our own hosts', () => {
+    expect(resolveOrigin('https', 'www.mimosaretreat.com')).toBe('https://www.mimosaretreat.com')
+    expect(resolveOrigin('https', 'mimosaretreat.com')).toBe('https://mimosaretreat.com')
+    expect(resolveOrigin('https', 'mimosa-spa-website-abc.vercel.app')).toBe('https://mimosa-spa-website-abc.vercel.app')
+    expect(resolveOrigin('http', 'localhost:3000')).toBe('http://localhost:3000')
+  })
+
+  it('falls back to production for an attacker-supplied host', () => {
+    expect(resolveOrigin('https', 'evil.com')).toBe('https://www.mimosaretreat.com')
+    expect(resolveOrigin('https', 'mimosaretreat.com.evil.com')).toBe('https://www.mimosaretreat.com')
+    expect(resolveOrigin('https', 'vercel.app.evil.com')).toBe('https://www.mimosaretreat.com')
+    expect(resolveOrigin(null, null)).toBe('https://www.mimosaretreat.com')
+  })
+
+  it('never trusts a non-http protocol', () => {
+    expect(resolveOrigin('gopher', 'localhost:3000')).toBe('https://localhost:3000')
   })
 })
