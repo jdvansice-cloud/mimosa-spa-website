@@ -9,7 +9,8 @@ import { panamaDate } from './hours'
 import { env } from './config/env'
 import type { AgentStore } from './store'
 import type { WatiClient } from './wati-api'
-import type { StoredMessage } from './types'
+import { closeAndRemember } from './memory'
+import type { ClientProfile, ConversationOutcome, StoredMessage } from './types'
 
 export interface RunDeps {
   anthropic: Pick<Anthropic, 'messages'>
@@ -41,6 +42,33 @@ function toMessages(history: StoredMessage[]): Anthropic.MessageParam[] {
   return out
 }
 
+/**
+ * One Mindbody lookup per turn, and only when we have a reason to believe the
+ * contact exists — an unknown number is the common case and must stay cheap.
+ */
+async function mindbodyHistoryFor(
+  phone: string,
+  conv: { mindbody_client_id: string | null; client_name: string | null },
+  profile: ClientProfile,
+  d: RunDeps,
+): Promise<{ line: string | null; patch: Partial<{ client_name: string; mindbody_client_id: string }> }> {
+  if (!conv.mindbody_client_id && !profile.correo) return { line: null, patch: {} }
+  try {
+    const byPhone = await d.mb.findClientByPhone(phone)
+    const c = byPhone ?? (profile.correo ? await d.mb.findClientByEmail(profile.correo) : null)
+    if (!c) return { line: null, patch: {} }
+    const lastVisits = (c as { lastVisits?: string[] }).lastVisits ?? []
+    const visits = lastVisits.length ? `, últimas visitas: ${lastVisits.slice(0, 3).join(' | ')}` : ''
+    const patch: Partial<{ client_name: string; mindbody_client_id: string }> = {}
+    if (!conv.mindbody_client_id) patch.mindbody_client_id = c.id
+    if (!conv.client_name && c.name) patch.client_name = c.name
+    return { line: `Cliente Mindbody: ${c.name}${visits}`, patch }
+  } catch (e) {
+    await d.store.logEvent(phone, 'error', { where: 'mindbodyHistory', error: String(e) }).catch(() => {})
+    return { line: null, patch: {} }
+  }
+}
+
 export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promise<{ bubbles: string[]; handedOff: boolean }> {
   const sleep = d.sleep ?? ((ms: number) => new Promise<void>(r => setTimeout(r, ms)))
   let conv: Awaited<ReturnType<AgentStore['getConversation']>> | undefined
@@ -56,17 +84,23 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
     const messages = toMessages(history)
     if (!messages.length) return { bubbles: [], handedOff: false }
 
-    const [media, personaName] = await Promise.all([
+    const [media, personaName, profile, historial] = await Promise.all([
       d.store.activeMedia(panamaDate(d.now)),
       d.store.getSetting('persona_name', 'Camila'),
+      d.store.getProfile(phone).catch(() => ({} as ClientProfile)),
+      d.store.recentConversationLogs(phone, 3).catch(() => []),
     ])
+    const mbHistory = await mindbodyHistoryFor(phone, conv, profile, d)
+    if (Object.keys(mbHistory.patch).length) conv = await d.store.upsertConversation({ phone, ...mbHistory.patch })
     const system = buildSystem({
       personaName,
       now: d.now,
       sucursal: conv.sucursal,
       clientName: conv.client_name,
-      mindbodyHistory: null,
+      mindbodyHistory: mbHistory.line,
       summary: conv.summary,
+      profile,
+      historial,
       media,
       intent: detectIntent(lastIn?.text || ''),
       styleGuide: d.styleGuide,
@@ -75,6 +109,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
     const texts: string[] = []
     let handedOff = false
     let endedByTool = false
+    let outcome: ConversationOutcome | null = null
 
     for (let round = 0; round < 8; round++) {
       const res = await d.anthropic.messages.create({
@@ -110,7 +145,9 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
         })
         await d.store.logEvent(phone, 'tool_result', { tool: b.name, ok: !o.isError, result: o.result.slice(0, 500) })
         if (o.convPatch) conv = await d.store.upsertConversation({ phone, ...o.convPatch })
-        if (b.name === 'handoff') handedOff = true
+        if (b.name === 'handoff') { handedOff = true; outcome = 'handoff' }
+        if (b.name === 'close_chat') outcome = 'closed'
+        if (b.name === 'book' && !o.isError) outcome = 'booked'
         if (o.endTurn) end = true
         results.push({ type: 'tool_result', tool_use_id: b.id, content: o.result, is_error: o.isError || undefined })
       }
@@ -123,6 +160,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
       if (!shadow) {
         // performHandoff sends its own "le comunico con mi compañera" bubble; a second one here reads as a stutter.
         await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'respuesta_vacia', resumen: conv.summary ?? '', shadow, env: env() }).catch(() => {})
+        await closeAndRemember({ anthropic: d.anthropic, store: d.store, phone, outcome: 'handoff', now: d.now })
       }
       return { bubbles: [], handedOff: true }
     }
@@ -168,6 +206,9 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
     } catch (e) {
       await d.store.logEvent(phone, 'error', { where: 'runTurn/bookkeeping', error: String(e) }).catch(() => {})
     }
+
+    // The conversation ended: write its log entry and fold what we learned into the profile.
+    if (outcome && !shadow) await closeAndRemember({ anthropic: d.anthropic, store: d.store, phone, outcome, now: d.now })
 
     return { bubbles, handedOff }
   } catch (e) {

@@ -5,7 +5,7 @@ import { performHandoff } from '../handoff'
 vi.mock('../handoff', () => ({ performHandoff: vi.fn(async () => {}) }))
 
 const deps = (over: Partial<any> = {}) => ({
-  store: { logEvent: vi.fn(async () => {}), upsertConversation: vi.fn(async (c: any) => c), getSetting: vi.fn(async (_k: string, f: any) => f) },
+  store: { logEvent: vi.fn(async () => {}), upsertConversation: vi.fn(async (c: any) => c), getSetting: vi.fn(async (_k: string, f: any) => f), mergeProfile: vi.fn(async (_p: string, patch: any) => patch) },
   wati: { sendText: vi.fn(async () => ({ ok: true })), sendFile: vi.fn(async () => ({ ok: true })), sendButtons: vi.fn(async () => ({ ok: true })), updateChatStatus: vi.fn(async () => ({ ok: true })) },
   conv: { phone: '507', sucursal: 'cde', mindbody_client_id: 'C1', client_name: 'Ana', summary: null },
   origin: 'https://x', shadow: false, now: new Date('2026-09-05T08:00:00-05:00'), recentInbound: ['si, confirmo'],
@@ -143,5 +143,50 @@ describe('executeTool', () => {
     await executeTool('handoff', { motivo: 'queja', resumen: 'resumen', sucursal: '' }, d)
     expect(d.store.upsertConversation).not.toHaveBeenCalled()
     expect(performHandoff).toHaveBeenCalledWith(expect.objectContaining({ conv: expect.objectContaining({ sucursal: 'cde' }) }))
+  })
+})
+
+describe('note_to_self profile memory', () => {
+  const empty = { nombre: '', correo: '', sucursal_preferida: '', tratamientos: [], preferencias: [], notas: [] }
+
+  it('appends to the summary and does not touch the profile when the patch is empty', async () => {
+    const d = deps()
+    const r = await executeTool('note_to_self', { text: 'prefiere la tarde', perfil: empty }, d)
+    expect(r.convPatch).toMatchObject({ summary: 'prefiere la tarde' })
+    expect(d.store.mergeProfile).not.toHaveBeenCalled()
+  })
+
+  it('merges the non-empty profile fields', async () => {
+    const d = deps()
+    await executeTool('note_to_self', { text: 'nota', perfil: { ...empty, nombre: 'Ana Ruiz', sucursal_preferida: 'sfc', notas: ['alergia al eucalipto'] } }, d)
+    expect(d.store.mergeProfile).toHaveBeenCalledWith('507', expect.objectContaining({
+      nombre: 'Ana Ruiz', sucursal_preferida: 'sfc', notas: ['alergia al eucalipto'],
+    }))
+  })
+
+  it('drops an invalid sucursal_preferida instead of storing it', async () => {
+    const d = deps()
+    await executeTool('note_to_self', { text: 'n', perfil: { ...empty, sucursal_preferida: 'panama', notas: ['x'] } }, d)
+    expect(d.store.mergeProfile.mock.calls[0][1].sucursal_preferida).toBeUndefined()
+  })
+
+  it('tolerates a missing perfil object', async () => {
+    const d = deps()
+    const r = await executeTool('note_to_self', { text: 'solo texto' }, d)
+    expect(r.result).toBe('anotado')
+    expect(d.store.mergeProfile).not.toHaveBeenCalled()
+  })
+})
+
+describe('client lookup feeds the profile', () => {
+  it('find_client remembers name and email', async () => {
+    const d = deps({ mb: { findClientByPhone: vi.fn(async () => ({ id: 'C1', name: 'Ana Ruiz', email: 'a@x.com', lastVisits: [] })) } })
+    await executeTool('find_client', {}, d)
+    expect(d.store.mergeProfile).toHaveBeenCalledWith('507', { nombre: 'Ana Ruiz', correo: 'a@x.com' })
+  })
+  it('create_client remembers name and email', async () => {
+    const d = deps({ mb: { createClient: vi.fn(async () => ({ id: 'C2' })) } })
+    await executeTool('create_client', { first_name: 'Ana', last_name: 'Ruiz', email: 'a@x.com' }, d)
+    expect(d.store.mergeProfile).toHaveBeenCalledWith('507', { nombre: 'Ana Ruiz', correo: 'a@x.com' })
   })
 })

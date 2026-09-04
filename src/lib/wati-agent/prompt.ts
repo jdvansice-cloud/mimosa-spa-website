@@ -2,7 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk'
 import { BUSINESS } from './config/business'
 import { greetingFor, formatPanama, isOpen } from './hours'
 import { selectExemplars, type Intent } from './voice/select'
-import type { MediaAsset, Sucursal } from './types'
+import type { ClientProfile, ConversationLogEntry, MediaAsset, Sucursal } from './types'
 
 export interface PromptContext {
   personaName: string
@@ -14,7 +14,34 @@ export interface PromptContext {
   media: MediaAsset[]
   intent: Intent
   styleGuide: string
+  /** What we remember about this contact from earlier conversations. */
+  profile?: ClientProfile | null
+  /** Newest first; only the summaries are shown. */
+  historial?: ConversationLogEntry[] | null
   businessOverrides?: Partial<typeof BUSINESS>
+}
+
+const SUCURSAL_LABEL: Record<Sucursal, string> = { cde: 'Costa del Este', sfc: 'San Francisco' }
+
+/** One-line-per-fact rendering; returns '' when we know nothing yet. */
+export function renderProfile(p: ClientProfile | null | undefined): string {
+  if (!p) return ''
+  const parts: string[] = []
+  if (p.nombre) parts.push(`nombre ${p.nombre}`)
+  if (p.correo) parts.push(`correo ${p.correo}`)
+  if (p.sucursal_preferida) parts.push(`sucursal habitual ${SUCURSAL_LABEL[p.sucursal_preferida]}`)
+  if (p.tratamientos?.length) parts.push(`tratamientos ${p.tratamientos.join(', ')}`)
+  if (p.preferencias?.length) parts.push(`preferencias ${p.preferencias.join(', ')}`)
+  if (p.notas?.length) parts.push(`notas ${p.notas.join(' · ')}`)
+  return parts.join('; ')
+}
+
+export function renderHistorial(logs: ConversationLogEntry[] | null | undefined): string {
+  if (!logs?.length) return ''
+  return logs
+    .slice(0, 3)
+    .map(l => `- ${String(l.ended_at ?? l.started_at ?? '').slice(0, 10)}${l.outcome ? ` (${l.outcome})` : ''}: ${l.summary.replace(/\s+/g, ' ').trim()}`)
+    .join('\n')
 }
 
 function stable(personaName: string, styleGuide: string): string {
@@ -38,6 +65,8 @@ ${styleGuide}
 - Ubicación: usa get_location_info y envía el enlace de Waze en su propia burbuja.
 - Datos de pago (Yappy, cuenta bancaria, link de tarjeta) SOLO con la herramienta get_payment_info; nunca de memoria.
 - En los ejemplos, [nombre del cliente] representa el nombre real del cliente: usa su nombre si lo sabes, o no lo menciones.
+- Si el perfil o el historial te dicen quién es el cliente, salúdalo por su nombre y usa lo que sabes (tratamiento habitual, sucursal) para proponer en vez de preguntar desde cero; confirma en una línea si ya tienes nombre y correo en vez de pedir la tarjeta 📌.
+- Cuando el cliente te dé un dato que valga la pena recordar para la próxima vez (nombre, correo, sucursal preferida, tratamiento habitual, alergias, preferencias), llama a note_to_self con el campo perfil correspondiente. Deja en blanco los campos que no cambian.
 - Al terminar ("gracias", "listo"): despídete como las recepcionistas y llama a close_chat.
 
 ## Política de cambios
@@ -63,9 +92,11 @@ export function deplaceholder(text: string): string {
 
 export function buildSystem(ctx: PromptContext): Anthropic.TextBlockParam[] {
   const ex = selectExemplars(ctx.intent, ctx.sucursal)
+  const perfil = renderProfile(ctx.profile)
+  const historial = renderHistorial(ctx.historial)
   const volatile = [
     `## Ahora\nFecha y hora en Panamá: ${formatPanama(ctx.now)}. Saludo correcto ahora: "${greetingFor(ctx.now)}". El spa está ${isOpen(ctx.now) ? 'abierto' : 'cerrado'} en este momento.`,
-    `## Cliente\nTeléfono conocido. Nombre: ${ctx.clientName ?? 'desconocido'}. Sucursal de esta conversación: ${ctx.sucursal ?? 'no definida'}.${ctx.mindbodyHistory ? `\nHistorial Mindbody: ${ctx.mindbodyHistory}` : ''}${ctx.summary ? `\nResumen de la conversación: ${ctx.summary}` : ''}`,
+    `## Cliente\nTeléfono conocido. Nombre: ${ctx.clientName ?? 'desconocido'}. Sucursal de esta conversación: ${ctx.sucursal ?? 'no definida'}.${ctx.mindbodyHistory ? `\nHistorial Mindbody: ${ctx.mindbodyHistory}` : ''}${perfil ? `\nPerfil: ${perfil}` : ''}${historial ? `\nConversaciones anteriores:\n${historial}` : ''}${ctx.summary ? `\nResumen de la conversación: ${ctx.summary}` : ''}`,
     `## Imágenes disponibles (send_image)\n${ctx.media.length ? ctx.media.map(m => `- ${m.key}: ${m.description}`).join('\n') : '(ninguna)'}`,
     `## Ejemplos reales de las recepcionistas para este tipo de mensaje\n${ex.map(e => `Cliente: ${deplaceholder(e.customer.join(' / '))}\nRecepcionista: ${deplaceholder(e.staff.join('\n---\n'))}`).join('\n\n')}`,
     `## Recuerda\nSin listas ni guiones: frases corridas.\nMáximo 2 líneas por burbuja.\nUna sola pregunta a la vez.\nPrecios solo si preguntan.`,

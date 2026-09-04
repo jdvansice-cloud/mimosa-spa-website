@@ -21,5 +21,26 @@ export const TOOLS: Anthropic.Tool[] = [
   tool('cancel', 'Cancela una cita. Requiere confirmación del cliente.', { appointment_id: { type: 'integer' }, customer_confirmation: { type: 'string' } }, ['appointment_id', 'customer_confirmation']),
   tool('handoff', 'Pasa la conversación a una recepcionista humana. resumen: 2 líneas con lo que quiere el cliente y lo ya recopilado.', { motivo: { type: 'string' }, resumen: { type: 'string' }, sucursal: { type: 'string', enum: ['cde', 'sfc', ''], description: 'cde, sfc o cadena vacía si no se conoce' } }, ['motivo', 'resumen', 'sucursal']),
   tool('close_chat', 'Marca la conversación como resuelta después de despedirte.', {}),
-  tool('note_to_self', 'Guarda un dato útil para el resto de la conversación (preferencias, sucursal, etc.).', { text: { type: 'string' } }, ['text']),
+  tool(
+    'note_to_self',
+    'Guarda un dato útil. text: nota para el resto de esta conversación. perfil: datos que el cliente confirmó y que debemos recordar para siempre; deja en blanco (cadena vacía o lista vacía) los campos que no cambian.',
+    {
+      text: { type: 'string' },
+      perfil: {
+        type: 'object',
+        description: 'Memoria permanente del cliente. Solo hechos que el cliente dijo o que se reservaron; nunca suposiciones.',
+        properties: {
+          nombre: { type: 'string', description: 'Nombre y apellido, o cadena vacía' },
+          correo: { type: 'string', description: 'Correo, o cadena vacía' },
+          sucursal_preferida: { type: 'string', enum: ['cde', 'sfc', ''], description: 'cde, sfc o cadena vacía' },
+          tratamientos: { type: 'array', items: { type: 'string' }, description: 'Tratamientos que suele tomar; lista vacía si no hay nada nuevo' },
+          preferencias: { type: 'array', items: { type: 'string' }, description: 'Preferencias (terapeuta, presión, horario); lista vacía si no hay nada nuevo' },
+          notas: { type: 'array', items: { type: 'string' }, description: 'Notas duraderas (alergias, embarazo, cumpleaños); lista vacía si no hay nada nuevo' },
+        },
+        required: ['nombre', 'correo', 'sucursal_preferida', 'tratamientos', 'preferencias', 'notas'],
+        additionalProperties: false,
+      },
+    },
+    ['text', 'perfil'],
+  ),
 ]
