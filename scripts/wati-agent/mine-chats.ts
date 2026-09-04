@@ -5,6 +5,7 @@ import path from 'node:path'
 import Anthropic from '@anthropic-ai/sdk'
 import { parseExport, buildExchanges, type Exchange } from '../../src/lib/wati-agent/voice/parse-export'
 import { scrub } from '../../src/lib/wati-agent/voice/scrub'
+import { redactNames } from './redact-names'
 
 const INTENTS = ['saludo','ubicacion','horario','precios','promo','reservar','cambiar','cancelar','certificado','pago','queja','cierre','otro'] as const
 type Intent = typeof INTENTS[number]
@@ -174,6 +175,31 @@ async function main() {
     '// GENERATED from style-guide.md — do not edit by hand.\n// Regenerate: npm run wati:mine (or the node -e command in the old header)\nexport const STYLE_GUIDE = ' + JSON.stringify(guideText) + '\n'
   )
   console.log(`exemplars ${finalExemplars.length}, cases ${finalCases.length}`)
+
+  // 9. Redact personal names that survived scrubbing (booking names, gift recipients, ...)
+  const exemplarStrings = finalExemplars.flatMap(e => [...e.customer, ...e.staff])
+  const caseStrings = finalCases.flatMap(c => c.turns.flatMap(t => [...t.customer, ...t.staff]))
+  const [redactedExemplarStrings, redactedCaseStrings] = await Promise.all([
+    redactNames(exemplarStrings, client),
+    redactNames(caseStrings, client),
+  ])
+  let ei = 0
+  const redactedExemplars = finalExemplars.map(e => ({
+    ...e,
+    customer: e.customer.map(() => redactedExemplarStrings[ei++]),
+    staff: e.staff.map(() => redactedExemplarStrings[ei++]),
+  }))
+  let ci = 0
+  const redactedCases = finalCases.map(c => ({
+    ...c,
+    turns: c.turns.map(t => ({
+      customer: t.customer.map(() => redactedCaseStrings[ci++]),
+      staff: t.staff.map(() => redactedCaseStrings[ci++]),
+    })),
+  }))
+  fs.writeFileSync('src/lib/wati-agent/voice/exemplars.json', JSON.stringify(redactedExemplars, null, 2))
+  fs.writeFileSync('scripts/wati-agent/evals/cases.json', JSON.stringify(redactedCases, null, 2))
+  console.log('redact-names: applied to exemplars.json and cases.json')
 }
 
 main().catch(err => { console.error(err); process.exit(1) })
