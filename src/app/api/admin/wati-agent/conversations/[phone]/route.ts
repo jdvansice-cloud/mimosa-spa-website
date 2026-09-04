@@ -5,6 +5,7 @@ import { storeFromEnv } from '@/lib/wati-agent/store'
 import { watiFromEnv } from '@/lib/wati-agent/wati-api'
 import { performHandoff, resumeAgent } from '@/lib/wati-agent/handoff'
 import { env } from '@/lib/wati-agent/config/env'
+import type { ClientProfile } from '@/lib/wati-agent/types'
 
 export async function GET(
   _req: NextRequest,
@@ -25,6 +26,8 @@ export async function GET(
     conversation: await store.getConversation(phone),
     messages: messages ?? [],
     events: await store.eventsFor(phone, 200),
+    profile: await store.getProfile(phone),
+    logs: await store.recentConversationLogs(phone, 10),
   })
 }
 
@@ -35,7 +38,8 @@ export async function POST(
   const denied = await requireAdmin()
   if (denied) return denied
   const { phone } = await params
-  const { action } = await req.json()
+  const body = await req.json()
+  const { action } = body as { action?: string }
   const store = storeFromEnv()
   const conv = await store.getConversation(phone)
   if (!conv) return NextResponse.json({ error: 'No existe' }, { status: 404 })
@@ -54,6 +58,11 @@ export async function POST(
       shadow: false,
       env: env(),
     })
+  } else if (action === 'profile') {
+    const patch = (body as { profile?: Record<string, unknown> }).profile
+    if (!patch || typeof patch !== 'object') return NextResponse.json({ error: 'perfil inválido' }, { status: 400 })
+    const profile = await store.mergeProfile(phone, patch as Partial<ClientProfile>)
+    return NextResponse.json({ ok: true, profile })
   } else {
     return NextResponse.json({ error: 'acción inválida' }, { status: 400 })
   }
