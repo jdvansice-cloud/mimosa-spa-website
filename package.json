@@ -13,7 +13,6 @@
     "check-all": "npm run lint && npm run type-check",
     "verify": "npm run build",
     "wati:mine": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/mine-chats.ts",
-    "wati:mine": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/mine-chats.ts",
     "wati:redact": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/redact-names.ts",
     "wati:evals": "node --env-file=.env.local --experimental-strip-types --import ./scripts/spikes/ts-resolve-register.mjs scripts/wati-agent/evals/run.ts"
   },
