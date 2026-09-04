@@ -41,4 +41,38 @@ describe('runTurn', () => {
     const second = d.anthropic.messages.create.mock.calls[1][0]
     expect(second.messages.at(-1).content[0]).toMatchObject({ type: 'tool_result', tool_use_id: 't1' })
   })
+  it('returns empty and logs error when conversation is missing', async () => {
+    const d = deps(fakeAnthropic([text('Hola')]), { store: undefined })
+    d.store = {
+      getConversation: vi.fn(async () => null),
+      recentMessages: vi.fn(async () => []),
+      activeMedia: vi.fn(async () => []), getSetting: vi.fn(async (_k: string, f: any) => f),
+      insertMessage: vi.fn(async () => ({ inserted: true })), logEvent: vi.fn(async () => {}), upsertConversation: vi.fn(async (c: any) => c),
+    }
+    const r = await runTurn('507', false, d)
+    expect(r).toEqual({ bubbles: [], handedOff: false })
+    expect(d.store.logEvent).toHaveBeenCalledWith('507', 'error', expect.objectContaining({}))
+    const call = d.store.logEvent.mock.calls.find((c: any) => c[1] === 'error')
+    expect(call).toBeTruthy()
+  })
+  it('stops sending and does not store the message when sendText fails', async () => {
+    const d = deps(fakeAnthropic([text('Hola\n---\n¿En qué le ayudo?')]))
+    d.wati.sendText = vi.fn(async () => ({ ok: false, error: 'x' }))
+    const r = await runTurn('507', false, d)
+    expect(r.bubbles).toEqual([])
+    expect(d.store.insertMessage).not.toHaveBeenCalled()
+    const call = d.store.logEvent.mock.calls.find((c: any) => c[1] === 'error' && c[2]?.where === 'sendText')
+    expect(call).toBeTruthy()
+  })
+  it('refreshes summary when camila message count crosses a multiple of 6', async () => {
+    const d = deps(fakeAnthropic([text('Hola\n---\n¿En qué le ayudo?'), text('Resumen actualizado')]))
+    d.store.recentMessages = vi.fn(async () => [
+      ...Array.from({ length: 5 }, (_, i) => ({ phone: '507', direction: 'out', author: 'camila', type: 'text', text: `msg${i}`, shadow: false })),
+      { phone: '507', direction: 'in', author: 'customer', type: 'text', text: 'hola', shadow: false },
+    ])
+    const r = await runTurn('507', false, d)
+    expect(r.bubbles).toEqual(['Hola', '¿En qué le ayudo?'])
+    expect(d.anthropic.messages.create).toHaveBeenCalledTimes(2)
+    expect(d.store.upsertConversation).toHaveBeenCalledWith(expect.objectContaining({ summary: 'Resumen actualizado' }))
+  })
 })

@@ -43,8 +43,13 @@ function toMessages(history: StoredMessage[]): Anthropic.MessageParam[] {
 
 export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promise<{ bubbles: string[]; handedOff: boolean }> {
   const sleep = d.sleep ?? ((ms: number) => new Promise<void>(r => setTimeout(r, ms)))
-  let conv = (await d.store.getConversation(phone))!
+  let conv: Awaited<ReturnType<AgentStore['getConversation']>> | undefined
   try {
+    conv = await d.store.getConversation(phone)
+    if (!conv) {
+      await d.store.logEvent(phone, 'error', { where: 'runTurn', error: 'conversation not found' })
+      return { bubbles: [], handedOff: false }
+    }
     const history = await d.store.recentMessages(phone, { sinceHours: 48, limit: 60 })
     const lastIn = [...history].reverse().find(m => m.direction === 'in')
     const messages = toMessages(history)
@@ -103,27 +108,37 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
       if (end) break
     }
 
-    const bubbles = handedOff ? [] : splitBubbles(texts.join('\n'))
-    for (const [i, bubbleText] of bubbles.entries()) {
+    const candidateBubbles = handedOff ? [] : splitBubbles(texts.join('\n'))
+    const bubbles: string[] = []
+    for (const [i, bubbleText] of candidateBubbles.entries()) {
       if (shadow) {
         await d.store.insertMessage({ phone, wati_message_id: null, direction: 'out', author: 'camila', type: 'text', text: bubbleText, media_ref: null, shadow: true })
         await d.store.logEvent(phone, 'shadow_reply', { text: bubbleText })
+        bubbles.push(bubbleText)
       } else {
         const r = await d.wati.sendText(phone, bubbleText)
+        if (!r.ok) {
+          await d.store.logEvent(phone, 'error', { where: 'sendText', error: r.error })
+          break
+        }
         await d.store.insertMessage({ phone, wati_message_id: r.messageId ?? null, direction: 'out', author: 'camila', type: 'text', text: bubbleText, media_ref: null, shadow: false })
-        if (i < bubbles.length - 1) await sleep(1500 + 500 * i)
+        bubbles.push(bubbleText)
+        if (i < candidateBubbles.length - 1) await sleep(1500 + 500 * i)
       }
     }
 
-    if (bubbles.length) await d.store.upsertConversation({ phone, last_outbound_at: new Date().toISOString() })
+    if (bubbles.length && !shadow) await d.store.upsertConversation({ phone, last_outbound_at: new Date().toISOString() })
 
-    const outCount = history.filter(m => m.author === 'camila').length + bubbles.length
-    if (handedOff || (outCount > 0 && outCount % 6 === 0)) {
+    const before = history.filter(m => m.author === 'camila').length
+    const after = before + bubbles.length
+    if (handedOff || Math.floor(after / 6) > Math.floor(before / 6)) {
+      const summaryMessages = messages.filter(m => typeof m.content === 'string')
+      if (texts.length) summaryMessages.push({ role: 'assistant', content: texts.join('\n') })
       const s = await d.anthropic.messages.create({
         model: env().model,
         max_tokens: 300,
         system: 'Resume la conversación en máximo 4 líneas en español: qué quiere el cliente, qué datos ya dio (nombre, correo, sucursal, fecha/hora, tratamiento), qué falta.',
-        messages: [...messages.filter(m => typeof m.content === 'string'), { role: 'user', content: 'Resumen:' }],
+        messages: [...summaryMessages, { role: 'user', content: 'Resumen:' }],
       })
       const summary = s.content.find((b: Anthropic.ContentBlock) => b.type === 'text')?.text
       if (summary) await d.store.upsertConversation({ phone, summary })
@@ -134,7 +149,9 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
     await d.store.logEvent(phone, 'error', { where: 'runTurn', error: String(e) })
     if (!shadow) {
       await d.wati.sendText(phone, 'Disculpe, un momento por favor 🌼').catch(() => {})
-      await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'error_sistema', resumen: conv.summary ?? '', shadow, env: env() }).catch(() => {})
+      if (conv) {
+        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'error_sistema', resumen: conv?.summary ?? '', shadow, env: env() }).catch(() => {})
+      }
     }
     return { bubbles: [], handedOff: true }
   }
