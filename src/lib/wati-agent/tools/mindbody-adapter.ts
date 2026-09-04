@@ -48,9 +48,25 @@ export async function findClientByPhone(phone: string): Promise<{ id: string; na
   return { id: String(c.Id), name: `${c.FirstName} ${c.LastName}`.trim(), email: c.Email, lastVisits }
 }
 
-export async function createClient(i: { first: string; last: string; email: string; phone: string }): Promise<{ id: string }> {
-  const r = await addClient({ FirstName: i.first, LastName: i.last, Email: i.email, MobilePhone: i.phone })
-  return { id: String(r.Id) }
+export async function findClientByEmail(email: string): Promise<{ id: string; name: string; email: string } | null> {
+  const clients = await searchClients(email)
+  if (!clients.length) return null
+  const target = email.toLowerCase()
+  const c = clients.find(x => (x.Email || '').toLowerCase() === target) ?? clients[0]
+  return { id: String(c.Id), name: `${c.FirstName} ${c.LastName}`.trim(), email: c.Email }
+}
+
+export async function createClient(i: { first: string; last: string; email: string; phone: string }): Promise<{ id: string; existing?: boolean }> {
+  try {
+    const r = await addClient({ FirstName: i.first, LastName: i.last, Email: i.email, MobilePhone: i.phone })
+    return { id: String(r.Id) }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (!/duplicate/i.test(msg)) throw err
+    const existing = await findClientByEmail(i.email)
+    if (!existing) throw err
+    return { id: existing.id, existing: true }
+  }
 }
 
 export async function availability(i: {
