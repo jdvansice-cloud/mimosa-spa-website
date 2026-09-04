@@ -8,6 +8,7 @@ export interface Exemplar { intent: Intent; sucursal: Sucursal | null; customer:
 const DIRTY: RegExp[] = [
   /\{codigo\}/i,
   /\{telefono\}/i,
+  /\{correo\}/i,
   /Caption:/i,
   /[0-9a-f]{8}-[0-9a-f]{4}/i,
   /Banco General/i,

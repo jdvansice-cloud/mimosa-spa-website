@@ -103,8 +103,8 @@ quedan etiquetados con este email o en blanco en el webhook "sent".
 
 ### 3.2 Atributos de contacto
 
-Contacts → Attributes → crear: `sucursal` (cde/sfc), `ai_modo`
-(agente/humano/off), `ai_resumen`, `ai_motivo`.
+Contacts → Attributes → crear: `sucursal` (cde/sfc), `team` (cde/sfc),
+`ai_modo` (agente/humano/off), `ai_resumen`, `ai_motivo`.
 
 ### 3.3 Webhooks
 
@@ -128,10 +128,13 @@ mensaje → Assign User Citas CDE/SF):
 
 1. Quitar su palabra clave de arranque ("new conversation") para que nunca
    se dispare solo — Camila lo inicia por API.
-2. Insertar un nodo **Condition** sobre `{{sucursal}}` antes del nodo
-   Buttons: `cde` → rama CDE (Assign Team CDE → mensaje → Assign User Citas
-   CDE), `sfc` → rama SF (misma forma), cualquier otro valor → el flujo de
-   Buttons existente (pregunta la sucursal).
+2. Insertar un nodo **Condition** sobre `{{team}}` (el atributo de contacto
+   que Camila fija al hacer el handoff, en base a la sucursal de la
+   conversación; si no la sabe, cae en `sfc`) antes del nodo Buttons: `cde` →
+   rama CDE (Assign Team CDE → mensaje → Assign User Citas CDE), `sfc` →
+   rama SF (misma forma; también recibe cualquier ubicación desconocida),
+   cualquier otro valor → el flujo de Buttons existente (pregunta la
+   sucursal).
 3. Copiar el id del chatbot desde la URL del editor de flujos en
    `WATI_HANDOFF_CHATBOT_ID`.
 

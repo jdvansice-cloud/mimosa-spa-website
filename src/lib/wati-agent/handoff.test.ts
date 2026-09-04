@@ -11,7 +11,7 @@ describe('performHandoff', () => {
     const w = wati(), s = store()
     await performHandoff({ store: s, wati: w, conv, motivo: 'queja', resumen: 'x', shadow: false, env: e })
     expect(w.startChatbot).toHaveBeenCalledWith('507', 'bot1')
-    expect(w.updateAttributes.mock.calls[0][1]).toMatchObject({ ai_modo: 'humano', ai_motivo: 'queja', sucursal: 'cde' })
+    expect(w.updateAttributes.mock.calls[0][1]).toMatchObject({ ai_modo: 'humano', ai_motivo: 'queja', sucursal: 'cde', team: 'cde' })
     expect(s.upsertConversation.mock.calls[0][0]).toMatchObject({ mode: 'human', handoff_reason: 'queja' })
   })
   it('falls back to assignOperator when flow fails', async () => {

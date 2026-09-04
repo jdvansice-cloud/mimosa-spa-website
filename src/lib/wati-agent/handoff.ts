@@ -7,7 +7,7 @@ export async function performHandoff(i: { store: AgentStore; wati: WatiClient; c
   const { phone, sucursal } = i.conv
   if (i.shadow) { await i.store.logEvent(phone, 'handoff', { motivo: i.motivo, resumen: i.resumen, shadow: true }); return }
   await i.wati.sendText(phone, 'Un momento por favor, le comunico con mi compañera 🌼')
-  await i.wati.updateAttributes(phone, { sucursal: sucursal ?? '', ai_modo: 'humano', ai_resumen: i.resumen.slice(0, 300), ai_motivo: i.motivo })
+  await i.wati.updateAttributes(phone, { sucursal: sucursal ?? '', team: sucursal ?? 'sfc', ai_modo: 'humano', ai_resumen: i.resumen.slice(0, 300), ai_motivo: i.motivo })
   let viaFlow = false
   if (i.env.handoffChatbotId) viaFlow = (await i.wati.startChatbot(phone, i.env.handoffChatbotId)).ok
   if (!viaFlow) {

@@ -35,6 +35,13 @@ describe('buildSystem', () => {
     expect(t).toContain('le esperamos 🌼')
   })
 
+  it('requires knowing the sucursal before handoff, except for urgent cases', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('Antes de llamar a handoff necesitas saber la sucursal')
+    expect(t).toContain('¿Para Costa del Este o San Francisco?')
+    expect(t).toContain('EXCEPTO en quejas, comprobantes de pago o errores de sistema')
+  })
+
   it('volatile block ends with the Recuerda section', () => {
     const t = (blocks[1] as any).text
     expect(t).toContain('## Recuerda')
@@ -64,6 +71,11 @@ describe('exemplar placeholders', () => {
     const all = blocks.map(b => (b as any).text).join('\n')
     expect(all).not.toContain('{nombre}')
     expect(all).toContain('[nombre del cliente]')
+  })
+
+  it('never leaks a raw {correo} placeholder', () => {
+    const all = blocks.map(b => (b as any).text).join('\n')
+    expect(all).not.toContain('{correo}')
   })
 
   it('explains the placeholder and routes payment data through the tool', () => {
