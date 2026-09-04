@@ -15,7 +15,7 @@ vi.mock('@/lib/booking/mindbody', () => ({
 vi.mock('@/lib/booking/wati', () => ({ sendBookingConfirmation: vi.fn(async () => ({ result: true })) }))
 
 import * as mb from '@/lib/booking/mindbody'
-import { listServices, availability, findClientByPhone } from './mindbody-adapter'
+import { listServices, availability, findClientByPhone, book } from './mindbody-adapter'
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -51,5 +51,45 @@ describe('adapter', () => {
   it('finds client by phone suffix', async () => {
     const c = await findClientByPhone('50766124546')
     expect(c?.name).toBe('Ana Ruiz')
+  })
+
+  it('rolls back the first booking when the second person fails to book', async () => {
+    const fetchImpl = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          availableDates: [
+            {
+              date: '2026-09-06',
+              slots: [{ time: '10:00', availableStaffIds: [1, 2] }],
+            },
+          ],
+        })
+      )
+    )
+    vi.stubGlobal('fetch', fetchImpl)
+
+    ;(mb.addMultipleAppointments as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ success: true, appointments: [{ Id: 111 }, { Id: 112 }] })
+      .mockResolvedValueOnce({ success: false, error: 'no room' })
+
+    await expect(
+      book({
+        clientId: 'C1',
+        sucursal: 'cde',
+        date: '2026-09-06',
+        time: '10:00',
+        serviceIds: [10],
+        people: 2,
+        origin: 'https://x',
+        clientName: 'Ana Ruiz',
+        phone: '50766124546',
+      })
+    ).rejects.toThrow('No se pudo reservar la segunda cabina; se liberó la primera')
+
+    expect(mb.removeAppointment).toHaveBeenCalledTimes(2)
+    expect(mb.removeAppointment).toHaveBeenCalledWith(111)
+    expect(mb.removeAppointment).toHaveBeenCalledWith(112)
+
+    vi.unstubAllGlobals()
   })
 })
