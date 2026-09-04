@@ -15,6 +15,21 @@ export interface InboundEvent {
   ticketId: string | null
   contactId: string | null
   mediaRef: string | null
+  timestamp: string | null
+}
+
+/** djb2-style hash, stable across runs. */
+function simpleHash(s: string): string {
+  let h = 5381
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) + h + s.charCodeAt(i)) | 0
+  }
+  return (h >>> 0).toString(36)
+}
+
+/** Deterministic id for inbound events that arrive without a WATI message id, so dedupe still applies. */
+export function fallbackMessageId(e: { phone: string; text: string | null; type: string; timestamp?: string | null }): string {
+  return `fb:${e.phone}:${e.timestamp ?? ''}:${simpleHash((e.text ?? '') + e.type)}`
 }
 
 export function parseInbound(b: any): InboundEvent | null {
@@ -32,6 +47,7 @@ export function parseInbound(b: any): InboundEvent | null {
     ticketId: b.ticketId ?? null,
     contactId: b.contactId ?? b.conversationId ?? null,
     mediaRef: data?.fileName ?? data?.filename ?? (typeof b.data === 'string' ? b.data : null),
+    timestamp: b.timestamp ?? null,
   }
 }
 
@@ -45,7 +61,8 @@ export interface SentEvent {
 }
 
 export function parseSent(b: any): SentEvent | null {
-  const phone = cleanPhone(b?.waId)
+  const rawId = b?.waId ?? b?.contact?.waId ?? b?.contact?.phone ?? b?.phone
+  const phone = cleanPhone(rawId)
   if (!phone) return null
   return {
     phone,
@@ -67,6 +84,7 @@ export function isHumanOperator(e: SentEvent, agentEmail: string, apiLabels: str
   return true
 }
 
-export function shouldDebounceSkip(newestId: number | null, myId: number): boolean {
+export function shouldDebounceSkip(newestId: number | null, myId: number | null): boolean {
+  if (myId == null) return false
   return newestId !== null && newestId > myId
 }
