@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { requireAdmin } from '@/lib/auth/require-admin'
+import { validateMediaKey, validateMediaFile } from '@/lib/wati-agent/media-validate'
 
 const BUCKET = 'wati-agent-media'
 
@@ -27,18 +28,32 @@ export async function POST(req: NextRequest) {
 
   const form = await req.formData()
   const file = form.get('file') as File | null
-  const key = String(form.get('key') ?? '').trim()
+  const rawKey = form.get('key')
   const description = String(form.get('description') ?? '')
   const caption = String(form.get('caption') ?? '')
   const valid_from = (form.get('valid_from') as string) || null
   const valid_until = (form.get('valid_until') as string) || null
 
-  if (!file || !key) {
+  if (!file || !rawKey) {
     return NextResponse.json({ error: 'file y key son requeridos' }, { status: 400 })
   }
 
+  const key = validateMediaKey(rawKey)
+  if (!key) {
+    return NextResponse.json(
+      { error: 'key inválida: use letras minúsculas, números, guiones' },
+      { status: 400 },
+    )
+  }
+
+  const fileError = validateMediaFile(file)
+  if (fileError) {
+    return NextResponse.json({ error: fileError }, { status: 400 })
+  }
+
   const sb = serviceClient()
-  const storagePath = `${key}/${Date.now()}-${file.name}`
+  const safeName = file.name.replace(/[^A-Za-z0-9._-]/g, '_')
+  const storagePath = `${key}/${Date.now()}-${safeName}`
   const bytes = new Uint8Array(await file.arrayBuffer())
   const { error: uploadError } = await sb.storage
     .from(BUCKET)
@@ -63,8 +78,15 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const denied = await requireAdmin()
   if (denied) return denied
-  const key = req.nextUrl.searchParams.get('key')
-  if (!key) return NextResponse.json({ error: 'key es requerido' }, { status: 400 })
+  const rawKey = req.nextUrl.searchParams.get('key')
+  if (!rawKey) return NextResponse.json({ error: 'key es requerido' }, { status: 400 })
+  const key = validateMediaKey(rawKey)
+  if (!key) {
+    return NextResponse.json(
+      { error: 'key inválida: use letras minúsculas, números, guiones' },
+      { status: 400 },
+    )
+  }
 
   const sb = serviceClient()
   const { data: row } = await sb.from('wati_agent_media').select('storage_path').eq('key', key).maybeSingle()
