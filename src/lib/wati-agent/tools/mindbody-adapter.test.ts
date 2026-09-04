@@ -15,7 +15,7 @@ vi.mock('@/lib/booking/mindbody', () => ({
 vi.mock('@/lib/booking/wati', () => ({ sendBookingConfirmation: vi.fn(async () => ({ result: true })) }))
 
 import * as mb from '@/lib/booking/mindbody'
-import { listServices, availability, findClientByPhone, book } from './mindbody-adapter'
+import { listServices, availability, findClientByPhone, book, createClient } from './mindbody-adapter'
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -127,6 +127,25 @@ describe('adapter', () => {
     expect(mb.addMultipleAppointments).not.toHaveBeenCalled()
     expect(fetchImpl).not.toHaveBeenCalled()
     vi.unstubAllGlobals()
+  })
+
+  it('recovers a duplicate client by email on creation', async () => {
+    ;(mb.addClient as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error('Mindbody API error: Client creation cannot result in duplicate client records')
+    )
+    ;(mb.searchClients as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      { Id: 'C9', FirstName: 'Otro', LastName: 'Persona', Email: 'other@x.com', MobilePhone: '' },
+      { Id: 'C1', FirstName: 'Ana', LastName: 'Ruiz', Email: 'A@X.COM', MobilePhone: '' },
+    ])
+    const r = await createClient({ first: 'Ana', last: 'Ruiz', email: 'a@x.com', phone: '50766124546' })
+    expect(r).toEqual({ id: 'C1', existing: true })
+  })
+
+  it('rethrows the duplicate error when no matching client is found', async () => {
+    const err = new Error('Mindbody API error: Client creation cannot result in duplicate client records')
+    ;(mb.addClient as ReturnType<typeof vi.fn>).mockRejectedValueOnce(err)
+    ;(mb.searchClients as ReturnType<typeof vi.fn>).mockResolvedValueOnce([])
+    await expect(createClient({ first: 'Ana', last: 'Ruiz', email: 'a@x.com', phone: '50766124546' })).rejects.toBe(err)
   })
 
   it('books normally when the existing appointment is at another time or location', async () => {

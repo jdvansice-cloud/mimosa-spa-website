@@ -139,6 +139,15 @@ mensaje → Assign User Citas CDE/SF):
 3. Copiar el id del chatbot desde la URL del editor de flujos en
    `WATI_HANDOFF_CHATBOT_ID`.
 
+Al hacer handoff, Camila envía la burbuja "Un momento por favor, le comunico
+con mi compañera 🌼" y, si tiene un `resumen` no vacío, una segunda burbuja
+"Resumen para mi compañera: …" (recortada a 300 caracteres) para que tanto
+la compañera como el cliente vean en qué quedó la conversación. Si
+`WATI_HANDOFF_CHATBOT_ID` no está configurado, el handoff cae directo a
+`assignOperator` y queda registrado como un evento `error` (visible en el
+panel `/admin/wati-agent`) con `error: 'WATI_HANDOFF_CHATBOT_ID no
+configurado'`.
+
 ## 4. Kill switches
 
 Dos formas de detener todo de inmediato, sin tocar código:

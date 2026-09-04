@@ -42,6 +42,14 @@ describe('buildSystem', () => {
     expect(t).toContain('EXCEPTO en quejas, comprobantes de pago o errores de sistema')
   })
 
+  it('describes what the handoff resumen must contain', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('El resumen que le pasas a handoff debe ser de una o dos líneas en español')
+    expect(t).toContain('qué quiere el cliente')
+    expect(t).toContain('los datos ya recopilados (nombre, correo)')
+    expect(t).toContain('evita jerga interna y nombres de herramientas')
+  })
+
   it('volatile block ends with the Recuerda section', () => {
     const t = (blocks[1] as any).text
     expect(t).toContain('## Recuerda')

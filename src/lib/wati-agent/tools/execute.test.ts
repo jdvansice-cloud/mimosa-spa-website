@@ -35,6 +35,17 @@ describe('executeTool', () => {
     const d = deps(); const r = await executeTool('cancel', { appointment_id: 9, customer_confirmation: 'si' }, d)
     expect(r.isError).toBe(true); expect(d.mb.cancelAppointment).not.toHaveBeenCalled()
   })
+  it('create_client reports a newly created client', async () => {
+    const d = deps({ mb: { createClient: vi.fn(async () => ({ id: 'C2' })), listServices: vi.fn(async () => []) } })
+    const r = await executeTool('create_client', { first_name: 'Ana', last_name: 'Ruiz', email: 'a@x.com' }, d)
+    expect(r.result).toContain('cliente creado')
+    expect(r.convPatch).toMatchObject({ mindbody_client_id: 'C2' })
+  })
+  it('create_client reports an existing client found by email', async () => {
+    const d = deps({ mb: { createClient: vi.fn(async () => ({ id: 'C1', existing: true })), listServices: vi.fn(async () => []) } })
+    const r = await executeTool('create_client', { first_name: 'Ana', last_name: 'Ruiz', email: 'a@x.com' }, d)
+    expect(r.result).toContain('cliente existente encontrado por correo')
+  })
   it('get_location_info returns waze', async () => {
     const r = await executeTool('get_location_info', { sucursal: 'sfc' }, deps())
     expect(r.result).toContain('waze')

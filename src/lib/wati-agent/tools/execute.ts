@@ -43,7 +43,11 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         if (!c) return { result: 'Cliente no encontrado en Mindbody. Pide nombre, apellido y correo y usa create_client.' }
         return { result: json(c), convPatch: { mindbody_client_id: c.id, client_name: c.name } }
       }
-      case 'create_client': { const c = await d.mb.createClient({ first: input.first_name, last: input.last_name, email: input.email, phone }); return { result: json(c), convPatch: { mindbody_client_id: c.id, client_name: `${input.first_name} ${input.last_name}` } } }
+      case 'create_client': {
+        const c = await d.mb.createClient({ first: input.first_name, last: input.last_name, email: input.email, phone })
+        const note = c.existing ? 'cliente existente encontrado por correo' : 'cliente creado'
+        return { result: json({ ...c, nota: note }), convPatch: { mindbody_client_id: c.id, client_name: `${input.first_name} ${input.last_name}` } }
+      }
       case 'check_availability': { const s = await d.mb.availability({ sucursal: input.sucursal, date: input.date, serviceIds: input.service_ids, people: input.people, origin: d.origin, phone }); return { result: json({ horas: s.map(x => x.time).slice(0, 12) }) } }
       case 'book': {
         const err = requireConfirmation(input, d.recentInbound); if (err) return { result: err, isError: true }

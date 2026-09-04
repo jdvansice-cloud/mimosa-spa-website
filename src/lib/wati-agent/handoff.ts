@@ -7,15 +7,18 @@ export async function performHandoff(i: { store: AgentStore; wati: WatiClient; c
   const { phone, sucursal } = i.conv
   if (i.shadow) { await i.store.logEvent(phone, 'handoff', { motivo: i.motivo, resumen: i.resumen, shadow: true }); return }
   await i.wati.sendText(phone, 'Un momento por favor, le comunico con mi compañera 🌼')
+  if (i.resumen.trim()) await i.wati.sendText(phone, `Resumen para mi compañera: ${i.resumen.trim().slice(0, 300)}`)
   await i.wati.updateAttributes(phone, { sucursal: sucursal ?? '', team: sucursal ?? 'sfc', ai_modo: 'humano', ai_resumen: i.resumen.slice(0, 300), ai_motivo: i.motivo })
+  const chatbotConfigured = Boolean(i.env.handoffChatbotId)
+  if (!chatbotConfigured) await i.store.logEvent(phone, 'error', { where: 'handoff', error: 'WATI_HANDOFF_CHATBOT_ID no configurado' })
   let viaFlow = false
-  if (i.env.handoffChatbotId) viaFlow = (await i.wati.startChatbot(phone, i.env.handoffChatbotId)).ok
+  if (chatbotConfigured) viaFlow = (await i.wati.startChatbot(phone, i.env.handoffChatbotId)).ok
   if (!viaFlow) {
     if (!sucursal) await i.wati.sendButtons(phone, '¿Para cuál sucursal desea atención?', ['Costa del Este', 'San Francisco'])
     await i.wati.assignOperator(phone, sucursal === 'cde' ? i.env.citasCdeEmail : i.env.citasSfcEmail)
   }
   await i.store.upsertConversation({ phone, mode: 'human', human_since: new Date().toISOString(), handoff_reason: i.motivo, summary: i.resumen })
-  await i.store.logEvent(phone, 'handoff', { motivo: i.motivo, resumen: i.resumen, viaFlow })
+  await i.store.logEvent(phone, 'handoff', { motivo: i.motivo, resumen: i.resumen, viaFlow, chatbotConfigured })
 }
 
 export async function registerTakeover(store: AgentStore, phone: string, operatorEmail: string) {
