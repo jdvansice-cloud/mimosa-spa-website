@@ -84,6 +84,30 @@ const fakeMb = {
 
 const NOW = process.env.WATI_EVAL_NOW ? new Date(process.env.WATI_EVAL_NOW) : new Date('2026-09-08T10:30:00-05:00')
 
+const EMOJI_RE = /\p{Extended_Pictographic}/u
+
+function computeStyleFlags(reply: string): string[] {
+  const flags: string[] = []
+  const bubbles = reply.split('\n').filter(b => b.trim().length > 0)
+
+  const hasList = bubbles.some(line => {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('✅') || trimmed.startsWith('📌')) return false
+    return /^(-\s|•\s|\d+\.\s)/.test(trimmed)
+  })
+  if (hasList) flags.push('lista')
+
+  const hasLongBubble = bubbles.some(b => b.split(/(?<=[.!?])\s+/).filter(s => s.trim()).length > 3)
+  if (hasLongBubble) flags.push('larga')
+
+  const hasTwoQuestions = bubbles.some(b => (b.match(/\?/g) || []).length >= 2)
+  if (hasTwoQuestions) flags.push('dos_preguntas')
+
+  if (bubbles.length > 1 && !EMOJI_RE.test(reply)) flags.push('sin_emoji')
+
+  return flags
+}
+
 const rows: any[] = []
 let picked = cases
 if (only) picked = picked.filter(c => c.id === only)
@@ -116,7 +140,7 @@ for (const c of picked) {
     if (r.handedOff) {
       graderSkipped = 'handoff'
     } else {
-      const graderSystem = 'Califica de 1 a 5 qué tanto la respuesta A suena como la recepcionista real B (tono, largo, calidez, formato). Responde ÚNICAMENTE con un objeto JSON en una sola línea: {"score": <1-5>, "why": "<máx 15 palabras>"}'
+      const graderSystem = 'Eres un evaluador de ESTILO y VOZ para las respuestas de Camila, la recepcionista virtual de un spa. Compara SOLO cómo suena A frente a B, nunca qué dice.\n\nEvalúa exclusivamente:\n- Tono cercano pero formal de usted.\n- Largo: burbujas de 1-2 líneas cortas, no párrafos.\n- Formato: sin listas con guiones ni viñetas ni numeración, salvo la tarjeta de confirmación con ✅ o 📌.\n- Calidez y emojis propios del estilo (🌼 ✨ 🍃 📅 ⏰ ✅), sin exagerar.\n- Una sola pregunta por burbuja, nunca varias a la vez.\n- Saludo y cierre como los usaría una recepcionista real.\n\nIgnora por completo si el contenido, la disponibilidad, las fechas o los datos coinciden con B; B es solo referencia de estilo.\n\nEscala: 5 = indistinguible de la recepcionista en estilo; 3 = aceptable pero con detalles de tono/formato/largo que lo delatan; 1 = suena a asistente/robot o usa un formato incorrecto (listas, párrafos largos, varias preguntas).\n\nResponde ÚNICAMENTE con un objeto JSON en una sola línea: {"score": <1-5>, "why": "<máx 15 palabras>"}'
       const graderUser = `Cliente: ${turn.customer.join(' / ')}\n\nA (Camila):\n${camila || '(handoff)'}\n\nB (humana):\n${turn.staff.join('\n')}`
 
       const callGrader = async (): Promise<number | null> => {
@@ -150,7 +174,8 @@ for (const c of picked) {
     const inventedPrice = /\$\s?\d+|\b\d+\s?(d[oó]lares|usd)\b/i.test(camila) && !turnEvents.some((e: any) => e.kind === 'tool_result' && e.payload.tool === 'list_services')
     const bookedWithoutConfirm = turnEvents.some((e: any) => e.kind === 'tool_result' && e.payload.tool === 'book' && e.payload.ok) && !turn.customer.some(t => /s[ií]|claro|dale|perfecto|listo|ok/i.test(t))
     const human = turn.staff.join(' / ').slice(0, 200)
-    rows.push({ case: c.id, turn: ti, score, graderError, graderSkipped, inventedPrice, bookedWithoutConfirm, handedOff: r.handedOff, camila: camila.slice(0, 200), human })
+    const styleFlags = r.handedOff ? [] : computeStyleFlags(camila)
+    rows.push({ case: c.id, turn: ti, score, graderError, graderSkipped, inventedPrice, bookedWithoutConfirm, handedOff: r.handedOff, camila: camila.slice(0, 200), human, styleFlags })
     if (r.handedOff) break
   }
 }
@@ -161,6 +186,12 @@ const mean = scored.length ? scored.reduce((s, r) => s + r.score, 0) / scored.le
 const hard = rows.length ? rows.filter(r => r.inventedPrice || r.bookedWithoutConfirm).length / rows.length : 0
 console.table(rows.map(r => ({ case: r.case, turn: r.turn, score: r.score, price: r.inventedPrice, confirm: r.bookedWithoutConfirm, handoff: r.handedOff })))
 console.log(`mean tone ${mean.toFixed(2)} (graded ${scored.length}/${rows.length})  hard-fail ${(hard * 100).toFixed(1)}%`)
+
+const flagCounts: Record<string, number> = { lista: 0, larga: 0, dos_preguntas: 0, sin_emoji: 0 }
+for (const r of rows) {
+  for (const f of (r.styleFlags || [])) flagCounts[f] = (flagCounts[f] || 0) + 1
+}
+console.log(`style flags — lista ${flagCounts.lista}  larga ${flagCounts.larga}  dos_preguntas ${flagCounts.dos_preguntas}  sin_emoji ${flagCounts.sin_emoji}`)
 
 const lowest = [...scored].sort((a, b) => a.score - b.score).slice(0, 5)
 if (lowest.length) {
