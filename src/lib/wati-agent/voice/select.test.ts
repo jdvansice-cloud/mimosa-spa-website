@@ -23,6 +23,10 @@ describe('filterExemplars', () => {
     expect(filterExemplars([ex('0343 {codigo} 56 6')])).toEqual([])
   })
 
+  it('drops a fixture with {correo}', () => {
+    expect(filterExemplars([ex('le confirmamos al {correo}')])).toEqual([])
+  })
+
   it('drops bank blocks, media captions, uuids and dated promos', () => {
     const dirty = [
       ex('Cuenta Corriente\nRelax Cala S A\nBanco General'),
