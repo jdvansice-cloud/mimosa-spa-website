@@ -1,0 +1,86 @@
+[
+  {
+    "intent": "saludo",
+    "sucursal": "cde",
+    "customer": ["Hola buenas"],
+    "staff": ["✨ Muy buenos días, bienvenido a Mimosa Spa Costa Del Este\nMi nombre es Camila 🌼\ncon mucho gusto"]
+  },
+  {
+    "intent": "saludo",
+    "sucursal": "sfc",
+    "customer": ["Buenas tardes"],
+    "staff": ["Muy buenos días, bienvenido a Mimosa Spa San Francisco\nMi nombre es Camila 🌼\n¿Como podemos ayudarle?"]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": ["Si dos masajes para hoy a las 6 pm / Cabina separada"],
+    "staff": ["que masaje desean?", "Me permite los datos de las 2 personas por favor", "por favor compartir los siguientes datos:\n\n📌 Nombre y Apellido:\n\n📌 Correo electrónico:\n\nMuchas gracias 🌼"]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "sfc",
+    "customer": ["Listos dos de esos"],
+    "staff": ["Su cita está confirmada! ✅\n📅 Fecha: hoy 01 de junio\n⏰ Hora: 6:00 pm\n🍃Tratamiento: 2 Liberador de tensión + piedras calientes\n🌼Lugar: Mimosa Spa Retreat,  Star Plaza, Costa del Este"]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": "cde",
+    "customer": ["este fin"],
+    "staff": ["estamos desde las 9 am", "que tratamiento seria?"]
+  },
+  {
+    "intent": "reservar",
+    "sucursal": null,
+    "customer": ["Creo lo voy a dejar para proximo sabado"],
+    "staff": ["No se preocupe, de igual manera podemos ir agendando ... ya que los fines de semana la agenda se nos llena bastante rapidito"]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": null,
+    "customer": ["Puedes cambiarla para las 5 pm?"],
+    "staff": ["Si", "le cambiamos"]
+  },
+  {
+    "intent": "cambiar",
+    "sucursal": null,
+    "customer": ["Necesito cancelar los masajes de hoy y pasarlos para miercoles"],
+    "staff": ["Buenas tardes", "Que hora desea para el miercoles?"]
+  },
+  {
+    "intent": "horario",
+    "sucursal": null,
+    "customer": ["queria saber si abren mañana"],
+    "staff": ["Si señora, el dia de mañana estaremos abiertos de 9am a 6pm"]
+  },
+  {
+    "intent": "pago",
+    "sucursal": null,
+    "customer": ["Cuanto es total? Psra hacerte Yappy"],
+    "staff": ["Serian 100.00", "En YAPPY nos busca en el directorio como MIMOSA y aparecemos con el logo, la flor amarilla..🌼"]
+  },
+  {
+    "intent": "cierre",
+    "sucursal": null,
+    "customer": ["Gracias"],
+    "staff": ["A la orden", "Ha sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"]
+  },
+  {
+    "intent": "otro",
+    "sucursal": null,
+    "customer": ["El tráfico nos tiene capturadas llegamos como 5 y 30"],
+    "staff": ["Disculpe, para las 2 personas serian 6:30 pm", "para 1 persona 5:30 pm"]
+  },
+  {
+    "intent": "ubicacion",
+    "sucursal": "cde",
+    "customer": ["Me pueden compartir la ubicación?"],
+    "staff": ["Con gusto 🌼", "Estamos en Star Plaza, Costa del Este", "Le comparto la ubicación por Waze 👇"]
+  },
+  {
+    "intent": "precios",
+    "sucursal": null,
+    "customer": ["Cuanto cuesta un facial?"],
+    "staff": ["Con gusto le comparto los precios 🌼", "Le comparto la lista de tratamientos y precios 👇"]
+  }
+]
