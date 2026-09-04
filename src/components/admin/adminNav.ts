@@ -21,6 +21,7 @@ import {
   Ticket,
   Clock,
   Building2,
+  MessageCircle,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -88,6 +89,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'sistema',
     label: 'Sistema',
     items: [
+      { href: '/admin/wati-agent', label: 'Camila (WhatsApp)', icon: MessageCircle },
       { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
     ],
   },
