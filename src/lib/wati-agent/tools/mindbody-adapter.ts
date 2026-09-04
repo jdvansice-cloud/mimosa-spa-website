@@ -59,6 +59,7 @@ export async function availability(i: {
   serviceIds: number[]
   people: 1 | 2
   origin: string
+  phone: string
   fetchImpl?: typeof fetch
 }): Promise<Array<{ time: string; staffIds: number[] }>> {
   const services = await listServices(i.sucursal)
@@ -72,7 +73,8 @@ export async function availability(i: {
   })
   const doFetch = i.fetchImpl ?? fetch
   const res = await doFetch(`${i.origin}/api/mindbody/availability?${params}`, {
-    headers: { 'x-internal-staff-resolution': '1' },
+    // Per-customer rate-limit bucket: without this every agent lookup shares the 'unknown' bucket.
+    headers: { 'x-internal-staff-resolution': '1', 'x-forwarded-for': `wati-agent-${i.phone}` },
   })
   const json: { availableDates?: Array<{ date: string; slots?: Array<{ time: string; availableStaffIds?: number[] }> }> } = await res.json()
   const day = (json.availableDates || []).find(d => d.date === i.date)
@@ -82,6 +84,15 @@ export async function availability(i: {
     return slots.filter(s => ok.has(s.time))
   }
   return slots
+}
+
+/** Idempotency guard: appointment ids this client already has at exactly this date+time+location. */
+async function findExistingAt(clientId: string, date: string, time: string, locationId: number): Promise<number[]> {
+  const target = `${date}T${time}:00`.slice(0, 16)
+  const r = await getClientSchedule({ clientId, startDate: date, limit: 20 }).catch(() => ({ visits: [] as any[] }))
+  return (r.visits || [])
+    .filter(v => String(v.StartDateTime).slice(0, 16) === target && v.LocationId === locationId)
+    .map(v => v.AppointmentId)
 }
 
 export async function book(i: {
@@ -94,8 +105,11 @@ export async function book(i: {
   origin: string
   clientName: string
   phone: string
-}): Promise<{ appointmentIds: number[]; therapist: string }> {
-  const slots = await availability({ sucursal: i.sucursal, date: i.date, serviceIds: i.serviceIds, people: i.people, origin: i.origin })
+}): Promise<{ appointmentIds: number[]; therapist: string; alreadyBooked?: boolean }> {
+  const existing = await findExistingAt(i.clientId, i.date, i.time, BUSINESS.locations[i.sucursal].mindbodyLocationId)
+  if (existing.length) return { appointmentIds: existing, therapist: 'ya reservada', alreadyBooked: true }
+
+  const slots = await availability({ sucursal: i.sucursal, date: i.date, serviceIds: i.serviceIds, people: i.people, origin: i.origin, phone: i.phone })
   const slot = slots.find(s => s.time === i.time)
   if (!slot) throw new Error('Esa hora ya no está disponible')
   const services = await listServices(i.sucursal)
@@ -125,8 +139,15 @@ export async function book(i: {
       secondResult = undefined
     }
     if (!secondResult || !secondResult.success) {
-      await Promise.all(appointments.map(a => removeAppointment(a.Id)))
-      throw new Error('No se pudo reservar la segunda cabina; se liberó la primera')
+      const removals = await Promise.allSettled(appointments.map(a => removeAppointment(a.Id)))
+      const stuck = appointments.filter((_, n) => {
+        const r = removals[n]
+        return r.status === 'rejected' || r.value === false
+      })
+      throw new Error(
+        'No se pudo reservar la segunda cabina; se liberó la primera' +
+          (stuck.length ? ` (no se pudieron liberar las citas ${stuck.map(a => a.Id).join(', ')})` : '')
+      )
     }
     appointments = [...appointments, ...secondResult.appointments]
   }

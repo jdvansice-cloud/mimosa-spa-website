@@ -52,6 +52,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
     }
     const history = await d.store.recentMessages(phone, { sinceHours: 48, limit: 60 })
     const lastIn = [...history].reverse().find(m => m.direction === 'in')
+    const recentInbound = history.filter(m => m.direction === 'in' && m.text).slice(-3).map(m => m.text as string)
     const messages = toMessages(history)
     if (!messages.length) return { bubbles: [], handedOff: false }
 
@@ -105,6 +106,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
           now: d.now,
           mediaBytes: d.mediaBytes,
           mb: d.mb,
+          recentInbound,
         })
         await d.store.logEvent(phone, 'tool_result', { tool: b.name, ok: !o.isError, result: o.result.slice(0, 500) })
         if (o.convPatch) conv = await d.store.upsertConversation({ phone, ...o.convPatch })
@@ -119,7 +121,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
     if (!texts.length && !handedOff && !endedByTool) {
       await d.store.logEvent(phone, 'error', { where: 'runTurn', error: 'empty reply' })
       if (!shadow) {
-        await d.wati.sendText(phone, 'Un momento por favor 🌼').catch(() => {})
+        // performHandoff sends its own "le comunico con mi compañera" bubble; a second one here reads as a stutter.
         await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'respuesta_vacia', resumen: conv.summary ?? '', shadow, env: env() }).catch(() => {})
       }
       return { bubbles: [], handedOff: true }
@@ -144,21 +146,27 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
       }
     }
 
-    if (bubbles.length && !shadow) await d.store.upsertConversation({ phone, last_outbound_at: new Date().toISOString() })
+    // Bookkeeping only. The customer already has their answer, so a failure here
+    // must never reach the apology/handoff path below.
+    try {
+      if (bubbles.length && !shadow) await d.store.upsertConversation({ phone, last_outbound_at: new Date().toISOString() })
 
-    const before = history.filter(m => m.author === 'camila').length
-    const after = before + bubbles.length
-    if (handedOff || Math.floor(after / 6) > Math.floor(before / 6)) {
-      const summaryMessages = messages.filter(m => typeof m.content === 'string')
-      if (texts.length) summaryMessages.push({ role: 'assistant', content: texts.join('\n') })
-      const s = await d.anthropic.messages.create({
-        model: env().model,
-        max_tokens: 600,
-        system: 'Resume la conversación en máximo 4 líneas en español: qué quiere el cliente, qué datos ya dio (nombre, correo, sucursal, fecha/hora, tratamiento), qué falta.',
-        messages: [...summaryMessages, { role: 'user', content: 'Resumen:' }],
-      })
-      const summary = s.content.find((b: Anthropic.ContentBlock) => b.type === 'text')?.text
-      if (summary) await d.store.upsertConversation({ phone, summary })
+      const before = history.filter(m => m.author === 'camila').length
+      const after = before + bubbles.length
+      if (handedOff || Math.floor(after / 6) > Math.floor(before / 6)) {
+        const summaryMessages = messages.filter(m => typeof m.content === 'string')
+        if (texts.length) summaryMessages.push({ role: 'assistant', content: texts.join('\n') })
+        const s = await d.anthropic.messages.create({
+          model: env().model,
+          max_tokens: 600,
+          system: 'Resume la conversación en máximo 4 líneas en español: qué quiere el cliente, qué datos ya dio (nombre, correo, sucursal, fecha/hora, tratamiento), qué falta.',
+          messages: [...summaryMessages, { role: 'user', content: 'Resumen:' }],
+        })
+        const summary = s.content.find((b: Anthropic.ContentBlock) => b.type === 'text')?.text
+        if (summary) await d.store.upsertConversation({ phone, summary })
+      }
+    } catch (e) {
+      await d.store.logEvent(phone, 'error', { where: 'runTurn/bookkeeping', error: String(e) }).catch(() => {})
     }
 
     return { bubbles, handedOff }
