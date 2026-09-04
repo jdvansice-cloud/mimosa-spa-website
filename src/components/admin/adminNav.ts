@@ -22,6 +22,7 @@ import {
   Clock,
   Building2,
   Printer,
+  MessageCircle,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -93,6 +94,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/facturas', label: 'Facturación electrónica', icon: Receipt },
       { href: '/admin/impresion', label: 'Impresión de facturas', icon: Printer },
+      { href: '/admin/wati-agent', label: 'Camila (WhatsApp)', icon: MessageCircle },
       { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
     ],
   },
