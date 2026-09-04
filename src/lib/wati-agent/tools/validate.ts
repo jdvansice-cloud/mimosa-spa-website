@@ -2,7 +2,8 @@ const YES = /\b(s[ií]|claro|dale|perfecto|listo|ok|okey|confirm|de acuerdo|corr
 
 export function requireConfirmation(input: { customer_confirmation?: string }): string | null {
   const c = (input.customer_confirmation || '').trim()
-  if (!c || !YES.test(c) || /\bno\b/i.test(c)) return 'Falta la confirmación explícita del cliente. Envía el resumen y espera un "sí" antes de llamar esta herramienta.'
+  const norm = c.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  if (!c || !YES.test(norm) || /\bno\b/i.test(norm)) return 'Falta la confirmación explícita del cliente. Envía el resumen y espera un "sí" antes de llamar esta herramienta.'
   return null
 }
 
