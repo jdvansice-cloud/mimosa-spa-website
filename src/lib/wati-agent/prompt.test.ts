@@ -92,3 +92,42 @@ describe('exemplar placeholders', () => {
     expect(t).toContain('get_payment_info')
   })
 })
+
+describe('client memory in the prompt', () => {
+  const build = (over: any = {}) => buildSystem({
+    personaName: 'Camila',
+    now: new Date('2026-09-04T15:00:00-05:00'),
+    sucursal: 'cde',
+    clientName: 'Ana',
+    mindbodyHistory: null,
+    summary: null,
+    media: [],
+    intent: 'reservar',
+    styleGuide: 'G',
+    ...over,
+  })
+
+  it('states the memory rule in the stable block', () => {
+    const t = (build()[0] as any).text
+    expect(t).toContain('Si el perfil o el historial te dicen quién es el cliente')
+    expect(t).toContain('en vez de pedir la tarjeta 📌')
+  })
+
+  it('renders Perfil and Conversaciones anteriores in the volatile block', () => {
+    const t = (build({
+      profile: { nombre: 'Ana Ruiz', correo: 'a@x.com', sucursal_preferida: 'sfc', tratamientos: ['Masaje relajante'], notas: ['alergia al eucalipto'] },
+      historial: [{ phone: '507', started_at: '2026-08-01T10:00:00Z', ended_at: '2026-08-01T11:00:00Z', outcome: 'booked', summary: 'Reservó masaje' }],
+    })[1] as any).text
+    expect(t).toContain('Perfil: nombre Ana Ruiz')
+    expect(t).toContain('sucursal habitual San Francisco')
+    expect(t).toContain('alergia al eucalipto')
+    expect(t).toContain('Conversaciones anteriores:')
+    expect(t).toContain('- 2026-08-01 (booked): Reservó masaje')
+  })
+
+  it('omits both sections when there is nothing remembered', () => {
+    const t = (build({ profile: {}, historial: [] })[1] as any).text
+    expect(t).not.toContain('Perfil:')
+    expect(t).not.toContain('Conversaciones anteriores')
+  })
+})

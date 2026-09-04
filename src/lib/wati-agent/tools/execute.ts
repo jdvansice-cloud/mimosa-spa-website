@@ -5,12 +5,29 @@ import { env } from '../config/env'
 import { panamaDate } from '../hours'
 import type { AgentStore } from '../store'
 import type { WatiClient } from '../wati-api'
-import type { Conversation } from '../types'
+import { isEmptyProfilePatch } from '../store'
+import type { ClientProfile, Conversation, Sucursal } from '../types'
 
 export interface ToolDeps { store: AgentStore; wati: WatiClient; conv: Conversation; origin: string; shadow: boolean; now: Date; mediaBytes: (p: string) => Promise<{ bytes: Uint8Array; mime: string; filename: string }>; mb: typeof import('./mindbody-adapter'); recentInbound: string[] }
 export interface ToolOutcome { result: string; isError?: boolean; endTurn?: boolean; convPatch?: Partial<Conversation> }
 
 const json = (v: unknown) => JSON.stringify(v)
+
+/** The strict tool schema forces every profile field to be present; empty means "unchanged". */
+function toProfilePatch(raw: unknown): Partial<ClientProfile> {
+  const p = (raw ?? {}) as Record<string, unknown>
+  const str = (v: unknown) => (typeof v === 'string' ? v : '')
+  const arr = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
+  const suc = str(p.sucursal_preferida)
+  return {
+    nombre: str(p.nombre),
+    correo: str(p.correo),
+    ...(suc === 'cde' || suc === 'sfc' ? { sucursal_preferida: suc as Sucursal } : {}),
+    tratamientos: arr(p.tratamientos),
+    preferencias: arr(p.preferencias),
+    notas: arr(p.notas),
+  }
+}
 
 const sucursalPatch = (input: any, current: Conversation['sucursal']): Partial<Conversation> | undefined => {
   const suc = input?.sucursal
@@ -47,12 +64,15 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
       case 'find_client': {
         const c = await d.mb.findClientByPhone(phone)
         if (!c) return { result: 'Cliente no encontrado en Mindbody. Pide nombre, apellido y correo y usa create_client.' }
+        await d.store.mergeProfile(phone, { nombre: c.name, correo: c.email })
         return { result: json(c), convPatch: { mindbody_client_id: c.id, client_name: c.name } }
       }
       case 'create_client': {
         const c = await d.mb.createClient({ first: input.first_name, last: input.last_name, email: input.email, phone })
         const note = c.existing ? 'cliente existente encontrado por correo' : 'cliente creado'
-        return { result: json({ ...c, nota: note }), convPatch: { mindbody_client_id: c.id, client_name: `${input.first_name} ${input.last_name}` } }
+        const nombre = `${input.first_name} ${input.last_name}`.trim()
+        await d.store.mergeProfile(phone, { nombre, correo: input.email })
+        return { result: json({ ...c, nota: note }), convPatch: { mindbody_client_id: c.id, client_name: nombre } }
       }
       case 'check_availability': { const s = await d.mb.availability({ sucursal: input.sucursal, date: input.date, serviceIds: input.service_ids, people: input.people, origin: d.origin, phone }); return { result: json({ horas: s.map(x => x.time).slice(0, 12) }), convPatch: sucursalPatch(input, d.conv.sucursal) } }
       case 'book': {
@@ -93,7 +113,11 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         return { result: 'handoff hecho', endTurn: true, convPatch: patch }
       }
       case 'close_chat': { if (!d.shadow) await d.wati.updateChatStatus(phone, 'SOLVED'); return { result: 'cerrado', endTurn: true } }
-      case 'note_to_self': return { result: 'anotado', convPatch: { summary: [d.conv.summary, input.text].filter(Boolean).join(' · ').slice(-800) } }
+      case 'note_to_self': {
+        const patch = toProfilePatch(input.perfil)
+        if (!isEmptyProfilePatch(patch)) await d.store.mergeProfile(phone, patch)
+        return { result: 'anotado', convPatch: { summary: [d.conv.summary, input.text].filter(Boolean).join(' · ').slice(-800) } }
+      }
       default: return { result: `Herramienta desconocida ${name}`, isError: true }
     }
   } catch (e) {
