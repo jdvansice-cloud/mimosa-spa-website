@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/require-admin'
 import { storeFromEnv } from '@/lib/wati-agent/store'
+import type { BusinessOverrides } from '@/lib/wati-agent/config/business'
 
 export async function GET() {
   const denied = await requireAdmin()
   if (denied) return denied
   const store = storeFromEnv()
-  const [enabled, persona_name, api_operator_labels] = await Promise.all([
+  const [enabled, persona_name, api_operator_labels, business_overrides] = await Promise.all([
     store.getSetting('enabled', true),
     store.getSetting('persona_name', 'Camila'),
     store.getSetting<string[]>('api_operator_labels', []),
+    store.getSetting<BusinessOverrides>('business_overrides', {}),
   ])
-  return NextResponse.json({ enabled, persona_name, api_operator_labels })
+  return NextResponse.json({ enabled, persona_name, api_operator_labels, business_overrides })
 }
 
 export async function POST(req: NextRequest) {
@@ -23,6 +25,7 @@ export async function POST(req: NextRequest) {
   if ('enabled' in body) updates.push(store.setSetting('enabled', body.enabled))
   if ('persona_name' in body) updates.push(store.setSetting('persona_name', body.persona_name))
   if ('api_operator_labels' in body) updates.push(store.setSetting('api_operator_labels', body.api_operator_labels))
+  if ('business_overrides' in body) updates.push(store.setSetting('business_overrides', body.business_overrides))
   await Promise.all(updates)
   return NextResponse.json({ ok: true })
 }

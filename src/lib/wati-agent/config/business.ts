@@ -40,4 +40,8 @@ export const BUSINESS = {
   },
 } as const
 
+/** Owner-editable overrides stored in the `business_overrides` setting row. */
+export interface LocationOverride { address?: string; parking?: string; wazeUrl?: string; mapsUrl?: string }
+export type BusinessOverrides = Partial<Record<Sucursal, LocationOverride>>
+
 export const LOCATION_ID_TO_SUCURSAL: Record<number, Sucursal> = { 1: 'cde', 2: 'sfc' }
