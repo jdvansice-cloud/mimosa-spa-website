@@ -8,6 +8,7 @@ const tool = (name: string, description: string, properties: Record<string, unkn
 export const TOOLS: Anthropic.Tool[] = [
   tool('get_location_info', 'Dirección, plaza, enlaces de Waze y Google Maps y estacionamiento de una sucursal.', { sucursal: suc }, ['sucursal']),
   tool('get_hours', 'Horario de atención del spa.', {}),
+  tool('get_payment_info', 'Formas de pago: Yappy, transferencia/ACH y link de tarjeta. Única fuente de datos bancarios; envíalos en su propia burbuja.', {}),
   tool('list_services', 'Lista tratamientos con duración y precio (fuente única de precios). query filtra por nombre.', { sucursal: suc, query: { type: 'string' } }, ['sucursal', 'query']),
   tool('send_image', 'Envía una imagen de la biblioteca al cliente (promo, precios, mapa). Usa la clave listada en el prompt.', { key: { type: 'string' } }, ['key']),
   tool('send_buttons', 'Envía un mensaje con hasta 3 botones (máx 20 caracteres cada uno).', { body: { type: 'string' }, buttons: { type: 'array', items: { type: 'string' } } }, ['body', 'buttons']),

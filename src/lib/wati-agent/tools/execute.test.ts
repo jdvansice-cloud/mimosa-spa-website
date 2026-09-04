@@ -24,6 +24,12 @@ describe('executeTool', () => {
     const r = await executeTool('get_location_info', { sucursal: 'sfc' }, deps())
     expect(r.result).toContain('waze')
   })
+  it('get_payment_info returns the payment text from BUSINESS', async () => {
+    const r = await executeTool('get_payment_info', {}, deps())
+    expect(r.isError).toBeUndefined()
+    expect(r.result).toContain('YAPPY')
+    expect(r.result).toContain('Banco General')
+  })
   it('send_image in shadow does not send', async () => {
     const d = deps({ shadow: true, store: { logEvent: vi.fn(async () => {}), activeMedia: vi.fn(async () => [{ key: 'promo', storage_path: 'p', caption: 'c', description: '', active: true, valid_from: null, valid_until: null }]) } })
     await executeTool('send_image', { key: 'promo' }, d)

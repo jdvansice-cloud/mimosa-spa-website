@@ -3,7 +3,26 @@ import type { Sucursal } from '../types'
 
 export type Intent = 'saludo'|'ubicacion'|'horario'|'precios'|'promo'|'reservar'|'cambiar'|'cancelar'|'certificado'|'pago'|'queja'|'cierre'|'otro'
 export interface Exemplar { intent: Intent; sucursal: Sucursal | null; customer: string[]; staff: string[] }
-const EXEMPLARS = exemplarsJson as Exemplar[]
+
+/** Patterns that make a mined exemplar unsafe to show the model as a "real receptionist" example. */
+const DIRTY: RegExp[] = [
+  /\{codigo\}/i,
+  /\{telefono\}/i,
+  /Caption:/i,
+  /[0-9a-f]{8}-[0-9a-f]{4}/i,
+  /Banco General/i,
+  /Cuenta Corriente/i,
+  /Relax Cala/i,
+  /v[\u00e1a]lid[ao]s? hasta/i,
+  /hasta el \d/i,
+]
+
+/** Drops exemplars carrying redaction placeholders, media-filename noise, bank details or dated promos. */
+export function filterExemplars(list: Exemplar[]): Exemplar[] {
+  return list.filter(e => ![...e.staff, ...e.customer].some(s => DIRTY.some(re => re.test(s))))
+}
+
+export const EXEMPLARS: Exemplar[] = filterExemplars(exemplarsJson as Exemplar[])
 
 const RULES: Array<[Intent, RegExp]> = [
   ['ubicacion', /d[oó]nde|ubicaci|direcci|waze|mapa|llegar|quedan/i],

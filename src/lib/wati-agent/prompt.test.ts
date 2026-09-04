@@ -46,3 +46,29 @@ describe('buildSystem', () => {
     expect((blocks[0] as any).text).toMatch(/handoff/)
   })
 })
+
+describe('exemplar placeholders', () => {
+  const blocks = buildSystem({
+    personaName: 'Camila',
+    now: new Date('2026-09-04T15:00:00-05:00'),
+    sucursal: 'cde',
+    clientName: null,
+    mindbodyHistory: null,
+    summary: null,
+    media: [],
+    intent: 'reservar',
+    styleGuide: 'Con mucho gusto sra {nombre}',
+  })
+
+  it('renders [nombre del cliente] and never a raw {nombre}', () => {
+    const all = blocks.map(b => (b as any).text).join('\n')
+    expect(all).not.toContain('{nombre}')
+    expect(all).toContain('[nombre del cliente]')
+  })
+
+  it('explains the placeholder and routes payment data through the tool', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('[nombre del cliente] representa el nombre real del cliente')
+    expect(t).toContain('get_payment_info')
+  })
+})

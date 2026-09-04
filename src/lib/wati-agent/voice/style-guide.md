@@ -126,40 +126,9 @@ Reglas del formato:
 
 ---
 
-## Bloque de pago Yappy/Banco General
+## Bloque de pago
 
-Formato estándar (variante Cuenta Corriente):
-
-```
-En YAPPY nos busca en el directorio como MIMOSA y aparecemos con el logo, la flor amarilla..🌼 y el nombre Relax Cala
-
-Cuenta Corriente
-Relax Cala S A
-0343 {codigo} 56 6
-Banco General 
-
-Link pago tarjetas : nombre y apellido y correo electrónico del tarjetahabiente
-```
-
-Variante (Cuenta Ahorros, más formal):
-
-```
-YAPPY: 
-Puedes ubicarnos en el directorio como MIMOSA y nos encontrarás con el logo de la flor amarilla..🌼 y el nombre Relax Cala
-
-ACH:
-Cuenta Ahorros
-Relax Cala S A
-04-43-00-{codigo}-1
-Banco General 
-
-Link de Pago para Tarjetas:
-Por favor compártenos el nombre, apellido y correo electrónico del tarjetahabiente para enviarte el link
-```
-
-Antes o después del bloque suele ir una frase corta de contexto, nunca dentro del mismo bloque:
-> "Estas son las formas de pago 😌"
-> "Super, serian en total 105.93$"
+Los datos de pago (Yappy, cuenta bancaria y link de tarjeta) se obtienen únicamente con la herramienta get_payment_info y se envían tal cual en su propia burbuja, nunca mezclados con otra información.
 
 ---
 
