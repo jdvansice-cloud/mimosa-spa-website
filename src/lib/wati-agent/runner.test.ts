@@ -73,9 +73,48 @@ describe('runTurn', () => {
     const r = await runTurn('507', false, d)
     expect(r.handedOff).toBe(true)
     expect(r.bubbles).toEqual([])
-    expect(d.sent[0]).toBe('Un momento por favor 🌼')
+    expect(d.sent).toHaveLength(1)
+    expect(d.sent[0]).toContain('compañera')
     const call = d.store.logEvent.mock.calls.find((c: any) => c[1] === 'error' && c[2]?.error === 'empty reply')
     expect(call).toBeTruthy()
+  })
+
+  it('a bookkeeping failure after a successful send does not apologise or hand off', async () => {
+    const d = deps(fakeAnthropic([text('Hola')]))
+    d.wati.updateAttributes = vi.fn(async () => ({ ok: true }))
+    d.wati.assignOperator = vi.fn(async () => ({ ok: true }))
+    d.wati.startChatbot = vi.fn(async () => ({ ok: true }))
+    d.store.upsertConversation = vi.fn(async () => { throw new Error('supabase blip') })
+
+    const r = await runTurn('507', false, d)
+
+    expect(r).toEqual({ bubbles: ['Hola'], handedOff: false })
+    expect(d.sent).toEqual(['Hola'])
+    expect(d.wati.assignOperator).not.toHaveBeenCalled()
+    const bookkeeping = d.store.logEvent.mock.calls.find((c: any) => c[2]?.where === 'runTurn/bookkeeping')
+    expect(bookkeeping).toBeTruthy()
+  })
+
+  it('passes only the last 3 customer texts to the tools as recentInbound', async () => {
+    const d = deps(fakeAnthropic([
+      toolUse('book', { sucursal: 'cde', date: '2026-09-06', time: '10:00', service_ids: [10], people: 1, customer_confirmation: 'si confirmo' }),
+      text('listo'),
+    ]))
+    d.store.getConversation = vi.fn(async () => ({ phone: '507', mode: 'agent', sucursal: 'cde', mindbody_client_id: 'C1', client_name: 'Ana', summary: null, audio_count: 0 }))
+    d.mb = { book: vi.fn(async () => ({ appointmentIds: [1], therapist: 'Ana' })), listServices: vi.fn(async () => []) }
+    d.store.recentMessages = vi.fn(async () => [
+      { phone: '507', direction: 'in', author: 'customer', type: 'text', text: 'si confirmo', shadow: false },
+      { phone: '507', direction: 'in', author: 'customer', type: 'text', text: 'uno', shadow: false },
+      { phone: '507', direction: 'in', author: 'customer', type: 'text', text: 'dos', shadow: false },
+      { phone: '507', direction: 'in', author: 'customer', type: 'text', text: 'tres', shadow: false },
+    ])
+
+    await runTurn('507', false, d)
+
+    // The "si confirmo" is older than the 3-message window, so the guard must reject it.
+    expect(d.mb.book).not.toHaveBeenCalled()
+    const rejected = d.store.logEvent.mock.calls.find((c: any) => c[1] === 'tool_result' && String(c[2]?.result).includes('texto exacto'))
+    expect(rejected).toBeTruthy()
   })
 
   it('refreshes summary when camila message count crosses a multiple of 6', async () => {

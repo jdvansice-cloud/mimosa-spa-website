@@ -5,13 +5,28 @@ const deps = (over: Partial<any> = {}) => ({
   store: { logEvent: vi.fn(async () => {}), upsertConversation: vi.fn(async (c: any) => c) },
   wati: { sendText: vi.fn(async () => ({ ok: true })), sendFile: vi.fn(async () => ({ ok: true })), sendButtons: vi.fn(async () => ({ ok: true })), updateChatStatus: vi.fn(async () => ({ ok: true })) },
   conv: { phone: '507', sucursal: 'cde', mindbody_client_id: 'C1', client_name: 'Ana', summary: null },
-  origin: 'https://x', shadow: false, now: new Date('2026-09-05T08:00:00-05:00'),
+  origin: 'https://x', shadow: false, now: new Date('2026-09-05T08:00:00-05:00'), recentInbound: ['si, confirmo'],
   mediaBytes: vi.fn(async () => ({ bytes: new Uint8Array([1]), mime: 'image/png', filename: 'a.png' })),
   mb: { upcoming: vi.fn(async () => [{ id: 9, start: '2026-09-05T10:00:00', service: 'Relax', location: 'Costa del Este' }]), cancelAppointment: vi.fn(async () => true), listServices: vi.fn(async () => []) },
   ...over,
 }) as any
 
 describe('executeTool', () => {
+  it('book rejects a confirmation the customer never wrote', async () => {
+    const d = deps({ recentInbound: ['a que hora abren?'] })
+    const r = await executeTool('book', { customer_confirmation: 'si' }, d)
+    expect(r.isError).toBe(true)
+    expect(r.result).toBe('La confirmación debe ser el texto exacto que escribió el cliente')
+  })
+  it('book accepts a confirmation quoted from a recent inbound message', async () => {
+    const d = deps({
+      recentInbound: ['cuanto cuesta?', 'Sí, confírmelo por favor'],
+      mb: { book: vi.fn(async () => ({ appointmentIds: [1], therapist: 'Ana' })), listServices: vi.fn(async () => []) },
+    })
+    const r = await executeTool('book', { sucursal: 'cde', date: '2026-09-06', time: '10:00', service_ids: [10], people: 1, customer_confirmation: 'sí, confírmelo por favor' }, d)
+    expect(r.isError).toBeUndefined()
+    expect(d.mb.book).toHaveBeenCalled()
+  })
   it('book without confirmation is an error', async () => {
     const r = await executeTool('book', { customer_confirmation: '' }, deps())
     expect(r.isError).toBe(true)
