@@ -1,0 +1,1244 @@
+[
+  {
+    "case": "case-1",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat\nMi nombre es Camila 🌼\nSí, hoy estamos abiertos ¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-1",
+    "turn": 1,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Sí, hoy en Costa del Este estamos abiertos hasta las 8:00pm 🌼\n¿Le gustaría agendar alguna cita?"
+  },
+  {
+    "case": "case-1",
+    "turn": 2,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Para soltar nudos y tensión le recomiendo el Liberador de Tensión - 60 min ($80) 🌼\n¿Le gustaría que revise disponibilidad para hoy?"
+  },
+  {
+    "case": "case-1",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "A las 3:30 no tenemos espacio disponible 🌼\nTenemos disponible a las 3:00pm hoy\n¿Le funcionaría esa hora?"
+  },
+  {
+    "case": "case-1",
+    "turn": 4,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "El Liberador de Tensión de 60 min es ideal para contracturas en cuello y hombros 🌼\n¿Le agendamos hoy a las 3:00pm en Costa del Este?\nPor favor compartir los siguientes datos:\n📌 Nombre y Apellido:\n📌"
+  },
+  {
+    "case": "case-1",
+    "turn": 5,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Entiendo, no se preocupe 🌼\nQuedamos atentas para cuando guste reprogramar.\nQue se mejore su hija."
+  },
+  {
+    "case": "case-2",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat Costa del Este.\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-2",
+    "turn": 1,
+    "score": 5,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto sra 🌼\n¿Para qué fecha desea el masaje?"
+  },
+  {
+    "case": "case-2",
+    "turn": 2,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¿Cuál de estos le gustaría?\n- Mimosa Relax 60 min ($75)\n- Liberador de Tensión 60 min ($80)"
+  },
+  {
+    "case": "case-2",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Gracias, le esperamos 🌼"
+  },
+  {
+    "case": "case-2",
+    "turn": 4,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat Costa del Este.\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-2",
+    "turn": 5,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-3",
+    "turn": 0,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-3",
+    "turn": 1,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-4",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Costa del Este ✨\nMi nombre es Camila 🌼\nCon gusto le comparto las promociones del mes 🌼\n¿Le gustaría agendar alguna en especial?"
+  },
+  {
+    "case": "case-4",
+    "turn": 1,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto, aquí tiene las promociones 🌼\n¿Le gustaría agendar alguna?"
+  },
+  {
+    "case": "case-4",
+    "turn": 2,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Para el miércoles 9 a la 1pm no tenemos disponibilidad para 2 personas 🌼\nLe podemos ofrecer 10:00am o 3:00pm ese día para el Mimosa Relax (60 min)\n¿Le funciona alguno de estos horarios?"
+  },
+  {
+    "case": "case-4",
+    "turn": 3,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Buenas tardes 🌼\nPara el miércoles 9 a la 1pm no contamos con disponibilidad para 2 personas.\nContamos con espacio a las 10:00am o 3:00pm ese día para Mimosa Relax\n¿Le funciona alguno de estos horario"
+  },
+  {
+    "case": "case-4",
+    "turn": 4,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Mucho gusto 🌼\n¿Le gustaría a las 10:00am o 3:00pm el miércoles 9?\n📌 Correo electrónico:"
+  },
+  {
+    "case": "case-5",
+    "turn": 0,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?\nCon mucho gusto, ya le comparto nuestros paquetes disponibles en San Francisco\nEstos son algunos de nu"
+  },
+  {
+    "case": "case-5",
+    "turn": 1,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto 🌼\nPara confirmar, ¿cuál de los tratamientos le interesa: Mimosa Relax, Liberador de Tensión, o la promoción del mes?"
+  },
+  {
+    "case": "case-5",
+    "turn": 2,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-6",
+    "turn": 0,
+    "score": 5,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa San Francisco\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-6",
+    "turn": 1,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto, si tenemos la opción de aplicar mayor presión en el masaje\nEsa promoción de 20% off es la que le compartimos en la imagen, válida este mes 🌼"
+  },
+  {
+    "case": "case-6",
+    "turn": 2,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Perfecto, en San Francisco 🌼\n¿Qué tratamiento le gustaría agendar y para qué fecha?"
+  },
+  {
+    "case": "case-6",
+    "turn": 3,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¿Le gustaría el masaje relajante con la promoción del mes?\n¿Para qué fecha y hora le gustaría agendar? 🌼"
+  },
+  {
+    "case": "case-6",
+    "turn": 4,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-7",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat 🌼\nMi nombre es Camila\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-7",
+    "turn": 1,
+    "score": 4,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto, le comento nuestras opciones para pareja en San Francisco:\n🍃 Mimosa Relax - 60 min: $75\n🍃 Liberador de Tensión - 60 min: $80\nAdemás le comparto la promoción vigente de este mes 🌼\n¿"
+  },
+  {
+    "case": "case-7",
+    "turn": 2,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "El \"Liberador de Tensión\" es nuestro masaje profundo, 60 min por $80, enfocado en aliviar tensión muscular con presión firme.\n¿Le gustaría agendarlo para pareja?"
+  },
+  {
+    "case": "case-7",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Sí, con mucho gusto. Es el \"Liberador de Tensión\", 60 min, $80 por persona, y se puede hacer para dos personas a la vez.\n¿Le gustaría agendarlo?"
+  },
+  {
+    "case": "case-7",
+    "turn": 4,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¡Hola! 🌼\n¿Desea que le busquemos disponibilidad para el \"Liberador de Tensión\" en pareja?"
+  },
+  {
+    "case": "case-7",
+    "turn": 5,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Le comento, para el sábado 12 a las 2:00pm no tenemos disponibilidad para 2 personas.\nContamos con espacio a las 10:00am o 3:00pm.\n¿Le acomoda alguna de estas horas?"
+  },
+  {
+    "case": "case-7",
+    "turn": 6,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Perfecto, para confirmar bien: ¿a las 10:00am o a las 3:00pm le gustaría agendar el sábado 12?"
+  },
+  {
+    "case": "case-8",
+    "turn": 0,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-9",
+    "turn": 0,
+    "score": 5,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa San Francisco\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-9",
+    "turn": 1,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "No tendríamos disponibilidad hoy a las 6:00pm.\nPara hoy contamos con 10:00am o 3:00pm.\n¿Le gustaría alguna de estas horas?"
+  },
+  {
+    "case": "case-9",
+    "turn": 2,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-10",
+    "turn": 0,
+    "score": 5,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-10",
+    "turn": 1,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-11",
+    "turn": 0,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-12",
+    "turn": 0,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa San Francisco\nMi nombre es Camila 🌼\nCon gusto le ayudo, actualmente estamos en septiembre, le comparto la promo vigente de este mes\n¿Cuál de estos tratamien"
+  },
+  {
+    "case": "case-12",
+    "turn": 1,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-13",
+    "turn": 0,
+    "score": 5,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-13",
+    "turn": 1,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-14",
+    "turn": 0,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat\nMi nombre es Camila 🌼\nCon gusto le ayudo a agendar en San Francisco\nNo contamos con un tratamiento llamado \"masaje de piedras calientes\" en San Fran"
+  },
+  {
+    "case": "case-14",
+    "turn": 1,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto, cualquier día le podemos atender 🌼\n¿Cuál de los dos le gustaría: Mimosa Relax o Liberador de Tensión?"
+  },
+  {
+    "case": "case-14",
+    "turn": 2,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Jajaja, con gusto le explico 🌼\n¿Le gustaría el Mimosa Relax o el Liberador de Tensión?"
+  },
+  {
+    "case": "case-14",
+    "turn": 3,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Para el sábado 5 de septiembre no tenemos las 10:30 am disponible.\nContamos con espacio a las 10:00 am o 3:00 pm.\n¿Le funciona alguno de esos horarios?"
+  },
+  {
+    "case": "case-14",
+    "turn": 4,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¡Perfecto! 🌼\n¿Prefiere a las 10:00 am o a las 3:00 pm?"
+  },
+  {
+    "case": "case-14",
+    "turn": 5,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "A la orden 🌼\nPara confirmar su cita, ¿prefiere las 10:00 am o las 3:00 pm?"
+  },
+  {
+    "case": "case-14",
+    "turn": 6,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-15",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "✨ Buenas tardes, bienvenido a Mimosa Spa Costa del Este\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-15",
+    "turn": 1,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¡Hola! Con mucho gusto 🌼\n¿En qué le podemos ayudar hoy?"
+  },
+  {
+    "case": "case-15",
+    "turn": 2,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-16",
+    "turn": 0,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-17",
+    "turn": 0,
+    "score": 4,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Costa del Este, mi nombre es Camila 🌼\n¿Cómo podemos ayudarle, Sra {nombre}?"
+  },
+  {
+    "case": "case-17",
+    "turn": 1,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto, Sra Ilka\nMimosa Relax - 60 min: $75\nLiberador de Tensión - 60 min: $80"
+  },
+  {
+    "case": "case-17",
+    "turn": 2,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto, Sra Ilka. Solo para aclarar, mi nombre es Camila 🌼\nHa sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta. Gracias por preferir a Mimosa Spa.🌼"
+  },
+  {
+    "case": "case-17",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": ""
+  },
+  {
+    "case": "case-18",
+    "turn": 0,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat Costa del Este.\nMi nombre es Camila 🌼\nContamos con \"Liberador de Tensión\" (60 min, $80) que es un masaje de tejido profundo.\n¿Le parece ese o busca "
+  },
+  {
+    "case": "case-18",
+    "turn": 1,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto.\nPara el masaje profundo tenemos \"Liberador de Tensión\" (60 min, $80).\nEn cuanto a faciales, no tengo esa opción disponible en Costa del Este por el momento.\n¿Desea que revise disponib"
+  },
+  {
+    "case": "case-18",
+    "turn": 2,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Para hoy tenemos disponibilidad a las 10:00 am y 3:00 pm para el \"Liberador de Tensión\" (60 min, $80).\n¿Cuál de esos horarios le viene bien?"
+  },
+  {
+    "case": "case-18",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Perfecto, para la tarde tenemos las 3:00 pm.\nLe confirmo los datos:\n📅 Fecha: hoy, viernes 4 de septiembre\n🕒 Hora: 3:00 pm\n🍃 Tratamiento: Liberador de Tensión (60 min, $80)\n📍 Sucursal: Costa del Es"
+  },
+  {
+    "case": "case-18",
+    "turn": 4,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe, revisando bien, después de la 1:00 pm solo tenemos disponible las 3:00 pm hoy.\n¿Le gustaría tomar ese horario?"
+  },
+  {
+    "case": "case-18",
+    "turn": 5,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Su cita está confirmada! ✅\n📅 Fecha: hoy 4 de septiembre\n⏰ Hora: 3:00 pm\n🍃 Tratamiento: Liberador de Tensión 60 min\n🌼 Lugar: Mimosa Spa Retreat, Star Plaza, Costa del Este"
+  },
+  {
+    "case": "case-19",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa San Francisco\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-19",
+    "turn": 1,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto\n¿Qué tratamiento desea agendar?"
+  },
+  {
+    "case": "case-19",
+    "turn": 2,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "No encuentro ninguna cita ni paquete registrado a su nombre.\n¿Me confirma qué tipo de masaje es (relajante, profundo, piedras calientes, etc.) para poder verificar disponibilidad?"
+  },
+  {
+    "case": "case-19",
+    "turn": 3,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto\nAntes de despedirnos, quiero confirmarle: aún no tenemos agendada su cita porque necesitamos saber qué tipo de masaje desea\n¿Me indica si es relajante, profundo, piedras calientes u otro? As"
+  },
+  {
+    "case": "case-19",
+    "turn": 4,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Buenas tardes\nYa son las 3:35pm, la hora de las 2:00pm de hoy ya pasó\n¿Desea que le busque disponibilidad para otro horario de hoy?\nAdemás, para poder verificar disponibilidad necesito saber qué trata"
+  },
+  {
+    "case": "case-19",
+    "turn": 5,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Para el primero de 60 minutos, ¿sería relajante (Mimosa Relax) o de tensión más profunda (Liberador de Tensión)?\nNo encuentro un combo de \"relajante + craneofacial\" de 80 min en el sistema. ¿Podría co"
+  },
+  {
+    "case": "case-19",
+    "turn": 6,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-20",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "✨ Muy buenas tardes, bienvenido a Mimosa Spa Costa del Este\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-20",
+    "turn": 1,
+    "score": 5,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto, le comparto las promociones vigentes de este mes 🌼\n¿Hay algún tratamiento en especial que le interese? Con gusto le doy más detalles."
+  },
+  {
+    "case": "case-20",
+    "turn": 2,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "No encuentro exactamente un tratamiento llamado \"Calma Profunda\" en nuestro sistema.\n¿Podría confirmarme si es el nombre que vio en la promoción que le envié, o el de algún otro tratamiento? Así le do"
+  },
+  {
+    "case": "case-20",
+    "turn": 3,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "No encuentro un tratamiento llamado exactamente \"Calma Profunda\" en nuestro sistema.\n¿Podría confirmarme el nombre del tratamiento tal como aparece en la promoción, por favor?"
+  },
+  {
+    "case": "case-20",
+    "turn": 4,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Le comparto la imagen de la promoción del mes para confirmar el nombre exacto 🌼\n¿Podría indicarme si \"Calma Profunda\" corresponde a alguno de los tratamientos que aparecen ahí?"
+  },
+  {
+    "case": "case-20",
+    "turn": 5,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-21",
+    "turn": 0,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat. Mi nombre es Camila 🌼\nCon gusto le ayudo. ¿Qué tipo de masaje desea (relajante, profundo, de pies, etc.)?"
+  },
+  {
+    "case": "case-21",
+    "turn": 1,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Sí tenemos, sería el Mimosa Relax 60 min ($75)\nDisponible hoy a las 3:00pm\n¿Le gustaría agendarlo a esa hora?"
+  },
+  {
+    "case": "case-21",
+    "turn": 2,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Tenemos disponible el Mimosa Relax 60 min ($75) hoy a las 3:00pm en San Francisco.\n¿Le gustaría agendarlo a esa hora?"
+  },
+  {
+    "case": "case-21",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto, pero por este medio solo podemos atender por WhatsApp 🌼\n¿Desea que le agende el Mimosa Relax 60 min hoy a las 3:00pm en San Francisco?"
+  },
+  {
+    "case": "case-21",
+    "turn": 4,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe la confusión 🌼\nEstamos atendiendo por WhatsApp de Mimosa Spa Retreat, sucursal San Francisco.\n¿En qué le podemos ayudar?"
+  },
+  {
+    "case": "case-22",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Costa del Este 🌼\nMi nombre es Camila, ¿cómo podemos ayudarle?\nA las 2:00 pm no tenemos espacio disponible.\nContamos con 10:00 am o 3:00 pm\n\n¿le gustaría age"
+  },
+  {
+    "case": "case-22",
+    "turn": 1,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Un momento, permítame verificar la disponibilidad real.\nA las 2:00 pm no tenemos disponibilidad para el Liberador de Tensión hoy.\nContamos con 10:00 am o 3:00 pm\n¿Le gustaría agendar en alguno de esos"
+  },
+  {
+    "case": "case-22",
+    "turn": 2,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¿Sería para hoy viernes 4 de septiembre? ¿Y prefiere a las 10:00 am o a las 3:00 pm?"
+  },
+  {
+    "case": "case-22",
+    "turn": 3,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe, no le entendí bien 🌼\n¿Prefiere a las 10:00 am o a las 3:00 pm, para el masaje Liberador de Tensión hoy?"
+  },
+  {
+    "case": "case-22",
+    "turn": 4,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "A las 10:15 am no tenemos ese horario exacto, pero sí contamos con las 10:00 am para el Mimosa Relax de 60 min.\n¿Le gustaría agendarlo a esa hora?"
+  },
+  {
+    "case": "case-22",
+    "turn": 5,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¡Perfecto! Tenemos las 10:00 am disponible para el Mimosa Relax de 60 min.\nPara agendar necesito sus datos:\n📌 Nombre y Apellido:\n📌 Correo electrónico:"
+  },
+  {
+    "case": "case-22",
+    "turn": 6,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe la confusión 🌼\n¿Me confirma qué tratamiento desea y para qué fecha, por favor?"
+  },
+  {
+    "case": "case-22",
+    "turn": 7,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto, ¿me confirma para cuál tratamiento sería a las 12:45? ¿Mimosa Relax (60 min) o Liberador de Tensión (60 min)?"
+  },
+  {
+    "case": "case-22",
+    "turn": 8,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe, necesito saber cuál de los dos tratamientos desea agendar a las 12:45:\n¿Mimosa Relax o Liberador de Tensión?"
+  },
+  {
+    "case": "case-22",
+    "turn": 9,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "A la 1:30 pm no tenemos disponibilidad para el Liberador de Tensión hoy.\nContamos con 10:00 am o 3:00 pm\n¿Le gustaría agendar en alguno de esos horarios?"
+  },
+  {
+    "case": "case-22",
+    "turn": 10,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe, no logro entenderle bien 🌼\n¿Podría confirmarme si desea las 10:00 am o las 3:00 pm para el masaje Liberador de Tensión de hoy?"
+  },
+  {
+    "case": "case-23",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Good afternoon, welcome to Mimosa Spa Retreat San Francisco. My name is Camila 🌼\nHow can we help you?\nWhich treatment would you like, and would that be Saturday or Sunday?"
+  },
+  {
+    "case": "case-23",
+    "turn": 1,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "No contamos con \"Mimosa Detox\" ni facial con equipo en San Francisco, mi nombre es Camila 🌼\n\nSolo tenemos disponibles:\n- Mimosa Relax 60 min - $75\n- Liberador de Tensión 60 min - $80\n\n¿Le gustaría al"
+  },
+  {
+    "case": "case-23",
+    "turn": 2,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "En San Francisco no manejamos tratamientos faciales, mi nombre es Camila 🌼\nSolo contamos con:\n- Mimosa Relax 60 min - $75\n- Liberador de Tensión 60 min - $80\n\n¿Le gustaría reservar alguno de estos pa"
+  },
+  {
+    "case": "case-23",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "This chat is for San Francisco location.\nWould you like San Francisco, or would you prefer Costa del Este instead?"
+  },
+  {
+    "case": "case-23",
+    "turn": 4,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Perfecto, en Costa del Este también contamos con:\n- Mimosa Relax 60 min - $75\n- Liberador de Tensión 60 min - $80\n\n¿Cuál de los dos desea para el sábado 9:30am?"
+  },
+  {
+    "case": "case-23",
+    "turn": 5,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto! ¿Cuál tratamiento desea: Mimosa Relax o Liberador de Tensión?"
+  },
+  {
+    "case": "case-23",
+    "turn": 6,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "You're welcome! Just to confirm, which treatment would you like for Saturday at 9:30am: Mimosa Relax (60 min - $75) or Liberador de Tensión (60 min - $80)?"
+  },
+  {
+    "case": "case-24",
+    "turn": 0,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-25",
+    "turn": 0,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Buenas tardes, bienvenido a Mimosa Spa Costa del Este, mi nombre es Camila 🌼\n\nCon gusto le reviso el masaje relajante.\nComento que ya son las 3:42pm, así que la hora de la 1 o 2 ya pasó.\n¿Le gustaría"
+  },
+  {
+    "case": "case-25",
+    "turn": 1,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe, la 1:00pm de hoy ya pasó (son las 3:42pm).\n¿Desea que le revise disponibilidad para mañana a la 1:00pm, o prefiere alguna hora de esta tarde?"
+  },
+  {
+    "case": "case-25",
+    "turn": 2,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muchas gracias 🌼\nAntes de agendar, ¿me confirma para cuándo desea la cita: hoy más tarde o mañana a la 1:00pm?"
+  },
+  {
+    "case": "case-25",
+    "turn": 3,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe, ¿me confirma la fecha que desea: hoy más tarde o mañana a la 1:00pm? 🌼"
+  },
+  {
+    "case": "case-26",
+    "turn": 0,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa San Francisco\nMi nombre es Camila 🌼\nCon mucho gusto, le comparto las promos del mes\n¿Hay alguna en especial que le llame la atención o quisiera reservar? 🌼"
+  },
+  {
+    "case": "case-26",
+    "turn": 1,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¿Para cuál tratamiento de la promo desea la disponibilidad del sábado?"
+  },
+  {
+    "case": "case-26",
+    "turn": 2,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Le comparto de nuevo la promo para confirmar nombres y precios 🌼\n¿Me confirma cuál de los dos desea agendar para el sábado?"
+  },
+  {
+    "case": "case-26",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Nuestra sucursal San Francisco está en Calle 74 este, detrás de la Delta de Calle 50 (no es exactamente Calle 50, pero queda muy cerca).\nAquí le confirmo el enlace de Waze para llegar:\nhttps://waze.co"
+  },
+  {
+    "case": "case-26",
+    "turn": 4,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe, a las 11:10 no tenemos disponibilidad ese sábado.\nSí contamos con espacio a las 10:00am o 3:00pm.\n¿Le acomoda alguna de esas horas?"
+  },
+  {
+    "case": "case-26",
+    "turn": 5,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto 🌼\n¿Le acomoda las 10:00am o las 3:00pm para el sábado?"
+  },
+  {
+    "case": "case-26",
+    "turn": 6,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¿Cuál de las dos horas prefiere, 10:00am o 3:00pm? 🌼"
+  },
+  {
+    "case": "case-26",
+    "turn": 7,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-27",
+    "turn": 0,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-28",
+    "turn": 0,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat\nMi nombre es Camila 🌼\n¿Cómo podemos ayudarle?"
+  },
+  {
+    "case": "case-28",
+    "turn": 1,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto\n¿Qué tipo de masaje desea? (relajante, profundo, con piedras, etc.)"
+  },
+  {
+    "case": "case-28",
+    "turn": 2,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Contamos con estas opciones:\n🍃 Mimosa Relax - 60 min ($75)\n🍃 Liberador de Tensión - 60 min ($80)\n¿Cuál de los dos le gustaría?"
+  },
+  {
+    "case": "case-28",
+    "turn": 3,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "No tenemos un tratamiento con ese nombre exacto\nLas opciones que manejamos son:\n🍃 Mimosa Relax - 60 min ($75)\n🍃 Liberador de Tensión - 60 min ($80)\n¿Cuál de los dos prefiere?"
+  },
+  {
+    "case": "case-28",
+    "turn": 4,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "No contamos con un tratamiento llamado \"Calm Therapy\"\nLas opciones disponibles son:\n🍃 Mimosa Relax - 60 min ($75)\n🍃 Liberador de Tensión - 60 min ($80)\n¿Cuál de los dos le gustaría?"
+  },
+  {
+    "case": "case-28",
+    "turn": 5,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Lastimosamente a la 1:15 pm no tenemos disponibilidad\nContamos con espacio a las 10:00 am o 3:00 pm\n¿Le gustaría alguna de estas horas?"
+  },
+  {
+    "case": "case-28",
+    "turn": 6,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Ha sido un placer atenderle, con gusto estamos a la orden para cualquier otra consulta.\nGracias por preferir a Mimosa Spa.🌼"
+  },
+  {
+    "case": "case-28",
+    "turn": 7,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¿Le gustaría agendar para las 10:00 am o 3:00 pm?"
+  },
+  {
+    "case": "case-28",
+    "turn": 8,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Disculpe, ¿podría confirmarme si desea la cita a las 10:00 am o a las 3:00 pm?"
+  },
+  {
+    "case": "case-28",
+    "turn": 9,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-29",
+    "turn": 0,
+    "score": 3,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Muy buenas tardes, bienvenido a Mimosa Spa Retreat. Mi nombre es Camila 🌼\n¿Cómo podemos ayudarle?\nNuestro horario en Costa del Este es Lun-Vie 9AM-8PM · Sáb-Dom 9AM-6PM"
+  },
+  {
+    "case": "case-29",
+    "turn": 1,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Mucho gusto, Sra {nombre} 🌼\nCon gusto le ayudamos a agendar\n¿Qué tratamiento le gustaría reservar para el viernes a las 11:00?"
+  },
+  {
+    "case": "case-29",
+    "turn": 2,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto, Sra {nombre} 🌼\nTenemos el Mimosa Relax - 60 min ($75) o el Liberador de Tensión - 60 min ($80)\n¿Cuál prefiere?"
+  },
+  {
+    "case": "case-29",
+    "turn": 3,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": true,
+    "camila": ""
+  },
+  {
+    "case": "case-30",
+    "turn": 0,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¡Muy buenas tardes! Bienvenido a Mimosa Spa Retreat, mi nombre es Camila 🌼\n\nCon gusto le ayudamos, sr {nombre}\n¿Qué tipo de masaje desea? (relajante, profundo, etc.)"
+  },
+  {
+    "case": "case-30",
+    "turn": 1,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con mucho gusto, sr {nombre}\n¿Qué tipo de masaje le gustaría? (relajante, profundo, con piedras calientes...)\nTambién, sábado 24 de enero, ¿de cuántos minutos lo prefiere?"
+  },
+  {
+    "case": "case-30",
+    "turn": 2,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Gracias, sr {nombre} 🌼\nAntes de agendar, ¿qué tipo de masaje prefiere? (relajante, descontracturante, con piedras calientes...)\n¿Y para cuántas personas sería la cita?"
+  },
+  {
+    "case": "case-30",
+    "turn": 3,
+    "score": 0,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Perfecto, anotamos las 10:00 am 🌼\n¿Qué tipo de masaje prefiere? (relajante, descontracturante...)\n¿Y sería para 1 persona o 2?"
+  },
+  {
+    "case": "case-30",
+    "turn": 4,
+    "score": 2,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Claro, con gusto le ayudo a reagendar.\nUn momento por favor, reviso su cita.\nNo encuentro ninguna cita activa a su nombre, sr {nombre}.\n¿Desea que le agendemos una nueva cita para el sábado 24 de ener"
+  },
+  {
+    "case": "case-30",
+    "turn": 5,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "No encuentro ninguna cita activa a su nombre, sr {nombre} 🌼\nPodemos agendarle entonces para el lunes a las 5:15 pm.\n¿Qué tipo de masaje prefiere (relajante, profundo...) y para cuántas personas sería"
+  },
+  {
+    "case": "case-30",
+    "turn": 6,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "Con gusto, sr {nombre} 🌼\nTenemos disponibles:\n- Mimosa Relax 60 min - $75\n- Liberador de Tensión 60 min - $80\n¿Cuál de los dos prefiere?"
+  },
+  {
+    "case": "case-30",
+    "turn": 7,
+    "score": 1,
+    "inventedPrice": false,
+    "bookedWithoutConfirm": false,
+    "handedOff": false,
+    "camila": "¡Hola! Muy buenas tardes, sr {nombre} 🌼\nEstamos aquí para ayudarle con su cita del lunes a las 5:15 pm.\n¿Qué tipo de masaje prefiere: Mimosa Relax (60 min - $75) o Liberador de Tensión (60 min - $80)"
+  }
+]
