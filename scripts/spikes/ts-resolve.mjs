@@ -1,6 +1,6 @@
 // Minimal ESM resolver so scripts can import the app's extensionless .ts
 // modules, and the "@/" alias those modules use between themselves.
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, resolve as resolvePath } from 'node:path'
 
@@ -25,11 +25,25 @@ export async function resolve(specifier, context, next) {
     if (hit) return next(pathToFileURL(hit).href, context)
   }
 
+  // Node's native loader requires an explicit `type: 'json'` import
+  // attribute for JSON modules; app source (bundled by webpack/turbopack)
+  // imports JSON without one, so scripts loading that source need it added.
+  const jsonAttrs = specifier.endsWith('.json') ? { ...context, importAttributes: { ...context.importAttributes, type: 'json' } } : context
+
   if (specifier.startsWith('.') && !/\.[cm]?[jt]s$/.test(specifier)) {
     const base = dirname(fileURLToPath(context.parentURL))
     const hit = firstExisting(base, specifier)
-    if (hit) return next(pathToFileURL(hit).href, context)
+    if (hit) return next(pathToFileURL(hit).href, jsonAttrs)
   }
 
-  return next(specifier, context)
+  return next(specifier, jsonAttrs)
+}
+
+export async function load(url, context, next) {
+  // Belt-and-suspenders for the JSON fix above: some Node versions ignore
+  // the resolve hook's importAttributes, so short-circuit the load here too.
+  if (url.endsWith('.json')) {
+    return { format: 'json', source: readFileSync(fileURLToPath(url), 'utf8'), shortCircuit: true }
+  }
+  return next(url, context)
 }
