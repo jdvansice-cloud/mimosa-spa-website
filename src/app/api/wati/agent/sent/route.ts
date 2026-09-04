@@ -20,7 +20,12 @@ export async function POST(request: NextRequest) {
     if (conv) {
       await store.insertMessage({ phone: ev.phone, wati_message_id: ev.messageId || null, direction: 'out', author: human ? 'human' : 'camila', type: 'text', text: ev.text, media_ref: null, shadow: false }).catch(() => ({ inserted: false }))
     }
-    if (human && conv && conv.mode === 'agent') await registerTakeover(store, ev.phone, ev.operatorEmail!)
+    if (human && conv && conv.mode === 'agent') {
+      // In shadow the operator always replies; taking over would end the conversation
+      // after a single draft and starve the tuning pass, so only log it.
+      if (e.mode === 'shadow') await store.logEvent(ev.phone, 'takeover', { shadow: true, operatorEmail: ev.operatorEmail })
+      else await registerTakeover(store, ev.phone, ev.operatorEmail!)
+    }
   } catch (err) {
     console.error('wati-agent sent webhook failed', err)
   }
