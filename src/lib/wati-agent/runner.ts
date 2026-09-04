@@ -73,9 +73,17 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
 
     const texts: string[] = []
     let handedOff = false
+    let endedByTool = false
 
     for (let round = 0; round < 8; round++) {
-      const res = await d.anthropic.messages.create({ model: env().model, max_tokens: 2000, system, tools: TOOLS, messages })
+      const res = await d.anthropic.messages.create({
+        model: env().model,
+        max_tokens: 4000,
+        output_config: { effort: 'medium' },
+        system,
+        tools: TOOLS,
+        messages,
+      } as Anthropic.MessageCreateParamsNonStreaming)
       await d.store.logEvent(phone, 'llm', { round, stop: res.stop_reason, usage: res.usage })
 
       for (const b of res.content) if (b.type === 'text' && b.text.trim()) texts.push(b.text)
@@ -105,7 +113,16 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
         results.push({ type: 'tool_result', tool_use_id: b.id, content: o.result, is_error: o.isError || undefined })
       }
       messages.push({ role: 'user', content: results })
-      if (end) break
+      if (end) { endedByTool = true; break }
+    }
+
+    if (!texts.length && !handedOff && !endedByTool) {
+      await d.store.logEvent(phone, 'error', { where: 'runTurn', error: 'empty reply' })
+      if (!shadow) {
+        await d.wati.sendText(phone, 'Un momento por favor 🌼').catch(() => {})
+        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'respuesta_vacia', resumen: conv.summary ?? '', shadow, env: env() }).catch(() => {})
+      }
+      return { bubbles: [], handedOff: true }
     }
 
     const candidateBubbles = handedOff ? [] : splitBubbles(texts.join('\n'))
@@ -136,7 +153,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
       if (texts.length) summaryMessages.push({ role: 'assistant', content: texts.join('\n') })
       const s = await d.anthropic.messages.create({
         model: env().model,
-        max_tokens: 300,
+        max_tokens: 600,
         system: 'Resume la conversación en máximo 4 líneas en español: qué quiere el cliente, qué datos ya dio (nombre, correo, sucursal, fecha/hora, tratamiento), qué falta.',
         messages: [...summaryMessages, { role: 'user', content: 'Resumen:' }],
       })
