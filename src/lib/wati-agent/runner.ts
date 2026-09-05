@@ -10,6 +10,7 @@ import { env } from './config/env'
 import type { AgentStore } from './store'
 import type { WatiClient } from './wati-api'
 import { closeAndRemember } from './memory'
+import { getKnowledge, type Knowledge } from './knowledge'
 import type { ClientProfile, ConversationOutcome, StoredMessage } from './types'
 
 export interface RunDeps {
@@ -23,6 +24,8 @@ export interface RunDeps {
   styleGuide: string
   /** Defaults to the Supabase-backed loader inside executeTool. */
   promotions?: ToolDeps['promotions']
+  /** Website knowledge; defaults to the 6h-cached Supabase-backed builder. */
+  knowledge?: () => Promise<Knowledge>
   sleep?: (ms: number) => Promise<void>
 }
 
@@ -92,6 +95,12 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
       d.store.getProfile(phone).catch(() => ({} as ClientProfile)),
       d.store.recentConversationLogs(phone, 3).catch(() => []),
     ])
+    const loadKnowledge = d.knowledge ?? (() => getKnowledge())
+    // Once per turn: the prompt block and every knowledge tool share this instance.
+    const knowledgePromise = loadKnowledge().catch(async e => {
+      await d.store.logEvent(phone, 'error', { where: 'knowledge', error: String(e) }).catch(() => {})
+      return null
+    })
     const mbHistory = await mindbodyHistoryFor(phone, conv, profile, d)
     if (Object.keys(mbHistory.patch).length) conv = await d.store.upsertConversation({ phone, ...mbHistory.patch })
     const system = buildSystem({
@@ -106,6 +115,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
       media,
       intent: detectIntent(lastIn?.text || ''),
       styleGuide: d.styleGuide,
+      catalogText: (await knowledgePromise)?.catalogText,
     })
 
     const texts: string[] = []
@@ -144,6 +154,11 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
           mediaBytes: d.mediaBytes,
           mb: d.mb,
           promotions: d.promotions,
+          knowledge: async () => {
+            const k = await knowledgePromise
+            if (!k) throw new Error('conocimiento del sitio no disponible')
+            return k
+          },
           recentInbound,
         })
         await d.store.logEvent(phone, 'tool_result', { tool: b.name, ok: !o.isError, result: o.result.slice(0, 500) })

@@ -6,6 +6,12 @@ function fakeAnthropic(responses: any[]) {
   return { messages: { create: vi.fn(async () => responses[i++]) } } as any
 }
 const text = (t: string) => ({ stop_reason: 'end_turn', content: [{ type: 'text', text: t }], usage: {} })
+const fakeKnowledge = {
+  catalogText: '## Catálogo de tratamientos\n- Mimosa Relax · 60 min · $75 · Masajes',
+  treatments: [{ id: 10, name: 'Mimosa Relax', category: 'Masajes', minutes: 60, price: 75, description: 'Sueco suave.', topPick: true }],
+  topics: { parejas: 'p', club: 'c', empresas: 'e', primera_visita: 'pv', referidos: 'r', giftcards: 'g', politicas: 'pol', ubicaciones: 'u' },
+  builtAt: '2026-09-01T00:00:00.000Z',
+}
 const toolUse = (name: string, input: any) => ({ stop_reason: 'tool_use', content: [{ type: 'tool_use', id: 't1', name, input }], usage: {} })
 
 function deps(anthropic: any, over: any = {}) {
@@ -21,7 +27,7 @@ function deps(anthropic: any, over: any = {}) {
       logConversation: vi.fn(async () => {}), mergeProfile: vi.fn(async () => ({})),
     },
     wati: { sendText: vi.fn(async (_p: string, t: string) => { sent.push(t); return { ok: true, messageId: 'm' } }) },
-    mediaBytes: vi.fn(), mb: {}, sent, ...over,
+    mediaBytes: vi.fn(), mb: {}, knowledge: vi.fn(async () => fakeKnowledge), sent, ...over,
   } as any
 }
 
@@ -141,7 +147,7 @@ describe('runTurn client memory', () => {
     d.store.recentConversationLogs = vi.fn(async () => [{ phone: '507', started_at: 'a', ended_at: '2026-08-01T00:00:00Z', outcome: 'booked', summary: 'Reservó masaje' }])
     await runTurn('507', false, d)
     const system = d.anthropic.messages.create.mock.calls[0][0].system
-    const volatile = system[1].text
+    const volatile = system.at(-1)!.text
     expect(volatile).toContain('Perfil: nombre Ana Ruiz')
     expect(volatile).toContain('Reservó masaje')
   })
@@ -151,7 +157,7 @@ describe('runTurn client memory', () => {
     d.mb = { findClientByPhone: vi.fn(async () => null), findClientByEmail: vi.fn(async () => null) }
     await runTurn('507', false, d)
     expect(d.mb.findClientByPhone).not.toHaveBeenCalled()
-    expect(d.anthropic.messages.create.mock.calls[0][0].system[1].text).not.toContain('Cliente Mindbody')
+    expect(d.anthropic.messages.create.mock.calls[0][0].system.at(-1).text).not.toContain('Cliente Mindbody')
   })
 
   it('looks the client up once and caches the id when the profile has an email', async () => {
@@ -163,7 +169,7 @@ describe('runTurn client memory', () => {
     }
     await runTurn('507', false, d)
     expect(d.mb.findClientByPhone).toHaveBeenCalledTimes(1)
-    expect(d.anthropic.messages.create.mock.calls[0][0].system[1].text).toContain('Cliente Mindbody: Ana Ruiz, últimas visitas: 2026-08-01 Masaje')
+    expect(d.anthropic.messages.create.mock.calls[0][0].system.at(-1).text).toContain('Cliente Mindbody: Ana Ruiz, últimas visitas: 2026-08-01 Masaje')
     expect(d.store.upsertConversation).toHaveBeenCalledWith(expect.objectContaining({ mindbody_client_id: 'C1', client_name: 'Ana Ruiz' }))
   })
 
@@ -195,3 +201,30 @@ describe('runTurn client memory', () => {
     expect(d.store.logConversation).not.toHaveBeenCalled()
   })
 })
+
+describe('runTurn website knowledge', () => {
+  it('loads knowledge once per turn and puts the catalogue in the system prompt', async () => {
+    const d = deps(fakeAnthropic([toolUse('get_site_info', { tema: 'club' }), text('Con gusto')]))
+    await runTurn('507', false, d)
+    expect(d.knowledge).toHaveBeenCalledTimes(1)
+    const system = d.anthropic.messages.create.mock.calls[0][0].system
+    expect(system).toHaveLength(3)
+    expect(system[1].text).toContain('## Catálogo de tratamientos')
+    expect(system[1].cache_control).toEqual({ type: 'ephemeral' })
+  })
+
+  it('passes knowledge through to the tools', async () => {
+    const d = deps(fakeAnthropic([toolUse('get_treatment_details', { name: 'mimosa relax' }), text('Listo')]))
+    await runTurn('507', false, d)
+    const result = d.anthropic.messages.create.mock.calls[1][0].messages.at(-1).content[0]
+    expect(result.content).toContain('Sueco suave.')
+  })
+
+  it('still answers when the knowledge build fails', async () => {
+    const d = deps(fakeAnthropic([text('Hola')]), { knowledge: vi.fn(async () => { throw new Error('boom') }) })
+    const r = await runTurn('507', false, d)
+    expect(r.bubbles).toEqual(['Hola'])
+    expect(d.anthropic.messages.create.mock.calls[0][0].system).toHaveLength(2)
+  })
+})
+

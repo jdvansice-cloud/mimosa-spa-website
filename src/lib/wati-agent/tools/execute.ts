@@ -1,5 +1,6 @@
 import { BUSINESS, menuLink, type BusinessOverrides } from '../config/business'
 import { loadActivePromotions, type PromoSuggestion } from '../promotions'
+import { getKnowledge, findTreatment, TOPIC_KEYS, type Knowledge, type TopicKey } from '../knowledge'
 import { requireConfirmation } from './validate'
 import { performHandoff } from '../handoff'
 import { env } from '../config/env'
@@ -9,7 +10,7 @@ import type { WatiClient } from '../wati-api'
 import { isEmptyProfilePatch } from '../store'
 import type { ClientProfile, Conversation, Sucursal } from '../types'
 
-export interface ToolDeps { store: AgentStore; wati: WatiClient; conv: Conversation; origin: string; shadow: boolean; now: Date; mediaBytes: (p: string) => Promise<{ bytes: Uint8Array; mime: string; filename: string }>; mb: typeof import('./mindbody-adapter'); recentInbound: string[]; promotions?: (today: string) => Promise<PromoSuggestion[]> }
+export interface ToolDeps { store: AgentStore; wati: WatiClient; conv: Conversation; origin: string; shadow: boolean; now: Date; mediaBytes: (p: string) => Promise<{ bytes: Uint8Array; mime: string; filename: string }>; mb: typeof import('./mindbody-adapter'); recentInbound: string[]; promotions?: (today: string) => Promise<PromoSuggestion[]>; knowledge?: () => Promise<Knowledge> }
 export interface ToolOutcome { result: string; isError?: boolean; endTurn?: boolean; convPatch?: Partial<Conversation> }
 
 const json = (v: unknown) => JSON.stringify(v)
@@ -65,6 +66,18 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         const t = await d.mb.listTherapists({ sucursal: input.sucursal, date: input.date, serviceIds: input.service_ids, origin: d.origin, phone })
         if (!t.length) return { result: 'No hay terapeutas disponibles ese día; ofrece otra fecha.' }
         return { result: json(t), convPatch: sucursalPatch(input, d.conv.sucursal) }
+      }
+      case 'get_treatment_details': {
+        const k = await (d.knowledge ?? (() => getKnowledge()))()
+        const { match, similar } = findTreatment(String(input.name ?? ''), k.treatments)
+        if (!match) return { result: json({ encontrado: false, parecidos: similar, nota: 'No existe ese tratamiento en el catálogo; ofrece los parecidos o el enlace del menú.' }) }
+        return { result: json({ encontrado: true, nombre: match.name, categoria: match.category, minutos: match.minutes, precio: match.price, descripcion: match.description, mas_pedido: match.topPick }) }
+      }
+      case 'get_site_info': {
+        const tema = String(input.tema ?? '') as TopicKey
+        if (!(TOPIC_KEYS as readonly string[]).includes(tema)) return { result: `Tema desconocido "${tema}". Temas: ${TOPIC_KEYS.join(', ')}.`, isError: true }
+        const k = await (d.knowledge ?? (() => getKnowledge()))()
+        return { result: k.topics[tema] }
       }
       case 'get_menu_link': return { result: menuLink(String(input.seccion ?? 'menu')) }
       case 'send_image': {
