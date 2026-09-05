@@ -272,8 +272,10 @@ function buildCatalogText(args: {
         ? promos
             .map(p => {
               const antes = p.precio_original ? ` (antes $${money(p.precio_original)})` : ''
-              const min = p.minutos ? ` · ${p.minutos} min` : ''
-              return `- ${p.titulo} · $${money(p.precio)}${antes}${min}`
+              const total = p.duracion_total || p.minutos
+              const min = total ? ` · ${total} min` : ''
+              const incluye = p.incluye?.length ? ` — incluye: ${p.incluye.map(t => t.nombre).join(' + ')}` : ''
+              return `- ${p.titulo} · $${money(p.precio)}${antes}${min}${incluye}`
             })
             .join('\n')
         : '(ninguna activa)'

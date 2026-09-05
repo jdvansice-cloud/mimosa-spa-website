@@ -38,7 +38,20 @@ function fakeSb(tables: Record<string, unknown[]>, errors: Record<string, string
 const deps = (over: Record<string, unknown> = {}) => ({
   sb: fakeSb({ treatment_settings: TREATMENTS, marketing_offers: OFFERS }),
   promotions: async () => [
-    { titulo: 'Promo Septiembre', precio: 99, precio_original: 150, minutos: 90, servicios: [10], valido_hasta: '2026-09-30' },
+    {
+      id: 'p1',
+      titulo: 'Promo Septiembre',
+      precio: 99,
+      precio_original: 150,
+      minutos: 90,
+      servicios: [10, 12],
+      incluye: [
+        { id: 10, nombre: 'Masaje Mimosa Relax', minutos: 60 },
+        { id: 12, nombre: 'Liberador de Tensión', minutos: 30 },
+      ],
+      duracion_total: 90,
+      valido_hasta: '2026-09-30',
+    },
   ],
   settings: async () => ({ ...DEFAULT_SETTINGS, phone_costa_del_este: '398-5295', phone_san_francisco: '300-1111' }),
   giftCatalog: async () => [
@@ -78,7 +91,9 @@ describe('buildKnowledge', () => {
   it('includes active promotions and page offers', async () => {
     const k = await buildKnowledge(deps())
     expect(k.catalogText).toContain('## Promociones activas (web)')
-    expect(k.catalogText).toContain('- Promo Septiembre · $99 (antes $150) · 90 min')
+    expect(k.catalogText).toContain(
+      '- Promo Septiembre · $99 (antes $150) · 90 min — incluye: Masaje Mimosa Relax + Liberador de Tensión',
+    )
     expect(k.catalogText).toContain('## Ofertas de página')
     expect(k.catalogText).toContain('Ritual para Dos · $190 (por pareja)')
     expect(k.catalogText).toContain('Plan Esencial · $69 (al mes)')
