@@ -720,6 +720,7 @@ function SettingsTab({
   const [personaName, setPersonaName] = useState('Camila')
   const [operatorLabels, setOperatorLabels] = useState('')
   const [idleResumeHours, setIdleResumeHours] = useState(3)
+  const [bestSellers, setBestSellers] = useState('')
   const [overrides, setOverrides] = useState<BusinessOverrides>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -734,6 +735,7 @@ function SettingsTab({
         setOperatorLabels((data.api_operator_labels ?? []).join(', '))
         setOverrides(data.business_overrides ?? {})
         setIdleResumeHours(Number(data.human_idle_resume_hours ?? 3))
+        setBestSellers((data.best_sellers ?? []).join(', '))
       })
       .catch(e => console.error('settings fetch failed', e))
       .finally(() => setLoading(false))
@@ -756,6 +758,10 @@ function SettingsTab({
             .filter(Boolean),
           business_overrides: overrides,
           human_idle_resume_hours: idleResumeHours,
+          best_sellers: bestSellers
+            .split(',')
+            .map(s => Number(s.trim()))
+            .filter(n => Number.isFinite(n) && n > 0),
         }),
       })
       setSaved(true)
@@ -809,6 +815,16 @@ function SettingsTab({
             step={0.5}
             value={idleResumeHours}
             onChange={e => setIdleResumeHours(Number(e.target.value))}
+            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="text-sm font-medium">Más pedidos (IDs de servicio Mindbody, separados por coma)</span>
+          <input
+            type="text"
+            value={bestSellers}
+            placeholder="(usar los tres masajes por defecto)"
+            onChange={e => setBestSellers(e.target.value)}
             className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
           />
         </label>

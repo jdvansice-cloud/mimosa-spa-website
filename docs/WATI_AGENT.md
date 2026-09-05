@@ -121,6 +121,30 @@ número; si no hay ninguna, usa `human_since`) y llama a `shouldResume`
 Código: `src/lib/wati-agent/` (lógica), `src/app/api/wati/agent/{inbound,sent,status}`
 (rutas), `src/app/admin/wati-agent` (panel).
 
+## Flujo de reserva y sugerencias
+
+Camila sigue el mismo orden que la web, con los menos pasos posibles:
+sucursal → tratamiento(s) y cuántas personas → una sola pregunta que junta
+extras y terapeuta → fecha y hora → tarjeta 📌 solo si falta nombre o correo →
+resumen y sí claro → `book`.
+
+- Si el cliente pide "un masaje" sin especificar, llama a `get_suggestions`:
+  devuelve las promociones activas de la tabla `promotions` (activas, con
+  `valid_until` >= hoy Panamá, por `sort_order`, máximo 4) y hasta 3 "más
+  pedidos". Ofrece 2 promos + 2 más pedidos en una sola burbuja.
+- Los más pedidos salen del ajuste `best_sellers` (IDs de servicio de Mindbody,
+  editable en Ajustes del panel, separados por coma). Si está vacío, usa por
+  defecto Mimosa Relax 60, Liberador de Tensión 60 y Piedras Calientes 60,
+  saltando los que no existan en esa sucursal.
+- `list_addons` trae los adicionales (se reservan como sesiones extra en la
+  misma cadena de citas) y `list_therapists` las terapeutas con disponibilidad
+  ese día. En `book`, `addon_ids` lleva los extras y `staff_id` la terapeuta
+  pedida (0 = cualquiera disponible); si esa terapeuta no está libre a esa hora,
+  Camila ofrece otra hora en vez de reservar con otra persona.
+- `get_menu_link` da el enlace público (`/es/menu`, `/es/menu/faciales`,
+  `/es/menu/corporales`, `/es/menu/paquetes`, `/es/promociones`, `/es/parejas`,
+  `/es/reservar`) cuando el cliente quiere ver más opciones.
+
 ## Memoria por contacto ("perfil")
 
 Camila recuerda a cada número entre conversaciones.
