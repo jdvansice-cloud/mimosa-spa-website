@@ -1,5 +1,5 @@
 import { BUSINESS, type BusinessOverrides } from '../config/business'
-import { requireConfirmation, checkNoticePolicy } from './validate'
+import { requireConfirmation } from './validate'
 import { performHandoff } from '../handoff'
 import { env } from '../config/env'
 import { panamaDate } from '../hours'
@@ -90,7 +90,6 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         const appts = d.conv.mindbody_client_id ? await d.mb.upcoming(d.conv.mindbody_client_id) : []
         const a = appts.find(x => x.id === input.appointment_id)
         if (!a) return { result: 'Cita no encontrada.', isError: true }
-        const pol = checkNoticePolicy(a.start, d.now); if (pol) return { result: pol, isError: true }
         if (name === 'cancel') {
           const ok = await d.mb.cancelAppointment(a.id); if (!ok) return { result: 'Mindbody no pudo cancelar.', isError: true }
           return { result: 'cancelada' }
