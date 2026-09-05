@@ -205,7 +205,7 @@ describe('client lookup feeds the profile', () => {
 describe('suggestions, addons, therapists and menu links', () => {
   it('get_suggestions combines active promotions with the best sellers', async () => {
     const d = deps({
-      promotions: vi.fn(async () => [{ titulo: 'Promo 2x1', precio: 99, precio_original: 150, minutos: 90, servicios: [10], valido_hasta: '2026-09-30' }]),
+      promotions: vi.fn(async () => [{ id: 'p1', titulo: 'Promo 2x1', precio: 99, precio_original: 150, minutos: 90, servicios: [10, 12], incluye: [{ id: 10, nombre: 'Mimosa Relax - 60 min', minutos: 60 }, { id: 12, nombre: 'Extra Piedras Calientes', minutos: 30 }], duracion_total: 90, valido_hasta: '2026-09-30' }]),
       mb: { bestSellers: vi.fn(async () => [{ id: 10, name: 'Mimosa Relax - 60 min', minutes: 60, price: 75, category: 'Masajes' }]) },
     })
     d.store.getSetting = vi.fn(async (k: string, f: any) => (k === 'best_sellers' ? [10] : f))
@@ -214,6 +214,10 @@ describe('suggestions, addons, therapists and menu links', () => {
     expect(d.mb.bestSellers).toHaveBeenCalledWith('cde', [10])
     const out = JSON.parse(r.result)
     expect(out.promociones[0].titulo).toBe('Promo 2x1')
+    expect(out.promociones[0].id).toBe('p1')
+    expect(out.promociones[0].incluye).toEqual(['Mimosa Relax - 60 min', 'Extra Piedras Calientes'])
+    expect(out.promociones[0].servicios).toEqual([10, 12])
+    expect(out.promociones[0].minutos).toBe(90)
     expect(out.mas_pedidos).toEqual([{ id: 10, nombre: 'Mimosa Relax - 60 min', minutos: 60, precio: 75 }])
   })
 
@@ -253,6 +257,24 @@ describe('suggestions, addons, therapists and menu links', () => {
     })
     await executeTool('book', { sucursal: 'cde', date: '2026-09-06', time: '10:00', service_ids: [10], addon_ids: [90], staff_id: 2, people: 1, customer_confirmation: 'si, confirmo' }, d)
     expect(d.mb.book).toHaveBeenCalledWith(expect.objectContaining({ addonIds: [90], staffId: 2 }))
+  })
+
+  it('book passes the chosen promotion through to the adapter', async () => {
+    const d = deps({
+      conv: { phone: '507', sucursal: 'cde', mindbody_client_id: 'C1', client_name: 'Ana' },
+      mb: { book: vi.fn(async () => ({ appointmentIds: [1, 2], therapist: 'Lucía' })), listServices: vi.fn(async () => []) },
+    })
+    await executeTool('book', { sucursal: 'cde', date: '2026-09-06', time: '10:00', service_ids: [49, 170], addon_ids: [], staff_id: 0, people: 1, promo_title: 'Escape Mimosa', promo_service_ids: [49, 170], customer_confirmation: 'si, confirmo' }, d)
+    expect(d.mb.book).toHaveBeenCalledWith(expect.objectContaining({ promoTitle: 'Escape Mimosa', promoServiceIds: [49, 170] }))
+  })
+
+  it('book without a promotion sends empty promo fields', async () => {
+    const d = deps({
+      conv: { phone: '507', sucursal: 'cde', mindbody_client_id: 'C1', client_name: 'Ana' },
+      mb: { book: vi.fn(async () => ({ appointmentIds: [1], therapist: 'Ana' })), listServices: vi.fn(async () => []) },
+    })
+    await executeTool('book', { sucursal: 'cde', date: '2026-09-06', time: '10:00', service_ids: [10], addon_ids: [], staff_id: 0, people: 1, promo_title: '', promo_service_ids: [], customer_confirmation: 'si, confirmo' }, d)
+    expect(d.mb.book).toHaveBeenCalledWith(expect.objectContaining({ promoTitle: '', promoServiceIds: [] }))
   })
 
   it('book with staff_id 0 books with any available therapist', async () => {

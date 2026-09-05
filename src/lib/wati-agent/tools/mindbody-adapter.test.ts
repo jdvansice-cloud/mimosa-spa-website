@@ -231,6 +231,40 @@ describe('addons, best sellers and therapists', () => {
     vi.unstubAllGlobals()
   })
 
+  it('tags only the promo services in the appointment notes', async () => {
+    vi.stubGlobal('fetch', slotsResponse([{ time: '10:00', availableStaffIds: [1, 2] }]))
+    ;(mb.addMultipleAppointments as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ success: true, appointments: [{ Id: 1 }, { Id: 2 }, { Id: 3 }] })
+
+    await book({
+      clientId: 'C1', sucursal: 'cde', date: '2026-09-06', time: '10:00',
+      serviceIds: [10, 11], addonIds: [90], people: 1, origin: 'https://x', clientName: 'Ana Ruiz', phone: '507',
+      promoTitle: 'Escape Mimosa', promoServiceIds: [10, 11],
+    })
+
+    const chain = (mb.addMultipleAppointments as ReturnType<typeof vi.fn>).mock.calls[0][0]
+    expect(chain.map((a: any) => a.Notes)).toEqual([
+      'Reservado por WhatsApp | Promo: Escape Mimosa',
+      'Reservado por WhatsApp | Promo: Escape Mimosa',
+      'Reservado por WhatsApp',
+    ])
+    vi.unstubAllGlobals()
+  })
+
+  it('notes plain "Reservado por WhatsApp" when there is no promotion', async () => {
+    vi.stubGlobal('fetch', slotsResponse([{ time: '10:00', availableStaffIds: [1, 2] }]))
+    ;(mb.addMultipleAppointments as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ success: true, appointments: [{ Id: 1 }, { Id: 2 }] })
+
+    await book({
+      clientId: 'C1', sucursal: 'cde', date: '2026-09-06', time: '10:00',
+      serviceIds: [10], addonIds: [90], people: 1, origin: 'https://x', clientName: 'Ana Ruiz', phone: '507',
+      promoTitle: '', promoServiceIds: [],
+    })
+
+    const chain = (mb.addMultipleAppointments as ReturnType<typeof vi.fn>).mock.calls[0][0]
+    expect(chain.map((a: any) => a.Notes)).toEqual(['Reservado por WhatsApp', 'Reservado por WhatsApp'])
+    vi.unstubAllGlobals()
+  })
+
   it('refuses a therapist who is not free at that time', async () => {
     vi.stubGlobal('fetch', slotsResponse([{ time: '10:00', availableStaffIds: [1] }]))
     await expect(
