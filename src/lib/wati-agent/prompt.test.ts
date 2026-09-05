@@ -70,6 +70,13 @@ describe('buildSystem', () => {
   it('does not repeat the send_buttons question in a text bubble', () => {
     expect((blocks[0] as any).text).toContain('send_buttons')
   })
+
+  it('states scope and manipulation guardrails', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('Alcance y límites')
+    expect(t).toContain('manipulacion')
+    expect(t).toContain('no lo manejo por aquí')
+  })
 })
 
 describe('exemplar placeholders', () => {
