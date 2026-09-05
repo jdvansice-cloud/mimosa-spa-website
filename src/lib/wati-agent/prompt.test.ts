@@ -26,6 +26,14 @@ describe('buildSystem', () => {
     expect((blocks[1] as any).text).toContain('Muy buenas tardes')
   })
 
+  it('describes the booking flow and the suggestion tools', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('Flujo de reserva')
+    expect(t).toContain('get_suggestions')
+    expect(t).toContain('get_menu_link')
+    expect(t).toContain('cualquiera disponible')
+  })
+
   it('states the tightened voice rules in the stable block', () => {
     const t = (blocks[0] as any).text
     expect(t).toContain('≤ 2 líneas cortas')

@@ -21,6 +21,8 @@ export interface RunDeps {
   mediaBytes: ToolDeps['mediaBytes']
   mb: ToolDeps['mb']
   styleGuide: string
+  /** Defaults to the Supabase-backed loader inside executeTool. */
+  promotions?: ToolDeps['promotions']
   sleep?: (ms: number) => Promise<void>
 }
 
@@ -141,6 +143,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
           now: d.now,
           mediaBytes: d.mediaBytes,
           mb: d.mb,
+          promotions: d.promotions,
           recentInbound,
         })
         await d.store.logEvent(phone, 'tool_result', { tool: b.name, ok: !o.isError, result: o.result.slice(0, 500) })

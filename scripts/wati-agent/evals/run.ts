@@ -82,6 +82,12 @@ const fakeMb = {
     if (people === 2) indices = chosen.filter(idx => idx % 2 === 0)
     return indices.map(idx => ({ time: ALL_SLOTS[idx], staffIds: [1, 2] }))
   },
+  listAddons: async () => [{ id: 90, name: 'Piedras calientes', minutes: 15, price: 15 }],
+  listTherapists: async () => [{ id: 1, nombre: 'Ana Ruiz', horas: ALL_SLOTS.slice(0, 3) }],
+  bestSellers: async () => [
+    { id: 10, name: 'Mimosa Relax - 60 min', minutes: 60, price: 75, category: 'Masajes' },
+    { id: 12, name: 'Liberador de Tensión - 60 min', minutes: 60, price: 80, category: 'Masajes' },
+  ],
   book: async () => ({ appointmentIds: [1], therapist: 'Por asignar' }),
   upcoming: async () => [],
   cancelAppointment: async () => true,
@@ -134,6 +140,7 @@ for (const c of picked) {
       anthropic, store, wati: fakeWati(), origin: 'https://eval', now: NOW,
       mediaBytes: async () => ({ bytes: new Uint8Array(), mime: 'image/png', filename: 'x' }),
       mb: fakeMb, styleGuide: STYLE_GUIDE,
+      promotions: async () => [],
     })
     const turnEvents = store.events.slice(eventsBefore)
     const camila = r.bubbles.join('\n')
