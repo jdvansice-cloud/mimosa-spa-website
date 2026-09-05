@@ -9,7 +9,7 @@ const e = { handoffChatbotId: 'bot1', citasCdeEmail: 'cde@x', citasSfcEmail: 'sf
 describe('performHandoff', () => {
   it('starts the flow and flips mode', async () => {
     const w = wati(), s = store()
-    await performHandoff({ store: s, wati: w, conv, motivo: 'queja', resumen: 'x', shadow: false, env: e })
+    await performHandoff({ store: s, wati: w, conv, motivo: 'queja', resumen: 'x', shadow: false, env: e, now: new Date('2026-09-04T15:00:00-05:00') })
     expect(w.startChatbot).toHaveBeenCalledWith('507', 'bot1')
     expect(w.updateAttributes.mock.calls[0][1]).toMatchObject({ ai_modo: 'humano', ai_motivo: 'queja', sucursal: 'cde', team: 'cde' })
     expect(s.upsertConversation.mock.calls[0][0]).toMatchObject({ mode: 'human', handoff_reason: 'queja' })
@@ -33,6 +33,17 @@ describe('performHandoff', () => {
     expect(w.assignOperator).toHaveBeenCalledWith('507', 'cde@x')
     expect(s.logEvent).toHaveBeenCalledWith('507', 'error', { where: 'handoff', error: 'WATI_HANDOFF_CHATBOT_ID no configurado' })
     expect(s.logEvent.mock.calls.find((c: any) => c[1] === 'handoff')?.[2]).toMatchObject({ chatbotConfigured: false })
+  })
+  it('sends the off-hours message when closed', async () => {
+    const w = wati(), s = store()
+    await performHandoff({ store: s, wati: w, conv, motivo: 'queja', resumen: 'x', shadow: false, env: e, now: new Date('2026-09-05T23:30:00-05:00') })
+    expect(w.sendText.mock.calls[0][1]).toContain('fuera de horario')
+    expect(w.sendText.mock.calls[0][1]).toContain('Lun-Vie 9AM-8PM · Sáb-Dom 9AM-6PM')
+  })
+  it('sends the "compañera" message when open', async () => {
+    const w = wati(), s = store()
+    await performHandoff({ store: s, wati: w, conv, motivo: 'queja', resumen: 'x', shadow: false, env: e, now: new Date('2026-09-04T15:00:00-05:00') })
+    expect(w.sendText.mock.calls[0][1]).toContain('compañera')
   })
   it('shadow sends nothing and keeps agent mode', async () => {
     const w = wati(), s = store()

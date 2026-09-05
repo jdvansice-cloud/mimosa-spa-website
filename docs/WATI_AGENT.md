@@ -237,6 +237,12 @@ la compañera como el cliente vean en qué quedó la conversación. Si
 panel `/admin/wati-agent`) con `error: 'WATI_HANDOFF_CHATBOT_ID no
 configurado'`.
 
+Fuera de horario (`isOpen(now)` en falso), esa primera burbuja cambia a un
+aviso de que quedó fuera de horario y que una compañera le atenderá en
+`BUSINESS.hours.text`; Camila sigue intentando resolver todo lo posible por
+su cuenta antes de llegar a ese punto — el handoff es el último recurso, no
+la respuesta por defecto fuera de horario.
+
 ## 4. Kill switches
 
 Dos formas de detener todo de inmediato, sin tocar código:
