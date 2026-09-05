@@ -343,12 +343,14 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
         </div>
 
         {columns.map(c => (
-          <div key={c.staffId} className="relative min-w-0 flex-1 border-r border-[#d8cfc0] bg-white">
+          // No column border: the divider lives on the working-hours band,
+          // so the white before/after the shift stays clean.
+          <div key={c.staffId} className="relative min-w-0 flex-1 bg-white">
             {/* Working hours — amber band, like Mindbody */}
             {c.availability.map((b, i) => (
               <div
                 key={`av${i}`}
-                className="absolute inset-x-0 bg-[#f8c471]/60"
+                className="absolute inset-x-0 border-r border-[#d8cfc0] bg-[#f8c471]/60"
                 style={{ top: y(Math.max(b.startMin, windowStartMin)), height: (Math.min(b.endMin, windowEndMin) - Math.max(b.startMin, windowStartMin)) * pxPerMin }}
               />
             ))}
@@ -469,7 +471,7 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
 
         {/* Clock + date in the empty hour before the first shift */}
         <div
-          className="pointer-events-none absolute z-10 flex items-center justify-center gap-4"
+          className="pointer-events-none absolute z-10 flex flex-col items-center justify-center gap-1"
           style={{ left: GUTTER_W, right: 0, top: y(windowStartMin), height: 60 * pxPerMin }}
         >
           <span className="text-[34px] font-black leading-none tabular-nums text-[#2b2620]">{labelShort(nowMin)}</span>
