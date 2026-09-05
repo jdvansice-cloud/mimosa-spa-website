@@ -6,7 +6,7 @@ const tool = (name: string, description: string, properties: Record<string, unkn
   ({ name, description, strict: true, input_schema: { type: 'object', properties, required, additionalProperties: false } } as Anthropic.Tool)
 
 export const TOOLS: Anthropic.Tool[] = [
-  tool('get_location_info', 'Dirección, plaza, enlaces de Waze y Google Maps y estacionamiento de una sucursal.', { sucursal: suc }, ['sucursal']),
+  tool('get_location_info', 'Dirección, plaza, enlaces de Waze y Google Maps y estacionamiento de una sucursal. La respuesta al cliente debe ser una línea corta seguida de los dos links (Google Maps y Waze), sin más texto.', { sucursal: suc }, ['sucursal']),
   tool('get_hours', 'Horario de atención del spa.', {}),
   tool('get_payment_info', 'Formas de pago: Yappy, transferencia/ACH y link de tarjeta. Única fuente de datos bancarios; envíalos en su propia burbuja.', {}),
   tool('list_services', 'Lista tratamientos con duración y precio (fuente única de precios). query filtra por nombre.', { sucursal: suc, query: { type: 'string' } }, ['sucursal', 'query']),

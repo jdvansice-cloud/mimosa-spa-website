@@ -67,6 +67,13 @@ describe('buildSystem', () => {
     expect(t).toMatch(/NUNCA env[ií]e?s? una tarjeta de confirmaci[oó]n/)
   })
 
+  it('states the location reply is a short line plus Google Maps and Waze links, in two bubbles', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('Google Maps')
+    expect(t).toContain('Waze')
+    expect(t).toContain('dos burbujas')
+  })
+
   it('does not repeat the send_buttons question in a text bubble', () => {
     expect((blocks[0] as any).text).toContain('send_buttons')
   })
