@@ -14,16 +14,6 @@ export function requireConfirmation(input: { customer_confirmation?: string }, r
   return null
 }
 
-/** Mindbody returns local times with no offset; they are always Panamá (-05:00, no DST). */
-export function withPanamaOffset(startIso: string): string {
-  return /([+-]\d\d:\d\d|Z)$/.test(startIso) ? startIso : `${startIso}-05:00`
-}
-
-export function checkNoticePolicy(startIso: string, now: Date, hours = 24): string | null {
-  const diff = (new Date(withPanamaOffset(startIso)).getTime() - now.getTime()) / 3600_000
-  return diff < hours ? `La cita empieza en menos de ${hours} horas; por política no se puede cambiar ni cancelar por este medio.` : null
-}
-
 export function pairSlotsForCouple(slots: Array<{ time: string; staffIds: number[] }>): string[] {
   return slots.filter(s => new Set(s.staffIds).size >= 2).map(s => s.time)
 }

@@ -31,7 +31,7 @@ export const BUSINESS = {
   },
   policies: {
     changeNoticeHours: 24,
-    changeText: 'Para cambios o cancelaciones necesitamos 24 horas de anticipación.',
+    changeText: 'Le agradecemos avisar con 24 horas de anticipación para cambios o cancelaciones.',
     arrivalText: 'Le recomendamos llegar 10 minutos antes de su cita.',
   },
   payment: {

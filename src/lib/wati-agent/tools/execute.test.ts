@@ -34,9 +34,9 @@ describe('executeTool', () => {
     const r = await executeTool('book', { customer_confirmation: '' }, deps())
     expect(r.isError).toBe(true)
   })
-  it('cancel inside 24h is blocked', async () => {
+  it('cancel inside 24h succeeds', async () => {
     const d = deps(); const r = await executeTool('cancel', { appointment_id: 9, customer_confirmation: 'si' }, d)
-    expect(r.isError).toBe(true); expect(d.mb.cancelAppointment).not.toHaveBeenCalled()
+    expect(d.mb.cancelAppointment).toHaveBeenCalled(); expect(r.result).toBe('cancelada')
   })
   it('create_client reports a newly created client', async () => {
     const d = deps({ mb: { createClient: vi.fn(async () => ({ id: 'C2' })), listServices: vi.fn(async () => []) } })
