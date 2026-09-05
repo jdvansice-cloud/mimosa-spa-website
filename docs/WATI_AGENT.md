@@ -145,6 +145,61 @@ resumen y sí claro → `book`.
   `/es/menu/corporales`, `/es/menu/paquetes`, `/es/promociones`, `/es/parejas`,
   `/es/reservar`) cuando el cliente quiere ver más opciones.
 
+## Conocimiento del sitio
+
+Camila responde preguntas sobre tratamientos, promociones y páginas de la web
+sin inventar nada, leyendo un "catálogo" que se arma desde las mismas fuentes
+que alimentan el sitio (`src/lib/wati-agent/knowledge.ts`).
+
+Fuentes:
+
+- **Tratamientos** — `treatment_settings` con `is_visible = true`, por
+  `sort_order` (nombre, categoría, precio, duración, descripción, `is_top_pick`).
+- **Promociones activas** — el mismo cargador que usa `get_suggestions`
+  (`promotions`, activas y con `valid_until` >= hoy Panamá).
+- **Ofertas de página** — `marketing_offers` activas, agrupadas por `page`
+  (`parejas`, `club-mimosa`, `empresas`, `primera-visita`).
+- **Ajustes del sitio** — `getServerSettings()`: horarios, teléfonos por
+  sucursal y calificación de Google.
+- **Copy de las páginas** — `src/content/pages.ts` (lado en español): parejas y
+  ocasiones, empresas, Club Mimosa, primera visita y referidos.
+- **Certificados de regalo** — `getActiveCatalog()` del gift shop: montos y
+  experiencias activas. Se compran en `mimosaretreat.com/giftcards`; la
+  vigencia nunca se inventa, Camila dice "consulte la vigencia en el
+  certificado".
+
+El resultado se emite de dos maneras:
+
+1. `catalogText` va al prompt como **segundo bloque cacheado**
+   (`cache_control: ephemeral`), entre el bloque estable de la persona y el
+   bloque volátil del turno. Son 2 de los 4 breakpoints de caché disponibles.
+2. `topics` y `treatments` alimentan dos herramientas:
+   - `get_treatment_details { name }` — descripción completa de un tratamiento,
+     con búsqueda difusa (sin acentos, mayúsculas o coincidencia parcial). Si no
+     encuentra nada devuelve hasta 3 nombres parecidos.
+   - `get_site_info { tema }` — texto completo de una página. Temas: `parejas`,
+     `club`, `empresas`, `primera_visita`, `referidos`, `giftcards`,
+     `politicas`, `ubicaciones`.
+
+Al **reservar**, los precios y duraciones que Camila confirma siguen saliendo de
+`list_services`: Mindbody es la fuente de verdad para reservar y el catálogo
+sirve para informar.
+
+**Política de cambios (regla del dueño).** El catálogo dice explícitamente que
+los cambios y las cancelaciones se aceptan siempre, a cualquier hora y **sin
+penalidad**. Esto sobrescribe la página legal del sitio: la cláusula de prepago
+y no-show **no** entra al conocimiento de Camila y ella nunca la menciona. El
+aviso de 24 horitas se pide como favor, nunca como condición. Los grupos de 3
+personas o más y los eventos los coordina una recepcionista (handoff).
+
+**Caché y recarga.** El catálogo se construye una vez y se guarda 6 horas en
+memoria del proceso. En el panel, **Ajustes → Conocimiento del sitio →
+"Recargar catálogo"** llama a `POST /api/admin/wati-agent/knowledge/refresh`,
+que invalida la caché y reconstruye al momento; devuelve `builtAt`, el número de
+tratamientos y el tamaño del catálogo en caracteres (el `GET` de esa misma ruta
+sólo consulta). Úsalo después de cambiar precios, promociones u ofertas si no
+quieres esperar las 6 horas.
+
 ## Memoria por contacto ("perfil")
 
 Camila recuerda a cada número entre conversaciones.
