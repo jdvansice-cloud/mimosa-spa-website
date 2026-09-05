@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 export default async function TvAgendaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ loc?: string; token?: string }>
+  searchParams: Promise<{ loc?: string; token?: string; debug?: string }>
 }) {
   const params = await searchParams
   const location = params.loc === '2' ? 2 : 1
@@ -29,5 +29,5 @@ export default async function TvAgendaPage({
     )
   }
 
-  return <TvAgendaClient location={location} token={token} />
+  return <TvAgendaClient location={location} token={token} debug={params.debug === '1'} />
 }
