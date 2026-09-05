@@ -174,11 +174,18 @@ export async function getTvAgenda(date: string, locationId: number): Promise<TvA
     return sa - sb || a.staffName.localeCompare(b.staffName, 'es')
   })
 
-  // Window: full business day, stretched if anything falls outside 9:00–20:00
+  // Window: one hour of margin around the day's actual schedule — from 1h
+  // before the first therapist availability to 1h after the last one, rounded
+  // to whole hours. Appointments outside working hours still stretch it so a
+  // block can never fall off the board. Empty day falls back to 8:00–21:00.
   const starts = columns.flatMap(c => [...c.availability, ...c.appointments].map(b => b.startMin))
   const ends = columns.flatMap(c => [...c.availability, ...c.appointments].map(b => b.endMin))
-  const windowStartMin = Math.min(9 * 60, ...(starts.length ? [Math.floor(Math.min(...starts) / 60) * 60] : []))
-  const windowEndMin = Math.max(20 * 60, ...(ends.length ? [Math.ceil(Math.max(...ends) / 60) * 60] : []))
+  const windowStartMin = starts.length
+    ? Math.max(0, Math.floor((Math.min(...starts) - 60) / 60) * 60)
+    : 8 * 60
+  const windowEndMin = ends.length
+    ? Math.min(24 * 60, Math.ceil((Math.max(...ends) + 60) / 60) * 60)
+    : 21 * 60
 
   return {
     date,

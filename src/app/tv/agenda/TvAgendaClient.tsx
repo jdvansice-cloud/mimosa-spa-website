@@ -15,7 +15,7 @@ import type { TvAgenda, TvAppointment } from '@/lib/tv/agenda'
 
 const REFRESH_MS = 2 * 60_000 // refetch from Mindbody every 2 min
 const HEADER_H = 56 // staff header row px (clock + date / name + working hours)
-const GUTTER_W = 96 // time gutter px — wide enough to read the clock from across the room
+const GUTTER_W = 52 // time gutter px — thin, hours only; the width goes to the columns
 
 
 /** Color by the visit's leading kind, so a glance says "massage" vs "facial". */
@@ -89,6 +89,20 @@ function stripDuration(name: string): string {
     .trim()
 }
 
+/**
+ * Break-room shorthand: drop the brand/category prefixes every therapist
+ * already knows ("Mimosa Profundo" → "Profundo") so long names survive a
+ * 150px column. The kind color still says massage vs facial vs pies.
+ */
+function shortServiceName(name: string): string {
+  return name
+    .replace(/^mimosa\s+/i, '')
+    .replace(/^masaje\s+(de\s+)?/i, '')
+    .replace(/^facial\s+de\s+/i, '')
+    .replace(/^tratamiento\s+(de\s+)?/i, '')
+    .trim()
+}
+
 /** Whichever status matters most for the floor wins for the whole visit. */
 function visitStatus(statuses: string[]): string {
   if (statuses.includes('NoShow')) return 'NoShow'
@@ -119,7 +133,7 @@ function buildVisits(appts: TvAppointment[]): Visit[] {
         )
       : undefined
     const item: VisitItem = {
-      name: stripDuration(a.serviceName),
+      name: shortServiceName(stripDuration(a.serviceName)),
       kind: kindOf(a.serviceName),
       minutes: a.endMin - a.startMin,
       startMin: a.startMin,
@@ -193,11 +207,11 @@ function panamaNowMin(): number {
   return Number(parts.slice(0, 2)) * 60 + Number(parts.slice(3, 5))
 }
 
-const label12h = (min: number): string => {
+/** "11:00" — no a.m./p.m.; inside the grid the position already says which. */
+const labelShort = (min: number): string => {
   const h24 = Math.floor(min / 60) % 24
-  const mm = min % 60
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12
-  return `${h12}:${String(mm).padStart(2, '0')} ${h24 < 12 ? 'a.m.' : 'p.m.'}`
+  return `${h12}:${String(min % 60).padStart(2, '0')}`
 }
 
 /**
@@ -288,8 +302,8 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           className="flex shrink-0 flex-col items-center justify-center border-b border-r border-[#d8cfc0] bg-[#2b2620] leading-tight text-[#f6f1e7]"
           style={{ width: GUTTER_W }}
         >
-          <span className="text-[19px] font-black tabular-nums">{label12h(nowMin)}</span>
-          <span className="text-[17px] font-bold tabular-nums text-[#f8c471]">{dayLabel()}</span>
+          <span className="text-[16px] font-black tabular-nums">{labelShort(nowMin)}</span>
+          <span className="text-[12px] font-bold tabular-nums text-[#f8c471]">{dayLabel()}</span>
         </div>
         {columns.map(c => (
           <div
@@ -297,10 +311,10 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
             className="flex min-w-0 flex-1 items-center justify-center border-b border-r border-[#d8cfc0] bg-[#3a342b] px-1 text-center"
           >
             <span className="flex min-w-0 flex-col items-center leading-tight">
-              <span className="truncate text-[13px] font-semibold text-white">{c.staffName}</span>
-              <span className="truncate text-[10px] tabular-nums text-[#f8c471]">
+              <span className="truncate text-[15px] font-bold text-white">{c.staffName}</span>
+              <span className="truncate text-[12px] tabular-nums text-[#f8c471]">
                 {c.availability.length > 0
-                  ? c.availability.map(b => `${label12h(b.startMin)}–${label12h(b.endMin)}`).join(' · ')
+                  ? c.availability.map(b => `${labelShort(b.startMin)}–${labelShort(b.endMin)}`).join(' · ')
                   : 'sin horario'}
               </span>
             </span>
@@ -320,10 +334,11 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           {hours.map(m => (
             <span
               key={m}
-              className="absolute right-2 -translate-y-1/2 whitespace-nowrap text-[14px] font-semibold tabular-nums text-[#7a6f5d]"
+              className="absolute right-1.5 -translate-y-1/2 whitespace-nowrap text-[13px] font-bold tabular-nums text-[#7a6f5d]"
               style={{ top: y(m) }}
             >
-              {label12h(m)}
+              {(Math.floor(m / 60) % 12) === 0 ? 12 : Math.floor(m / 60) % 12}
+              <span className="text-[9px] font-semibold">{m < 12 * 60 ? 'am' : 'pm'}</span>
             </span>
           ))}
         </div>
@@ -396,25 +411,26 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
                     </span>
                   )}
                   {/* When they're booked — the first thing the eye lands on */}
-                  <p className="truncate pr-14 text-[13px] font-black leading-tight tabular-nums">
-                    {label12h(a.startMin)}–{label12h(a.endMin)}
-                    {a.resourceName ? <span className="font-medium opacity-80"> · {a.resourceName}</span> : null}
+                  <p className="truncate pr-12 text-[14px] font-black leading-tight tabular-nums">
+                    {labelShort(a.startMin)}–{labelShort(a.endMin)}
+                    {a.resourceName ? <span className="font-semibold opacity-80"> · {a.resourceName}</span> : null}
                   </p>
-                  <p className="truncate text-[12px] font-semibold leading-tight opacity-95">
+                  <p className="truncate text-[13px] font-bold leading-tight opacity-95">
                     {a.clientName ?? '—'}
                   </p>
-                  {/* What to do, in running order: massages → extras → facials → pies */}
+                  {/* What to do, in running order: massages → extras → facials →
+                      pies. Names wrap instead of truncating — the whole point
+                      of the board is knowing WHICH treatment. */}
                   {compact ? (
-                    <p className="truncate text-[10px] leading-tight opacity-90">
+                    <p className="text-[12px] font-semibold leading-tight opacity-90 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
                       {a.items.map(i => i.name).join(' · ')}
                     </p>
                   ) : (
                     <ul className="mt-0.5 space-y-px">
                       {a.items.map((i, idx) => (
-                        <li key={idx} className="flex items-baseline gap-1 truncate text-[11px] leading-tight">
-                          <span className="opacity-70">▸</span>
-                          <span className="truncate">{i.name}</span>
-                          <span className="ml-auto shrink-0 pl-1 text-[10px] tabular-nums opacity-75">{i.minutes}′</span>
+                        <li key={idx} className="flex items-baseline gap-1 text-[12px] font-semibold leading-[1.15]">
+                          <span className="min-w-0 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">{i.name}</span>
+                          <span className="ml-auto shrink-0 pl-1 text-[11px] tabular-nums opacity-75">{i.minutes}′</span>
                         </li>
                       ))}
                     </ul>
@@ -429,8 +445,8 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
         {showNow && (
           <div className="pointer-events-none absolute inset-x-0 z-30" style={{ top: y(nowMin) }}>
             <div className="border-t-2 border-red-500" />
-            <span className="absolute -top-2.5 left-1 rounded-full bg-red-500 px-1.5 py-px text-[10px] font-bold tabular-nums text-white">
-              {label12h(nowMin)}
+            <span className="absolute -top-2.5 left-0.5 rounded-full bg-red-500 px-1.5 py-px text-[11px] font-bold tabular-nums text-white">
+              {labelShort(nowMin)}
             </span>
           </div>
         )}
