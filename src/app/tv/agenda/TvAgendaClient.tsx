@@ -19,19 +19,19 @@ const GUTTER_W = 52 // time gutter px — thin, hours only; the width goes to th
 
 
 /**
- * Tile color says STATUS only — never treatment type. Upcoming visits are
- * rose; an arrived client turns green (they're here — go), a finished visit
- * fades to gray so the eye skips it, a no-show turns red so nobody keeps a
- * cabina waiting.
+ * Tile color says STATUS only — never treatment type — using the same
+ * five colors as Mindbody's status chips, so the board and the front-desk
+ * app agree at a glance.
  */
-const BOOKED_COLOR = { bg: '#b5657f', fg: '#ffffff' } // rose — reserved, not yet here
 const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
-  Arrived:   { bg: '#4f9a6e', fg: '#ffffff' }, // client is here — go
-  Completed: { bg: '#cfcac0', fg: '#5a544a' }, // done — recede
-  NoShow:    { bg: '#c94a4a', fg: '#ffffff' }, // didn't come — shout
+  Booked:    { bg: '#6d9d97', fg: '#ffffff' }, // teal
+  Confirmed: { bg: '#9a6f95', fg: '#ffffff' }, // mauve
+  Arrived:   { bg: '#8a1e52', fg: '#ffffff' }, // magenta
+  Completed: { bg: '#6b7fa0', fg: '#ffffff' }, // slate blue
+  NoShow:    { bg: '#8f7f6a', fg: '#ffffff' }, // taupe
 }
 function visitColor(v: Visit) {
-  return STATUS_COLORS[v.status] ?? BOOKED_COLOR
+  return STATUS_COLORS[v.status] ?? STATUS_COLORS.Booked
 }
 
 /**
@@ -410,12 +410,12 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
                     <span className="absolute right-1 top-0.5 text-[10px] font-black leading-none" title="Completada">✓</span>
                   )}
                   {a.status === 'Arrived' && (
-                    <span className="absolute right-1 top-0.5 rounded bg-white/90 px-1 text-[8px] font-black leading-tight text-[#2f6b47]">
+                    <span className="absolute right-1 top-0.5 rounded bg-white/90 px-1 text-[8px] font-black leading-tight text-[#8a1e52]">
                       LLEGÓ
                     </span>
                   )}
                   {a.status === 'NoShow' && (
-                    <span className="absolute right-1 top-0.5 rounded bg-white px-1 text-[8px] font-black leading-tight text-[#c94a4a]">
+                    <span className="absolute right-1 top-0.5 rounded bg-white px-1 text-[8px] font-black leading-tight text-[#6b5a45]">
                       NO SHOW
                     </span>
                   )}
@@ -478,7 +478,8 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           style={{ left: GUTTER_W, right: 0, top: y(windowEndMin - 60), height: 60 * pxPerMin }}
         >
           {[
-            { label: 'Reservada', ...BOOKED_COLOR },
+            { label: 'Reservada', ...STATUS_COLORS.Booked },
+            { label: 'Confirmada', ...STATUS_COLORS.Confirmed },
             { label: 'Llegó', ...STATUS_COLORS.Arrived },
             { label: 'Completada', ...STATUS_COLORS.Completed },
             { label: 'No show', ...STATUS_COLORS.NoShow },
