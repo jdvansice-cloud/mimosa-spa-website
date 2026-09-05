@@ -274,3 +274,60 @@ describe('suggestions, addons, therapists and menu links', () => {
     expect(r.result).toContain('Esa terapeuta no está disponible')
   })
 })
+
+describe('website knowledge tools', () => {
+  const knowledge = async () => ({
+    catalogText: '## Catálogo de tratamientos',
+    treatments: [
+      { id: 10, name: 'Masaje Mimosa Relax', category: 'Masajes', minutes: 60, price: 75, description: 'Masaje sueco suave.', topPick: true },
+      { id: 12, name: 'Liberador de Tensión', category: 'Masajes', minutes: 60, price: 80, description: 'Presión profunda.', topPick: false },
+    ],
+    topics: {
+      parejas: 'Parejas y Ocasiones: cabinas dobles.',
+      club: 'Club Mimosa: ritual mensual.',
+      empresas: 'Empresas: bienestar corporativo.',
+      primera_visita: 'Primera visita.',
+      referidos: 'Referidos: próximamente.',
+      giftcards: 'Certificados: mimosaretreat.com/giftcards.',
+      politicas: 'Cambios y cancelaciones sin penalidad.',
+      ubicaciones: 'Costa del Este y San Francisco.',
+    },
+    builtAt: '2026-09-01T00:00:00.000Z',
+  })
+
+  it('get_treatment_details returns the full entry for a fuzzy name', async () => {
+    const r = await executeTool('get_treatment_details', { name: 'liberador de tension' }, deps({ knowledge }))
+    expect(r.isError).toBeUndefined()
+    const out = JSON.parse(r.result)
+    expect(out).toMatchObject({ encontrado: true, nombre: 'Liberador de Tensión', minutos: 60, precio: 80, descripcion: 'Presión profunda.' })
+  })
+
+  it('get_treatment_details suggests alternatives when nothing matches', async () => {
+    const r = await executeTool('get_treatment_details', { name: 'reflexología podal' }, deps({ knowledge }))
+    const out = JSON.parse(r.result)
+    expect(out.encontrado).toBe(false)
+    expect(out.parecidos.length).toBeGreaterThan(0)
+    expect(out.parecidos.length).toBeLessThanOrEqual(3)
+  })
+
+  it('get_site_info returns the topic text', async () => {
+    const r = await executeTool('get_site_info', { tema: 'politicas' }, deps({ knowledge }))
+    expect(r.result).toContain('sin penalidad')
+    const g = await executeTool('get_site_info', { tema: 'giftcards' }, deps({ knowledge }))
+    expect(g.result).toContain('mimosaretreat.com/giftcards')
+  })
+
+  it('get_site_info rejects an unknown topic', async () => {
+    const r = await executeTool('get_site_info', { tema: 'menu' }, deps({ knowledge }))
+    expect(r.isError).toBe(true)
+    expect(r.result).toContain('Tema desconocido')
+  })
+
+  it('reports a knowledge failure as a tool error instead of throwing', async () => {
+    const d = deps({ knowledge: async () => { throw new Error('sin conocimiento') } })
+    const r = await executeTool('get_site_info', { tema: 'club' }, d)
+    expect(r.isError).toBe(true)
+    expect(r.result).toContain('sin conocimiento')
+  })
+})
+

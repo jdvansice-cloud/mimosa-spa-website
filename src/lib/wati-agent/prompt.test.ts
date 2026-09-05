@@ -175,3 +175,43 @@ describe('client memory in the prompt', () => {
     expect(t).not.toContain('Conversaciones anteriores')
   })
 })
+
+describe('buildSystem website knowledge', () => {
+  const base = {
+    personaName: 'Camila',
+    now: new Date('2026-09-04T15:00:00-05:00'),
+    sucursal: 'cde' as const,
+    clientName: 'Ana',
+    mindbodyHistory: null,
+    summary: null,
+    media: [],
+    intent: 'promo' as const,
+    styleGuide: 'GUIA',
+  }
+
+  it('emits the catalogue as a second cached block between stable and volatile', () => {
+    const blocks = buildSystem({ ...base, catalogText: '## Catálogo de tratamientos\n- Mimosa Relax' })
+    expect(blocks).toHaveLength(3)
+    expect(blocks[0].cache_control).toEqual({ type: 'ephemeral' })
+    expect((blocks[1] as any).text).toContain('## Catálogo de tratamientos')
+    expect(blocks[1].cache_control).toEqual({ type: 'ephemeral' })
+    expect(blocks[2].cache_control).toBeUndefined()
+    expect((blocks[2] as any).text).toContain('Ana')
+    expect(blocks.filter(b => b.cache_control)).toHaveLength(2)
+  })
+
+  it('omits the block entirely when there is no catalogue', () => {
+    expect(buildSystem({ ...base })).toHaveLength(2)
+    expect(buildSystem({ ...base, catalogText: '   ' })).toHaveLength(2)
+  })
+
+  it('teaches the knowledge rules in the stable block', () => {
+    const t = (buildSystem({ ...base })[0] as any).text
+    expect(t).toContain('Conocimiento del sitio web')
+    expect(t).toContain('get_treatment_details')
+    expect(t).toContain('get_site_info')
+    expect(t).toContain('Nunca inventes un tratamiento que no esté en el catálogo')
+    expect(t).toContain('siguen saliendo de list_services')
+  })
+})
+

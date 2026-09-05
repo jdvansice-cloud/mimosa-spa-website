@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { runTurn } from '../../../src/lib/wati-agent/runner'
 import type { StoredMessage, Conversation } from '../../../src/lib/wati-agent/types'
 import { STYLE_GUIDE } from '../../../src/lib/wati-agent/voice/style-guide'
+import type { Knowledge } from '../../../src/lib/wati-agent/knowledge'
 
 type Case = { id: string; sucursal: 'cde' | 'sfc' | null; turns: Array<{ customer: string[]; staff: string[] }> }
 
@@ -93,6 +94,40 @@ const fakeMb = {
   cancelAppointment: async () => true,
 } as any
 
+// Offline knowledge: the evals must never touch Supabase or the live website.
+const fakeKnowledge: Knowledge = {
+  catalogText: [
+    '## Catálogo de tratamientos',
+    '### Masajes',
+    '- ★ Mimosa Relax · 60 min · $75 · Masajes — Masaje sueco suave de cuerpo completo.',
+    '- Liberador de Tensión · 60 min · $80 · Masajes — Presión profunda en espalda, cuello y hombros.',
+    '### Faciales',
+    '- Facial Hidratante · 50 min · $70 · Faciales — Limpieza profunda e hidratación.',
+    '',
+    '## Promociones activas (web)',
+    '- Promo Septiembre · $99 (antes $150) · 90 min',
+    '',
+    '## Datos',
+    '- Horario: Lun-Vie 9AM-8PM · Sáb-Dom 9AM-6PM',
+  ].join('\n'),
+  treatments: [
+    { id: 10, name: 'Mimosa Relax', category: 'Masajes', minutes: 60, price: 75, description: 'Masaje sueco suave de cuerpo completo.', topPick: true },
+    { id: 12, name: 'Liberador de Tensión', category: 'Masajes', minutes: 60, price: 80, description: 'Presión profunda en espalda, cuello y hombros.', topPick: false },
+    { id: 20, name: 'Facial Hidratante', category: 'Faciales', minutes: 50, price: 70, description: 'Limpieza profunda e hidratación.', topPick: false },
+  ],
+  topics: {
+    parejas: 'Parejas y Ocasiones: cabinas dobles y rituales para dos.',
+    club: 'Club Mimosa: tu ritual mensual a precio de miembro.',
+    empresas: 'Mimosa para Empresas: bienestar corporativo y regalos ejecutivos.',
+    primera_visita: 'Tu Primera Visita: experiencia diseñada para conocerte.',
+    referidos: 'Regala $20, Recibe $20. Próximamente / lista de espera.',
+    giftcards: 'Certificados de regalo. Se compran en mimosaretreat.com/giftcards. Consulte la vigencia en el certificado.',
+    politicas: 'Cambios y cancelaciones: siempre se aceptan, sin penalidad.',
+    ubicaciones: 'Costa del Este y San Francisco, Ciudad de Panamá.',
+  },
+  builtAt: '2026-09-01T00:00:00.000Z',
+}
+
 const NOW = process.env.WATI_EVAL_NOW ? new Date(process.env.WATI_EVAL_NOW) : new Date('2026-09-08T10:30:00-05:00')
 
 const EMOJI_RE = /\p{Extended_Pictographic}/u
@@ -141,6 +176,7 @@ for (const c of picked) {
       mediaBytes: async () => ({ bytes: new Uint8Array(), mime: 'image/png', filename: 'x' }),
       mb: fakeMb, styleGuide: STYLE_GUIDE,
       promotions: async () => [],
+      knowledge: async () => fakeKnowledge,
     })
     const turnEvents = store.events.slice(eventsBefore)
     const camila = r.bubbles.join('\n')
