@@ -302,8 +302,7 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           className="flex shrink-0 flex-col items-center justify-center border-b border-r border-[#d8cfc0] bg-[#2b2620] leading-tight text-[#f6f1e7]"
           style={{ width: GUTTER_W }}
         >
-          <span className="text-[16px] font-black tabular-nums">{labelShort(nowMin)}</span>
-          <span className="text-[12px] font-bold tabular-nums text-[#f8c471]">{dayLabel()}</span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[#f8c471]">Hora</span>
         </div>
         {columns.map(c => (
           <div
@@ -378,9 +377,20 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
             {/* Appointments */}
             {layoutColumn(buildVisits(c.appointments)).map(({ a, lane, lanes }) => {
               const color = visitColor(a)
-              const h = Math.max((a.endMin - a.startMin) * pxPerMin, 16)
-              const compact = h < 56
+              // 3px shaved off the bottom leaves a visible seam between
+              // back-to-back visits of the same color/status.
+              const h = Math.max((a.endMin - a.startMin) * pxPerMin - 3, 16)
               const laneW = 100 / lanes
+              // Line budget: time + name take ~30px; each treatment row 13px.
+              // Rows that don't fit collapse into one joined, clamped line so
+              // time, name AND treatments are always on screen.
+              const HEAD_PX = 30
+              const ROW_PX = 13
+              const itemLines = Math.floor((h - HEAD_PX - 2) / ROW_PX)
+              const oneLiner = h < HEAD_PX
+              const asList = itemLines >= a.items.length
+              const hasBadge = a.status === 'Arrived' || a.status === 'NoShow' || a.status === 'Completed'
+              const itemsInline = a.items.map(i => `${i.name} ${i.minutes}′`).join(' · ')
               return (
                 <div
                   key={a.id}
@@ -393,53 +403,107 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
                     background: color.bg,
                     color: color.fg,
                     borderLeft: `4px solid rgba(0,0,0,0.25)`,
+                    // Light top hairline: even when the gap hides (rounding at
+                    // tight scales) two stacked same-color visits stay separate
+                    borderTop: '1px solid rgba(255,255,255,0.75)',
                     // Completed visits also drop their shadow so they sit flat
                     opacity: a.status === 'Completed' ? 0.85 : 1,
                   }}
                 >
                   {a.status === 'Completed' && (
-                    <span className="absolute right-1 top-0.5 text-[12px] font-black leading-none" title="Completada">✓</span>
+                    <span className="absolute right-1 top-0.5 text-[10px] font-black leading-none" title="Completada">✓</span>
                   )}
                   {a.status === 'Arrived' && (
-                    <span className="absolute right-1 top-0.5 rounded bg-white/90 px-1 text-[9px] font-black leading-tight text-[#2f6b47]">
+                    <span className="absolute right-1 top-0.5 rounded bg-white/90 px-1 text-[8px] font-black leading-tight text-[#2f6b47]">
                       LLEGÓ
                     </span>
                   )}
                   {a.status === 'NoShow' && (
-                    <span className="absolute right-1 top-0.5 rounded bg-white px-1 text-[9px] font-black leading-tight text-[#c94a4a]">
+                    <span className="absolute right-1 top-0.5 rounded bg-white px-1 text-[8px] font-black leading-tight text-[#c94a4a]">
                       NO SHOW
                     </span>
                   )}
-                  {/* When they're booked — the first thing the eye lands on */}
-                  <p className="truncate pr-12 text-[14px] font-black leading-tight tabular-nums">
-                    {labelShort(a.startMin)}–{labelShort(a.endMin)}
-                    {a.resourceName ? <span className="font-semibold opacity-80"> · {a.resourceName}</span> : null}
-                  </p>
-                  <p className="truncate text-[13px] font-bold leading-tight opacity-95">
-                    {a.clientName ?? '—'}
-                  </p>
-                  {/* What to do, in running order: massages → extras → facials →
-                      pies. Names wrap instead of truncating — the whole point
-                      of the board is knowing WHICH treatment. */}
-                  {compact ? (
-                    <p className="text-[12px] font-semibold leading-tight opacity-90 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
-                      {a.items.map(i => i.name).join(' · ')}
+                  {oneLiner ? (
+                    /* Tiny tile (a stand-alone 15′ extra): everything on one line */
+                    <p className={`truncate text-[11px] font-bold leading-[14px] tabular-nums ${hasBadge ? 'pr-10' : ''}`}>
+                      {labelShort(a.startMin)} {a.clientName ?? '—'}
+                      <span className="font-semibold opacity-90"> · {itemsInline}</span>
                     </p>
                   ) : (
-                    <ul className="mt-0.5 space-y-px">
-                      {a.items.map((i, idx) => (
-                        <li key={idx} className="flex items-baseline gap-1 text-[12px] font-semibold leading-[1.15]">
-                          <span className="min-w-0 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">{i.name}</span>
-                          <span className="ml-auto shrink-0 pl-1 text-[11px] tabular-nums opacity-75">{i.minutes}′</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <>
+                      {/* When they're booked — the first thing the eye lands on */}
+                      <p className={`truncate text-[12px] font-black leading-[15px] tabular-nums ${hasBadge ? 'pr-10' : ''}`}>
+                        {labelShort(a.startMin)}–{labelShort(a.endMin)}
+                        {a.resourceName ? <span className="text-[10px] font-semibold opacity-80"> · {a.resourceName}</span> : null}
+                      </p>
+                      <p className="truncate text-[11px] font-bold leading-[13px] opacity-95">
+                        {a.clientName ?? '—'}
+                      </p>
+                      {/* What to do, in running order: massages → extras →
+                          facials → pies. One row each when they fit, otherwise
+                          a joined line clamped to the rows that remain. */}
+                      {asList ? (
+                        <ul>
+                          {a.items.map((i, idx) => (
+                            <li key={idx} className="flex items-baseline gap-1 text-[11px] font-semibold leading-[13px]">
+                              <span className="min-w-0 truncate">{i.name}</span>
+                              <span className="ml-auto shrink-0 pl-1 text-[10px] tabular-nums opacity-75">{i.minutes}′</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p
+                          className="overflow-hidden text-[11px] font-semibold leading-[13px] opacity-95 [display:-webkit-box] [-webkit-box-orient:vertical]"
+                          style={{ WebkitLineClamp: Math.max(1, itemLines) }}
+                        >
+                          {itemsInline}
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               )
             })}
           </div>
         ))}
+
+        {/* Clock + date in the empty hour before the first shift */}
+        <div
+          className="pointer-events-none absolute z-10 flex items-center justify-center gap-4"
+          style={{ left: GUTTER_W, right: 0, top: y(windowStartMin), height: 60 * pxPerMin }}
+        >
+          <span className="text-[34px] font-black leading-none tabular-nums text-[#2b2620]">{labelShort(nowMin)}</span>
+          <span className="text-[22px] font-bold leading-none text-[#8b6a2b]">{dayLabel()}</span>
+        </div>
+
+        {/* Legend in the empty hour after the last shift */}
+        <div
+          className="pointer-events-none absolute z-10 flex items-center justify-center gap-5"
+          style={{ left: GUTTER_W, right: 0, top: y(windowEndMin - 60), height: 60 * pxPerMin }}
+        >
+          {[
+            { label: 'Masaje', ...KIND_COLORS.massage },
+            { label: 'Extra', ...KIND_COLORS.extra },
+            { label: 'Facial', ...KIND_COLORS.facial },
+            { label: 'Pies', ...KIND_COLORS.foot },
+            { label: 'Llegó', ...STATUS_COLORS.Arrived },
+            { label: 'Completada', ...STATUS_COLORS.Completed },
+            { label: 'No show', ...STATUS_COLORS.NoShow },
+          ].map(l => (
+            <span key={l.label} className="flex items-center gap-1.5 text-[13px] font-semibold text-[#5a544a]">
+              <span className="inline-block h-4 w-6 rounded-sm" style={{ background: l.bg, borderLeft: '3px solid rgba(0,0,0,0.25)' }} />
+              {l.label}
+            </span>
+          ))}
+          <span className="flex items-center gap-1.5 text-[13px] font-semibold text-[#5a544a]">
+            <span className="inline-block h-4 w-6 rounded-sm" style={{ background: 'repeating-linear-gradient(-45deg, #eae4d8 0 4px, #f3eee4 4px 8px)' }} />
+            Lunch / bloqueo
+          </span>
+          <span className="flex items-center gap-1.5 text-[13px] font-semibold text-[#5a544a]">
+            <span className="inline-block h-4 w-6 rounded-sm bg-[#f8c471]/60" />
+            Horario de trabajo
+          </span>
+        </div>
 
         {/* Running now-line across the whole grid */}
         {showNow && (
