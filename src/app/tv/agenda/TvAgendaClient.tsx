@@ -469,7 +469,7 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           style={{ left: GUTTER_W, right: 0, top: y(windowStartMin), height: 60 * pxPerMin }}
         >
           <span className="text-[34px] font-black leading-none tabular-nums text-[#2b2620]">{labelShort(nowMin)}</span>
-          <span className="text-[22px] font-bold leading-none text-[#8b6a2b]">{dayLabel()}</span>
+          <span className="text-[14px] font-bold leading-none text-[#8b6a2b]">{dayLabel()}</span>
         </div>
 
         {/* Legend in the empty hour after the last shift */}
