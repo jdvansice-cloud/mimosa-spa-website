@@ -18,26 +18,20 @@ const HEADER_H = 56 // staff header row px (clock + date / name + working hours)
 const GUTTER_W = 52 // time gutter px — thin, hours only; the width goes to the columns
 
 
-/** Color by the visit's leading kind, so a glance says "massage" vs "facial". */
-const KIND_COLORS: Record<Kind, { bg: string; fg: string }> = {
-  massage: { bg: '#b5657f', fg: '#ffffff' }, // rose
-  extra:   { bg: '#8ea8c3', fg: '#10222f' }, // slate
-  facial:  { bg: '#7fb8a4', fg: '#0f2b22' }, // teal
-  foot:    { bg: '#c9a15f', fg: '#2e2005' }, // gold
-}
 /**
- * Status overrides kind: an arrived client turns the tile green (they're
- * here — go), a finished visit fades to gray so the eye skips it, a no-show
- * turns red so nobody keeps a cabina waiting. Only UPCOMING visits keep
- * their kind color.
+ * Tile color says STATUS only — never treatment type. Upcoming visits are
+ * rose; an arrived client turns green (they're here — go), a finished visit
+ * fades to gray so the eye skips it, a no-show turns red so nobody keeps a
+ * cabina waiting.
  */
+const BOOKED_COLOR = { bg: '#b5657f', fg: '#ffffff' } // rose — reserved, not yet here
 const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
   Arrived:   { bg: '#4f9a6e', fg: '#ffffff' }, // client is here — go
   Completed: { bg: '#cfcac0', fg: '#5a544a' }, // done — recede
   NoShow:    { bg: '#c94a4a', fg: '#ffffff' }, // didn't come — shout
 }
 function visitColor(v: Visit) {
-  return STATUS_COLORS[v.status] ?? KIND_COLORS[v.items[0]?.kind ?? 'massage']
+  return STATUS_COLORS[v.status] ?? BOOKED_COLOR
 }
 
 /**
@@ -484,10 +478,7 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           style={{ left: GUTTER_W, right: 0, top: y(windowEndMin - 60), height: 60 * pxPerMin }}
         >
           {[
-            { label: 'Masaje', ...KIND_COLORS.massage },
-            { label: 'Extra', ...KIND_COLORS.extra },
-            { label: 'Facial', ...KIND_COLORS.facial },
-            { label: 'Pies', ...KIND_COLORS.foot },
+            { label: 'Reservada', ...BOOKED_COLOR },
             { label: 'Llegó', ...STATUS_COLORS.Arrived },
             { label: 'Completada', ...STATUS_COLORS.Completed },
             { label: 'No show', ...STATUS_COLORS.NoShow },
