@@ -1,5 +1,7 @@
 import {
   getAllServices,
+  getAddons,
+  getStaff,
   searchClients,
   addClient,
   addMultipleAppointments,
@@ -34,6 +36,60 @@ export async function listServices(sucursal: Sucursal, query?: string): Promise<
   if (!query?.trim()) return items
   const q = stripAccents(query)
   return items.filter(s => stripAccents(s.name).includes(q))
+}
+
+export interface AddonSummary { id: number; name: string; minutes: number; price: number }
+
+const addonCache = new Map<Sucursal, { at: number; items: AddonSummary[] }>()
+
+export async function listAddons(sucursal: Sucursal): Promise<AddonSummary[]> {
+  const hit = addonCache.get(sucursal)
+  if (hit && Date.now() - hit.at < SIX_H) return hit.items
+  const raw = await getAddons(BUSINESS.locations[sucursal].mindbodyLocationId)
+  const items = raw.map(a => ({ id: a.Id, name: a.Name, minutes: a.Duration, price: Math.round(a.Price * 100) / 100 }))
+  addonCache.set(sucursal, { at: Date.now(), items })
+  return items
+}
+
+/** Names used when the owner has not configured `best_sellers`. */
+export const FALLBACK_BEST_SELLERS = [
+  'Mimosa Relax - 60 min',
+  'Liberador de Tensión - 60 min',
+  'Masaje con Piedras Calientes - 60 min',
+]
+
+/** Configured ids win; otherwise match the fallback names, skipping any that are missing. */
+export function pickBestSellers(services: ServiceSummary[], ids: number[]): ServiceSummary[] {
+  const picked = ids.length
+    ? ids.map(id => services.find(s => s.id === id)).filter((s): s is ServiceSummary => !!s)
+    : FALLBACK_BEST_SELLERS.map(name => services.find(s => stripAccents(s.name) === stripAccents(name))).filter((s): s is ServiceSummary => !!s)
+  return picked.slice(0, 3)
+}
+
+export async function bestSellers(sucursal: Sucursal, ids: number[] = []): Promise<ServiceSummary[]> {
+  return pickBestSellers(await listServices(sucursal), ids)
+}
+
+/** Therapists with at least one free slot that day, each with the times they are free. */
+export async function listTherapists(i: {
+  sucursal: Sucursal
+  date: string
+  serviceIds: number[]
+  origin: string
+  phone: string
+  fetchImpl?: typeof fetch
+}): Promise<Array<{ id: number; nombre: string; horas: string[] }>> {
+  const slots = await availability({ ...i, people: 1 })
+  const byStaff = new Map<number, string[]>()
+  for (const s of slots) for (const id of s.staffIds) byStaff.set(id, [...(byStaff.get(id) ?? []), s.time])
+  if (!byStaff.size) return []
+  const staff = await getStaff(BUSINESS.locations[i.sucursal].mindbodyLocationId)
+  return [...byStaff.entries()]
+    .map(([id, horas]) => {
+      const s = staff.find(x => x.Id === id)
+      return { id, nombre: s ? `${s.FirstName} ${s.LastName}`.trim() : `Terapeuta ${id}`, horas }
+    })
+    .slice(0, 8)
 }
 
 export async function findClientByPhone(phone: string): Promise<{ id: string; name: string; email: string; lastVisits: string[] } | null> {
@@ -117,11 +173,14 @@ export async function book(i: {
   date: string
   time: string
   serviceIds: number[]
+  addonIds?: number[]
+  staffId?: number
   people: 1 | 2
   origin: string
   clientName: string
   phone: string
 }): Promise<{ appointmentIds: number[]; therapist: string; alreadyBooked?: boolean }> {
+  const addonIds = (i.addonIds ?? []).filter(Boolean)
   const existing = await findExistingAt(i.clientId, i.date, i.time, BUSINESS.locations[i.sucursal].mindbodyLocationId)
   if (existing.length) return { appointmentIds: existing, therapist: 'ya reservada', alreadyBooked: true }
 
@@ -131,17 +190,22 @@ export async function book(i: {
   const services = await listServices(i.sucursal)
   const loc = BUSINESS.locations[i.sucursal]
 
+  if (i.staffId && !slot.staffIds.includes(i.staffId)) {
+    throw new Error('Esa terapeuta no está disponible a esa hora; ofrécele otra hora u otra terapeuta')
+  }
+
   const chain = (staffId: number) =>
-    i.serviceIds.map(id => ({
+    [...i.serviceIds, ...addonIds].map(id => ({
       ClientId: i.clientId,
       LocationId: loc.mindbodyLocationId,
       StaffId: staffId,
       SessionTypeId: id,
       StartDateTime: `${i.date}T${i.time}:00`,
       Notes: 'Reservado por WhatsApp (Camila)',
+      StaffRequested: !!i.staffId,
     }))
 
-  const firstStaffId = slot.staffIds[0]
+  const firstStaffId = i.staffId || slot.staffIds[0]
   const firstResult = await addMultipleAppointments(chain(firstStaffId))
   if (!firstResult.success) throw new Error(`No se pudo reservar: ${firstResult.error}`)
   let appointments = firstResult.appointments
@@ -169,7 +233,10 @@ export async function book(i: {
   }
 
   const therapist = appointments[0]?.Staff ? `${appointments[0].Staff.FirstName} ${appointments[0].Staff.LastName}` : 'Por asignar'
-  const minutes = i.serviceIds.reduce((s, id) => s + (services.find(x => x.id === id)?.minutes ?? 0), 0)
+  const addons = addonIds.length ? await listAddons(i.sucursal) : []
+  const minutes =
+    i.serviceIds.reduce((s, id) => s + (services.find(x => x.id === id)?.minutes ?? 0), 0) +
+    addonIds.reduce((s, id) => s + (addons.find(x => x.id === id)?.minutes ?? 0), 0)
 
   await sendBookingConfirmation({
     clientName: i.clientName,
@@ -177,7 +244,10 @@ export async function book(i: {
     locationName: `Mimosa ${loc.name}`,
     date: new Intl.DateTimeFormat('es-PA', { timeZone: 'America/Panama', dateStyle: 'long' }).format(new Date(`${i.date}T12:00:00-05:00`)),
     time: new Intl.DateTimeFormat('es-PA', { timeZone: 'America/Panama', timeStyle: 'short' }).format(new Date(`${i.date}T${i.time}:00-05:00`)),
-    services: i.serviceIds.map(id => services.find(x => x.id === id)?.name ?? String(id)),
+    services: [
+      ...i.serviceIds.map(id => services.find(x => x.id === id)?.name ?? String(id)),
+      ...addonIds.map(id => addons.find(x => x.id === id)?.name ?? String(id)),
+    ],
     totalDuration: minutes,
     therapistName: therapist,
   })
