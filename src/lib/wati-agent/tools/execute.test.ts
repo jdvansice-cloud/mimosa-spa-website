@@ -201,3 +201,76 @@ describe('client lookup feeds the profile', () => {
     expect(d.store.mergeProfile).toHaveBeenCalledWith('507', { nombre: 'Ana Ruiz', correo: 'a@x.com' })
   })
 })
+
+describe('suggestions, addons, therapists and menu links', () => {
+  it('get_suggestions combines active promotions with the best sellers', async () => {
+    const d = deps({
+      promotions: vi.fn(async () => [{ titulo: 'Promo 2x1', precio: 99, precio_original: 150, minutos: 90, servicios: [10], valido_hasta: '2026-09-30' }]),
+      mb: { bestSellers: vi.fn(async () => [{ id: 10, name: 'Mimosa Relax - 60 min', minutes: 60, price: 75, category: 'Masajes' }]) },
+    })
+    d.store.getSetting = vi.fn(async (k: string, f: any) => (k === 'best_sellers' ? [10] : f))
+    const r = await executeTool('get_suggestions', { sucursal: 'cde' }, d)
+    expect(r.isError).toBeUndefined()
+    expect(d.mb.bestSellers).toHaveBeenCalledWith('cde', [10])
+    const out = JSON.parse(r.result)
+    expect(out.promociones[0].titulo).toBe('Promo 2x1')
+    expect(out.mas_pedidos).toEqual([{ id: 10, nombre: 'Mimosa Relax - 60 min', minutos: 60, precio: 75 }])
+  })
+
+  it('get_suggestions still answers when the promotions query fails', async () => {
+    const d = deps({
+      promotions: vi.fn(async () => { throw new Error('supabase down') }),
+      mb: { bestSellers: vi.fn(async () => []) },
+    })
+    const r = await executeTool('get_suggestions', { sucursal: 'cde' }, d)
+    expect(r.isError).toBeUndefined()
+    expect(JSON.parse(r.result).promociones).toEqual([])
+    expect(d.store.logEvent).toHaveBeenCalled()
+  })
+
+  it('list_addons returns the mapped extras', async () => {
+    const d = deps({ mb: { listAddons: vi.fn(async () => [{ id: 90, name: 'Piedras calientes', minutes: 15, price: 15 }]) } })
+    const r = await executeTool('list_addons', { sucursal: 'sfc' }, d)
+    expect(JSON.parse(r.result)[0].name).toBe('Piedras calientes')
+    expect(r.convPatch).toMatchObject({ sucursal: 'sfc' })
+  })
+
+  it('list_therapists says so when nobody is free', async () => {
+    const d = deps({ mb: { listTherapists: vi.fn(async () => []) } })
+    const r = await executeTool('list_therapists', { sucursal: 'cde', date: '2026-09-06', service_ids: [10] }, d)
+    expect(r.result).toContain('ofrece otra fecha')
+  })
+
+  it('get_menu_link returns the public URL', async () => {
+    const r = await executeTool('get_menu_link', { seccion: 'faciales' }, deps())
+    expect(r.result).toBe('https://www.mimosaretreat.com/es/menu/faciales')
+  })
+
+  it('book passes add-ons and the requested therapist through', async () => {
+    const d = deps({
+      recentInbound: ['si, confirmo'],
+      mb: { book: vi.fn(async () => ({ appointmentIds: [1], therapist: 'Lucía' })), listServices: vi.fn(async () => []) },
+    })
+    await executeTool('book', { sucursal: 'cde', date: '2026-09-06', time: '10:00', service_ids: [10], addon_ids: [90], staff_id: 2, people: 1, customer_confirmation: 'si, confirmo' }, d)
+    expect(d.mb.book).toHaveBeenCalledWith(expect.objectContaining({ addonIds: [90], staffId: 2 }))
+  })
+
+  it('book with staff_id 0 books with any available therapist', async () => {
+    const d = deps({
+      recentInbound: ['si, confirmo'],
+      mb: { book: vi.fn(async () => ({ appointmentIds: [1], therapist: 'Ana' })), listServices: vi.fn(async () => []) },
+    })
+    await executeTool('book', { sucursal: 'cde', date: '2026-09-06', time: '10:00', service_ids: [10], addon_ids: [], staff_id: 0, people: 1, customer_confirmation: 'si, confirmo' }, d)
+    expect(d.mb.book).toHaveBeenCalledWith(expect.objectContaining({ addonIds: [], staffId: undefined }))
+  })
+
+  it('book surfaces the adapter error when the therapist is taken', async () => {
+    const d = deps({
+      recentInbound: ['si, confirmo'],
+      mb: { book: vi.fn(async () => { throw new Error('Esa terapeuta no está disponible a esa hora; ofrécele otra hora u otra terapeuta') }), listServices: vi.fn(async () => []) },
+    })
+    const r = await executeTool('book', { sucursal: 'cde', date: '2026-09-06', time: '10:00', service_ids: [10], addon_ids: [], staff_id: 2, people: 1, customer_confirmation: 'si, confirmo' }, d)
+    expect(r.isError).toBe(true)
+    expect(r.result).toContain('Esa terapeuta no está disponible')
+  })
+})

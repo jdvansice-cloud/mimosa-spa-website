@@ -1,4 +1,5 @@
-import { BUSINESS, type BusinessOverrides } from '../config/business'
+import { BUSINESS, menuLink, type BusinessOverrides } from '../config/business'
+import { loadActivePromotions, type PromoSuggestion } from '../promotions'
 import { requireConfirmation } from './validate'
 import { performHandoff } from '../handoff'
 import { env } from '../config/env'
@@ -8,7 +9,7 @@ import type { WatiClient } from '../wati-api'
 import { isEmptyProfilePatch } from '../store'
 import type { ClientProfile, Conversation, Sucursal } from '../types'
 
-export interface ToolDeps { store: AgentStore; wati: WatiClient; conv: Conversation; origin: string; shadow: boolean; now: Date; mediaBytes: (p: string) => Promise<{ bytes: Uint8Array; mime: string; filename: string }>; mb: typeof import('./mindbody-adapter'); recentInbound: string[] }
+export interface ToolDeps { store: AgentStore; wati: WatiClient; conv: Conversation; origin: string; shadow: boolean; now: Date; mediaBytes: (p: string) => Promise<{ bytes: Uint8Array; mime: string; filename: string }>; mb: typeof import('./mindbody-adapter'); recentInbound: string[]; promotions?: (today: string) => Promise<PromoSuggestion[]> }
 export interface ToolOutcome { result: string; isError?: boolean; endTurn?: boolean; convPatch?: Partial<Conversation> }
 
 const json = (v: unknown) => JSON.stringify(v)
@@ -49,6 +50,23 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
       case 'get_hours': return { result: BUSINESS.hours.text }
       case 'get_payment_info': return { result: json({ yappy: BUSINESS.payment.yappyText, transferencia: BUSINESS.payment.transferText }) }
       case 'list_services': return { result: json(await d.mb.listServices(input.sucursal, input.query)), convPatch: sucursalPatch(input, d.conv.sucursal) }
+      case 'get_suggestions': {
+        const suc = input.sucursal as Sucursal
+        const load = d.promotions ?? loadActivePromotions
+        const [promociones, ids] = await Promise.all([
+          load(panamaDate(d.now)).catch(async e => { await d.store.logEvent(phone, 'error', { tool: 'get_suggestions', error: String(e) }); return [] as PromoSuggestion[] }),
+          d.store.getSetting<number[]>('best_sellers', []),
+        ])
+        const mas_pedidos = (await d.mb.bestSellers(suc, (ids ?? []).map(Number).filter(Boolean))).map(s2 => ({ id: s2.id, nombre: s2.name, minutos: s2.minutes, precio: s2.price }))
+        return { result: json({ promociones, mas_pedidos }), convPatch: sucursalPatch(input, d.conv.sucursal) }
+      }
+      case 'list_addons': return { result: json(await d.mb.listAddons(input.sucursal)), convPatch: sucursalPatch(input, d.conv.sucursal) }
+      case 'list_therapists': {
+        const t = await d.mb.listTherapists({ sucursal: input.sucursal, date: input.date, serviceIds: input.service_ids, origin: d.origin, phone })
+        if (!t.length) return { result: 'No hay terapeutas disponibles ese día; ofrece otra fecha.' }
+        return { result: json(t), convPatch: sucursalPatch(input, d.conv.sucursal) }
+      }
+      case 'get_menu_link': return { result: menuLink(String(input.seccion ?? 'menu')) }
       case 'send_image': {
         const asset = (await d.store.activeMedia(panamaDate(d.now))).find(m => m.key === input.key)
         if (!asset) return { result: `No existe la imagen "${input.key}"`, isError: true }
@@ -80,7 +98,7 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
       case 'book': {
         const err = requireConfirmation(input, d.recentInbound); if (err) return { result: err, isError: true }
         if (!d.conv.mindbody_client_id) return { result: 'Primero identifica al cliente con find_client o create_client.', isError: true }
-        const r = await d.mb.book({ clientId: d.conv.mindbody_client_id, sucursal: input.sucursal, date: input.date, time: input.time, serviceIds: input.service_ids, people: input.people, origin: d.origin, clientName: d.conv.client_name ?? '', phone })
+        const r = await d.mb.book({ clientId: d.conv.mindbody_client_id, sucursal: input.sucursal, date: input.date, time: input.time, serviceIds: input.service_ids, addonIds: Array.isArray(input.addon_ids) ? input.addon_ids : [], staffId: Number(input.staff_id) || undefined, people: input.people, origin: d.origin, clientName: d.conv.client_name ?? '', phone })
         return { result: json(r), convPatch: { sucursal: input.sucursal } }
       }
       case 'list_my_appointments': { if (!d.conv.mindbody_client_id) return { result: 'Cliente no identificado; usa find_client.' }; return { result: json(await d.mb.upcoming(d.conv.mindbody_client_id)) } }
