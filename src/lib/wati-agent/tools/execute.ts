@@ -58,8 +58,10 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         return r.ok ? { result: 'enviado' } : { result: `Error enviando imagen: ${r.error}`, isError: true }
       }
       case 'send_buttons': {
-        if (d.shadow) { await d.store.logEvent(phone, 'shadow_reply', { buttons: input }); return { result: 'enviado (shadow)' } }
-        const r = await d.wati.sendButtons(phone, input.body, input.buttons); return r.ok ? { result: 'enviado' } : { result: `Error: ${r.error}`, isError: true }
+        // Like close_chat, this ends the turn: the buttons already ask the question, so the
+        // model must not follow up with a text bubble repeating it.
+        if (d.shadow) { await d.store.logEvent(phone, 'shadow_reply', { buttons: input }); return { result: 'enviado (shadow)', endTurn: true } }
+        const r = await d.wati.sendButtons(phone, input.body, input.buttons); return r.ok ? { result: 'enviado', endTurn: true } : { result: `Error: ${r.error}`, isError: true }
       }
       case 'find_client': {
         const c = await d.mb.findClientByPhone(phone)

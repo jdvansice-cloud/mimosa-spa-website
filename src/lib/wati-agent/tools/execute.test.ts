@@ -92,6 +92,17 @@ describe('executeTool', () => {
     await executeTool('send_image', { key: 'promo' }, d)
     expect(d.wati.sendFile).not.toHaveBeenCalled()
   })
+  it('send_buttons ends the turn like close_chat, so the model cannot repeat the question in a text bubble', async () => {
+    const d = deps()
+    const r = await executeTool('send_buttons', { body: '¿Correcto?', buttons: ['Sí, confirmar', 'Cambiar hora'] }, d)
+    expect(d.wati.sendButtons).toHaveBeenCalled()
+    expect(r.endTurn).toBe(true)
+  })
+  it('send_buttons in shadow also ends the turn', async () => {
+    const d = deps({ shadow: true, store: { logEvent: vi.fn(async () => {}) } })
+    const r = await executeTool('send_buttons', { body: '¿Correcto?', buttons: ['Sí, confirmar', 'Cambiar hora'] }, d)
+    expect(r.endTurn).toBe(true)
+  })
   it('reschedule keeps the original appointment when booking the new slot fails', async () => {
     const d = deps({
       mb: {
