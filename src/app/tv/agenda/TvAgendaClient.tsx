@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { TvAgenda, TvAppointment } from '@/lib/tv/agenda'
+import { TV_REFRESH_EVENT, TV_REFRESH_TOPIC, type TvRefreshPayload } from '@/lib/tv/broadcast'
+import { getClient } from '@/lib/supabase/client'
 
 // ===========================================
 // TV Agenda — read-only daily calendar for the therapist work area,
@@ -254,6 +256,33 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
     const t = setInterval(load, REFRESH_MS)
     return () => clearInterval(t)
   }, [load])
+
+  // Instant refresh: Mindbody webhooks → /api/mindbody/webhook → Supabase
+  // Realtime broadcast → here. The interval above stays as the fallback
+  // (webhook payloads don't carry Completed/NoShow, and deliveries can drop).
+  useEffect(() => {
+    let supabase: ReturnType<typeof getClient>
+    try {
+      supabase = getClient()
+    } catch {
+      return // no Supabase config in this env — polling only
+    }
+    let timer: ReturnType<typeof setTimeout> | null = null
+    const channel = supabase
+      .channel(TV_REFRESH_TOPIC)
+      .on('broadcast', { event: TV_REFRESH_EVENT }, ({ payload }) => {
+        const p = payload as TvRefreshPayload
+        if (p.locationId != null && p.locationId !== location) return
+        // Debounce: one front-desk action can fan out into several events
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(load, 1500)
+      })
+      .subscribe()
+    return () => {
+      if (timer) clearTimeout(timer)
+      supabase.removeChannel(channel)
+    }
+  }, [load, location])
 
   // Now-line ticks every 30s
   useEffect(() => {
