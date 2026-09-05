@@ -13,6 +13,7 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
+  RefreshCw,
 } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import type { ClientProfile, Conversation, ConversationLogEntry, ConversationMode, StoredMessage, EventKind } from '@/lib/wati-agent/types'
@@ -725,6 +726,8 @@ function SettingsTab({
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [knowledge, setKnowledge] = useState<{ builtAt: string; treatments: number; catalogChars: number } | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/wati-agent/settings')
@@ -739,6 +742,10 @@ function SettingsTab({
       })
       .catch(e => console.error('settings fetch failed', e))
       .finally(() => setLoading(false))
+    fetch('/api/admin/wati-agent/knowledge/refresh')
+      .then(res => res.json())
+      .then(data => { if (!data.error) setKnowledge(data) })
+      .catch(e => console.error('knowledge fetch failed', e))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -768,6 +775,17 @@ function SettingsTab({
       setTimeout(() => setSaved(false), 2000)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const refreshKnowledge = async () => {
+    setRefreshing(true)
+    try {
+      const res = await fetch('/api/admin/wati-agent/knowledge/refresh', { method: 'POST' })
+      const data = await res.json()
+      if (!data.error) setKnowledge(data)
+    } finally {
+      setRefreshing(false)
     }
   }
 
@@ -845,6 +863,18 @@ function SettingsTab({
             ))}
           </div>
         ))}
+        <div className="space-y-2 rounded-md border border-gray-200 p-3">
+          <p className="text-sm font-semibold">Conocimiento del sitio</p>
+          <p className="text-xs text-gray-500">
+            {knowledge
+              ? `${knowledge.treatments} tratamientos · ${knowledge.catalogChars.toLocaleString('es-PA')} caracteres · actualizado ${new Date(knowledge.builtAt).toLocaleString('es-PA')}`
+              : 'Se reconstruye solo cada 6 horas.'}
+          </p>
+          <Button variant="outline" onClick={refreshKnowledge} disabled={refreshing}>
+            {refreshing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
+            Recargar catálogo
+          </Button>
+        </div>
         <Button onClick={save} disabled={saving}>
           {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
           {saved ? 'Guardado' : 'Guardar'}
