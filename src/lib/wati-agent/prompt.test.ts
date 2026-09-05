@@ -26,6 +26,12 @@ describe('buildSystem', () => {
     expect((blocks[1] as any).text).toContain('Muy buenas tardes')
   })
 
+  it('uses the softer same-day cancellation courtesy line, never a scolding reminder', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('24 horitas')
+    expect(t).not.toContain('Le recordamos que para la próxima')
+  })
+
   it('describes the booking flow and the suggestion tools', () => {
     const t = (blocks[0] as any).text
     expect(t).toContain('Flujo de reserva')
