@@ -110,7 +110,7 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
         if (patch?.sucursal && !d.conv.sucursal) {
           conv = await d.store.upsertConversation({ ...d.conv, ...patch, phone })
         }
-        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: input.motivo || 'modelo', resumen: input.resumen || '', shadow: d.shadow, env: env() })
+        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: input.motivo || 'modelo', resumen: input.resumen || '', shadow: d.shadow, env: env(), now: d.now })
         return { result: 'handoff hecho', endTurn: true, convPatch: patch }
       }
       case 'close_chat': { if (!d.shadow) await d.wati.updateChatStatus(phone, 'SOLVED'); return { result: 'cerrado', endTurn: true } }

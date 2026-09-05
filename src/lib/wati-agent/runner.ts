@@ -159,7 +159,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
       await d.store.logEvent(phone, 'error', { where: 'runTurn', error: 'empty reply' })
       if (!shadow) {
         // performHandoff sends its own "le comunico con mi compañera" bubble; a second one here reads as a stutter.
-        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'respuesta_vacia', resumen: conv.summary ?? '', shadow, env: env() }).catch(() => {})
+        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'respuesta_vacia', resumen: conv.summary ?? '', shadow, env: env(), now: d.now }).catch(() => {})
         await closeAndRemember({ anthropic: d.anthropic, store: d.store, phone, outcome: 'handoff', now: d.now })
       }
       return { bubbles: [], handedOff: true }
@@ -216,7 +216,7 @@ export async function runTurn(phone: string, shadow: boolean, d: RunDeps): Promi
     if (!shadow) {
       await d.wati.sendText(phone, 'Disculpe, un momento por favor 🌼').catch(() => {})
       if (conv) {
-        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'error_sistema', resumen: conv?.summary ?? '', shadow, env: env() }).catch(() => {})
+        await performHandoff({ store: d.store, wati: d.wati, conv, motivo: 'error_sistema', resumen: conv?.summary ?? '', shadow, env: env(), now: d.now }).catch(() => {})
       }
     }
     return { bubbles: [], handedOff: true }

@@ -78,6 +78,12 @@ describe('buildSystem', () => {
     expect((blocks[0] as any).text).toContain('send_buttons')
   })
 
+  it('states Camila always helps outside opening hours', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('las 24 horas')
+    expect(t).toContain('Nunca digas que no puedes ayudar por la hora')
+  })
+
   it('states scope and manipulation guardrails', () => {
     const t = (blocks[0] as any).text
     expect(t).toContain('Alcance y límites')

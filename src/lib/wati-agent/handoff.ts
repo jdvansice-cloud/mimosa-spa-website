@@ -2,6 +2,8 @@ import type { AgentStore } from './store'
 import type { WatiClient } from './wati-api'
 import type { Conversation } from './types'
 import type { env as envFn } from './config/env'
+import { isOpen } from './hours'
+import { BUSINESS } from './config/business'
 
 /**
  * Handoff reasons that keep a conversation stuck with a human even after
@@ -10,10 +12,14 @@ import type { env as envFn } from './config/env'
  */
 export const STICKY_HANDOFF_REASONS = ['queja', 'manipulacion', 'medico', 'certificado', 'comprobante_o_imagen'] as const
 
-export async function performHandoff(i: { store: AgentStore; wati: WatiClient; conv: Conversation; motivo: string; resumen: string; shadow: boolean; env: ReturnType<typeof envFn> }) {
+export async function performHandoff(i: { store: AgentStore; wati: WatiClient; conv: Conversation; motivo: string; resumen: string; shadow: boolean; env: ReturnType<typeof envFn>; now?: Date }) {
   const { phone, sucursal } = i.conv
   if (i.shadow) { await i.store.logEvent(phone, 'handoff', { motivo: i.motivo, resumen: i.resumen, shadow: true }); return }
-  await i.wati.sendText(phone, 'Un momento por favor, le comunico con mi compañera 🌼')
+  const now = i.now ?? new Date()
+  const greeting = isOpen(now)
+    ? 'Un momento por favor, le comunico con mi compañera 🌼'
+    : `En este momento estamos fuera de horario 🌼 Dejo su solicitud lista para que una compañera le atienda en nuestro horario: ${BUSINESS.hours.text}.`
+  await i.wati.sendText(phone, greeting)
   if (i.resumen.trim()) await i.wati.sendText(phone, `Resumen para mi compañera: ${i.resumen.trim().slice(0, 300)}`)
   await i.wati.updateAttributes(phone, { sucursal: sucursal ?? '', team: sucursal ?? 'sfc', ai_modo: 'humano', ai_resumen: i.resumen.slice(0, 300), ai_motivo: i.motivo })
   const chatbotConfigured = Boolean(i.env.handoffChatbotId)
