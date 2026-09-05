@@ -96,6 +96,24 @@ WATI ──webhook "session message sent"──▶ /api/wati/agent/sent     (det
 WATI ──webhook "conversation status"───▶ /api/wati/agent/status   (ticket resuelto → Camila retoma)
 ```
 
+**Cómo retoma Camila una conversación en modo `human`.** El webhook
+"conversation status = SOLVED" casi nunca llega en la práctica, así que no es
+la única salida. En cada mensaje entrante mientras `mode === 'human'`,
+`/api/wati/agent/inbound` calcula hace cuánto no responde un humano (última
+fila `wati_agent_messages` con `direction='out'` y `author='human'` para ese
+número; si no hay ninguna, usa `human_since`) y llama a `shouldResume`
+(`src/lib/wati-agent/resume.ts`):
+
+- Si ese silencio supera el ajuste `human_idle_resume_hours` (por defecto 3,
+  editable en `/admin/wati-agent` → Ajustes → "Horas sin respuesta humana
+  para que Camila retome"), Camila retoma — **salvo** que el motivo del
+  handoff (`handoff_reason`) sea uno de los "pegajosos"
+  (`STICKY_HANDOFF_REASONS` en `src/lib/wati-agent/handoff.ts`: `queja`,
+  `manipulacion`, `medico`, `certificado`, `comprobante_o_imagen`), que se
+  quedan con un humano hasta que se resuelva el ticket o pasen 24 h.
+- Pase lo que pase con el motivo, a las 24 h de `human_since` Camila siempre
+  retoma (límite duro, sin excepción).
+
 Código: `src/lib/wati-agent/` (lógica), `src/app/api/wati/agent/{inbound,sent,status}`
 (rutas), `src/app/admin/wati-agent` (panel).
 

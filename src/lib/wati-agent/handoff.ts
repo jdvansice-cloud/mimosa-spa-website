@@ -3,6 +3,13 @@ import type { WatiClient } from './wati-api'
 import type { Conversation } from './types'
 import type { env as envFn } from './config/env'
 
+/**
+ * Handoff reasons that keep a conversation stuck with a human even after
+ * `human_idle_resume_hours` of silence — only the ticket being solved or
+ * the hard 24h bound brings Camila back for these.
+ */
+export const STICKY_HANDOFF_REASONS = ['queja', 'manipulacion', 'medico', 'certificado', 'comprobante_o_imagen'] as const
+
 export async function performHandoff(i: { store: AgentStore; wati: WatiClient; conv: Conversation; motivo: string; resumen: string; shadow: boolean; env: ReturnType<typeof envFn> }) {
   const { phone, sucursal } = i.conv
   if (i.shadow) { await i.store.logEvent(phone, 'handoff', { motivo: i.motivo, resumen: i.resumen, shadow: true }); return }
@@ -26,7 +33,7 @@ export async function registerTakeover(store: AgentStore, phone: string, operato
   await store.logEvent(phone, 'takeover', { operatorEmail })
 }
 
-export async function resumeAgent(store: AgentStore, phone: string) {
+export async function resumeAgent(store: AgentStore, phone: string, eventPayload: unknown = {}) {
   await store.upsertConversation({ phone, mode: 'agent', human_since: null, handoff_reason: null })
-  await store.logEvent(phone, 'resume', {})
+  await store.logEvent(phone, 'resume', eventPayload)
 }

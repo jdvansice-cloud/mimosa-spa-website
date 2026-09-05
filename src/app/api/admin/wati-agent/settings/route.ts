@@ -7,13 +7,14 @@ export async function GET() {
   const denied = await requireAdmin()
   if (denied) return denied
   const store = storeFromEnv()
-  const [enabled, persona_name, api_operator_labels, business_overrides] = await Promise.all([
+  const [enabled, persona_name, api_operator_labels, business_overrides, human_idle_resume_hours] = await Promise.all([
     store.getSetting('enabled', true),
     store.getSetting('persona_name', 'Camila'),
     store.getSetting<string[]>('api_operator_labels', []),
     store.getSetting<BusinessOverrides>('business_overrides', {}),
+    store.getSetting('human_idle_resume_hours', 3),
   ])
-  return NextResponse.json({ enabled, persona_name, api_operator_labels, business_overrides })
+  return NextResponse.json({ enabled, persona_name, api_operator_labels, business_overrides, human_idle_resume_hours })
 }
 
 export async function POST(req: NextRequest) {
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
   if ('persona_name' in body) updates.push(store.setSetting('persona_name', body.persona_name))
   if ('api_operator_labels' in body) updates.push(store.setSetting('api_operator_labels', body.api_operator_labels))
   if ('business_overrides' in body) updates.push(store.setSetting('business_overrides', body.business_overrides))
+  if ('human_idle_resume_hours' in body) updates.push(store.setSetting('human_idle_resume_hours', body.human_idle_resume_hours))
   await Promise.all(updates)
   return NextResponse.json({ ok: true })
 }

@@ -719,6 +719,7 @@ function SettingsTab({
 }) {
   const [personaName, setPersonaName] = useState('Camila')
   const [operatorLabels, setOperatorLabels] = useState('')
+  const [idleResumeHours, setIdleResumeHours] = useState(3)
   const [overrides, setOverrides] = useState<BusinessOverrides>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -732,6 +733,7 @@ function SettingsTab({
         setPersonaName(data.persona_name ?? 'Camila')
         setOperatorLabels((data.api_operator_labels ?? []).join(', '))
         setOverrides(data.business_overrides ?? {})
+        setIdleResumeHours(Number(data.human_idle_resume_hours ?? 3))
       })
       .catch(e => console.error('settings fetch failed', e))
       .finally(() => setLoading(false))
@@ -753,6 +755,7 @@ function SettingsTab({
             .map(s => s.trim())
             .filter(Boolean),
           business_overrides: overrides,
+          human_idle_resume_hours: idleResumeHours,
         }),
       })
       setSaved(true)
@@ -795,6 +798,17 @@ function SettingsTab({
             type="text"
             value={operatorLabels}
             onChange={e => setOperatorLabels(e.target.value)}
+            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="text-sm font-medium">Horas sin respuesta humana para que Camila retome</span>
+          <input
+            type="number"
+            min={0}
+            step={0.5}
+            value={idleResumeHours}
+            onChange={e => setIdleResumeHours(Number(e.target.value))}
             className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
           />
         </label>
