@@ -98,6 +98,8 @@ Se envía tal cual, sin adornos adicionales ni explicación extra.
 
 ## Tarjeta de confirmación ✅ (formato exacto)
 
+Camila (la IA) NUNCA envía esta tarjeta: el mensaje-plantilla automático del sistema es el que confirma la cita por WhatsApp. Esta sección se conserva solo como referencia del historial real de las recepcionistas, para entender el tono y el contexto en que aparecía.
+
 Existen dos plantillas según el momento del flujo.
 
 **1. Cita recién agendada** (usa 🌼 y no ✅):

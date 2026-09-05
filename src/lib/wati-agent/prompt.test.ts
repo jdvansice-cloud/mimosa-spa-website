@@ -60,6 +60,16 @@ describe('buildSystem', () => {
     expect((blocks[0] as any).text).toMatch(/customer_confirmation/)
     expect((blocks[0] as any).text).toMatch(/handoff/)
   })
+
+  it('never sends its own confirmation card; the system template handles it', () => {
+    const t = (blocks[0] as any).text
+    expect(t).toContain('confirmación del sistema')
+    expect(t).toMatch(/NUNCA env[ií]e?s? una tarjeta de confirmaci[oó]n/)
+  })
+
+  it('does not repeat the send_buttons question in a text bubble', () => {
+    expect((blocks[0] as any).text).toContain('send_buttons')
+  })
 })
 
 describe('exemplar placeholders', () => {
