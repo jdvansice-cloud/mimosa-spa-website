@@ -26,7 +26,6 @@ const MANIPULACION_RULES: RegExp[] = [
 const RULES: Array<{ motivo: string; re: RegExp }> = [
   { motivo: 'certificado', re: /\b(certificado|gift ?cards?|tarjeta de regalo|bono de regalo|voucher)\b/i },
   { motivo: 'queja', re: /\b(queja|reclamo|p[ée]simo|molest[oa]|inaceptable|reembolso|devoluci[oó]n|denuncia)\b/i },
-  { motivo: 'terapeuta', re: /\b(con la (misma )?terapeuta|con (la|el) (se[ñn]ora?|se[ñn]orita|muchacha) [A-ZÁÉÍÓÚ][a-záéíóú]+|terapeuta [A-ZÁÉÍÓÚ][a-záéíóú]+)\b/ },
   { motivo: 'medico', re: /\b(embaraz|lesi[oó]n|cirug[ií]a|hernia|fractura|m[ée]dic[oa]|trombo|cancer|c[áa]ncer)\b/i },
   { motivo: 'es_bot', re: /\b(eres|sos|es usted|hablo con)\s+(un|una)?\s*(bot|robot|m[áa]quina|ia|inteligencia artificial|asistente virtual)\b/i },
 ]
