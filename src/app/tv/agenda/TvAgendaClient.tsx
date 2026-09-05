@@ -226,7 +226,7 @@ function dayLabel(): string {
   return `${DOW_ES[dow] ?? ''} ${get('day')} ${MON_ES[Number(get('month')) - 1] ?? ''}`
 }
 
-export function TvAgendaClient({ location, token }: { location: number; token: string }) {
+export function TvAgendaClient({ location, token, debug = false }: { location: number; token: string; debug?: boolean }) {
   const [data, setData] = useState<TvAgenda | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [nowMin, setNowMin] = useState(panamaNowMin())
@@ -538,6 +538,10 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           </div>
         )}
 
+        {/* ?debug=1 — TV setup aid: the board is tuned for a 1920px-wide
+            viewport, so this says at a glance whether browser zoom is right. */}
+        {debug && <DebugOverlay />}
+
         {/* Stale-data notice if a refresh fails while showing an old schedule */}
         {error && (
           <div className="absolute bottom-1 right-2 z-40 rounded bg-red-600/90 px-2 py-0.5 text-[10px] font-semibold text-white">
@@ -545,6 +549,28 @@ export function TvAgendaClient({ location, token }: { location: number; token: s
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+/** Viewport readout for TV setup (open the board with &debug=1). */
+function DebugOverlay() {
+  const [vp, setVp] = useState({ w: 0, h: 0, dpr: 1 })
+  useEffect(() => {
+    const read = () => setVp({ w: window.innerWidth, h: window.innerHeight, dpr: window.devicePixelRatio || 1 })
+    read()
+    window.addEventListener('resize', read)
+    return () => window.removeEventListener('resize', read)
+  }, [])
+  const ok = vp.w >= 1880 && vp.w <= 1960
+  return (
+    <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-[#2b2620]/95 px-8 py-6 text-center text-white shadow-2xl">
+      <p className="text-[40px] font-black tabular-nums leading-tight">{vp.w} × {vp.h}</p>
+      <p className="text-[18px] opacity-80">píxeles CSS · densidad {vp.dpr.toFixed(2)}</p>
+      <p className={`mt-3 text-[22px] font-bold ${ok ? 'text-emerald-300' : 'text-amber-300'}`}>
+        {ok ? '✓ Zoom correcto (100%)' : vp.w > 1960 ? 'Zoom muy bajo — subir zoom del navegador' : 'Zoom muy alto — bajar zoom del navegador'}
+      </p>
+      <p className="mt-2 text-[14px] opacity-70">Objetivo: 1920 de ancho · quitar &debug=1 de la URL al terminar</p>
     </div>
   )
 }
