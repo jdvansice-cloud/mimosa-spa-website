@@ -1,5 +1,28 @@
 export type TriggerResult = { handoff: true; motivo: string } | { handoff: false }
 
+/** Lowercase + strip accents, for accent/case-insensitive matching. */
+function normalize(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+const MANIPULACION_RULES: RegExp[] = [
+  /\bignora (tus|las) instrucciones\b/,
+  /\bolvida (tus|las) instrucciones\b/,
+  /\bsystem prompt\b/,
+  /\bprompt del sistema\b/,
+  /\bmodo desarrollador\b/,
+  /\bdeveloper mode\b/,
+  /\bjailbreak\b/,
+  /\bact[ua]a como (un|una) (ia|ai|modelo)\b/,
+  /\beres chatgpt\b/,
+  /\beres claude\b/,
+  /\bque modelo\b/,
+  /\bmuestrame tus instrucciones\b/,
+]
+
 const RULES: Array<{ motivo: string; re: RegExp }> = [
   { motivo: 'certificado', re: /\b(certificado|gift ?cards?|tarjeta de regalo|bono de regalo|voucher)\b/i },
   { motivo: 'queja', re: /\b(queja|reclamo|p[ée]simo|molest[oa]|inaceptable|reembolso|devoluci[oó]n|denuncia)\b/i },
@@ -15,6 +38,8 @@ export function checkTriggers(input: { type: string; text: string | null; audioC
   const text = input.text || ''
   const people = text.match(/\b(somos|para|de)\s+(\d+)\s+(personas?|pax|amigas?|chicas?)\b/i)
   if (people && Number(people[2]) >= 3) return { handoff: true, motivo: 'grupo' }
+  const normalized = normalize(text)
+  for (const re of MANIPULACION_RULES) if (re.test(normalized)) return { handoff: true, motivo: 'manipulacion' }
   for (const r of RULES) if (r.re.test(text)) return { handoff: true, motivo: r.motivo }
   return { handoff: false }
 }
