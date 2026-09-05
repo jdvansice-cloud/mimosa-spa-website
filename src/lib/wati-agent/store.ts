@@ -43,6 +43,7 @@ export interface AgentStore {
   insertMessage(m: StoredMessage): Promise<{ inserted: boolean }>
   recentMessages(phone: string, opts: { sinceHours: number; limit: number }): Promise<StoredMessage[]>
   newestInboundId(phone: string): Promise<number | null>
+  lastHumanOutboundAt(phone: string): Promise<string | null>
   logEvent(phone: string | null, kind: EventKind, payload: unknown): Promise<void>
   activeMedia(today: string): Promise<MediaAsset[]>
   getSetting<T>(key: string, fallback: T): Promise<T>
@@ -81,6 +82,10 @@ export function createStore(sb: SupabaseClient): AgentStore {
     async newestInboundId(phone) {
       const { data, error } = await sb.from('wati_agent_messages').select('id').eq('phone', phone).eq('direction', 'in').order('id', { ascending: false }).limit(1).maybeSingle()
       fail('newestInboundId', error); return data?.id ?? null
+    },
+    async lastHumanOutboundAt(phone) {
+      const { data, error } = await sb.from('wati_agent_messages').select('created_at').eq('phone', phone).eq('direction', 'out').eq('author', 'human').order('created_at', { ascending: false }).limit(1).maybeSingle()
+      fail('lastHumanOutboundAt', error); return data?.created_at ?? null
     },
     async logEvent(phone, kind, payload) {
       const { error } = await sb.from('wati_agent_events').insert({ phone, kind, payload })

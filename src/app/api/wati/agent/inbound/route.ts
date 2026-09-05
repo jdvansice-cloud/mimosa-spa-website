@@ -8,6 +8,7 @@ import { watiFromEnv } from '@/lib/wati-agent/wati-api'
 import { gate } from '@/lib/wati-agent/gate'
 import { checkTriggers } from '@/lib/wati-agent/triggers'
 import { performHandoff, resumeAgent } from '@/lib/wati-agent/handoff'
+import { shouldResume } from '@/lib/wati-agent/resume'
 import { runTurn } from '@/lib/wati-agent/runner'
 import { mediaBytesFromStorage } from '@/lib/wati-agent/media-bytes'
 import * as mb from '@/lib/wati-agent/tools/mindbody-adapter'
@@ -37,10 +38,14 @@ async function handleInbound(ev: NonNullable<ReturnType<typeof parseInbound>>, o
   const wati = watiFromEnv()
   let conv = await store.getConversation(ev.phone)
   if (!conv) conv = await store.upsertConversation({ phone: ev.phone, mode: 'agent', client_name: ev.senderName || null, wati_contact_id: ev.contactId, ticket_id: ev.ticketId })
-  // Resume after 24 h in human mode with no activity
-  if (conv.mode === 'human' && conv.human_since && Date.now() - new Date(conv.human_since).getTime() > 24 * 3600_000) {
-    await resumeAgent(store, ev.phone)
-    conv = (await store.getConversation(ev.phone))!
+  // Resume after a few idle hours in human mode (sticky reasons excepted), or after 24h regardless
+  if (conv.mode === 'human') {
+    const idleHours = await store.getSetting('human_idle_resume_hours', 3)
+    const lastHumanOutboundAt = await store.lastHumanOutboundAt(ev.phone)
+    if (shouldResume({ mode: conv.mode, handoffReason: conv.handoff_reason, humanSince: conv.human_since, lastHumanOutboundAt, now: new Date(), idleHours })) {
+      await resumeAgent(store, ev.phone, { reason: 'idle', idleHours })
+      conv = (await store.getConversation(ev.phone))!
+    }
   }
   if (ev.owner) return
   const { inserted } = await store.insertMessage({ phone: ev.phone, wati_message_id: ev.messageId || fallbackMessageId(ev), direction: 'in', author: 'customer', type: ev.type, text: ev.text, media_ref: ev.mediaRef, shadow: false })
