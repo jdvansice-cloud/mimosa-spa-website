@@ -179,6 +179,10 @@ export async function book(i: {
   origin: string
   clientName: string
   phone: string
+  /** Title of the promotion the customer chose, tagged on its own services only. */
+  promoTitle?: string
+  /** Service ids that belong to that promotion. */
+  promoServiceIds?: number[]
 }): Promise<{ appointmentIds: number[]; therapist: string; alreadyBooked?: boolean }> {
   const addonIds = (i.addonIds ?? []).filter(Boolean)
   const existing = await findExistingAt(i.clientId, i.date, i.time, BUSINESS.locations[i.sucursal].mindbodyLocationId)
@@ -194,6 +198,13 @@ export async function book(i: {
     throw new Error('Esa terapeuta no está disponible a esa hora; ofrécele otra hora u otra terapeuta')
   }
 
+  // Same note format as the online booking flow (/api/mindbody/book): parts joined
+  // by ' | ', and `Promo: <title>` only on the services the promotion includes.
+  const promoTitle = (i.promoTitle ?? '').trim()
+  const promoIds = new Set<number>((i.promoServiceIds ?? []).map(Number).filter(Boolean))
+  const noteFor = (id: number) =>
+    ['Reservado por WhatsApp', ...(promoIds.has(id) && promoTitle ? [`Promo: ${promoTitle}`] : [])].join(' | ')
+
   const chain = (staffId: number) =>
     [...i.serviceIds, ...addonIds].map(id => ({
       ClientId: i.clientId,
@@ -201,7 +212,7 @@ export async function book(i: {
       StaffId: staffId,
       SessionTypeId: id,
       StartDateTime: `${i.date}T${i.time}:00`,
-      Notes: 'Reservado por WhatsApp (Camila)',
+      Notes: noteFor(id),
       StaffRequested: !!i.staffId,
     }))
 

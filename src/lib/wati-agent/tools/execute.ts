@@ -53,12 +53,24 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
       case 'list_services': return { result: json(await d.mb.listServices(input.sucursal, input.query)), convPatch: sucursalPatch(input, d.conv.sucursal) }
       case 'get_suggestions': {
         const suc = input.sucursal as Sucursal
-        const load = d.promotions ?? loadActivePromotions
-        const [promociones, ids] = await Promise.all([
+        // The promo's treatments are named from treatment_settings, with the live
+        // Mindbody catalogue as a fallback for ids the CMS does not carry.
+        const load = d.promotions ?? ((today: string) => loadActivePromotions(today, undefined, () => d.mb.listServices(suc)))
+        const [promos, ids] = await Promise.all([
           load(panamaDate(d.now)).catch(async e => { await d.store.logEvent(phone, 'error', { tool: 'get_suggestions', error: String(e) }); return [] as PromoSuggestion[] }),
           d.store.getSetting<number[]>('best_sellers', []),
         ])
         const mas_pedidos = (await d.mb.bestSellers(suc, (ids ?? []).map(Number).filter(Boolean))).map(s2 => ({ id: s2.id, nombre: s2.name, minutos: s2.minutes, precio: s2.price }))
+        const promociones = promos.map(p => ({
+          id: p.id ?? '',
+          titulo: p.titulo,
+          precio: p.precio,
+          precio_original: p.precio_original,
+          minutos: p.duracion_total || p.minutos,
+          servicios: p.servicios,
+          incluye: (p.incluye ?? []).map(t => t.nombre),
+          valido_hasta: p.valido_hasta,
+        }))
         return { result: json({ promociones, mas_pedidos }), convPatch: sucursalPatch(input, d.conv.sucursal) }
       }
       case 'list_addons': return { result: json(await d.mb.listAddons(input.sucursal)), convPatch: sucursalPatch(input, d.conv.sucursal) }
@@ -111,7 +123,7 @@ export async function executeTool(name: string, input: any, d: ToolDeps): Promis
       case 'book': {
         const err = requireConfirmation(input, d.recentInbound); if (err) return { result: err, isError: true }
         if (!d.conv.mindbody_client_id) return { result: 'Primero identifica al cliente con find_client o create_client.', isError: true }
-        const r = await d.mb.book({ clientId: d.conv.mindbody_client_id, sucursal: input.sucursal, date: input.date, time: input.time, serviceIds: input.service_ids, addonIds: Array.isArray(input.addon_ids) ? input.addon_ids : [], staffId: Number(input.staff_id) || undefined, people: input.people, origin: d.origin, clientName: d.conv.client_name ?? '', phone })
+        const r = await d.mb.book({ clientId: d.conv.mindbody_client_id, sucursal: input.sucursal, date: input.date, time: input.time, serviceIds: input.service_ids, addonIds: Array.isArray(input.addon_ids) ? input.addon_ids : [], staffId: Number(input.staff_id) || undefined, people: input.people, origin: d.origin, clientName: d.conv.client_name ?? '', phone, promoTitle: typeof input.promo_title === 'string' ? input.promo_title : '', promoServiceIds: Array.isArray(input.promo_service_ids) ? input.promo_service_ids.map(Number).filter(Boolean) : [] })
         return { result: json(r), convPatch: { sucursal: input.sucursal } }
       }
       case 'list_my_appointments': { if (!d.conv.mindbody_client_id) return { result: 'Cliente no identificado; usa find_client.' }; return { result: json(await d.mb.upcoming(d.conv.mindbody_client_id)) } }

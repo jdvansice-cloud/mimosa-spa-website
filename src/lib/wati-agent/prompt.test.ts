@@ -38,6 +38,9 @@ describe('buildSystem', () => {
     expect(t).toContain('get_suggestions')
     expect(t).toContain('get_menu_link')
     expect(t).toContain('cualquiera disponible')
+    expect(t).toContain('promo_service_ids')
+    expect(t).toContain('reserva exactamente los tratamientos que la promoción incluye')
+    expect(t).toContain('No preguntes por extras')
   })
 
   it('states the tightened voice rules in the stable block', () => {

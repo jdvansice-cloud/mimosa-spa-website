@@ -141,6 +141,16 @@ resumen y sí claro → `book`.
   ese día. En `book`, `addon_ids` lleva los extras y `staff_id` la terapeuta
   pedida (0 = cualquiera disponible); si esa terapeuta no está libre a esa hora,
   Camila ofrece otra hora en vez de reservar con otra persona.
+- Promociones: `get_suggestions` devuelve por cada promoción su `id`, `titulo`,
+  precio, duración total y los tratamientos que `incluye` (nombres resueltos
+  desde `treatment_settings` a partir de `mindbody_service_ids`, con los
+  nombres de Mindbody como respaldo). Al reservar una promoción, Camila manda
+  esos mismos ids en `service_ids` y en `promo_service_ids`, y el título en
+  `promo_title`; no pregunta por extras porque la promoción ya los define.
+- Notas de la cita: mismo formato que la reserva en línea, partes unidas con
+  ` | `. La primera parte siempre es `Reservado por WhatsApp` y los servicios
+  incluidos en la promoción llevan además `Promo: <título>` (los demás
+  servicios y los adicionales no).
 - `get_menu_link` da el enlace público (`/es/menu`, `/es/menu/faciales`,
   `/es/menu/corporales`, `/es/menu/paquetes`, `/es/promociones`, `/es/parejas`,
   `/es/reservar`) cuando el cliente quiere ver más opciones.
