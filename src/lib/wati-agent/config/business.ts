@@ -45,3 +45,23 @@ export interface LocationOverride { address?: string; parking?: string; wazeUrl?
 export type BusinessOverrides = Partial<Record<Sucursal, LocationOverride>>
 
 export const LOCATION_ID_TO_SUCURSAL: Record<number, Sucursal> = { 1: 'cde', 2: 'sfc' }
+
+/** Sections of the public menu Camila can point a customer to. */
+export const MENU_SECTIONS = ['menu', 'faciales', 'corporales', 'paquetes', 'promociones', 'parejas', 'reservar'] as const
+export type MenuSeccion = (typeof MENU_SECTIONS)[number]
+
+const MENU_PATHS: Record<MenuSeccion, string> = {
+  menu: '/menu',
+  faciales: '/menu/faciales',
+  corporales: '/menu/corporales',
+  paquetes: '/menu/paquetes',
+  promociones: '/promociones',
+  parejas: '/parejas',
+  reservar: '/reservar',
+}
+
+/** Public Spanish URL for a menu section; unknown sections fall back to the full menu. */
+export function menuLink(seccion: string): string {
+  const key = (MENU_SECTIONS as readonly string[]).includes(seccion) ? (seccion as MenuSeccion) : 'menu'
+  return `${BUSINESS.website}/es${MENU_PATHS[key]}`
+}

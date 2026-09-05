@@ -11,11 +11,19 @@ vi.mock('@/lib/booking/mindbody', () => ({
   getClientSchedule: vi.fn(async () => ({ visits: [] })),
   getClientVisits: vi.fn(async () => ({ visits: [] })),
   removeAppointment: vi.fn(async () => true),
+  getAddons: vi.fn(async () => [
+    { Id: 90, Name: 'Piedras calientes', Duration: 15, Price: 15.005 },
+    { Id: 91, Name: 'Aromaterapia', Duration: 10, Price: 10 },
+  ]),
+  getStaff: vi.fn(async () => [
+    { Id: 1, FirstName: 'Ana', LastName: 'Ruiz' },
+    { Id: 2, FirstName: 'Lucía', LastName: 'Mora' },
+  ]),
 }))
 vi.mock('@/lib/booking/wati', () => ({ sendBookingConfirmation: vi.fn(async () => ({ result: true })) }))
 
 import * as mb from '@/lib/booking/mindbody'
-import { listServices, availability, findClientByPhone, book, createClient } from './mindbody-adapter'
+import { listServices, availability, findClientByPhone, book, createClient, listAddons, listTherapists, pickBestSellers, bestSellers } from './mindbody-adapter'
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -163,6 +171,72 @@ describe('adapter', () => {
     const r = await book({ clientId: 'C1', sucursal: 'cde', date: '2026-09-06', time: '10:00', serviceIds: [10], people: 1, origin: 'https://x', clientName: 'Ana Ruiz', phone: '50766124546' })
     expect(r.appointmentIds).toEqual([999])
     expect(r.alreadyBooked).toBeUndefined()
+    vi.unstubAllGlobals()
+  })
+})
+
+const slotsResponse = (slots: Array<{ time: string; availableStaffIds: number[] }>) =>
+  vi.fn(async () => new Response(JSON.stringify({ availableDates: [{ date: '2026-09-06', slots }] })))
+
+describe('addons, best sellers and therapists', () => {
+  it('maps addons and caches them', async () => {
+    const a = await listAddons('sfc')
+    const b = await listAddons('sfc')
+    expect(a).toEqual([
+      { id: 90, name: 'Piedras calientes', minutes: 15, price: 15.01 },
+      { id: 91, name: 'Aromaterapia', minutes: 10, price: 10 },
+    ])
+    expect(b).toBe(a)
+    expect(mb.getAddons).toHaveBeenCalledTimes(1)
+  })
+
+  it('picks configured best sellers, else the fallback names, skipping missing ones', () => {
+    const services = [
+      { id: 10, name: 'Mimosa Relax - 60 min', minutes: 60, price: 75, category: 'Masajes' },
+      { id: 11, name: 'Facial Glow', minutes: 45, price: 60, category: 'Faciales' },
+      { id: 12, name: 'Liberador de Tension - 60 min', minutes: 60, price: 80, category: 'Masajes' },
+    ]
+    expect(pickBestSellers(services, [11, 10]).map(s => s.id)).toEqual([11, 10])
+    // Accent-insensitive match; the hot stones service is missing and is skipped.
+    expect(pickBestSellers(services, []).map(s => s.id)).toEqual([10, 12])
+  })
+
+  it('bestSellers falls back to the configured service list', async () => {
+    const out = await bestSellers('cde', [])
+    expect(out.map(s => s.id)).toEqual([10])
+  })
+
+  it('lists therapists as the union of the day slots with their free times', async () => {
+    const fetchImpl = slotsResponse([
+      { time: '10:00', availableStaffIds: [1] },
+      { time: '11:00', availableStaffIds: [1, 2] },
+    ])
+    const t = await listTherapists({ sucursal: 'cde', date: '2026-09-06', serviceIds: [10], origin: 'https://x', phone: '507', fetchImpl })
+    expect(t).toEqual([
+      { id: 1, nombre: 'Ana Ruiz', horas: ['10:00', '11:00'] },
+      { id: 2, nombre: 'Lucía Mora', horas: ['11:00'] },
+    ])
+  })
+
+  it('books add-ons in the same chain and flags a requested therapist', async () => {
+    vi.stubGlobal('fetch', slotsResponse([{ time: '10:00', availableStaffIds: [1, 2] }]))
+    ;(mb.addMultipleAppointments as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ success: true, appointments: [{ Id: 1, Staff: { FirstName: 'Lucía', LastName: 'Mora' } }, { Id: 2 }] })
+
+    const r = await book({ clientId: 'C1', sucursal: 'cde', date: '2026-09-06', time: '10:00', serviceIds: [10], addonIds: [90], staffId: 2, people: 1, origin: 'https://x', clientName: 'Ana Ruiz', phone: '507' })
+
+    expect(r.appointmentIds).toEqual([1, 2])
+    const chain = (mb.addMultipleAppointments as ReturnType<typeof vi.fn>).mock.calls[0][0]
+    expect(chain.map((a: any) => a.SessionTypeId)).toEqual([10, 90])
+    expect(chain.every((a: any) => a.StaffId === 2 && a.StaffRequested === true)).toBe(true)
+    vi.unstubAllGlobals()
+  })
+
+  it('refuses a therapist who is not free at that time', async () => {
+    vi.stubGlobal('fetch', slotsResponse([{ time: '10:00', availableStaffIds: [1] }]))
+    await expect(
+      book({ clientId: 'C1', sucursal: 'cde', date: '2026-09-06', time: '10:00', serviceIds: [10], addonIds: [], staffId: 2, people: 1, origin: 'https://x', clientName: 'Ana Ruiz', phone: '507' })
+    ).rejects.toThrow(/Esa terapeuta no está disponible a esa hora/)
+    expect(mb.addMultipleAppointments).not.toHaveBeenCalled()
     vi.unstubAllGlobals()
   })
 })
