@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { authorized, parseInbound, parseSent, isHumanOperator, shouldDebounceSkip, fallbackMessageId, resolveOrigin } from './webhook'
+import { authorized, parseInbound, parseSent, isHumanOperator, shouldDebounceSkip, fallbackMessageId, resolveOrigin, isWhatsAppContact } from './webhook'
 
 describe('webhook', () => {
   it('authorizes by token query', () => expect(authorized('https://x/api?token=abc', 'abc')).toBe(true))
@@ -34,6 +34,14 @@ describe('webhook', () => {
     expect(parseSent({ contact: { phone: '50766124546' }, whatsappMessageId: 'w2', owner: true })).toMatchObject({ phone: '50766124546' })
     expect(parseSent({ phone: '50766124546', whatsappMessageId: 'w3', owner: true })).toMatchObject({ phone: '50766124546' })
   })
+})
+
+describe('isWhatsAppContact', () => {
+  it('accepts a plain phone with no channel', () => expect(isWhatsAppContact({ phone: '50766124546' })).toBe(true))
+  it('rejects a page-scoped 15-digit id', () => expect(isWhatsAppContact({ phone: '123456789012345' })).toBe(false))
+  it('rejects a removed-CO style id', () => expect(isWhatsAppContact({ phone: '123' })).toBe(false))
+  it('rejects when channel says instagram even if phone is valid', () => expect(isWhatsAppContact({ phone: '50766124546', channel: 'instagram' })).toBe(false))
+  it('accepts when channel matches whatsapp', () => expect(isWhatsAppContact({ phone: '50766124546', channel: 'WhatsApp' })).toBe(true))
 })
 
 describe('resolveOrigin', () => {

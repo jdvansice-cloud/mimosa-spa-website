@@ -16,6 +16,13 @@ export interface InboundEvent {
   contactId: string | null
   mediaRef: string | null
   timestamp: string | null
+  channel: string | null
+}
+
+/** True when a contact is on WhatsApp: channel absent/matching, and phone looks like a real MSISDN (not a page-scoped id). */
+export function isWhatsAppContact(e: { phone: string; channel?: string | null }): boolean {
+  if (e.channel != null && !/whatsapp/i.test(e.channel)) return false
+  return /^\d{10,13}$/.test(e.phone)
 }
 
 /** djb2-style hash, stable across runs. */
@@ -48,6 +55,9 @@ export function parseInbound(b: any): InboundEvent | null {
     contactId: b.contactId ?? b.conversationId ?? null,
     mediaRef: data?.fileName ?? data?.filename ?? (typeof b.data === 'string' ? b.data : null),
     timestamp: b.timestamp ?? null,
+    channel: (b?.channel ?? b?.channelType ?? b?.sourceType ?? b?.platform) != null
+      ? String(b.channel ?? b.channelType ?? b.sourceType ?? b.platform)
+      : null,
   }
 }
 
@@ -58,6 +68,7 @@ export interface SentEvent {
   operatorEmail: string | null
   operatorName: string | null
   owner: boolean
+  channel: string | null
 }
 
 export function parseSent(b: any): SentEvent | null {
@@ -71,6 +82,9 @@ export function parseSent(b: any): SentEvent | null {
     operatorEmail: b.operatorEmail ? String(b.operatorEmail).toLowerCase() : null,
     operatorName: b.operatorName ?? null,
     owner: Boolean(b.owner),
+    channel: (b?.channel ?? b?.channelType ?? b?.sourceType ?? b?.platform) != null
+      ? String(b.channel ?? b.channelType ?? b.sourceType ?? b.platform)
+      : null,
   }
 }
 

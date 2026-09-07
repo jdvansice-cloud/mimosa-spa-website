@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
 import Anthropic from '@anthropic-ai/sdk'
-import { authorized, parseInbound, shouldDebounceSkip, fallbackMessageId, resolveOrigin } from '@/lib/wati-agent/webhook'
+import { authorized, parseInbound, shouldDebounceSkip, fallbackMessageId, resolveOrigin, isWhatsAppContact } from '@/lib/wati-agent/webhook'
 import { env } from '@/lib/wati-agent/config/env'
 import { storeFromEnv } from '@/lib/wati-agent/store'
 import { watiFromEnv } from '@/lib/wati-agent/wati-api'
@@ -24,6 +24,16 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const ev = parseInbound(body)
   if (!ev) return NextResponse.json({ ok: true, ignored: 'no waId' })
+  if (!isWhatsAppContact(ev)) {
+    if (ev.phone.length >= 8) {
+      try {
+        await storeFromEnv().logEvent(ev.phone, 'llm', { skipped: 'channel', channel: ev.channel, id: ev.phone })
+      } catch (err) {
+        console.error('wati-agent inbound channel-skip log failed', err)
+      }
+    }
+    return NextResponse.json({ ok: true, ignored: 'channel' })
+  }
   const origin = resolveOrigin(
     request.headers.get('x-forwarded-proto') ?? request.nextUrl.protocol.replace(':', ''),
     request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? request.nextUrl.host,

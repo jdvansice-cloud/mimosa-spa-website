@@ -29,6 +29,13 @@ sección 6 (spike) antes de pasar a `shadow`.
 
 Responde siempre (24/7), desde el primer mensaje, en todos los chats.
 
+**Solo WhatsApp por ahora:** WATI también enruta mensajes de Instagram y
+Messenger por los mismos webhooks; Camila los ignora (`isWhatsAppContact` en
+`src/lib/wati-agent/webhook.ts`) y no crea conversación ni responde. Cada
+mensaje ignorado con id de al menos 8 caracteres queda registrado como evento
+`llm` con `skipped: 'channel'` (tabla de eventos del store), para poder
+contarlos desde el admin.
+
 **Hace por su cuenta:**
 - Información: ubicación, horarios, precios, promociones, servicios.
 - Reservas, cambios de fecha/hora y cancelaciones en Mindbody. Los cambios y
