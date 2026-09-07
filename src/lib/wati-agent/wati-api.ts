@@ -25,6 +25,26 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null
 }
 
+// Duplicated (not imported) to avoid a dependency cycle with src/lib/booking/wati.ts.
+// Reception stores 6000-0000 on Mindbody clients with no real phone; sending
+// there lands on whoever actually owns that WhatsApp number — a data leak.
+function isPlaceholderWatiPhone(phone: string): boolean {
+  if (!phone) return true
+
+  let cleaned = phone.replace(/\D/g, '')
+  if (!cleaned.startsWith('507') && cleaned.length === 8) {
+    cleaned = '507' + cleaned
+  }
+
+  if (cleaned === '50760000000' || cleaned === '60000000') return true
+  if (cleaned.length < 11) return true
+
+  const last7 = cleaned.slice(-7)
+  if (/^(\d)\1{6}$/.test(last7)) return true
+
+  return false
+}
+
 export function createWatiClient(opts: { baseUrl: string; token: string; channelPhone?: string; fetchImpl?: typeof fetch }): WatiClient {
   const base = opts.baseUrl.replace(/\/$/, '')
   const root = base.replace(/\/\d+$/, '')
@@ -62,6 +82,10 @@ export function createWatiClient(opts: { baseUrl: string; token: string; channel
 
   return {
     async sendText(phone, text) {
+      if (isPlaceholderWatiPhone(phone)) {
+        console.warn(`WATI agent send blocked: placeholder phone "${phone}" (sendText)`)
+        return { ok: false, error: 'placeholder phone' }
+      }
       const r = await call('/api/ext/v3/conversations/messages/text', { method: 'POST', json: { target: phone, text } })
       let messageId: string | undefined
       let whatsappMessageId: string | undefined
@@ -75,6 +99,10 @@ export function createWatiClient(opts: { baseUrl: string; token: string; channel
       return { ok: r.ok, messageId: whatsappMessageId ?? messageId, whatsappMessageId, error: r.error }
     },
     async sendFile(phone, file, caption) {
+      if (isPlaceholderWatiPhone(phone)) {
+        console.warn(`WATI agent send blocked: placeholder phone "${phone}" (sendFile)`)
+        return { ok: false, error: 'placeholder phone' }
+      }
       const fd = new FormData()
       fd.append('file', new Blob([file.bytes as BlobPart], { type: file.mime }), file.filename)
       const q = caption ? `?caption=${encodeURIComponent(caption)}` : ''
@@ -82,6 +110,10 @@ export function createWatiClient(opts: { baseUrl: string; token: string; channel
       return { ok: r.ok, error: r.error }
     },
     async sendButtons(phone, body, buttons, footer) {
+      if (isPlaceholderWatiPhone(phone)) {
+        console.warn(`WATI agent send blocked: placeholder phone "${phone}" (sendButtons)`)
+        return { ok: false, error: 'placeholder phone' }
+      }
       const r = await call(`/api/v1/sendInteractiveButtonsMessage?whatsappNumber=${phone}`, {
         method: 'POST',
         json: { body, footer: footer ?? '', buttons: buttons.slice(0, 3).map(text => ({ text: text.slice(0, 20) })) },

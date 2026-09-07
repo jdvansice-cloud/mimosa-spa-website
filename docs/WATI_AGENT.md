@@ -81,6 +81,22 @@ Límites duros que ya existían y siguen vigentes:
 - Datos de pago (Yappy, cuenta, link de tarjeta) **solo** con la herramienta
   `get_payment_info`, nunca escritos de memoria.
 
+## Teléfonos placeholder
+
+Recepción a veces guarda `6000-0000` en Mindbody cuando un cliente no dejó
+teléfono. Ese número normaliza a `50760000000`, que en WhatsApp le pertenece
+a una clienta real — enviarle plantillas de confirmación/recordatorio ahí
+filtra los datos de otros clientes a su chat. `isPlaceholderPhone()`
+(`src/lib/booking/wati.ts`) detecta `50760000000`/`60000000`, cualquier
+número que quede con menos de 11 dígitos tras normalizar, o cuyos últimos 7
+dígitos sean todos iguales (`0000000`, `1111111`, etc.), y `sendTemplate` —el
+único punto de envío de plantillas— bloquea el envío antes de llamar a WATI
+(igual en `createWatiClient` para los mensajes de Camila). El cron de
+recordatorios cae automáticamente al correo cuando esto pasa. Recomendación:
+en Mindbody, dejar el campo de teléfono **en blanco** en vez de poner
+6000-0000 — así el sistema lo trata como "sin teléfono" desde el inicio, sin
+depender de la heurística.
+
 ## Cómo funciona
 
 ```
