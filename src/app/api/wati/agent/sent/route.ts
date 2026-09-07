@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorized, parseSent, isHumanOperator } from '@/lib/wati-agent/webhook'
+import { authorized, parseSent, isHumanOperator, isWhatsAppContact } from '@/lib/wati-agent/webhook'
 import { env } from '@/lib/wati-agent/config/env'
 import { storeFromEnv } from '@/lib/wati-agent/store'
 import { registerTakeover } from '@/lib/wati-agent/handoff'
@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
   if (!authorized(request.url, e.webhookSecret)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   const ev = parseSent(await request.json().catch(() => null))
   if (!ev) return NextResponse.json({ ok: true })
+  if (!isWhatsAppContact(ev)) return NextResponse.json({ ok: true, ignored: 'channel' })
   try {
     const store = storeFromEnv()
     const apiLabels = await store.getSetting<string[]>('api_operator_labels', [''])

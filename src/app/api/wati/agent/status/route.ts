@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authorized } from '@/lib/wati-agent/webhook'
+import { authorized, isWhatsAppContact } from '@/lib/wati-agent/webhook'
 import { cleanPhone } from '@/lib/wati-agent/phone'
 import { env } from '@/lib/wati-agent/config/env'
 import { storeFromEnv } from '@/lib/wati-agent/store'
@@ -12,6 +12,10 @@ export async function POST(request: NextRequest) {
   const b = await request.json().catch(() => null)
   const phone = cleanPhone(b?.waId)
   const status = String(b?.ticketStatus ?? b?.status ?? b?.statusString ?? '').toUpperCase()
+  const channel = (b?.channel ?? b?.channelType ?? b?.sourceType ?? b?.platform) != null
+    ? String(b.channel ?? b.channelType ?? b.sourceType ?? b.platform)
+    : null
+  if (!isWhatsAppContact({ phone, channel })) return NextResponse.json({ ok: true, ignored: 'channel' })
   try {
     if (phone && status === 'SOLVED') {
       const store = storeFromEnv()
