@@ -23,7 +23,7 @@ describe('wati client', () => {
   it('sendText prefers whatsappMessageId over id when both are present', async () => {
     const { f } = mockFetch(200, { id: 'internal-1', whatsappMessageId: 'wamid.ABC123' })
     const c = createWatiClient({ baseUrl: 'https://x', token: 'T', fetchImpl: f })
-    const r = await c.sendText('507', 'Hola')
+    const r = await c.sendText('50766124546', 'Hola')
     expect(r.whatsappMessageId).toBe('wamid.ABC123')
     expect(r.messageId).toBe('wamid.ABC123')
   })
@@ -55,8 +55,16 @@ describe('wati client', () => {
   it('non-2xx returns ok:false with error', async () => {
     const { f } = mockFetch(401, { error: 'nope' })
     const c = createWatiClient({ baseUrl: 'https://x', token: 'T', fetchImpl: f })
-    const r = await c.sendText('507', 'x')
+    const r = await c.sendText('50766124546', 'x')
     expect(r.ok).toBe(false)
     expect(r.error).toContain('401')
+  })
+  it('sendText with a placeholder phone (6000-0000) returns ok:false and never calls fetch', async () => {
+    const { f } = mockFetch()
+    const c = createWatiClient({ baseUrl: 'https://x', token: 'T', fetchImpl: f })
+    const r = await c.sendText('50760000000', 'Hola')
+    expect(r.ok).toBe(false)
+    expect(r.error).toBe('placeholder phone')
+    expect(f).not.toHaveBeenCalled()
   })
 })

@@ -54,6 +54,31 @@ function formatPhoneForWati(phone: string): string {
 }
 
 // ===========================================
+// PLACEHOLDER PHONE DETECTION
+// Reception stores 6000-0000 on Mindbody clients who have no real phone.
+// Sending WATI templates to it lands on whoever actually owns that WhatsApp
+// number (a real customer) — a data leak. Treat any placeholder-looking
+// number as "no phone" everywhere we'd otherwise send a template/message.
+// ===========================================
+
+export function isPlaceholderPhone(phone: string): boolean {
+  if (!phone) return true
+
+  const formatted = formatPhoneForWati(phone)
+
+  if (formatted === '50760000000' || formatted === '60000000') return true
+
+  // Too short to be a real Panama WhatsApp number once normalized.
+  if (formatted.length < 11) return true
+
+  // Last 7 digits all the same digit (e.g. ...0000000, ...1111111).
+  const last7 = formatted.slice(-7)
+  if (/^(\d)\1{6}$/.test(last7)) return true
+
+  return false
+}
+
+// ===========================================
 // API REQUEST HELPER
 // POST /api/v1/sendTemplateMessage?whatsappNumber=PHONE
 // ===========================================
@@ -66,6 +91,11 @@ async function sendTemplate(
   if (!WATI_ACCESS_TOKEN) {
     console.warn('WATI_ACCESS_TOKEN not configured')
     return { result: false, error: 'WATI not configured' }
+  }
+
+  if (isPlaceholderPhone(phone)) {
+    console.warn(`WATI send blocked: placeholder phone "${phone}" (template: ${templateName})`)
+    return { result: false, error: 'placeholder phone' }
   }
 
   const formattedPhone = formatPhoneForWati(phone)
