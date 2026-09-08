@@ -106,16 +106,16 @@ export const EXPLAIN: Record<string, ExplainEntry> = {
   },
   // agenda
   agenda_hero: {
-    es: 'Citas del mes EN LIBROS: realizadas hasta hoy + reservas futuras (la suma del calendario, igual que Mindbody). El % compara contra el mes completo del año pasado; la línea de abajo compara solo las mismas fechas. El ingreso esperado estima el neto de las reservas restantes.',
-    en: "Appointments ON THE BOOKS this month: done through today + future bookings (the calendar's sum, same as Mindbody). The % compares against last year's full month; the line below compares same dates only. Expected income estimates the net of remaining bookings.",
+    es: 'Citas del mes (tratamientos, igual que el calendario de Mindbody) comparadas con las mismas fechas del año pasado. El ingreso esperado estima el neto de las reservas restantes: $/minuto reciente × minutos reservados.',
+    en: 'Appointments this month (treatments, same as the Mindbody calendar) compared with the same dates last year. Expected income estimates the net of remaining bookings: recent $/minute × booked minutes.',
   },
   agenda_grid: {
     es: 'Citas por día: más intenso = más citas; píldora verde = reservas futuras; el disco dorado es hoy. Toca un día para ver el horario por terapeuta con colores de estado.',
     en: 'Appointments per day: darker = more appointments; green pill = future bookings; the gold disc is today. Tap a day for the per-therapist schedule with status colors.',
   },
-  hoy_canal: {
-    es: 'Citas activas de HOY divididas por canal de reserva: online = hechas por la clienta en el sitio web; directas = agendadas por el equipo (mostrador, teléfono, WhatsApp). Se actualiza cada 5 minutos.',
-    en: "TODAY's active appointments split by booking channel: online = booked by the client on the website; direct = scheduled by the team (front desk, phone, WhatsApp). Refreshes every 5 minutes.",
+  canal_mes: {
+    es: 'Citas activas del mes divididas por canal de reserva: online = hechas por la clienta en el sitio web; directas = agendadas por el equipo (mostrador, teléfono, WhatsApp). Toca para ver el detalle por día — hoy aparece resaltado.',
+    en: "The month's active appointments split by booking channel: online = booked by the client on the website; direct = scheduled by the team (front desk, phone, WhatsApp). Tap to see the per-day detail — today is highlighted.",
   },
   // marketing
   sesiones: {
