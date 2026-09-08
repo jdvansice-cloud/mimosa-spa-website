@@ -308,7 +308,11 @@ export async function getAgendaMonth(month: string, location: KpiLocation): Prom
         supabase
           .from('bookings')
           .select('mindbody_appointment_ids')
-          .in('status', ['confirmed', 'partial'])
+          // Website bookings only: staff-created appointments are ingested with
+          // MB- confirmation numbers (for WhatsApp confirmations) and lifecycle
+          // moves rows to completed/noshow — so filter by origin, not status.
+          .not('confirmation_number', 'like', 'MB-%')
+          .neq('status', 'failed')
           .gte('created_at', `${addDays(start, -180)}T00:00:00`)
           .order('created_at', { ascending: true })
           .order('id', { ascending: true })
