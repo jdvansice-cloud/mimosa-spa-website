@@ -1,12 +1,12 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import type { AgendaAppointment, AgendaMonth, StaffAvailability } from '@/lib/kpis/report'
 import { BlackSpinner, CardBox, DeltaChip, Label, LoadingCard, deltaPct, money } from '../shared'
-import { LangProvider, LangToggle, MONTHS_LONG, WEEKDAY_LETTERS, formatDateLang, useLang, useT } from '../i18n'
+import { LangProvider, LangToggle, MONTHS_LONG, WEEKDAYS_SHORT, WEEKDAY_LETTERS, formatDateLang, useLang, useT } from '../i18n'
 import { prefetchStaffKpis } from '../prefetch'
-import { InfoTip, DictionaryLink } from '../explain'
+import { ExplainText, InfoTip, DictionaryLink } from '../explain'
 
 // ===========================================
 // Agenda — calendario mensual con citas por día; al tocar un día se abre
@@ -131,7 +131,7 @@ function AgendaInner() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null) // day view when set
-  const [showCalendar, setShowCalendar] = useState(false)
+  const [showChannels, setShowChannels] = useState(false)
   const [dayCache, setDayCache] = useState<Record<string, DayState>>({})
   const [refreshTick, setRefreshTick] = useState(0)
 
@@ -460,28 +460,17 @@ function AgendaInner() {
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Month total ON THE BOOKS (done + future) — the sum of the calendar tiles */}
+          {/* Month total — compared over the same dates, with the full LY month as goal */}
           <div className="rounded-2xl border border-gold-200 bg-gold-50 p-4">
             <Label info="agenda_hero">{t('Citas del mes')}</Label>
             <div className="flex items-baseline gap-3 flex-wrap mt-1">
-              <span className="text-3xl font-bold text-dark tabular-nums">
-                {(data.totals.activeToDate + data.totals.futureBooked).toLocaleString('en-US')}
-              </span>
-              {data.totals.lyFullMonth > 0 && (
-                <DeltaChip
-                  delta={deltaPct(data.totals.activeToDate + data.totals.futureBooked, data.totals.lyFullMonth)}
-                  suffix={`vs ${lyYear} ${t('mes completo')}`}
-                />
-              )}
+              <span className="text-3xl font-bold text-dark tabular-nums">{data.totals.activeToDate.toLocaleString('en-US')}</span>
+              <DeltaChip delta={deltaPct(data.totals.activeToDate, data.totals.lySameDates)} suffix={`vs ${lyYear}`} />
             </div>
-            <p className="text-xs text-warm-gray-500 mt-1 tabular-nums">
-              <b className="text-dark">{data.totals.activeToDate.toLocaleString('en-US')}</b> {t('hasta hoy')}
-              {data.totals.lySameDates > 0 && (() => {
-                const d = deltaPct(data.totals.activeToDate, data.totals.lySameDates)
-                return (
-                  <> ({d !== null && `${d >= 0 ? '+' : ''}${Math.round(d * 100)}%`} vs {data.totals.lySameDates.toLocaleString('en-US')} {t('en las mismas fechas de')} {lyYear})</>
-                )
-              })()}
+            <p className="text-xs text-warm-gray-500 mt-1">
+              {data.totals.lySameDates > 0
+                ? `${data.totals.lySameDates.toLocaleString('en-US')} ${t('citas en las mismas fechas de')} ${lyYear}`
+                : `${t('sin datos de')} ${lyYear} ${t('para comparar')}`}
             </p>
             {data.totals.lyFullMonth > 0 && (
               <p className="text-xs text-warm-gray-500 mt-0.5">
@@ -498,36 +487,56 @@ function AgendaInner() {
             )}
           </div>
 
-          {/* Today's bookings by channel */}
-          {data.todayBookings && (
-            <CardBox className="py-3">
-              <div className="flex items-center justify-between flex-wrap gap-x-4 gap-y-1">
-                <Label info="hoy_canal">{t('Citas de hoy')}</Label>
-                <div className="flex items-baseline gap-4 tabular-nums">
-                  <span className="text-xl font-bold text-dark">{data.todayBookings.total}</span>
-                  <span className="text-sm text-dark">
-                    <b>{data.todayBookings.direct}</b> <span className="text-warm-gray-500">{t('directas')}</span>
-                  </span>
-                  <span className="text-sm font-bold text-spa-green">
-                    {data.todayBookings.online} <span className="font-normal">online</span>
-                  </span>
+          {/* Month's bookings by channel, per-day list collapsed behind a tap */}
+          {(data.bookingChannels.direct + data.bookingChannels.online) > 0 && (
+            <CardBox className="p-0 overflow-hidden">
+              <button
+                onClick={() => setShowChannels(v => !v)}
+                aria-expanded={showChannels}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-beige-100/50 transition-colors"
+              >
+                <span className="flex items-center">
+                  <Label>{t('Citas por canal')}</Label>
+                  <Info className="h-3 w-3 ml-1.5 text-warm-gray-500/60" />
+                </span>
+                <span className="flex items-baseline gap-3 tabular-nums text-sm whitespace-nowrap">
+                  <span className="text-dark"><b>{data.bookingChannels.direct.toLocaleString('en-US')}</b> <span className="text-warm-gray-500">{t('directas')}</span></span>
+                  <span className="font-bold text-spa-green">{data.bookingChannels.online.toLocaleString('en-US')} <span className="font-normal">online</span></span>
+                  <ChevronDown className={`h-4 w-4 self-center text-warm-gray-500 transition-transform ${showChannels ? 'rotate-180' : ''}`} />
+                </span>
+              </button>
+              {showChannels && (
+                <div className="px-4 pb-3">
+                  <ExplainText k="canal_mes" className="mb-2" />
+                  <div className="flex justify-end gap-4 text-[9px] uppercase tracking-wider text-warm-gray-500 font-bold pb-1 border-b border-beige-300">
+                    <span className="w-14 text-right">{t('directas')}</span>
+                    <span className="w-14 text-right">online</span>
+                  </div>
+                  {data.bookingChannels.days.map(d => {
+                    const isToday = d.date === today
+                    const dow = new Date(`${d.date}T00:00:00Z`).getUTCDay()
+                    return (
+                      <div
+                        key={d.date}
+                        className={`flex items-center justify-between py-1 text-xs tabular-nums border-b border-dashed border-beige-200 ${isToday ? 'font-bold' : ''}`}
+                      >
+                        <span className={isToday ? 'text-dark' : 'text-warm-gray-500'}>
+                          {WEEKDAYS_SHORT[lang][dow]} {Number(d.date.slice(8, 10))}{isToday && ` · ${t('Hoy')}`}
+                        </span>
+                        <span className="flex gap-4">
+                          <span className="w-14 text-right text-dark">{d.direct}</span>
+                          <span className={`w-14 text-right ${d.online > 0 ? 'text-spa-green font-bold' : 'text-warm-gray-500'}`}>{d.online}</span>
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
-              </div>
+              )}
             </CardBox>
           )}
 
-          {/* Calendar grid — collapsed by default; the hero already carries the month KPI */}
-          <CardBox className="p-0 overflow-hidden">
-            <button
-              onClick={() => setShowCalendar(v => !v)}
-              aria-expanded={showCalendar}
-              className="w-full flex items-center justify-between px-4 py-3 hover:bg-beige-100/50 transition-colors"
-            >
-              <Label>{t('Calendario por día')}</Label>
-              <ChevronDown className={`h-4 w-4 text-warm-gray-500 transition-transform ${showCalendar ? 'rotate-180' : ''}`} />
-            </button>
-            {showCalendar && (
-            <div className="px-4 pb-4">
+          {/* Calendar grid */}
+          <CardBox>
             <div className="grid grid-cols-7 text-center text-[10px] font-bold text-warm-gray-500 mb-1">
               {WEEKDAYS.map((d, i) => <span key={i} className="py-1">{d}</span>)}
             </div>
@@ -574,8 +583,6 @@ function AgendaInner() {
               <span>■ {t('más intenso = más citas')}<InfoTip k="agenda_grid" /></span>
               <span><span className="text-spa-green font-bold">{t('verde')}</span> {t('= reservas futuras')}</span>
             </div>
-            </div>
-            )}
           </CardBox>
 
           <p className="text-center text-xs text-warm-gray-500 pb-4">

@@ -56,6 +56,7 @@ const SECTIONS: Section[] = [
     terms: [
       { k: 'agenda_hero', es: 'Citas del mes e ingreso esperado', en: 'Month appointments & expected income' },
       { k: 'agenda_grid', es: 'Calendario', en: 'Calendar grid' },
+      { k: 'canal_mes', es: 'Citas por canal', en: 'Appointments by channel' },
     ],
   },
   {
