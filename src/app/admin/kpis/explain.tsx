@@ -113,6 +113,10 @@ export const EXPLAIN: Record<string, ExplainEntry> = {
     es: 'Citas por día: más intenso = más citas; píldora verde = reservas futuras; el disco dorado es hoy. Toca un día para ver el horario por terapeuta con colores de estado.',
     en: 'Appointments per day: darker = more appointments; green pill = future bookings; the gold disc is today. Tap a day for the per-therapist schedule with status colors.',
   },
+  hoy_canal: {
+    es: 'Citas activas de HOY divididas por canal de reserva: online = hechas por la clienta en el sitio web; directas = agendadas por el equipo (mostrador, teléfono, WhatsApp). Se actualiza cada 5 minutos.',
+    en: "TODAY's active appointments split by booking channel: online = booked by the client on the website; direct = scheduled by the team (front desk, phone, WhatsApp). Refreshes every 5 minutes.",
+  },
   // marketing
   sesiones: {
     es: 'Una sesión = un navegador visitando el sitio (no una persona: el mismo cliente en celular y laptop son 2 sesiones).',

@@ -486,6 +486,24 @@ function AgendaInner() {
             )}
           </div>
 
+          {/* Today's bookings by channel */}
+          {data.todayBookings && (
+            <CardBox className="py-3">
+              <div className="flex items-center justify-between flex-wrap gap-x-4 gap-y-1">
+                <Label info="hoy_canal">{t('Citas de hoy')}</Label>
+                <div className="flex items-baseline gap-4 tabular-nums">
+                  <span className="text-xl font-bold text-dark">{data.todayBookings.total}</span>
+                  <span className="text-sm text-dark">
+                    <b>{data.todayBookings.direct}</b> <span className="text-warm-gray-500">{t('directas')}</span>
+                  </span>
+                  <span className="text-sm font-bold text-spa-green">
+                    {data.todayBookings.online} <span className="font-normal">online</span>
+                  </span>
+                </div>
+              </div>
+            </CardBox>
+          )}
+
           {/* Calendar grid */}
           <CardBox>
             <div className="grid grid-cols-7 text-center text-[10px] font-bold text-warm-gray-500 mb-1">
