@@ -177,6 +177,9 @@ export default function GiftCardPrintPage() {
           <ArrowLeft className="h-4 w-4" /> Volver a Emitidas
         </Link>
         <div className="flex flex-wrap items-center gap-2">
+          <Link href="/admin/giftcards/manual">
+            <Button variant="outline" leftIcon={<BookOpen className="h-4 w-4" />}>Manual</Button>
+          </Link>
           {!card.sold_at && !card.redeemed_at && !card.voided_at && (
             <Link href={`/admin/giftcards/issued/${card.id}/edit`}>
               <Button variant="outline" leftIcon={<Pencil className="h-4 w-4" />}>Editar</Button>
