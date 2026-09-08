@@ -106,8 +106,8 @@ export const EXPLAIN: Record<string, ExplainEntry> = {
   },
   // agenda
   agenda_hero: {
-    es: 'Citas del mes (tratamientos, igual que el calendario de Mindbody) comparadas con las mismas fechas del año pasado. El ingreso esperado estima el neto de las reservas restantes: $/minuto reciente × minutos reservados.',
-    en: 'Appointments this month (treatments, same as the Mindbody calendar) compared with the same dates last year. Expected income estimates the net of remaining bookings: recent $/minute × booked minutes.',
+    es: 'Citas del mes EN LIBROS: realizadas hasta hoy + reservas futuras (la suma del calendario, igual que Mindbody). El % compara contra el mes completo del año pasado; la línea de abajo compara solo las mismas fechas. El ingreso esperado estima el neto de las reservas restantes.',
+    en: "Appointments ON THE BOOKS this month: done through today + future bookings (the calendar's sum, same as Mindbody). The % compares against last year's full month; the line below compares same dates only. Expected income estimates the net of remaining bookings.",
   },
   agenda_grid: {
     es: 'Citas por día: más intenso = más citas; píldora verde = reservas futuras; el disco dorado es hoy. Toca un día para ver el horario por terapeuta con colores de estado.',
