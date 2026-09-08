@@ -208,9 +208,11 @@ export interface AgendaMonth {
     /** Estimated net income of the month's remaining bookings (last-30-days $/appointment-minute × booked minutes). */
     expectedIncome: number | null
   }
+  /** Today's appointments split by booking channel (only when the viewed month contains today). */
+  todayBookings: { total: number; online: number; direct: number } | null
 }
 
-interface AgendaApptRow { start_datetime: string; status: string; duration_min: number | null }
+interface AgendaApptRow { id: number; start_datetime: string; status: string; duration_min: number | null }
 
 export async function getAgendaMonth(month: string, location: KpiLocation): Promise<AgendaMonth> {
   const supabase = serviceClient()
@@ -228,7 +230,7 @@ export async function getAgendaMonth(month: string, location: KpiLocation): Prom
     fetchAll<AgendaApptRow>((from, to) => {
       let q = supabase
         .from('mb_appointments')
-        .select('start_datetime,status,duration_min')
+        .select('id,start_datetime,status,duration_min')
         .gte('start_datetime', `${start}T00:00:00`)
         .lte('start_datetime', `${end}T23:59:59`)
       if (location !== 'all') q = q.eq('location_id', location)
@@ -287,6 +289,33 @@ export async function getAgendaMonth(month: string, location: KpiLocation): Prom
     ? Math.round(perMinute * futureMinutes)
     : null
 
+  // Today's appointments by booking channel: website bookings record their
+  // Mindbody appointment ids, so anything in that table is "online" and the
+  // rest was booked directly (front desk / phone / WhatsApp).
+  let todayBookings: AgendaMonth['todayBookings'] = null
+  const todayAppts = appts.filter(
+    a => a.start_datetime.slice(0, 10) === today && !['Cancelled', 'LateCancelled', 'NoShow'].includes(a.status)
+  )
+  if (todayAppts.length > 0) {
+    let online = 0
+    try {
+      const ids = todayAppts.map(a => a.id)
+      const { data: webBookings } = await supabase
+        .from('bookings')
+        .select('mindbody_appointment_ids')
+        .in('status', ['confirmed', 'partial'])
+        .overlaps('mindbody_appointment_ids', ids)
+      const onlineIds = new Set<number>()
+      for (const b of webBookings ?? []) {
+        for (const id of (b.mindbody_appointment_ids as number[] | null) ?? []) onlineIds.add(id)
+      }
+      online = todayAppts.filter(a => onlineIds.has(a.id)).length
+    } catch { /* channel split is best-effort — never break the agenda */ }
+    todayBookings = { total: todayAppts.length, online, direct: todayAppts.length - online }
+  } else if (month === today.slice(0, 7)) {
+    todayBookings = { total: 0, online: 0, direct: 0 }
+  }
+
   return {
     month,
     days,
@@ -297,6 +326,7 @@ export async function getAgendaMonth(month: string, location: KpiLocation): Prom
       lyFullMonth: lyAppts.reduce((s, r) => s + r.visits + r.missed, 0),
       expectedIncome,
     },
+    todayBookings,
   }
 }
 

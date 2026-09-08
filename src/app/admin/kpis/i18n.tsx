@@ -297,6 +297,8 @@ const EN: Record<string, string> = {
   'Hoy se actualiza al entrar y cada 5 min mientras la página esté abierta · reservas futuras ~60 días adelante':
     'Today refreshes on entry and every 5 min while the page is open · future bookings ~60 days ahead',
   'citas': 'appointments',
+  'Citas de hoy': "Today's appointments",
+  'directas': 'direct',
   'no-shows': 'no-shows',
   'reservas': 'bookings',
   'canceladas': 'cancelled',
