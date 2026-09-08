@@ -84,6 +84,8 @@ export interface KpiPayload {
   }
   prebooked: { clientsSeen: number; withNext: number; rate: number | null }
   noShow: { count: number; rate: number | null; lyRate: number | null }
+  /** Booking channel of the period's appointments (online = made on the website). */
+  channels: { online: number; direct: number } | null
   /** Ownership budget for the selected scope/period (null in gc mode or years without a budget). */
   budget: {
     year: number
@@ -803,6 +805,28 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
     })
   }
 
+  // ---- booking channel (website bookings record their Mindbody appointment ids) ----
+  let channels: KpiPayload['channels'] = null
+  const channelAppts = curAppts.filter(a => a.status !== 'Cancelled' && a.status !== 'LateCancelled')
+  if (!gcMode && channelAppts.length > 0) {
+    try {
+      const bookingRows = await fetchAll<{ mindbody_appointment_ids: number[] | null }>((from, to) =>
+        supabase
+          .from('bookings')
+          .select('mindbody_appointment_ids')
+          .in('status', ['confirmed', 'partial'])
+          .gte('created_at', `${addDays(range.start, -180)}T00:00:00`)
+          .order('created_at', { ascending: true })
+          .order('id', { ascending: true })
+          .range(from, to) as unknown as PromiseLike<{ data: Array<{ mindbody_appointment_ids: number[] | null }> | null; error: { message: string } | null }>
+      )
+      const onlineIds = new Set<number>()
+      for (const b of bookingRows) for (const id of b.mindbody_appointment_ids ?? []) onlineIds.add(id)
+      const online = channelAppts.filter(a => onlineIds.has(a.id)).length
+      channels = { online, direct: channelAppts.length - online }
+    } catch { /* channel split is best-effort */ }
+  }
+
   // Top 25 — the UI shows 5 and can expand
   const topServices = [...cur.serviceByName.entries()]
     .map(([name, v]) => ({ name, net: round2(v.net), count: v.count }))
@@ -892,6 +916,7 @@ export async function getKpis(period: KpiPeriod, location: KpiLocation, gcMode =
       lyReturned: prevCohort.returned,
       lyRate: prevCohort.rate,
     },
+    channels,
     prebooked: {
       clientsSeen: seenClients.size,
       withNext,
