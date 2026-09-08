@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual de Gift Cards — Mimosa Spa Retreat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  @page { size: Letter; margin: 18mm 16mm 20mm 16mm; }
+  @page :first { margin: 0; }
+  :root {
+    --gold: #C9A227; --gold-bg: #FCF6DF; --gold-line: #E8D48A;
+    --dark: #1F1D1A; --ink: #2C2A26; --muted: #6E6A62; --beige: #F5F1E8; --line: #E4DDCF;
+    --amber-bg: #FDF0C7; --amber-fg: #8A5A00; --green-bg: #DCF3E3; --green-fg: #146633;
+    --gray-bg: #E9E6DF; --gray-fg: #4A4741; --red-bg: #FBE1E1; --red-fg: #9A2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; }
+  h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif; color: var(--dark); margin: 0; }
+  h2 { font-size: 22pt; font-weight: 600; margin: 0 0 8pt; break-after: avoid; }
+  h3 { font-size: 14pt; font-weight: 600; margin: 14pt 0 4pt; break-after: avoid; }
+  p { margin: 0 0 8pt; }
+  a { color: inherit; text-decoration: none; }
+  strong { color: var(--dark); }
+  code, .mono { font-family: 'Menlo', 'SF Mono', Consolas, monospace; font-size: 9.5pt; background: var(--beige); padding: 0 3px; border-radius: 3px; }
+
+  /* Cover */
+  .cover { height: 279.4mm; padding: 26mm 22mm; background: linear-gradient(180deg, #FFFDF6 0%, #F7F1E1 100%); display: flex; flex-direction: column; break-after: page; }
+  .cover .logo { width: 62mm; }
+  .cover .eyebrow { margin-top: 30mm; font-size: 9pt; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+  .cover h1 { font-size: 40pt; font-weight: 600; line-height: 1.05; margin-top: 6mm; max-width: 130mm; }
+  .cover .sub { font-size: 12.5pt; color: var(--muted); margin-top: 6mm; max-width: 125mm; line-height: 1.5; }
+  .cover .meta { margin-top: auto; display: flex; gap: 24mm; font-size: 9pt; color: var(--muted); border-top: 1px solid var(--gold-line); padding-top: 6mm; }
+  .cover .meta b { display: block; color: var(--dark); font-size: 10pt; letter-spacing: 0.04em; }
+
+  /* Sections */
+  .section { break-inside: auto; margin-bottom: 18pt; }
+  .section.new-page { break-before: page; }
+  .kicker { font-size: 8.5pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 4pt; }
+  ol.steps { padding-left: 18pt; margin: 6pt 0 10pt; }
+  ol.steps li { margin-bottom: 5pt; padding-left: 3pt; }
+  ol.steps li::marker { font-weight: 700; color: var(--gold); }
+  ul.plain { padding-left: 16pt; margin: 4pt 0 8pt; }
+
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8pt; margin: 8pt 0 12pt; }
+  .flow > div { border: 1px solid var(--line); border-radius: 6pt; padding: 8pt 9pt; background: #fff; }
+  .flow .n { font-size: 8pt; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+  .flow .t { font-weight: 700; color: var(--dark); margin-top: 2pt; }
+  .flow .d { font-size: 8.8pt; color: var(--muted); margin-top: 2pt; line-height: 1.4; }
+
+  figure { margin: 8pt 0 12pt; border: 1px solid var(--line); border-radius: 6pt; overflow: hidden; background: #fff; break-inside: avoid; }
+  figure img { display: block; max-width: 100%; max-height: 150mm; width: auto; margin: 0 auto; }
+  figure.narrow { width: 62%; }
+  figcaption { font-size: 8.5pt; color: var(--muted); padding: 5pt 9pt; border-top: 1px solid var(--line); background: #FBFAF6; }
+
+  .tip { border: 1px solid var(--line); background: var(--beige); border-radius: 6pt; padding: 7pt 10pt; font-size: 9.6pt; margin: 8pt 0; break-inside: avoid; }
+  .tip.warn { border-color: #EBCB7A; background: #FFF7DF; }
+  .tip b { color: var(--dark); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 9.4pt; margin: 6pt 0 10pt; break-inside: avoid; }
+  th { text-align: left; font-size: 7.8pt; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); background: var(--beige); padding: 6pt 8pt; border-bottom: 1px solid var(--line); }
+  td { padding: 7pt 8pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .pill { display: inline-block; font-size: 8.5pt; font-weight: 700; padding: 1.5pt 8pt; border-radius: 999px; white-space: nowrap; }
+  .amber { background: var(--amber-bg); color: var(--amber-fg); }
+  .green { background: var(--green-bg); color: var(--green-fg); }
+  .gray  { background: var(--gray-bg);  color: var(--gray-fg); }
+  .red   { background: var(--red-bg);   color: var(--red-fg); }
+
+  .toc { columns: 2; column-gap: 20pt; font-size: 10pt; margin: 6pt 0 0; }
+  .toc div { break-inside: avoid; padding: 3pt 0; border-bottom: 1px dotted var(--line); }
+  .toc span { color: var(--gold); font-weight: 700; margin-right: 6pt; }
+  .footer-note { font-size: 8.5pt; color: var(--muted); margin-top: 16pt; border-top: 1px solid var(--line); padding-top: 6pt; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <img class="logo" src="../public/Logo_mimosa.png" alt="Mimosa Spa Retreat">
+  <div class="eyebrow">Manual del personal</div>
+  <h1>Gift Cards físicas: emitir, imprimir, vender y consultar</h1>
+  <p class="sub">Todo el ciclo de una Gift Card en el sitio de administración y en Mindbody — para recepción, administración y socios.</p>
+  <div class="meta">
+    <div><b>Mimosa Spa Retreat</b>Costa del Este · San Francisco</div>
+    <div><b>Versión</b>Septiembre 2026</div>
+    <div><b>En línea</b>www.mimosaretreat.com/admin/giftcards/manual</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="kicker">Contenido</div>
+  <div class="toc">
+    <div><span>1</span>Cómo funciona</div>
+    <div><span>2</span>Emitir una Gift Card</div>
+    <div><span>3</span>Imprimir la etiqueta</div>
+    <div><span>4</span>Vender la Gift Card en Mindbody</div>
+    <div><span>5</span>Estados de una Gift Card</div>
+    <div><span>6</span>Editar una Gift Card</div>
+    <div><span>7</span>Consultar y sincronizar</div>
+    <div><span>8</span>Problemas frecuentes</div>
+  </div>
+</section>
+
+<section class="section" style="margin-top:16pt">
+  <div class="kicker">1</div>
+  <h2>Cómo funciona</h2>
+  <p>El sitio genera el <strong>serial</strong> y la etiqueta; <strong>Mindbody</strong> es donde vive el dinero. Una Gift Card solo vale cuando la venta queda registrada en Mindbody con ese mismo serial.</p>
+  <div class="flow">
+    <div><div class="n">Paso 1</div><div class="t">Emitir</div><div class="d">Datos del comprador, destinatario y monto. El sitio asigna el serial.</div></div>
+    <div><div class="n">Paso 2</div><div class="t">Imprimir</div><div class="d">La etiqueta sale de la impresora D520 y se pega en la tarjeta física.</div></div>
+    <div><div class="n">Paso 3</div><div class="t">Vender</div><div class="d">En Mindbody, escaneando el serial como número de la gift card.</div></div>
+    <div><div class="n">Paso 4</div><div class="t">Sincronizar</div><div class="d">El sitio consulta Mindbody y la tarjeta pasa a Vendida.</div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="kicker">2</div>
+  <h2>Emitir una Gift Card</h2>
+  <ol class="steps">
+    <li>Entra a <strong>Emitir Gift Card</strong> en el panel de administración.</li>
+    <li><strong>Monto.</strong> Elige <em>Monto directo</em> (escribes el valor) o <em>Por tratamientos</em> (sumas tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada).</li>
+    <li><strong>Comprador.</strong> Escribe el nombre y elige el cliente de Mindbody en la lista si aparece — así queda enlazado y se rellenan correo y teléfono. Usa el mismo cliente al vender en Mindbody.</li>
+    <li><strong>Destinatario.</strong> Quien recibe el regalo. El nombre no se imprime en la etiqueta.</li>
+    <li><strong>Detalles de impresión.</strong> Mensaje/dedicatoria (sí se imprime), nota interna (nunca se imprime) y qué mostrar en la etiqueta: monto, mensaje, tratamientos.</li>
+    <li>Presiona <strong>Emitir e imprimir</strong>. El sitio asigna el serial (por ejemplo <code>MG000123</code>) y te lleva a la pantalla de impresión.</li>
+  </ol>
+  <figure><img src="../public/manual/giftcards/01-emitir.png" alt="Formulario Emitir Gift Card"><figcaption>Pantalla Emitir Gift Card: monto, comprador, destinatario y detalles de impresión.</figcaption></figure>
+</section>
+
+<section class="section new-page">
+  <div class="kicker">3</div>
+  <h2>Imprimir la etiqueta</h2>
+  <ol class="steps">
+    <li>Revisa la vista previa: es exactamente lo que va a salir de la impresora.</li>
+    <li>Confirma que <strong>QZ Tray</strong> está abierto (ícono junto al reloj de la Mac) y que la impresora <strong>D520</strong> está encendida.</li>
+    <li>Presiona <strong>Imprimir Etiqueta</strong>. No aparece ningún diálogo: la etiqueta sale directo.</li>
+    <li>Pega la etiqueta <strong>centrada</strong> en la tarjeta física de Mimosa.</li>
+  </ol>
+  <figure><img src="../public/manual/giftcards/02-imprimir.png" alt="Pantalla de impresión"><figcaption>Pantalla de impresión: estado en Mindbody, botones Manual · Editar · Prueba · Imprimir Etiqueta, y la vista previa.</figcaption></figure>
+  <figure class="narrow"><img src="../public/manual/giftcards/03-etiqueta.png" alt="Etiqueta"><figcaption>La etiqueta (3 × 2 pulgadas): monto, tratamientos incluidos, mensaje y el código de barras con el serial.</figcaption></figure>
+  <div class="tip"><b>Prueba</b> imprime un patrón de calibración (marco, flecha ARRIBA, parches de oscuridad y un código de barras). Úsalo al cambiar de rollo: el marco debe coincidir con el borde de la etiqueta. Si no coincide, con la impresora encendida y el cable USB desconectado, mantén presionado el botón de avance 3–6 segundos para que recalibre, y vuelve a probar.</div>
+  <div class="tip warn">Si la etiqueta no se imprime, lo más común es que QZ Tray no esté abierto. Ábrelo desde Aplicaciones y vuelve a intentar. Si aparece una ventana de QZ pidiendo permiso (“Allow”), avisa a administración: falta instalar el certificado en esa computadora.</div>
+</section>
+
+<section class="section new-page">
+  <div class="kicker">4</div>
+  <h2>Vender la Gift Card en Mindbody</h2>
+  <p>Este paso es el que le da valor a la tarjeta. Lo importante: <strong>el número de la gift card en Mindbody tiene que ser el serial impreso</strong>. Si Mindbody genera su propio número, el sitio nunca encontrará la venta y la tarjeta se quedará en <em>Emitida</em>.</p>
+  <ol class="steps">
+    <li>En Mindbody abre el <strong>Punto de venta</strong> (Retail → Point of Sale) y selecciona al <strong>comprador</strong> — el mismo cliente que pusiste al emitir.</li>
+    <li>Elige <strong>Gift Cards</strong> y la gift card prepagada.</li>
+    <li>Escribe el <strong>valor</strong> igual al monto emitido.</li>
+    <li>En el campo del <strong>número / código de barras de la gift card</strong>, <strong>escanea la etiqueta</strong> con el lector (o escribe el serial tal cual, por ejemplo <code>MG000123</code>, respetando mayúsculas y ceros).</li>
+    <li>Completa destinatario si Mindbody lo pide y <strong>cobra</strong> con la forma de pago real del cliente.</li>
+    <li>De vuelta en el sitio, presiona <strong>Sincronizar</strong> en la tarjeta. Debe pasar a <span class="pill green">Vendida</span> y mostrar el saldo. Si no presionas nada, el sitio revisa solo cada hora.</li>
+  </ol>
+  <div class="tip warn">¿Sincronizaste y sigue en Emitida? Casi siempre es que la venta en Mindbody quedó con otro número. Busca la venta en Mindbody, anúlala y vuelve a venderla escaneando la etiqueta.</div>
+  <p style="color:var(--muted); font-size:9.6pt">Para canjear: en Mindbody, al cobrar un servicio, elige <em>Gift Card</em> como forma de pago y escanea la misma etiqueta. El saldo baja en Mindbody y, tras sincronizar, también en el sitio.</p>
+</section>
+
+<section class="section">
+  <div class="kicker">5</div>
+  <h2>Estados de una Gift Card</h2>
+  <p>El estado sale de comparar nuestro registro con Mindbody. Cambia solo, por sincronización — nadie lo edita a mano.</p>
+  <table>
+    <thead><tr><th style="width:15%">Estado</th><th style="width:33%">Qué significa</th><th style="width:24%">Cómo llega ahí</th><th>Qué puedes hacer</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill amber">Emitida</span></td><td>El serial existe en el sitio; Mindbody todavía no conoce la tarjeta. <strong>Aún no vale dinero.</strong></td><td>Al presionar “Emitir e imprimir”.</td><td>Editar, reimprimir, venderla en Mindbody.</td></tr>
+      <tr><td><span class="pill green">Vendida</span></td><td>Mindbody registró la venta con este serial y la tarjeta tiene saldo.</td><td>Sincronización (botón o cada hora) después de la venta en Mindbody.</td><td>Reimprimir, consultar saldo. <strong>Ya no se edita</strong>: cualquier corrección va en Mindbody.</td></tr>
+      <tr><td><span class="pill gray">Usada</span></td><td>El saldo en Mindbody llegó a $0.</td><td>Sincronización después del último canje.</td><td>Solo consulta. Queda como historial.</td></tr>
+      <tr><td><span class="pill red">Anulada</span></td><td>Administración la canceló (etiqueta dañada, emitida por error…).</td><td>Solo administración.</td><td>Nada. Emite una nueva si hace falta.</td></tr>
+    </tbody>
+  </table>
+  <p style="color:var(--muted); font-size:9.6pt">“Saldo Mindbody” y la fecha de sincronización aparecen en la lista de Emitidas y en el detalle de cada tarjeta.</p>
+</section>
+
+<section class="section">
+  <div class="kicker">6</div>
+  <h2>Editar una Gift Card</h2>
+  <p>Mientras la tarjeta esté <span class="pill amber">Emitida</span> puedes corregir cualquier dato: monto, tratamientos, comprador, destinatario, mensaje y qué se imprime. El <strong>serial nunca cambia</strong>.</p>
+  <ol class="steps">
+    <li>En <strong>Emitidas</strong>, busca la tarjeta y presiona el lápiz (Editar). También hay un botón Editar en la pantalla de impresión.</li>
+    <li>Corrige lo necesario y presiona <strong>Guardar cambios</strong>.</li>
+    <li>Vuelves a la pantalla de impresión: si cambió algo que se imprime, <strong>imprime la etiqueta de nuevo</strong> y descarta la anterior.</li>
+  </ol>
+  <figure><img src="../public/manual/giftcards/06-editar.png" alt="Editar Gift Card"><figcaption>Editar: el mismo formulario de emisión, con los datos actuales cargados.</figcaption></figure>
+  <div class="tip warn">En cuanto la tarjeta pasa a <b>Vendida</b> el botón desaparece y el sistema rechaza cambios: el monto ya es dinero cobrado. Corrige en Mindbody y presiona Sincronizar.</div>
+</section>
+
+<section class="section">
+  <div class="kicker">7</div>
+  <h2>Consultar y sincronizar</h2>
+  <ol class="steps">
+    <li>En <strong>Emitidas</strong> escribe el serial, un nombre, correo o teléfono en el buscador.</li>
+    <li>Filtra por estado con los botones Todas · Emitidas · Vendidas · Usadas.</li>
+    <li>Toca el serial para abrir el detalle completo (monto, saldo, comprador, destinatario, venta en Mindbody, quién la emitió).</li>
+    <li>El botón <strong>Sincronizar</strong> (flechas circulares) consulta Mindbody en ese momento y actualiza estado y saldo.</li>
+  </ol>
+  <figure><img src="../public/manual/giftcards/04-emitidas.png" alt="Lista de Gift Cards emitidas"><figcaption>Emitidas: buscador, filtros por estado, saldo en Mindbody y acciones (sincronizar · editar · imprimir).</figcaption></figure>
+  <figure><img src="../public/manual/giftcards/05-detalle.png" alt="Detalle de una Gift Card vendida"><figcaption>Detalle de una tarjeta ya vendida: saldo en Mindbody, venta y forma de pago.</figcaption></figure>
+</section>
+
+<section class="section new-page">
+  <div class="kicker">8</div>
+  <h2>Problemas frecuentes</h2>
+  <table>
+    <thead><tr><th style="width:38%">Qué pasa</th><th>Qué hacer</th></tr></thead>
+    <tbody>
+      <tr><td>“No se pudo conectar con QZ Tray”</td><td>Abre QZ Tray desde Aplicaciones (debe verse su ícono junto al reloj) y vuelve a imprimir.</td></tr>
+      <tr><td>La impresora no responde</td><td>Revisa que esté encendida y conectada por USB. Apágala y enciéndela con la tapa cerrada.</td></tr>
+      <tr><td>La etiqueta sale corrida o cada vez más abajo</td><td>Recalibra: USB desconectado, mantén el botón de avance 3–6 s, reconecta. Luego presiona <strong>Prueba</strong>.</td></tr>
+      <tr><td>La impresión sale clara</td><td>Avisa a administración para subir la oscuridad (Darkness) de la impresora.</td></tr>
+      <tr><td>Sincronicé y sigue en Emitida</td><td>La venta en Mindbody no lleva este serial. Anula esa venta y vuelve a venderla escaneando la etiqueta.</td></tr>
+      <tr><td>Me equivoqué en el monto o el nombre</td><td>Si está Emitida: Editar y reimprimir. Si ya está Vendida: corregir en Mindbody y Sincronizar.</td></tr>
+      <tr><td>Se dañó la etiqueta</td><td>Reimprime desde la tarjeta (mismo serial). No emitas una nueva: eso crea otro serial.</td></tr>
+    </tbody>
+  </table>
+  <p class="footer-note">Este manual también está disponible dentro del panel de administración (botón <strong>Manual</strong> en Emitir, Emitidas y la pantalla de impresión), siempre con la versión más reciente. Mimosa Spa Retreat · Septiembre 2026.</p>
+</section>
+
+</body>
+</html>
