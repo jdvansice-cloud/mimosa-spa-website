@@ -422,6 +422,20 @@ function KpisInner() {
             />
           </div>}
 
+          {/* Booking channel of the period */}
+          {!gcMode && data.channels && (data.channels.direct + data.channels.online) > 0 && (
+            <CardBox className="py-3">
+              <div className="flex items-center justify-between flex-wrap gap-x-4 gap-y-1">
+                <Label info="canal_mes">{t('Citas por canal')}</Label>
+                <div className="flex items-baseline gap-3 tabular-nums text-sm whitespace-nowrap">
+                  <span className="text-dark"><b>{data.channels.direct.toLocaleString('en-US')}</b> <span className="text-warm-gray-500">{t('directas')}</span></span>
+                  <span className="font-bold text-spa-green">{data.channels.online.toLocaleString('en-US')} <span className="font-normal">online</span></span>
+                  <span className="text-warm-gray-500 text-xs">({pct(data.channels.online / (data.channels.online + data.channels.direct))} online)</span>
+                </div>
+              </div>
+            </CardBox>
+          )}
+
           {/* Retention / pre-booked / acquisition don't apply to gift-card usage */}
           {!gcMode && <>
           <CardBox>
