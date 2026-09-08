@@ -10,6 +10,7 @@ export interface GiftCardDetailData {
   id: string
   serial: string
   format: string
+  gift_card_serial_config_id: string | null
   channel: string | null
   buyer_name: string
   buyer_email: string | null

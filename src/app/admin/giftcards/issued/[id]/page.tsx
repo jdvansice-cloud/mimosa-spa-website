@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Gift, Printer, Loader2, RefreshCw } from 'lucide-react'
+import { Gift, Printer, Loader2, RefreshCw, Pencil } from 'lucide-react'
 import { AdminPage } from '@/components/admin/AdminPage'
 import { GiftCardDetail, type GiftCardDetailData } from '@/components/admin/giftcards/GiftCardDetail'
 import { StatusPill } from '@/components/admin/AdminTable'
@@ -96,6 +96,11 @@ export default function GiftCardDetailPage() {
             leftIcon={syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}>
             Sincronizar
           </Button>
+          {!card.sold_at && !card.redeemed_at && !card.voided_at && (
+            <Link href={`/admin/giftcards/issued/${card.id}/edit`}>
+              <Button variant="secondary" leftIcon={<Pencil className="h-4 w-4" />}>Editar</Button>
+            </Link>
+          )}
           <Link href={`/admin/giftcards/issued/${card.id}/print`}>
             <Button leftIcon={<Printer className="h-4 w-4" />}>Imprimir etiqueta</Button>
           </Link>

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Gift, Plus, List, Settings, LayoutTemplate, Hash, ShoppingBag, Store } from 'lucide-react'
+import { Gift, Plus, List, Settings, LayoutTemplate, Hash, ShoppingBag, Store, BookOpen } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
 
 const tiles = [
@@ -26,6 +26,12 @@ const tiles = [
     icon: List,
     title: 'Gift Cards Emitidas',
     description: 'Historial de Gift Cards emitidas, con su serial y estado.',
+  },
+  {
+    href: '/admin/giftcards/manual',
+    icon: BookOpen,
+    title: 'Manual del personal',
+    description: 'Guía paso a paso: emitir, imprimir, vender en Mindbody, estados y edición.',
   },
   {
     href: '/admin/giftcards/templates',

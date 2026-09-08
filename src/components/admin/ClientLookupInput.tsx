@@ -54,8 +54,10 @@ export function ClientLookupInput({
   const [highlight, setHighlight] = useState(-1)
   const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null)
   // Suppress the lookup for the value we just selected — retriggering the
-  // dropdown right after a pick reads as the UI refusing to accept it.
-  const selectedRef = useRef<string | null>(null)
+  // dropdown right after a pick reads as the UI refusing to accept it. The
+  // initial value counts as selected too, so an edit form that mounts with
+  // names already filled in doesn't open a dropdown under every field.
+  const selectedRef = useRef<string | null>(value || null)
   const boxRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)

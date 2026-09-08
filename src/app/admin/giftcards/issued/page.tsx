@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import {
   Gift, ArrowLeft, Plus, Printer, Loader2, RefreshCw, Search, X,
-  ChevronLeft, ChevronRight, ChevronDown,
+  ChevronLeft, ChevronRight, ChevronDown, Pencil, BookOpen,
 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { AdminTable, CardField, StatusPill, type AdminColumn } from '@/components/admin/AdminTable'
@@ -68,6 +68,9 @@ function statusLabel(row: IssuedRow): { label: string; tone: 'green' | 'amber' |
   if (row.sold_at) return { label: 'Vendida', tone: 'green' }
   return { label: 'Emitida', tone: 'amber' }
 }
+
+/** Only an Emitida card can still change — after the sale the record is frozen. */
+const isEditable = (row: IssuedRow) => !row.sold_at && !row.redeemed_at
 
 /** Pill filter — shared vocabulary with the KPIs section. */
 function Pill({
@@ -324,6 +327,16 @@ function IssuedList() {
       render: r => (
         <div className="flex items-center gap-1 justify-end">
           {syncButton(r, 'h-11 w-11 flex items-center justify-center rounded-lg text-warm-gray-500 hover:text-dark hover:bg-beige disabled:opacity-50')}
+          {isEditable(r) && (
+            <Link
+              href={`/admin/giftcards/issued/${r.id}/edit`}
+              title="Editar"
+              aria-label={`Editar ${r.serial}`}
+              className="h-11 w-11 flex items-center justify-center rounded-lg text-warm-gray-500 hover:text-dark hover:bg-beige"
+            >
+              <Pencil className="h-5 w-5" />
+            </Link>
+          )}
           <Link
             href={`/admin/giftcards/issued/${r.id}/print`}
             title="Imprimir etiqueta"
@@ -374,6 +387,15 @@ function IssuedList() {
               Imprimir
             </Button>
           </Link>
+          {isEditable(row) && (
+            <Link
+              href={`/admin/giftcards/issued/${row.id}/edit`}
+              aria-label={`Editar ${row.serial}`}
+              className="h-11 w-11 shrink-0 flex items-center justify-center rounded-lg border border-beige-400 text-warm-gray-500 hover:text-dark hover:bg-beige"
+            >
+              <Pencil className="h-5 w-5" />
+            </Link>
+          )}
           {syncButton(row, 'h-11 w-11 shrink-0 flex items-center justify-center rounded-lg border border-beige-400 text-warm-gray-500 hover:text-dark hover:bg-beige disabled:opacity-50')}
         </div>
       </>
@@ -401,9 +423,14 @@ function IssuedList() {
               Busca por serial, comprador o destinatario. &quot;Sincronizar&quot; consulta el saldo actual en Mindbody.
             </p>
           </div>
-          <Link href="/admin/giftcards/issue">
-            <Button leftIcon={<Plus className="h-4 w-4" />}>Emitir Nueva</Button>
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/admin/giftcards/manual">
+              <Button variant="outline" leftIcon={<BookOpen className="h-4 w-4" />}>Manual</Button>
+            </Link>
+            <Link href="/admin/giftcards/issue">
+              <Button leftIcon={<Plus className="h-4 w-4" />}>Emitir Nueva</Button>
+            </Link>
+          </div>
         </div>
       </div>
 

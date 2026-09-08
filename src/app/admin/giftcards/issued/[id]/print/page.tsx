@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, Printer, Loader2, RefreshCw, FileText, Crosshair } from 'lucide-react'
+import { ArrowLeft, Printer, Loader2, RefreshCw, FileText, Crosshair, Pencil, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui'
 import {
   GiftCardLabelPreview,
@@ -22,6 +22,8 @@ interface GiftCard extends LabelCard {
   tax_cents: number | null
   issued_at: string
   sold_at: string | null
+  redeemed_at?: string | null
+  voided_at?: string | null
   mindbody_remaining_balance_cents: number | null
   mindbody_synced_at: string | null
 }
@@ -174,7 +176,12 @@ export default function GiftCardPrintPage() {
         >
           <ArrowLeft className="h-4 w-4" /> Volver a Emitidas
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {!card.sold_at && !card.redeemed_at && !card.voided_at && (
+            <Link href={`/admin/giftcards/issued/${card.id}/edit`}>
+              <Button variant="outline" leftIcon={<Pencil className="h-4 w-4" />}>Editar</Button>
+            </Link>
+          )}
           <Button
             variant="outline"
             onClick={() => window.print()}
@@ -241,10 +248,15 @@ export default function GiftCardPrintPage() {
 
       {/* Printer settings reminder */}
       <div className="mt-5 no-print max-w-xl rounded-lg border border-beige-300 bg-beige-50 p-4 text-xs text-warm-gray leading-relaxed">
-        <div className="font-semibold text-dark mb-1">Impresión directa (QZ Tray · Omezizy D520)</div>
+        <div className="flex items-center justify-between gap-3 mb-1">
+          <div className="font-semibold text-dark">Impresión directa (QZ Tray · Omezizy D520)</div>
+          <Link href="/admin/giftcards/manual" className="inline-flex items-center gap-1 text-gold-700 hover:underline">
+            <BookOpen className="h-3.5 w-3.5" /> Manual del personal
+          </Link>
+        </div>
         <ul className="list-disc pl-4 space-y-0.5">
           <li><span className="font-medium text-dark">QZ Tray</span> debe estar instalado y ejecutándose en esta computadora (qz.io/download). La D520 va conectada por <span className="font-medium text-dark">USB</span>.</li>
-          <li>Al cargar un rollo nuevo presiona <span className="font-medium text-dark">feed</span> una vez para que la impresora calibre la etiqueta, y luego usa &quot;Prueba&quot; — el marco impreso debe coincidir con el borde de la etiqueta.</li>
+          <li>Al cargar un rollo nuevo: con el USB desconectado, <span className="font-medium text-dark">mantén presionado feed 3–6 s</span> para que la impresora calibre la etiqueta; reconecta y usa &quot;Prueba&quot; — el marco impreso debe coincidir con el borde de la etiqueta.</li>
           <li>&quot;Imprimir Etiqueta&quot; envía la imagen a 203 dpi directo a la impresora, sin diálogo. &quot;Diálogo del navegador&quot; es el respaldo: tamaño 3&quot; × 2&quot;, márgenes 0, escala 100%.</li>
           <li>Las etiquetas <span className="font-medium text-dark">transparentes</span> necesitan más calor que el papel: si la impresión sale clara, sube <span className="font-medium text-dark">Darkness</span> (los parches 100/50/25% de la prueba sirven de referencia).</li>
         </ul>
