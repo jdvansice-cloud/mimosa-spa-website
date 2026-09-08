@@ -298,6 +298,8 @@ const EN: Record<string, string> = {
     'Today refreshes on entry and every 5 min while the page is open · future bookings ~60 days ahead',
   'citas': 'appointments',
   'Citas de hoy': "Today's appointments",
+  'hasta hoy': 'through today',
+  'Calendario por día': 'Calendar by day',
   'directas': 'direct',
   'no-shows': 'no-shows',
   'reservas': 'bookings',
