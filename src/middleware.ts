@@ -114,13 +114,16 @@ export async function middleware(request: NextRequest) {
     }
 
     // Location-restricted admins are locked to the gift-card area.
-    // Allowed: /admin/giftcards/issue, /admin/giftcards/issued, /admin/giftcards/issued/[id]/print.
-    // Anything else under /admin (including /admin itself and /admin/giftcards hub) → redirect to issue.
+    // Allowed: issue, the issued list, a card's detail / print / edit pages,
+    // and the staff manual. Anything else under /admin (including /admin
+    // itself and the /admin/giftcards hub) → redirect to issue.
     if (locationConfigId) {
       const allowed =
         pathname === '/admin/giftcards/issue' ||
         pathname === '/admin/giftcards/issued' ||
-        /^\/admin\/giftcards\/issued\/[^/]+\/print$/.test(pathname)
+        pathname === '/admin/giftcards/manual' ||
+        /^\/admin\/giftcards\/issued\/[^/]+$/.test(pathname) ||
+        /^\/admin\/giftcards\/issued\/[^/]+\/(print|edit)$/.test(pathname)
 
       if (!allowed) {
         return NextResponse.redirect(new URL('/admin/giftcards/issue', request.url))
