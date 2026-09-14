@@ -15,6 +15,8 @@ const nextConfig = {
       { source: '/ig', destination: '/?utm_source=instagram&utm_medium=bio', permanent: false },
       { source: '/fb', destination: '/?utm_source=facebook&utm_medium=bio', permanent: false },
       { source: '/wa', destination: '/?utm_source=whatsapp&utm_medium=chat', permanent: false },
+      // WATI chatbot greeting node ("Reserva aquí") → booking page
+      { source: '/wa/reservar', destination: '/es/reservar?utm_source=whatsapp&utm_medium=chatbot&utm_campaign=saludo', permanent: false },
     ]
   },
   images: {
