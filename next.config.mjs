@@ -13,6 +13,8 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/ig', destination: '/?utm_source=instagram&utm_medium=bio', permanent: false },
+      // Instagram (bio / stories / DM) → booking page
+      { source: '/ig/reservar', destination: '/es/reservar?utm_source=instagram&utm_medium=social&utm_campaign=reservar', permanent: false },
       { source: '/fb', destination: '/?utm_source=facebook&utm_medium=bio', permanent: false },
       { source: '/wa', destination: '/?utm_source=whatsapp&utm_medium=chat', permanent: false },
       // WATI chatbot greeting node ("Reserva aquí") → booking page
