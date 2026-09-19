@@ -115,8 +115,8 @@ export default async function GiftViewPage({
                   ) : (
                     <div className="bg-beige/60 rounded-2xl p-5 mb-4">
                       <p className="text-xs text-warm-gray mb-3">
-                        Págalo en línea con este código o muéstralo en el spa · Pay
-                        online with this code, or show it at the spa
+                        Muestra este código al pagar en el spa · Show this code when
+                        paying at the spa
                       </p>
                       <GiftBarcode code={code} />
                       <p className="font-mono text-lg font-bold tracking-widest text-dark mt-2">
@@ -135,13 +135,18 @@ export default async function GiftViewPage({
                     href={`/es/reservar?gc=${encodeURIComponent(code)}`}
                     className="inline-flex items-center justify-center px-8 py-3 bg-gold text-dark font-semibold rounded-full hover:bg-gold/90 transition-colors"
                   >
-                    Reservar y pagar con mi gift card
+                    Reservar mi cita · Book my appointment
                   </Link>
                   <p className="text-[11px] text-warm-gray mt-3 max-w-xs mx-auto">
-                    Elige tu tratamiento y tu hora: aplicamos el saldo automáticamente
-                    al pagar. · Choose your treatment and time — we apply the balance
-                    automatically at checkout.
+                    Elige tu tratamiento y horario; presenta este código al pagar en el
+                    spa. · Choose your treatment and time; show this code when paying at
+                    the spa.
                   </p>
+                  <ol className="text-left text-xs text-warm-gray mt-5 max-w-xs mx-auto space-y-1.5">
+                    <li>1. Reserva tu cita en línea o por WhatsApp · Book online or via WhatsApp</li>
+                    <li>2. Ven al spa el día de tu cita · Come to the spa on the day</li>
+                    <li>3. Presenta este código al pagar · Show this code when paying</li>
+                  </ol>
                 </>
               )}
             </div>
