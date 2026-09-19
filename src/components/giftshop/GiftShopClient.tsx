@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import { Loader2, Gift, ChevronLeft, ShoppingBag } from 'lucide-react'
 import { track } from '@/lib/track'
@@ -25,10 +25,54 @@ interface CatalogItem {
 
 interface CatalogResponse {
   shopEnabled: boolean
+  whatsappDeliveryEnabled?: boolean
   items: CatalogItem[]
 }
 
 type Step = 'pick' | 'details' | 'pay'
+
+type DeliveryMethod = 'email' | 'whatsapp' | 'self'
+type FieldErrors = Partial<Record<'recipientName' | 'recipientEmail' | 'recipientPhone' | 'buyerName' | 'buyerEmail', string>>
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// Label above, control, then hint or error below. Errors are linked to the
+// control through aria-describedby so screen readers read them in place.
+function Field({
+  id,
+  label,
+  required,
+  hint,
+  error,
+  labelFor = true,
+  children,
+}: {
+  id: string
+  label: string
+  required?: boolean
+  hint?: string
+  error?: string
+  labelFor?: boolean
+  children: ReactNode
+}) {
+  const LabelTag = labelFor ? 'label' : 'span'
+  return (
+    <div>
+      <LabelTag {...(labelFor ? { htmlFor: id } : {})} className="block text-sm font-medium text-dark mb-1.5">
+        {label}
+        {required && <span className="text-gold-600"> *</span>}
+      </LabelTag>
+      {children}
+      {error ? (
+        <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-red-600">
+          {error}
+        </p>
+      ) : hint ? (
+        <p className="mt-1 text-xs text-warm-gray">{hint}</p>
+      ) : null}
+    </div>
+  )
+}
 
 // 3-step shop: Elige → Personaliza → Paga (hosted Tilopay redirect).
 export function GiftShopClient({ locale }: { locale: string }) {
@@ -38,6 +82,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
   const [step, setStep] = useState<Step>('pick')
   const [item, setItem] = useState<CatalogItem | null>(null)
   const [form, setForm] = useState({
+    deliveryMethod: 'email' as DeliveryMethod,
     recipientName: '',
     recipientEmail: '',
     recipientPhone: '',
@@ -50,6 +95,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
   })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const addGiftCardToBag = useBagStore((s) => s.addGiftCard)
   const openBag = useBagStore((s) => s.openBag)
 
@@ -67,6 +113,8 @@ export function GiftShopClient({ locale }: { locale: string }) {
   const description = (i: CatalogItem) => (en ? i.description_en : i.description_es)
   const badge = (i: CatalogItem) => (en ? i.badge_en : i.badge_es)
   const money = (cents: number) => `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`
+  const whatsappAvailable = !!catalog?.whatsappDeliveryEnabled
+  const todayIso = new Date().toISOString().slice(0, 10)
 
   // With the unified bag on, "details" hands off to the bag instead of a
   // gift-card-only Tilopay redirect — so a card can ride along with a booking.
@@ -88,13 +136,33 @@ export function GiftShopClient({ locale }: { locale: string }) {
     openBag()
   }
 
+  const validateDetails = (): boolean => {
+    const errs: FieldErrors = {}
+    if (!form.recipientName.trim()) errs.recipientName = t('errRecipientName')
+    if (form.deliveryMethod === 'email' && !EMAIL_RE.test(form.recipientEmail.trim())) errs.recipientEmail = t('errRecipientEmail')
+    if (form.deliveryMethod === 'whatsapp' && form.recipientPhone.replace(/\D/g, '').length < 8) errs.recipientPhone = t('errRecipientPhone')
+    setFieldErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  const goToPay = () => {
+    if (!validateDetails()) return
+    setError(null)
+    setStep('pay')
+  }
+
+  const validateBuyer = (): boolean => {
+    const errs: FieldErrors = {}
+    if (!form.buyerName.trim()) errs.buyerName = t('errBuyerName')
+    if (!EMAIL_RE.test(form.buyerEmail.trim())) errs.buyerEmail = t('errBuyerEmail')
+    setFieldErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
   const pay = async () => {
     if (!item || submitting) return
     setError(null)
-    if (!form.buyerName || !form.buyerEmail || !form.recipientName) {
-      setError(t('errRequired'))
-      return
-    }
+    if (!validateBuyer()) return
     setSubmitting(true)
     track('giftshop_checkout', { locale, meta: { item: item.id } })
     try {
@@ -144,7 +212,9 @@ export function GiftShopClient({ locale }: { locale: string }) {
   }
 
   const inputCls =
-    'w-full border border-beige rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold'
+    'w-full border border-beige rounded-lg px-3 py-3 min-h-[44px] text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold aria-[invalid=true]:border-red-400'
+  const selectCls =
+    'w-24 shrink-0 border border-beige rounded-lg px-2 py-3 min-h-[44px] text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold'
 
   const stepTitles: Record<Step, string> = {
     pick: t('step1'),
@@ -170,7 +240,10 @@ export function GiftShopClient({ locale }: { locale: string }) {
 
       {step !== 'pick' && (
         <button
-          onClick={() => setStep(step === 'pay' ? 'details' : 'pick')}
+          onClick={() => {
+            setFieldErrors({})
+            setStep(step === 'pay' ? 'details' : 'pick')
+          }}
           className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark mb-4"
         >
           <ChevronLeft className="h-4 w-4" /> {t('back')}
@@ -219,39 +292,114 @@ export function GiftShopClient({ locale }: { locale: string }) {
 
       {/* Step 2: details */}
       {step === 'details' && item && (
-        <div className="bg-white rounded-2xl shadow-card p-6 space-y-4">
+        <div className="bg-white rounded-2xl shadow-card p-6 space-y-5">
           <p className="font-display font-semibold text-dark">
-            {name(item)} · <span className="text-gold-600">{money(item.amount_cents)}</span>
+            {name(item)}
+            {item.kind === 'experience' && <span className="text-gold-600"> · {money(item.amount_cents)}</span>}
           </p>
           <input type="text" name="website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="hidden" tabIndex={-1} autoComplete="off" aria-hidden />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input className={inputCls} placeholder={t('recipientName')} value={form.recipientName} onChange={(e) => setForm({ ...form, recipientName: e.target.value })} required />
-            <input className={inputCls} type="email" placeholder={t('recipientEmail')} value={form.recipientEmail} onChange={(e) => setForm({ ...form, recipientEmail: e.target.value })} />
-          </div>
-          <PhoneInput
-            value={form.recipientPhone}
-            onChange={(recipientPhone) => setForm({ ...form, recipientPhone })}
-            placeholder={t('recipientPhone')}
-            showIcon={false}
-            inputClassName={inputCls}
-            selectClassName={`${inputCls} w-20 px-2`}
-          />
-          <textarea className={inputCls} rows={2} maxLength={300} placeholder={t('message')} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-          <div>
-            <label className="text-xs text-warm-gray block mb-1">{t('sendDate')}</label>
-            <input className={inputCls} type="date" value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} />
-          </div>
+
+          <Field id="recipientName" label={t('labelRecipientName')} required error={fieldErrors.recipientName}>
+            <input
+              id="recipientName"
+              className={inputCls}
+              placeholder={t('phRecipientName')}
+              value={form.recipientName}
+              autoComplete="off"
+              aria-invalid={!!fieldErrors.recipientName}
+              aria-describedby={fieldErrors.recipientName ? 'recipientName-error' : undefined}
+              onChange={(e) => setForm({ ...form, recipientName: e.target.value })}
+            />
+          </Field>
+
+          <fieldset>
+            <legend className="text-sm font-medium text-dark mb-2">{t('deliveryTitle')}</legend>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t('deliveryTitle')}>
+              {(
+                [
+                  { key: 'email', label: t('deliveryEmail'), show: true },
+                  { key: 'whatsapp', label: t('deliveryWhatsapp'), show: whatsappAvailable },
+                  { key: 'self', label: t('deliverySelf'), show: true },
+                ] as Array<{ key: DeliveryMethod; label: string; show: boolean }>
+              )
+                .filter((o) => o.show)
+                .map((o) => (
+                  <button
+                    key={o.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={form.deliveryMethod === o.key}
+                    onClick={() => {
+                      setFieldErrors({})
+                      setForm({ ...form, deliveryMethod: o.key })
+                    }}
+                    className={`rounded-lg border px-3 py-3 min-h-[44px] text-sm transition-colors ${
+                      form.deliveryMethod === o.key
+                        ? 'border-gold bg-gold/15 text-dark font-semibold'
+                        : 'border-beige bg-white text-warm-gray hover:border-gold/60'
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+            </div>
+            <p className="text-xs text-warm-gray mt-2">
+              {form.deliveryMethod === 'email' && t('deliveryEmailHint')}
+              {form.deliveryMethod === 'whatsapp' && t('deliveryWhatsappHint')}
+              {form.deliveryMethod === 'self' && t('deliverySelfHint')}
+            </p>
+          </fieldset>
+
+          {form.deliveryMethod === 'email' && (
+            <Field id="recipientEmail" label={t('labelRecipientEmail')} required error={fieldErrors.recipientEmail}>
+              <input
+                id="recipientEmail"
+                type="email"
+                inputMode="email"
+                className={inputCls}
+                placeholder={t('phEmail')}
+                value={form.recipientEmail}
+                autoComplete="off"
+                aria-invalid={!!fieldErrors.recipientEmail}
+                aria-describedby={fieldErrors.recipientEmail ? 'recipientEmail-error' : undefined}
+                onChange={(e) => setForm({ ...form, recipientEmail: e.target.value })}
+              />
+            </Field>
+          )}
+          {form.deliveryMethod === 'whatsapp' && (
+            <Field id="recipientPhone" label={t('labelRecipientPhone')} required error={fieldErrors.recipientPhone} labelFor={false}>
+              <PhoneInput
+                value={form.recipientPhone}
+                onChange={(recipientPhone) => setForm({ ...form, recipientPhone })}
+                placeholder="6612 3456"
+                showIcon={false}
+                inputClassName={inputCls}
+                selectClassName={selectCls}
+              />
+            </Field>
+          )}
+
+          <Field id="message" label={`${t('labelMessage')} ${t('optional')}`}>
+            <textarea id="message" className={inputCls} rows={2} maxLength={300} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+          </Field>
+
+          {form.deliveryMethod !== 'self' && (
+            <Field id="scheduledDate" label={`${t('labelSendDate')} ${t('optional')}`} hint={t('sendDateHint')}>
+              <input id="scheduledDate" className={inputCls} type="date" min={todayIso} value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} />
+            </Field>
+          )}
+
           {FEATURES.bag ? (
             <button
               onClick={addToBag}
-              className="btn-primary w-full inline-flex items-center justify-center gap-2"
+              className="btn-primary w-full min-h-[44px] inline-flex items-center justify-center gap-2"
               disabled={!form.recipientName}
             >
               <ShoppingBag className="h-4 w-4" />
               {en ? 'Add to bag' : 'Agregar a la bolsa'}
             </button>
           ) : (
-            <button onClick={() => setStep('pay')} className="btn-primary w-full" disabled={!form.recipientName}>
+            <button onClick={goToPay} className="btn-primary w-full min-h-[44px]">
               {t('continue')}
             </button>
           )}
@@ -260,19 +408,42 @@ export function GiftShopClient({ locale }: { locale: string }) {
 
       {/* Step 3: pay */}
       {step === 'pay' && item && (
-        <div className="bg-white rounded-2xl shadow-card p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input className={inputCls} placeholder={t('buyerName')} value={form.buyerName} onChange={(e) => setForm({ ...form, buyerName: e.target.value })} required />
-            <input className={inputCls} type="email" placeholder={t('buyerEmail')} value={form.buyerEmail} onChange={(e) => setForm({ ...form, buyerEmail: e.target.value })} required />
-          </div>
-          <PhoneInput
-            value={form.buyerPhone}
-            onChange={(buyerPhone) => setForm({ ...form, buyerPhone })}
-            placeholder={t('buyerPhone')}
-            showIcon={false}
-            inputClassName={inputCls}
-            selectClassName={`${inputCls} w-20 px-2`}
-          />
+        <div className="bg-white rounded-2xl shadow-card p-6 space-y-5">
+          <Field id="buyerName" label={t('labelBuyerName')} required error={fieldErrors.buyerName}>
+            <input
+              id="buyerName"
+              className={inputCls}
+              autoComplete="name"
+              value={form.buyerName}
+              aria-invalid={!!fieldErrors.buyerName}
+              aria-describedby={fieldErrors.buyerName ? 'buyerName-error' : undefined}
+              onChange={(e) => setForm({ ...form, buyerName: e.target.value })}
+            />
+          </Field>
+          <Field id="buyerEmail" label={t('labelBuyerEmail')} required error={fieldErrors.buyerEmail} hint={en ? 'Your receipt goes here.' : 'Aquí llega tu comprobante.'}>
+            <input
+              id="buyerEmail"
+              type="email"
+              inputMode="email"
+              className={inputCls}
+              autoComplete="email"
+              placeholder={t('phEmail')}
+              value={form.buyerEmail}
+              aria-invalid={!!fieldErrors.buyerEmail}
+              aria-describedby={fieldErrors.buyerEmail ? 'buyerEmail-error' : undefined}
+              onChange={(e) => setForm({ ...form, buyerEmail: e.target.value })}
+            />
+          </Field>
+          <Field id="buyerPhone" label={`${t('labelBuyerPhone')} ${t('optional')}`} labelFor={false}>
+            <PhoneInput
+              value={form.buyerPhone}
+              onChange={(buyerPhone) => setForm({ ...form, buyerPhone })}
+              placeholder="6612 3456"
+              showIcon={false}
+              inputClassName={inputCls}
+              selectClassName={selectCls}
+            />
+          </Field>
 
           <div className="bg-beige/60 rounded-xl p-4 text-sm space-y-1">
             <div className="flex justify-between">
@@ -292,7 +463,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
           </div>
 
           {error && <p className="text-red-600 text-sm">{error}</p>}
-          <button onClick={pay} disabled={submitting} className="btn-primary w-full disabled:opacity-60">
+          <button onClick={pay} disabled={submitting} className="btn-primary w-full min-h-[44px] disabled:opacity-60">
             {submitting ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : t('payCta')}
           </button>
           <p className="text-xs text-warm-gray text-center">{t('payNote')}</p>
