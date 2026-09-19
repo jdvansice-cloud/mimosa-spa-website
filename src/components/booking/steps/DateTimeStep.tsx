@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Calendar, Loader2, Clock, ChevronLeft, ChevronRight, User, Check } from 'lucide-react'
+import { Calendar, Loader2, Clock, ChevronLeft, ChevronRight, User, Users, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
 import type { MindbodyStaff } from '@/types/booking'
@@ -414,37 +414,61 @@ export function DateTimeStep() {
 
         {!isLoadingAvailability && !availabilityError && (
           <div className="space-y-6">
-            {/* Optional therapist filter — one quiet line for the majority,
-                two taps for regulars who book with "their" therapist */}
+            {/* Therapist choice — visible, optional. "Cualquiera" is preselected so
+                the majority passes through with no extra tap; regulars tap a name
+                and the dates and slots below filter to that therapist. */}
             {bookableStaff.length > 0 && (
-              <div className="flex items-center justify-center gap-2 flex-wrap -mb-2">
-                {filterStaff ? (
-                  <span className="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-gold/15 border border-gold/40 text-sm text-dark font-medium">
-                    Mostrando horarios de {staffName(filterStaff)}
-                    <button
-                      onClick={() => handleFilterChange('')}
-                      className="w-5 h-5 rounded-full bg-gold/30 hover:bg-gold text-dark flex items-center justify-center text-xs"
-                      aria-label="Quitar filtro de terapeuta"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ) : (
-                  <label className="flex items-center gap-2 text-xs text-warm-gray">
-                    ¿Buscas a alguien en especial?
-                    <select
-                      value=""
-                      onChange={(e) => handleFilterChange(e.target.value)}
-                      className="px-2 py-1.5 rounded-lg border border-beige-200 bg-white text-xs text-dark
-                               focus:outline-none focus:ring-2 focus:ring-gold/50"
-                    >
-                      <option value="">Cualquier terapeuta</option>
-                      {bookableStaff.map((st) => (
-                        <option key={st.Id} value={st.Id}>{staffName(st)}</option>
-                      ))}
-                    </select>
-                  </label>
-                )}
+              <div className="bg-white border border-beige-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-dark flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gold" />
+                    Elige tu terapeuta
+                    <span className="text-xs font-normal text-warm-gray">(opcional)</span>
+                  </h3>
+                </div>
+                <div
+                  className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x"
+                  role="radiogroup"
+                  aria-label="Terapeuta"
+                >
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={!filterStaff}
+                    onClick={() => handleFilterChange('')}
+                    className={`shrink-0 snap-start px-4 py-2.5 min-h-[44px] rounded-full border text-sm font-medium transition-colors ${
+                      !filterStaff
+                        ? 'border-gold bg-gold text-dark'
+                        : 'border-beige-200 bg-white text-warm-gray hover:border-gold/60'
+                    }`}
+                  >
+                    Cualquiera
+                  </button>
+                  {bookableStaff.map((st) => {
+                    const selected = filterStaff?.Id === st.Id
+                    return (
+                      <button
+                        key={st.Id}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => handleFilterChange(String(st.Id))}
+                        className={`shrink-0 snap-start px-4 py-2.5 min-h-[44px] rounded-full border text-sm font-medium transition-colors ${
+                          selected
+                            ? 'border-gold bg-gold text-dark'
+                            : 'border-beige-200 bg-white text-warm-gray hover:border-gold/60'
+                        }`}
+                      >
+                        {staffName(st)}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="mt-2 text-xs text-warm-gray">
+                  {filterStaff
+                    ? `Mostrando horarios de ${staffName(filterStaff)}.`
+                    : 'Si no eliges, te asignamos a una terapeuta del equipo.'}
+                </p>
               </div>
             )}
 
