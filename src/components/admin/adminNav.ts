@@ -24,6 +24,7 @@ import {
   MessageCircle,
   Printer,
 } from 'lucide-react'
+import { FEATURES } from '@/lib/nav'
 
 export interface NavItem {
   href: string
@@ -51,6 +52,9 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/admin/kpis/agenda', label: 'Agenda', icon: CalendarDays },
       { href: '/admin/giftcards', label: 'Gift Cards', icon: Gift },
+      ...(FEATURES.bag
+        ? [{ href: '/admin/pedidos', label: 'Pedidos en línea', icon: ShoppingBag }]
+        : []),
       { href: '/admin/resenas', label: 'Reseñas', icon: MessageSquareQuote },
     ],
   },
@@ -75,6 +79,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/admin/tratamientos', label: 'Tratamientos', icon: Sparkles },
       { href: '/admin/promociones', label: 'Promociones', icon: Tag },
       { href: '/admin/ofertas', label: 'Ofertas y Precios', icon: BadgePercent },
+      ...(FEATURES.bag
+        ? [{ href: '/admin/promocodes', label: 'Códigos de descuento', icon: Ticket }]
+        : []),
       { href: '/admin/membresia', label: 'Membresía', icon: Award },
     ],
   },
@@ -91,8 +98,12 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Sistema',
     items: [
       { href: '/admin/wati-agent', label: 'Camila (WhatsApp)', icon: MessageCircle },
-      { href: '/admin/facturas', label: 'Facturación electrónica', icon: Receipt },
-      { href: '/admin/impresion', label: 'Impresión de facturas', icon: Printer },
+      ...(FEATURES.bag
+        ? [
+            { href: '/admin/facturas', label: 'Facturación electrónica', icon: Receipt },
+            { href: '/admin/impresion', label: 'Impresión de facturas', icon: Printer },
+          ]
+        : []),
       { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
     ],
   },
