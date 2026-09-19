@@ -2,12 +2,15 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
-import { Loader2, Gift, ChevronLeft, ShoppingBag } from 'lucide-react'
+import { Loader2, Gift, ShoppingBag } from 'lucide-react'
 import { track } from '@/lib/track'
 import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
 import { PhoneInput } from '@/components/shared/PhoneInput'
 import { FEATURES } from '@/lib/nav'
 import { useBagStore } from '@/lib/bag/store'
+import { ShopStepHeader } from './ShopStepHeader'
+import { ShopBottomBar } from './ShopBottomBar'
+import { recapLine } from '@/lib/giftshop/recap'
 
 interface CatalogItem {
   id: string
@@ -98,6 +101,11 @@ export function GiftShopClient({ locale }: { locale: string }) {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const addGiftCardToBag = useBagStore((s) => s.addGiftCard)
   const openBag = useBagStore((s) => s.openBag)
+
+  const setField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
+    setForm({ ...form, [key]: value })
+    if (key in fieldErrors) setFieldErrors(({ [key as keyof FieldErrors]: _omit, ...rest }) => rest)
+  }
 
   useEffect(() => {
     fetch('/api/giftcards/catalog')
@@ -216,39 +224,9 @@ export function GiftShopClient({ locale }: { locale: string }) {
   const selectCls =
     'w-24 shrink-0 border border-beige rounded-lg px-2 py-3 min-h-[44px] text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold'
 
-  const stepTitles: Record<Step, string> = {
-    pick: t('step1'),
-    details: t('step2'),
-    pay: t('step3'),
-  }
-
   return (
-    <div>
-      {/* Step header */}
-      <div className="flex items-center justify-center gap-2 mb-8 text-sm">
-        {(['pick', 'details', 'pay'] as Step[]).map((s, i) => (
-          <span
-            key={s}
-            className={`px-3 py-1 rounded-full ${
-              step === s ? 'bg-gold text-dark font-semibold' : 'bg-beige text-warm-gray'
-            }`}
-          >
-            {i + 1}. {stepTitles[s]}
-          </span>
-        ))}
-      </div>
-
-      {step !== 'pick' && (
-        <button
-          onClick={() => {
-            setFieldErrors({})
-            setStep(step === 'pay' ? 'details' : 'pick')
-          }}
-          className="inline-flex items-center gap-1 text-sm text-warm-gray hover:text-dark mb-4"
-        >
-          <ChevronLeft className="h-4 w-4" /> {t('back')}
-        </button>
-      )}
+    <div className="pb-28">
+      <ShopStepHeader step={step === 'pick' ? 1 : step === 'details' ? 2 : 3} />
 
       {/* Step 1: pick */}
       {step === 'pick' && (
@@ -308,7 +286,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
               autoComplete="off"
               aria-invalid={!!fieldErrors.recipientName}
               aria-describedby={fieldErrors.recipientName ? 'recipientName-error' : undefined}
-              onChange={(e) => setForm({ ...form, recipientName: e.target.value })}
+              onChange={(e) => setField('recipientName', e.target.value)}
             />
           </Field>
 
@@ -362,7 +340,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
                 autoComplete="off"
                 aria-invalid={!!fieldErrors.recipientEmail}
                 aria-describedby={fieldErrors.recipientEmail ? 'recipientEmail-error' : undefined}
-                onChange={(e) => setForm({ ...form, recipientEmail: e.target.value })}
+                onChange={(e) => setField('recipientEmail', e.target.value)}
               />
             </Field>
           )}
@@ -373,7 +351,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
                 aria-invalid={!!fieldErrors.recipientPhone}
                 aria-describedby={fieldErrors.recipientPhone ? 'recipientPhone-error' : undefined}
                 value={form.recipientPhone}
-                onChange={(recipientPhone) => setForm({ ...form, recipientPhone })}
+                onChange={(recipientPhone) => setField('recipientPhone', recipientPhone)}
                 placeholder="6612 3456"
                 showIcon={false}
                 inputClassName={inputCls}
@@ -392,7 +370,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
             </Field>
           )}
 
-          {FEATURES.bag ? (
+          {FEATURES.bag && (
             <button
               onClick={addToBag}
               className="btn-primary w-full min-h-[44px] inline-flex items-center justify-center gap-2"
@@ -401,10 +379,6 @@ export function GiftShopClient({ locale }: { locale: string }) {
               <ShoppingBag className="h-4 w-4" />
               {en ? 'Add to bag' : 'Agregar a la bolsa'}
             </button>
-          ) : (
-            <button onClick={goToPay} className="btn-primary w-full min-h-[44px]">
-              {t('continue')}
-            </button>
           )}
         </div>
       )}
@@ -412,6 +386,9 @@ export function GiftShopClient({ locale }: { locale: string }) {
       {/* Step 3: pay */}
       {step === 'pay' && item && (
         <div className="bg-white rounded-2xl shadow-card p-6 space-y-5">
+          <p className="text-sm text-dark bg-beige/60 rounded-xl px-4 py-3">
+            {recapLine(form, en ? 'en' : 'es')}
+          </p>
           <Field id="buyerName" label={t('labelBuyerName')} required error={fieldErrors.buyerName}>
             <input
               id="buyerName"
@@ -420,7 +397,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
               value={form.buyerName}
               aria-invalid={!!fieldErrors.buyerName}
               aria-describedby={fieldErrors.buyerName ? 'buyerName-error' : undefined}
-              onChange={(e) => setForm({ ...form, buyerName: e.target.value })}
+              onChange={(e) => setField('buyerName', e.target.value)}
             />
           </Field>
           <Field id="buyerEmail" label={t('labelBuyerEmail')} required error={fieldErrors.buyerEmail} hint={en ? 'Your receipt goes here.' : 'Aquí llega tu comprobante.'}>
@@ -434,7 +411,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
               value={form.buyerEmail}
               aria-invalid={!!fieldErrors.buyerEmail}
               aria-describedby={fieldErrors.buyerEmail ? 'buyerEmail-error' : undefined}
-              onChange={(e) => setForm({ ...form, buyerEmail: e.target.value })}
+              onChange={(e) => setField('buyerEmail', e.target.value)}
             />
           </Field>
           <Field id="buyerPhone" label={`${t('labelBuyerPhone')} ${t('optional')}`}>
@@ -467,11 +444,26 @@ export function GiftShopClient({ locale }: { locale: string }) {
           </div>
 
           {error && <p className="text-red-600 text-sm">{error}</p>}
-          <button onClick={pay} disabled={submitting} className="btn-primary w-full min-h-[44px] disabled:opacity-60">
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : t('payCta')}
-          </button>
           <p className="text-xs text-warm-gray text-center">{t('payNote')}</p>
         </div>
+      )}
+
+      {step === 'details' && item && !FEATURES.bag && (
+        <ShopBottomBar
+          onBack={() => { setFieldErrors({}); setStep('pick') }}
+          backLabel={t('back')}
+          onNext={goToPay}
+          nextLabel={t('continue')}
+        />
+      )}
+      {step === 'pay' && item && (
+        <ShopBottomBar
+          onBack={() => { setFieldErrors({}); setStep('details') }}
+          backLabel={t('back')}
+          onNext={pay}
+          nextLabel={t('payCta')}
+          loading={submitting}
+        />
       )}
     </div>
   )

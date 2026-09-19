@@ -237,6 +237,7 @@
     "step1": "Elige",
     "step2": "Personaliza",
     "step3": "Paga",
+    "stepOf": "Paso {step} de 3",
     "back": "Volver",
     "monetary": "Por monto",
     "experiences": "Experiencias",

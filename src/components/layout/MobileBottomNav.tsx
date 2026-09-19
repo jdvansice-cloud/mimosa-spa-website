@@ -19,7 +19,7 @@ export function MobileBottomNav() {
   const bagCount = selectBagCount({ session, giftCards })
 
   // Check if we're on the booking page - hide bottom nav to give more screen space
-  const isOnBookingPage = pathname.includes('/reservar')
+  const isOnBookingPage = pathname.includes('/reservar') || (/\/giftcards$/.test(pathname) && !pathname.includes('/menu/giftcards'))
 
   // Hide bottom nav on booking page to maximize screen space for booking widget
   if (isOnBookingPage) {

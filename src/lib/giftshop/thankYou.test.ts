@@ -14,13 +14,13 @@ describe('thankYouSentence', () => {
   it('email, immediate', () => {
     const o = { ...base, delivery_email: true, recipient_email: 'maria@example.com' }
     expect(thankYouSentence(o, 'es')).toBe('María recibirá su gift card por correo (maria@example.com) en los próximos minutos.')
-    expect(thankYouSentence(o, 'en')).toBe('María will receive her gift card by email (maria@example.com) in the next few minutes.')
+    expect(thankYouSentence(o, 'en')).toBe('María will receive the gift card by email (maria@example.com) in the next few minutes.')
   })
 
   it('email, scheduled', () => {
     const o = { ...base, delivery_email: true, recipient_email: 'maria@example.com', scheduled_send_at: '2026-09-20T14:00:00.000Z' }
     expect(thankYouSentence(o, 'es')).toBe('María recibirá su gift card por correo (maria@example.com) el 20 de septiembre.')
-    expect(thankYouSentence(o, 'en')).toBe('María will receive her gift card by email (maria@example.com) on September 20.')
+    expect(thankYouSentence(o, 'en')).toBe('María will receive the gift card by email (maria@example.com) on September 20.')
   })
 
   it('whatsapp', () => {
