@@ -507,7 +507,7 @@ export function DateTimeStep() {
                           {monthShort}
                         </span>
                         <span className={`text-[9px] mt-0.5 ${isSelected ? 'text-dark/60' : 'text-gold'}`}>
-                          {dateItem.slotsCount} slots
+                          {dateItem.slotsCount} {dateItem.slotsCount === 1 ? 'horario' : 'horarios'}
                         </span>
                       </button>
                     )

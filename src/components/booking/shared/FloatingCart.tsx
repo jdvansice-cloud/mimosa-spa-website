@@ -123,7 +123,7 @@ export function FloatingCart() {
                   Tu Carrito
                   {itemCount > 0 && (
                     <span className="text-sm font-normal text-warm-gray">
-                      ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+                      ({itemCount} {itemCount === 1 ? 'tratamiento' : 'tratamientos'})
                     </span>
                   )}
                 </h2>

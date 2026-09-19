@@ -70,7 +70,7 @@ export function StepProgress({ currentStep, totalSteps }: StepProgressProps) {
         <button
           onClick={toggleCart}
           className="absolute right-0 top-1/2 -translate-y-1/2 group"
-          aria-label={`Carrito: ${itemCount} items`}
+          aria-label={`Carrito: ${itemCount} ${itemCount === 1 ? 'tratamiento' : 'tratamientos'}`}
         >
           <div className={`
             relative w-10 h-10 rounded-xl flex items-center justify-center
@@ -110,12 +110,12 @@ export function StepProgress({ currentStep, totalSteps }: StepProgressProps) {
               onClick={toggleCart}
               className={`
                 relative p-2 rounded-lg transition-all
-                ${itemCount > 0 
-                  ? 'bg-gold/10 text-gold' 
+                ${itemCount > 0
+                  ? 'bg-gold/10 text-gold'
                   : 'bg-beige-100 text-warm-gray'
                 }
               `}
-              aria-label={`Carrito: ${itemCount} items`}
+              aria-label={`Carrito: ${itemCount} ${itemCount === 1 ? 'tratamiento' : 'tratamientos'}`}
             >
               <ShoppingBag className="w-5 h-5" />
               {itemCount > 0 && (
