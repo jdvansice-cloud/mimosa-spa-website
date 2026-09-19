@@ -17,6 +17,7 @@ export interface DeliveryResolved {
   recipientPhone: string | null
   deliveryEmail: boolean
   deliveryWhatsapp: boolean
+  allowSchedule: boolean
 }
 
 export interface DeliveryRejected {
@@ -49,6 +50,7 @@ export function resolveDelivery(input: DeliveryInput): DeliveryResolved | Delive
       recipientPhone: phone || null,
       deliveryEmail: !!email,
       deliveryWhatsapp: !!phone,
+      allowSchedule: !!(email || phone),
     }
   }
 
@@ -56,12 +58,12 @@ export function resolveDelivery(input: DeliveryInput): DeliveryResolved | Delive
     case 'email':
       if (!email) return { ok: false, error: 'Indica el correo de quien recibe' }
       if (!EMAIL_RE.test(email)) return { ok: false, error: 'Correo del destinatario inválido' }
-      return { ok: true, method: 'email', recipientEmail: email, recipientPhone: null, deliveryEmail: true, deliveryWhatsapp: false }
+      return { ok: true, method: 'email', recipientEmail: email, recipientPhone: null, deliveryEmail: true, deliveryWhatsapp: false, allowSchedule: true }
     case 'whatsapp':
       if (phone.length < 8) return { ok: false, error: 'Indica el WhatsApp de quien recibe' }
-      return { ok: true, method: 'whatsapp', recipientEmail: null, recipientPhone: phone, deliveryEmail: false, deliveryWhatsapp: true }
+      return { ok: true, method: 'whatsapp', recipientEmail: null, recipientPhone: phone, deliveryEmail: false, deliveryWhatsapp: true, allowSchedule: true }
     case 'self':
-      return { ok: true, method: 'self', recipientEmail: null, recipientPhone: null, deliveryEmail: false, deliveryWhatsapp: false }
+      return { ok: true, method: 'self', recipientEmail: null, recipientPhone: null, deliveryEmail: false, deliveryWhatsapp: false, allowSchedule: false }
     default:
       return { ok: false, error: 'Método de entrega inválido' }
   }

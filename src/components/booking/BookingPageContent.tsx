@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react'
 import { useBookingStore } from '@/lib/booking/store'
 import { BookingWidget } from './BookingWidget'
 import { GiftCodeChip } from '@/components/booking/GiftCodeChip'
+import { sanitizeGiftCode, GIFT_CODE_STORAGE_KEY } from '@/lib/giftshop/giftCode'
 import { AnimatePresence, motion } from 'framer-motion'
 import { RefreshCw } from 'lucide-react'
 import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
@@ -48,14 +49,13 @@ function BookingPageInner() {
 
       // Deep-link preselection runs for EVERYONE — browsing no longer requires
       // an account (auth moved to the step before confirmation).
-      // A gift card's own page links here with ?gc=SERIAL, so the recipient
-      // books and pays with their card without typing the code anywhere.
-      const giftCode = searchParams.get('gc')
-      if (giftCode && /^[A-Za-z0-9-]{4,30}$/.test(giftCode)) {
+      // A gift card's own page links here with ?gc=SERIAL; the code rides into the appointment note so the front desk sees it.
+      const giftCode = sanitizeGiftCode(searchParams.get('gc'))
+      if (giftCode) {
         try {
-          sessionStorage.setItem('mimosa-gc', giftCode.toUpperCase())
+          sessionStorage.setItem(GIFT_CODE_STORAGE_KEY, giftCode)
         } catch {
-          // private mode / storage disabled — the code can still be typed
+          // private mode / storage disabled — the front desk can still take the code by hand
         }
       }
 

@@ -6,7 +6,7 @@ describe('resolveDelivery', () => {
     const r = resolveDelivery({ deliveryMethod: 'email', recipientEmail: ' Maria@Example.com ', recipientPhone: '50761234567' })
     expect(r).toEqual({
       ok: true, method: 'email', recipientEmail: 'maria@example.com', recipientPhone: null,
-      deliveryEmail: true, deliveryWhatsapp: false,
+      deliveryEmail: true, deliveryWhatsapp: false, allowSchedule: true,
     })
   })
 
@@ -19,7 +19,7 @@ describe('resolveDelivery', () => {
     const r = resolveDelivery({ deliveryMethod: 'whatsapp', recipientPhone: '+507 6123-4567', recipientEmail: 'x@y.com' })
     expect(r).toEqual({
       ok: true, method: 'whatsapp', recipientEmail: null, recipientPhone: '50761234567',
-      deliveryEmail: false, deliveryWhatsapp: true,
+      deliveryEmail: false, deliveryWhatsapp: true, allowSchedule: true,
     })
   })
 
@@ -31,8 +31,13 @@ describe('resolveDelivery', () => {
     const r = resolveDelivery({ deliveryMethod: 'self', recipientEmail: 'x@y.com', recipientPhone: '50761234567' })
     expect(r).toEqual({
       ok: true, method: 'self', recipientEmail: null, recipientPhone: null,
-      deliveryEmail: false, deliveryWhatsapp: false,
+      deliveryEmail: false, deliveryWhatsapp: false, allowSchedule: false,
     })
+  })
+
+  it('self never allows a scheduled send', () => {
+    const r = resolveDelivery({ deliveryMethod: 'self' })
+    expect(r.ok && r.allowSchedule).toBe(false)
   })
 
   it('rejects an unknown method', () => {
@@ -43,12 +48,12 @@ describe('resolveDelivery', () => {
     const r = resolveDelivery({ recipientEmail: 'a@b.co', recipientPhone: '50761234567' })
     expect(r).toEqual({
       ok: true, method: 'email', recipientEmail: 'a@b.co', recipientPhone: '50761234567',
-      deliveryEmail: true, deliveryWhatsapp: true,
+      deliveryEmail: true, deliveryWhatsapp: true, allowSchedule: true,
     })
     const none = resolveDelivery({})
     expect(none).toEqual({
       ok: true, method: 'self', recipientEmail: null, recipientPhone: null,
-      deliveryEmail: false, deliveryWhatsapp: false,
+      deliveryEmail: false, deliveryWhatsapp: false, allowSchedule: false,
     })
   })
 })
