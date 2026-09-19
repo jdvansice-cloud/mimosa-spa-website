@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import { useBookingStore } from '@/lib/booking/store'
 import { BookingWidget } from './BookingWidget'
+import { GiftCodeChip } from '@/components/booking/GiftCodeChip'
 import { AnimatePresence, motion } from 'framer-motion'
 import { RefreshCw } from 'lucide-react'
 import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
@@ -213,6 +214,7 @@ function BookingPageInner() {
       {/* Booking Widget */}
       <section className="py-4 md:py-6">
         <div className="container-spa max-w-4xl">
+          <GiftCodeChip />
           <BookingWidget />
         </div>
       </section>

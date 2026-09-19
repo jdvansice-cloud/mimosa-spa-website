@@ -7,6 +7,7 @@ import { useBookingStore, selectTotalDuration } from '@/lib/booking/store'
 import { calculateCartPricing } from '@/lib/booking/pricing'
 import { useBagStore } from '@/lib/bag/store'
 import { FEATURES } from '@/lib/nav'
+import { readStoredGiftCode, clearStoredGiftCode } from '@/lib/giftshop/giftCode'
 
 interface CheckoutCfg {
   enabled: boolean
@@ -297,6 +298,7 @@ export function ConfirmStep() {
           totalWithTax: pricing.totalWithTax,
           // Appointment replacement: cancel old appointment after booking
           replaceAppointmentId: replaceAppointmentId || undefined,
+          giftCode: readStoredGiftCode() ?? undefined,
         })
       })
 
@@ -330,6 +332,7 @@ export function ConfirmStep() {
         totalBooked: data.totalBooked,
         totalRequested: data.totalRequested,
       })
+      clearStoredGiftCode()
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error de conexión')
