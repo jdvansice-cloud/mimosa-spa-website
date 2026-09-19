@@ -47,6 +47,11 @@
 | `src/components/booking/BookingPageContent.tsx` | Mounts the chip above the widget |
 | `src/app/api/cron/giftcard-orders/route.ts` | Pass (f): WhatsApp deliveries pending template approval |
 | `src/lib/nav.ts` | Task 9 launch flips |
+| `src/components/giftshop/ShopStepHeader.tsx`, `ShopBottomBar.tsx` | Task 10: same step header and action bar as the booking widget |
+| `src/lib/giftshop/recap.ts` (+ `.test.ts`) | Task 10: `recapLine()` for the pay step |
+| `src/components/layout/MobileBottomNav.tsx` | Task 10: hide the site bottom nav on the shop page |
+| `src/components/shared/LeadForm.tsx` | Task 3: same phone-field class fix |
+| `AuthStep.tsx`, `DateTimeStep.tsx`, `FloatingCart.tsx`, `StepProgress.tsx` | Task 11: widget copy congruence; Task 12: visible therapist choice |
 
 ---
 
@@ -472,21 +477,35 @@ Expected: clean cherry-pick, Vercel deploys. The public page is still behind the
 
 ---
 
-### Task 3: Delivery choice in the shop (step 2)
+### Task 3: Delivery choice, visible labels, inline errors and the phone-field fix (shop steps 2 and 3)
 
 **Files:**
-- Modify: `src/components/giftshop/GiftShopClient.tsx` (state at :40-50, `CatalogResponse` at :26-29, `pay()` at :91-117, step 2 block at :221-260)
+- Modify: `src/components/giftshop/GiftShopClient.tsx` (imports :1-10, `CatalogResponse` :26-29, state :40-50, `pay()` :91-117, `inputCls` :146-147, step 2 block :221-260, step 3 block :262-299)
+- Modify: `src/components/shared/LeadForm.tsx:131` (same phone-field class bug)
 - Modify: `src/messages/es.json`, `src/messages/en.json` (`giftShop` object)
 
 **Interfaces:**
 - Consumes: `whatsappDeliveryEnabled` from `GET /api/giftcards/catalog` (Task 2); `deliveryMethod` accepted by `POST /api/giftcards/checkout` (Task 2).
+- Produces: `form.deliveryMethod: 'email' | 'whatsapp' | 'self'`, `goToPay()` and `validateBuyer()` used by Task 10's bottom bar; the `Field` helper and `selectCls` constant reused by Task 10.
+
+Why this shape (from the 2026-09-19 screen review): every field in steps 2 and 3 was placeholder-only, errors appeared as one generic red line, the country selector inherited `w-full` from `inputCls` and squeezed the phone field to a sliver at 375px, and buttons were under 44px tall.
 
 - [ ] **Step 1: Add the strings**
 
-In `src/messages/es.json`, inside `"giftShop"`, change two existing values and add the new keys (keep the rest):
+In `src/messages/es.json`, inside `"giftShop"`, add the keys below (keep every existing key):
 ```json
-    "recipientEmail": "Correo de quien recibe *",
-    "recipientPhone": "WhatsApp de quien recibe *",
+    "labelRecipientName": "Nombre de quien recibe",
+    "phRecipientName": "Ej. María Pérez",
+    "labelRecipientEmail": "Correo de quien recibe",
+    "phEmail": "nombre@correo.com",
+    "labelRecipientPhone": "WhatsApp de quien recibe",
+    "labelMessage": "Mensaje para la tarjeta",
+    "labelSendDate": "Enviar en una fecha específica",
+    "sendDateHint": "Si no eliges fecha, se envía al completar el pago.",
+    "optional": "(opcional)",
+    "labelBuyerName": "Tu nombre",
+    "labelBuyerEmail": "Tu correo",
+    "labelBuyerPhone": "Tu teléfono",
     "deliveryTitle": "¿Cómo se lo entregamos?",
     "deliveryEmail": "Por correo",
     "deliveryEmailHint": "Le llega un correo con el enlace a su gift card.",
@@ -494,13 +513,26 @@ In `src/messages/es.json`, inside `"giftShop"`, change two existing values and a
     "deliveryWhatsappHint": "Le llega un mensaje de WhatsApp con el enlace a su gift card.",
     "deliverySelf": "Yo se lo entrego",
     "deliverySelfHint": "Recibirás el enlace de la gift card en tu comprobante, para enviárselo cuando quieras.",
-    "errRecipientEmail": "Indica el correo de quien recibe",
-    "errRecipientPhone": "Indica el WhatsApp de quien recibe",
+    "errRecipientName": "Escribe el nombre de quien recibe",
+    "errRecipientEmail": "Escribe un correo válido para quien recibe",
+    "errRecipientPhone": "Escribe el WhatsApp de quien recibe",
+    "errBuyerName": "Escribe tu nombre",
+    "errBuyerEmail": "Escribe un correo válido",
 ```
 In `src/messages/en.json`:
 ```json
-    "recipientEmail": "Recipient's email *",
-    "recipientPhone": "Recipient's WhatsApp *",
+    "labelRecipientName": "Recipient's name",
+    "phRecipientName": "e.g. María Pérez",
+    "labelRecipientEmail": "Recipient's email",
+    "phEmail": "name@email.com",
+    "labelRecipientPhone": "Recipient's WhatsApp",
+    "labelMessage": "Card message",
+    "labelSendDate": "Send on a specific date",
+    "sendDateHint": "If you don't pick a date, it is sent as soon as you pay.",
+    "optional": "(optional)",
+    "labelBuyerName": "Your name",
+    "labelBuyerEmail": "Your email",
+    "labelBuyerPhone": "Your phone",
     "deliveryTitle": "How should we deliver it?",
     "deliveryEmail": "By email",
     "deliveryEmailHint": "They get an email with the link to their gift card.",
@@ -508,16 +540,19 @@ In `src/messages/en.json`:
     "deliveryWhatsappHint": "They get a WhatsApp message with the link to their gift card.",
     "deliverySelf": "I'll give it myself",
     "deliverySelfHint": "You'll get the gift card link in your receipt, to share whenever you like.",
-    "errRecipientEmail": "Enter the recipient's email",
+    "errRecipientName": "Enter the recipient's name",
+    "errRecipientEmail": "Enter a valid email for the recipient",
     "errRecipientPhone": "Enter the recipient's WhatsApp",
+    "errBuyerName": "Enter your name",
+    "errBuyerEmail": "Enter a valid email",
 ```
 Validate both files:
 ```bash
-node -e "for (const l of ['es','en']) { const d=require('./src/messages/'+l+'.json').giftShop; for (const k of ['deliveryTitle','deliveryEmail','deliveryWhatsapp','deliverySelf','deliverySelfHint','errRecipientEmail','errRecipientPhone']) if(!d[k]) throw new Error(l+' missing '+k) } console.log('i18n ok')"
+node -e "for (const l of ['es','en']) { const d=require('./src/messages/'+l+'.json').giftShop; for (const k of ['labelRecipientName','labelBuyerEmail','deliveryTitle','deliverySelfHint','errRecipientName','errBuyerEmail','sendDateHint','optional']) if(!d[k]) throw new Error(l+' missing '+k) } console.log('i18n ok')"
 ```
 Expected: `i18n ok`.
 
-- [ ] **Step 2: Extend the client state and catalog type**
+- [ ] **Step 2: State, catalog type, class constants and the `Field` helper**
 
 In `GiftShopClient.tsx`:
 
@@ -529,55 +564,156 @@ interface CatalogResponse {
   items: CatalogItem[]
 }
 ```
-Add after the `Step` type:
+After the `Step` type add:
 ```ts
 type DeliveryMethod = 'email' | 'whatsapp' | 'self'
+type FieldErrors = Partial<Record<'recipientName' | 'recipientEmail' | 'recipientPhone' | 'buyerName' | 'buyerEmail', string>>
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// Label above, control, then hint or error below. Errors are linked to the
+// control through aria-describedby so screen readers read them in place.
+function Field({
+  id,
+  label,
+  required,
+  hint,
+  error,
+  labelFor = true,
+  children,
+}: {
+  id: string
+  label: string
+  required?: boolean
+  hint?: string
+  error?: string
+  labelFor?: boolean
+  children: React.ReactNode
+}) {
+  const LabelTag = labelFor ? 'label' : 'span'
+  return (
+    <div>
+      <LabelTag {...(labelFor ? { htmlFor: id } : {})} className="block text-sm font-medium text-dark mb-1.5">
+        {label}
+        {required && <span className="text-gold-600"> *</span>}
+      </LabelTag>
+      {children}
+      {error ? (
+        <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-red-600">
+          {error}
+        </p>
+      ) : hint ? (
+        <p className="mt-1 text-xs text-warm-gray">{hint}</p>
+      ) : null}
+    </div>
+  )
+}
 ```
+Add `import type React from 'react'` if the file does not already import React types (it imports `useEffect, useState` from 'react'; extend that import to `import { useEffect, useState, type ReactNode } from 'react'` and use `ReactNode` instead of `React.ReactNode`).
+
 In the `useState` form object add a first field:
 ```ts
     deliveryMethod: 'email' as DeliveryMethod,
 ```
-Add a derived flag after `const money = …`:
+After `const [error, setError] = useState<string | null>(null)` add:
+```ts
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+```
+After `const money = …` add:
 ```ts
   const whatsappAvailable = !!catalog?.whatsappDeliveryEnabled
+  const todayIso = new Date().toISOString().slice(0, 10)
 ```
-
-- [ ] **Step 3: Validate the chosen channel before paying**
-
-In `pay()`, replace
+Replace the `inputCls` constant with two constants (44px tall controls; the select no longer inherits `w-full`):
 ```ts
-    if (!form.buyerName || !form.buyerEmail || !form.recipientName) {
-      setError(t('errRequired'))
-      return
-    }
+  const inputCls =
+    'w-full border border-beige rounded-lg px-3 py-3 min-h-[44px] text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold aria-[invalid=true]:border-red-400'
+  const selectCls =
+    'w-24 shrink-0 border border-beige rounded-lg px-2 py-3 min-h-[44px] text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold'
 ```
-with
+
+- [ ] **Step 3: Validation per step**
+
+Replace `pay()` with these three functions:
 ```ts
-    if (!form.buyerName || !form.buyerEmail || !form.recipientName) {
-      setError(t('errRequired'))
-      return
+  const validateDetails = (): boolean => {
+    const errs: FieldErrors = {}
+    if (!form.recipientName.trim()) errs.recipientName = t('errRecipientName')
+    if (form.deliveryMethod === 'email' && !EMAIL_RE.test(form.recipientEmail.trim())) errs.recipientEmail = t('errRecipientEmail')
+    if (form.deliveryMethod === 'whatsapp' && form.recipientPhone.replace(/\D/g, '').length < 8) errs.recipientPhone = t('errRecipientPhone')
+    setFieldErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  const goToPay = () => {
+    if (!validateDetails()) return
+    setError(null)
+    setStep('pay')
+  }
+
+  const validateBuyer = (): boolean => {
+    const errs: FieldErrors = {}
+    if (!form.buyerName.trim()) errs.buyerName = t('errBuyerName')
+    if (!EMAIL_RE.test(form.buyerEmail.trim())) errs.buyerEmail = t('errBuyerEmail')
+    setFieldErrors(errs)
+    return Object.keys(errs).length === 0
+  }
+
+  const pay = async () => {
+    if (!item || submitting) return
+    setError(null)
+    if (!validateBuyer()) return
+    setSubmitting(true)
+    track('giftshop_checkout', { locale, meta: { item: item.id } })
+    try {
+      const res = await fetch('/api/giftcards/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId: item.id, locale, ...form }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok || !data?.url) {
+        setError(data?.error || t('errCheckout'))
+        setSubmitting(false)
+        return
+      }
+      window.location.href = data.url
+    } catch {
+      setError(t('errCheckout'))
+      setSubmitting(false)
     }
-    if (form.deliveryMethod === 'email' && !form.recipientEmail.trim()) {
-      setError(t('errRecipientEmail'))
-      setStep('details')
-      return
-    }
-    if (form.deliveryMethod === 'whatsapp' && form.recipientPhone.replace(/\D/g, '').length < 8) {
-      setError(t('errRecipientPhone'))
-      setStep('details')
-      return
-    }
+  }
 ```
-The request body already spreads `...form`, so `deliveryMethod` reaches the server.
+Also make the back arrow clear errors: in the `onClick={() => setStep(step === 'pay' ? 'details' : 'pick')}` handler add `setFieldErrors({})` before `setStep`.
 
-- [ ] **Step 4: Replace the recipient contact inputs with the delivery choice**
+- [ ] **Step 4: Step 2 markup — labels, delivery choice, phone fix**
 
-In the step-2 block, replace the `<div className="grid grid-cols-1 md:grid-cols-2 gap-3">…</div>` that holds `recipientName` + `recipientEmail`, and the `<PhoneInput … recipientPhone … />` that follows it, with:
+Replace the whole `{step === 'details' && item && ( … )}` block with:
 ```tsx
-          <input className={inputCls} placeholder={t('recipientName')} value={form.recipientName} onChange={(e) => setForm({ ...form, recipientName: e.target.value })} required />
+      {/* Step 2: details */}
+      {step === 'details' && item && (
+        <div className="bg-white rounded-2xl shadow-card p-6 space-y-5">
+          <p className="font-display font-semibold text-dark">
+            {name(item)}
+            {item.kind === 'experience' && <span className="text-gold-600"> · {money(item.amount_cents)}</span>}
+          </p>
+          <input type="text" name="website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="hidden" tabIndex={-1} autoComplete="off" aria-hidden />
 
-          <div>
-            <p className="text-sm font-medium text-dark mb-2">{t('deliveryTitle')}</p>
+          <Field id="recipientName" label={t('labelRecipientName')} required error={fieldErrors.recipientName}>
+            <input
+              id="recipientName"
+              className={inputCls}
+              placeholder={t('phRecipientName')}
+              value={form.recipientName}
+              autoComplete="off"
+              aria-invalid={!!fieldErrors.recipientName}
+              aria-describedby={fieldErrors.recipientName ? 'recipientName-error' : undefined}
+              onChange={(e) => setForm({ ...form, recipientName: e.target.value })}
+            />
+          </Field>
+
+          <fieldset>
+            <legend className="text-sm font-medium text-dark mb-2">{t('deliveryTitle')}</legend>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t('deliveryTitle')}>
               {(
                 [
@@ -593,8 +729,11 @@ In the step-2 block, replace the `<div className="grid grid-cols-1 md:grid-cols-
                     type="button"
                     role="radio"
                     aria-checked={form.deliveryMethod === o.key}
-                    onClick={() => setForm({ ...form, deliveryMethod: o.key })}
-                    className={`rounded-lg border px-3 py-2.5 text-sm transition-colors ${
+                    onClick={() => {
+                      setFieldErrors({})
+                      setForm({ ...form, deliveryMethod: o.key })
+                    }}
+                    className={`rounded-lg border px-3 py-3 min-h-[44px] text-sm transition-colors ${
                       form.deliveryMethod === o.key
                         ? 'border-gold bg-gold/15 text-dark font-semibold'
                         : 'border-beige bg-white text-warm-gray hover:border-gold/60'
@@ -609,59 +748,144 @@ In the step-2 block, replace the `<div className="grid grid-cols-1 md:grid-cols-
               {form.deliveryMethod === 'whatsapp' && t('deliveryWhatsappHint')}
               {form.deliveryMethod === 'self' && t('deliverySelfHint')}
             </p>
-          </div>
+          </fieldset>
 
           {form.deliveryMethod === 'email' && (
-            <input className={inputCls} type="email" placeholder={t('recipientEmail')} value={form.recipientEmail} onChange={(e) => setForm({ ...form, recipientEmail: e.target.value })} required />
+            <Field id="recipientEmail" label={t('labelRecipientEmail')} required error={fieldErrors.recipientEmail}>
+              <input
+                id="recipientEmail"
+                type="email"
+                inputMode="email"
+                className={inputCls}
+                placeholder={t('phEmail')}
+                value={form.recipientEmail}
+                autoComplete="off"
+                aria-invalid={!!fieldErrors.recipientEmail}
+                aria-describedby={fieldErrors.recipientEmail ? 'recipientEmail-error' : undefined}
+                onChange={(e) => setForm({ ...form, recipientEmail: e.target.value })}
+              />
+            </Field>
           )}
           {form.deliveryMethod === 'whatsapp' && (
+            <Field id="recipientPhone" label={t('labelRecipientPhone')} required error={fieldErrors.recipientPhone} labelFor={false}>
+              <PhoneInput
+                value={form.recipientPhone}
+                onChange={(recipientPhone) => setForm({ ...form, recipientPhone })}
+                placeholder="6612 3456"
+                showIcon={false}
+                inputClassName={inputCls}
+                selectClassName={selectCls}
+              />
+            </Field>
+          )}
+
+          <Field id="message" label={`${t('labelMessage')} ${t('optional')}`}>
+            <textarea id="message" className={inputCls} rows={2} maxLength={300} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+          </Field>
+
+          {form.deliveryMethod !== 'self' && (
+            <Field id="scheduledDate" label={`${t('labelSendDate')} ${t('optional')}`} hint={t('sendDateHint')}>
+              <input id="scheduledDate" className={inputCls} type="date" min={todayIso} value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} />
+            </Field>
+          )}
+
+          {FEATURES.bag ? (
+            <button
+              onClick={addToBag}
+              className="btn-primary w-full min-h-[44px] inline-flex items-center justify-center gap-2"
+              disabled={!form.recipientName}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {en ? 'Add to bag' : 'Agregar a la bolsa'}
+            </button>
+          ) : (
+            <button onClick={goToPay} className="btn-primary w-full min-h-[44px]">
+              {t('continue')}
+            </button>
+          )}
+        </div>
+      )}
+```
+(Task 10 later moves the `Continuar` button into a sticky bottom bar; keep it inline here so this task is verifiable on its own.)
+
+- [ ] **Step 5: Step 3 markup — labelled buyer fields**
+
+Replace the `<div className="grid grid-cols-1 md:grid-cols-2 gap-3">…</div>` with the buyer name/email inputs and the `<PhoneInput … buyerPhone … />` that follows it with:
+```tsx
+          <Field id="buyerName" label={t('labelBuyerName')} required error={fieldErrors.buyerName}>
+            <input
+              id="buyerName"
+              className={inputCls}
+              autoComplete="name"
+              value={form.buyerName}
+              aria-invalid={!!fieldErrors.buyerName}
+              aria-describedby={fieldErrors.buyerName ? 'buyerName-error' : undefined}
+              onChange={(e) => setForm({ ...form, buyerName: e.target.value })}
+            />
+          </Field>
+          <Field id="buyerEmail" label={t('labelBuyerEmail')} required error={fieldErrors.buyerEmail} hint={en ? 'Your receipt goes here.' : 'Aquí llega tu comprobante.'}>
+            <input
+              id="buyerEmail"
+              type="email"
+              inputMode="email"
+              className={inputCls}
+              autoComplete="email"
+              placeholder={t('phEmail')}
+              value={form.buyerEmail}
+              aria-invalid={!!fieldErrors.buyerEmail}
+              aria-describedby={fieldErrors.buyerEmail ? 'buyerEmail-error' : undefined}
+              onChange={(e) => setForm({ ...form, buyerEmail: e.target.value })}
+            />
+          </Field>
+          <Field id="buyerPhone" label={`${t('labelBuyerPhone')} ${t('optional')}`} labelFor={false}>
             <PhoneInput
-              value={form.recipientPhone}
-              onChange={(recipientPhone) => setForm({ ...form, recipientPhone })}
-              placeholder={t('recipientPhone')}
+              value={form.buyerPhone}
+              onChange={(buyerPhone) => setForm({ ...form, buyerPhone })}
+              placeholder="6612 3456"
               showIcon={false}
               inputClassName={inputCls}
-              selectClassName={`${inputCls} w-20 px-2`}
+              selectClassName={selectCls}
             />
-          )}
+          </Field>
 ```
-Then wrap the send-date block so it is hidden for self-delivery. Replace
+Change the outer step-3 card's `space-y-4` to `space-y-5`, and give the pay button `min-h-[44px]`:
 ```tsx
-          <div>
-            <label className="text-xs text-warm-gray block mb-1">{t('sendDate')}</label>
-            <input className={inputCls} type="date" value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} />
-          </div>
+          <button onClick={pay} disabled={submitting} className="btn-primary w-full min-h-[44px] disabled:opacity-60">
+```
+
+- [ ] **Step 6: Same phone-field fix in the lead form**
+
+In `src/components/shared/LeadForm.tsx` line 131 replace
+```tsx
+          selectClassName={`${inputCls} w-20 px-2`}
 ```
 with
 ```tsx
-          {form.deliveryMethod !== 'self' && (
-            <div>
-              <label className="text-xs text-warm-gray block mb-1">{t('sendDate')}</label>
-              <input className={inputCls} type="date" value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} />
-            </div>
-          )}
+          selectClassName="w-24 shrink-0 border border-beige rounded-lg px-2 py-3 min-h-[44px] text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold"
 ```
-Leave the `FEATURES.bag ? addToBag : continue` button as it is.
+(Check the file's own `inputCls` first: if it already lacks `w-full`, leave this line alone and note it in the report.)
 
-- [ ] **Step 5: Verify in the dev server**
+- [ ] **Step 7: Verify in the dev server**
 
-The public page redirects while `FEATURES.giftShop` is false, so preview through the dev server with a temporary local override: start the dev server (`preview_start` with the project's launch config), then in `src/lib/nav.ts` set `giftShop: true` **locally only** (do not commit). Open `http://localhost:3000/es/giftcards`, pick a card, and check:
-- three pills appear only when the WhatsApp setting is on; otherwise two;
-- choosing "Por correo" shows the email field and the send-date field; "Por WhatsApp" shows the phone input; "Yo se lo entrego" shows neither;
-- continuing to step 3 without an email while "Por correo" is selected shows "Indica el correo de quien recibe" and returns to step 2.
-Then revert `src/lib/nav.ts` (`git checkout -- src/lib/nav.ts`) and confirm `git status --porcelain src/lib/nav.ts` prints nothing.
+The public page redirects while `FEATURES.giftShop` is false, so set `giftShop: true` in `src/lib/nav.ts` **locally only** (never commit), open `http://localhost:3000/es/giftcards` at a 375px viewport, pick a card, and check:
+- every input has a visible label above it, the required ones marked with a gold asterisk;
+- the country selector is narrow and the phone field fills the rest of the row (previously a sliver);
+- three delivery pills when the WhatsApp setting is on, two otherwise; choosing one shows only its own field; "Yo se lo entrego" hides the send-date field;
+- pressing "Continuar" with an empty name shows "Escribe el nombre de quien recibe" under the name field, and the field's border turns red; the page does not advance;
+- on step 3, pressing pay with an empty email shows "Escribe un correo válido" under the email field.
+Then `git checkout -- src/lib/nav.ts` and confirm `git status --porcelain src/lib/nav.ts` prints nothing.
 
-- [ ] **Step 6: Build, commit, deploy**
+- [ ] **Step 8: Build, commit**
 
-Run: `npm run build 2>&1 | tail -5` → expected `✓ Compiled successfully`.
+Run: `npm run build 2>&1 | tail -5` → `✓ Compiled successfully`.
 ```bash
 git branch --show-current
-git add src/components/giftshop/GiftShopClient.tsx src/messages/es.json src/messages/en.json
-git commit -m "feat(giftshop): buyer picks how the gift card is delivered (email, WhatsApp, in person)
+git add src/components/giftshop/GiftShopClient.tsx src/components/shared/LeadForm.tsx src/messages/es.json src/messages/en.json
+git commit -m "feat(giftshop): buyer picks how the card is delivered; labelled fields, inline errors, phone field fix
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
-SHA=$(git rev-parse --short HEAD); git -C .worktrees/main cherry-pick $SHA && git -C .worktrees/main push origin main
 ```
+The controller cherry-picks onto main and pushes after review.
 
 ---
 
@@ -884,6 +1108,11 @@ Replace the `<Link href={`/es/reservar?gc=…`}>…</Link>` and the `<p classNam
                     spa. · Choose your treatment and time; show this code when paying at
                     the spa.
                   </p>
+                  <ol className="text-left text-xs text-warm-gray mt-5 max-w-xs mx-auto space-y-1.5">
+                    <li>1. Reserva tu cita en línea o por WhatsApp · Book online or via WhatsApp</li>
+                    <li>2. Ven al spa el día de tu cita · Come to the spa on the day</li>
+                    <li>3. Presenta este código al pagar · Show this code when paying</li>
+                  </ol>
 ```
 
 - [ ] **Step 3: Recipient email footnote**
@@ -1237,7 +1466,7 @@ SHA=$(git rev-parse --short HEAD); git -C .worktrees/main cherry-pick $SHA && gi
 **Files:**
 - Modify: `.claude/launch.json` (add one configuration; do not commit it)
 
-Preconditions: Tasks 1–7 deployed; Tilopay account still in **test** mode; the owner has activated at least one catalog item with a Mindbody product ID in `/admin/giftcards/shop`.
+Preconditions: Tasks 1–7 and 10–12 deployed; Tilopay account still in **test** mode; the owner has activated at least one catalog item with a Mindbody product ID in `/admin/giftcards/shop`.
 
 The public page is behind `FEATURES.giftShop`, so the run happens **locally in test mode**, the same way the Aug 18 run proved the flow: the dev server reads `.env.local` (production Supabase, Tilopay test credentials, real Resend), `GIFTCARD_TEST_MODE=1` prefixes emails with "[TEST]" and makes the Mindbody registration a `Test:true` preflight, and Tilopay's hosted page redirects the browser back to localhost. Set up once:
 
@@ -1265,7 +1494,7 @@ The public page is behind `FEATURES.giftShop`, so the run happens **locally in t
 - [ ] **Step 2: Self delivery** — "Yo se lo entrego". Expected: no send-date field; thank-you page shows "Ver la gift card" + "Enviar por WhatsApp"; no recipient email is sent; buyer receipt has the forward link.
 - [ ] **Step 3: Scheduled email** — date = tomorrow. Expected: thank-you says "el <date>"; no recipient email today; `scheduled_send_at` set. (Optionally set it to a past date in Supabase and run the cron by hand to see it deliver.)
 - [ ] **Step 4: WhatsApp** — only once the template is approved and the setting is on: "Por WhatsApp" to your own number. Expected: the template message arrives with the card button; `whatsapp_sent_at` set.
-- [ ] **Step 5: Validation** — pick "Por correo" and leave the email empty, continue to pay: expected the error "Indica el correo de quien recibe" and a return to step 2.
+- [ ] **Step 5: Validation** — pick "Por correo", leave the email empty and press "Continuar": expected the inline error "Escribe un correo válido para quien recibe" under the field, red border, no step change. On step 3 the recap line reads "Para <name> · por correo a <email> · se envía al pagar" and the header reads "Paso 3 de 3 · Paga".
 - [ ] **Step 6: Callback safety** — take the exact callback URL from the browser history of Step 1 and `curl` it twice: expected second call is a no-op (order unchanged). Change one digit of `amount`: expected redirect to the error page with `reason=invalid`, order unchanged.
 - [ ] **Step 7: Payment methods** — one purchase each with the Tilopay test Mastercard and AMEX numbers (and Yappy sandbox if enabled). Expected: "Método" column in the orders admin shows Visa/MC Web or AMEX Web; the Mindbody sale (Test mode: preflight only) accepted the tender.
 - [ ] **Step 8: Gift code in the booking note** — from the Step 1 card page click "Reservar mi cita" (it opens `/es/reservar?gc=<code>` on the same local server, which books in the **real** Mindbody), complete a booking for a slot you will cancel right away. Expected: the chip is visible through the flow; the Mindbody appointment note ends with `| Gift card: <code>`. Cancel the appointment in Mindbody.
@@ -1338,3 +1567,424 @@ One real purchase with a real card by the owner (email delivery to themselves). 
 - [ ] **Step 6: Rollback note (only if needed)**
 
 Fastest: in Supabase set `gc_shop_settings.shop_enabled = false` (checkout returns 503; the page shows "muy pronto" with the WhatsApp link). Code-level: revert the Task 9 commit on `main`.
+
+---
+
+### Task 10: Shop step header, sticky bottom bar and the pay-step recap (congruence with the booking widget)
+
+**Files:**
+- Create: `src/components/giftshop/ShopStepHeader.tsx`
+- Create: `src/components/giftshop/ShopBottomBar.tsx`
+- Create: `src/lib/giftshop/recap.ts`, test `src/lib/giftshop/recap.test.ts`
+- Modify: `src/lib/giftshop/thankYou.ts` (export the date formatter)
+- Modify: `src/components/giftshop/GiftShopClient.tsx` (step header, remove inline back link and inline primary buttons on steps 2–3, render the bar, recap on step 3)
+- Modify: `src/components/layout/MobileBottomNav.tsx:22-26` (hide on the shop page as it already does on the booking page)
+- Modify: `src/messages/es.json`, `src/messages/en.json` (`giftShop.stepOf`)
+
+**Interfaces:**
+- Consumes from Task 3: `goToPay()`, `pay()`, `submitting`, `form.deliveryMethod`, `setFieldErrors`.
+- Produces:
+  ```ts
+  export function ShopStepHeader({ step }: { step: 1 | 2 | 3 }): JSX.Element
+  export function ShopBottomBar(props: { onBack?: () => void; backLabel: string; onNext: () => void; nextLabel: string; disabled?: boolean; loading?: boolean }): JSX.Element
+  export function recapLine(i: { recipientName: string; deliveryMethod: 'email' | 'whatsapp' | 'self'; recipientEmail: string; recipientPhone: string; scheduledDate: string }, locale: 'es' | 'en'): string
+  export function longDateLabel(iso: string, locale: 'es' | 'en'): string   // moved out of thankYou.ts
+  ```
+
+Why (screen review): the widget says "Paso 1 de 4" with a progress bar and a sticky "Continuar" bar; the shop used three text pills and inline buttons. The pay step showed the card and total but nothing about who receives it and how.
+
+- [ ] **Step 1: Write the failing recap tests**
+
+Create `src/lib/giftshop/recap.test.ts`:
+```ts
+import { describe, it, expect } from 'vitest'
+import { recapLine } from './recap'
+
+const base = { recipientName: 'María', deliveryMethod: 'email' as const, recipientEmail: 'maria@example.com', recipientPhone: '', scheduledDate: '' }
+
+describe('recapLine', () => {
+  it('email, sent on payment', () => {
+    expect(recapLine(base, 'es')).toBe('Para María · por correo a maria@example.com · se envía al pagar')
+    expect(recapLine(base, 'en')).toBe('For María · by email to maria@example.com · sent when you pay')
+  })
+  it('email, scheduled', () => {
+    expect(recapLine({ ...base, scheduledDate: '2026-09-20' }, 'es')).toBe('Para María · por correo a maria@example.com · se envía el 20 de septiembre')
+    expect(recapLine({ ...base, scheduledDate: '2026-09-20' }, 'en')).toBe('For María · by email to maria@example.com · sent on September 20')
+  })
+  it('whatsapp', () => {
+    expect(recapLine({ ...base, deliveryMethod: 'whatsapp', recipientEmail: '', recipientPhone: '50761234567' }, 'es')).toBe('Para María · por WhatsApp al +50761234567 · se envía al pagar')
+  })
+  it('self', () => {
+    expect(recapLine({ ...base, deliveryMethod: 'self', recipientEmail: '' }, 'es')).toBe('Para María · te la entregamos a ti en el comprobante')
+    expect(recapLine({ ...base, deliveryMethod: 'self', recipientEmail: '' }, 'en')).toBe('For María · we hand it to you in your receipt')
+  })
+})
+```
+
+- [ ] **Step 2: Run the tests to verify they fail**
+
+Run: `npx vitest run src/lib/giftshop/recap.test.ts` → FAIL, `Cannot find module './recap'`.
+
+- [ ] **Step 3: Export the date formatter and implement `recapLine`**
+
+In `src/lib/giftshop/thankYou.ts` rename the private `dateLabel` to an exported `longDateLabel` (same body) and update its two call sites in `thankYouSentence`. Run `npx vitest run src/lib/giftshop/thankYou.test.ts` → 4 passed.
+
+Create `src/lib/giftshop/recap.ts`:
+```ts
+import { longDateLabel } from './thankYou'
+
+// One line on the pay step so the buyer confirms the decision that matters
+// most before paying: who receives the card, how, and when.
+export interface RecapInput {
+  recipientName: string
+  deliveryMethod: 'email' | 'whatsapp' | 'self'
+  recipientEmail: string
+  recipientPhone: string
+  /** YYYY-MM-DD from the date input, or '' */
+  scheduledDate: string
+}
+
+export function recapLine(i: RecapInput, locale: 'es' | 'en'): string {
+  const en = locale === 'en'
+  const who = en ? `For ${i.recipientName.trim()}` : `Para ${i.recipientName.trim()}`
+  if (i.deliveryMethod === 'self') {
+    return en ? `${who} · we hand it to you in your receipt` : `${who} · te la entregamos a ti en el comprobante`
+  }
+  const how =
+    i.deliveryMethod === 'email'
+      ? en ? `by email to ${i.recipientEmail.trim()}` : `por correo a ${i.recipientEmail.trim()}`
+      : en ? `by WhatsApp to +${i.recipientPhone.replace(/\D/g, '')}` : `por WhatsApp al +${i.recipientPhone.replace(/\D/g, '')}`
+  const when = i.scheduledDate
+    ? en ? `sent on ${longDateLabel(`${i.scheduledDate}T14:00:00.000Z`, 'en')}` : `se envía el ${longDateLabel(`${i.scheduledDate}T14:00:00.000Z`, 'es')}`
+    : en ? 'sent when you pay' : 'se envía al pagar'
+  return `${who} · ${how} · ${when}`
+}
+```
+
+- [ ] **Step 4: Run the tests to verify they pass**
+
+Run: `npx vitest run src/lib/giftshop/recap.test.ts src/lib/giftshop/thankYou.test.ts` → 8 passed.
+
+- [ ] **Step 5: Header and bottom bar components**
+
+Add to `src/messages/es.json` `giftShop`: `"stepOf": "Paso {step} de 3"`; to `en.json`: `"stepOf": "Step {step} of 3"`.
+
+Create `src/components/giftshop/ShopStepHeader.tsx` (mirrors the mobile header of `src/components/booking/shared/StepProgress.tsx`):
+```tsx
+'use client'
+
+import { useTranslations } from 'next-intl'
+
+export function ShopStepHeader({ step }: { step: 1 | 2 | 3 }) {
+  const t = useTranslations('giftShop')
+  const labels: Record<1 | 2 | 3, string> = { 1: t('step1'), 2: t('step2'), 3: t('step3') }
+  return (
+    <div className="mb-6" role="group" aria-label={t('stepOf', { step })}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-dark">{t('stepOf', { step })}</span>
+        <span className="text-sm text-warm-gray">{labels[step]}</span>
+      </div>
+      <div className="h-2 bg-beige rounded-full overflow-hidden">
+        <div className="h-full bg-gold transition-all duration-500 rounded-full" style={{ width: `${(step / 3) * 100}%` }} />
+      </div>
+    </div>
+  )
+}
+```
+Create `src/components/giftshop/ShopBottomBar.tsx` (mirrors `src/components/booking/shared/BookingNav.tsx`):
+```tsx
+'use client'
+
+import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
+
+export function ShopBottomBar({
+  onBack,
+  backLabel,
+  onNext,
+  nextLabel,
+  disabled,
+  loading,
+}: {
+  onBack?: () => void
+  backLabel: string
+  onNext: () => void
+  nextLabel: string
+  disabled?: boolean
+  loading?: boolean
+}) {
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-beige shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+      <div className="max-w-4xl mx-auto px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center justify-between">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] text-sm text-warm-gray hover:text-dark rounded-lg hover:bg-beige/60 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {backLabel}
+          </button>
+        ) : (
+          <span />
+        )}
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={disabled || loading}
+          className="flex items-center gap-1.5 px-5 py-2.5 min-h-[44px] bg-gold text-dark text-sm font-semibold rounded-lg hover:bg-gold/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+          {nextLabel}
+          {!loading && <ArrowRight className="w-4 h-4" />}
+        </button>
+      </div>
+    </div>
+  )
+}
+```
+
+- [ ] **Step 6: Wire them into the shop client**
+
+In `GiftShopClient.tsx`:
+- Import `ShopStepHeader`, `ShopBottomBar`, `recapLine`.
+- Replace the pills header (`<div className="flex items-center justify-center gap-2 mb-8 text-sm">…</div>`) with `<ShopStepHeader step={step === 'pick' ? 1 : step === 'details' ? 2 : 3} />`.
+- Remove the `{step !== 'pick' && (<button … ChevronLeft … {t('back')}</button>)}` back link; remove the inline `goToPay` button (non-bag branch) at the end of step 2 and the inline `pay` button at the end of step 3 (keep the `payNote` paragraph and the `error` paragraph).
+- Give the root `<div>` the class `pb-28` so the fixed bar never covers content, and render the bar after the step blocks:
+```tsx
+      {step === 'details' && item && !FEATURES.bag && (
+        <ShopBottomBar
+          onBack={() => { setFieldErrors({}); setStep('pick') }}
+          backLabel={t('back')}
+          onNext={goToPay}
+          nextLabel={t('continue')}
+        />
+      )}
+      {step === 'pay' && item && (
+        <ShopBottomBar
+          onBack={() => { setFieldErrors({}); setStep('details') }}
+          backLabel={t('back')}
+          onNext={pay}
+          nextLabel={t('payCta')}
+          loading={submitting}
+        />
+      )}
+```
+- On step 3, insert the recap as the first child of the card, before the buyer fields:
+```tsx
+          <p className="text-sm text-dark bg-beige/60 rounded-xl px-4 py-3">
+            {recapLine(form, en ? 'en' : 'es')}
+          </p>
+```
+(`form` already has exactly the `RecapInput` fields plus extras; TypeScript accepts the wider object.)
+- Remove the now-unused `ChevronLeft` import if nothing else uses it.
+
+In `src/components/layout/MobileBottomNav.tsx` change line 22 from
+```ts
+  const isOnBookingPage = pathname.includes('/reservar')
+```
+to
+```ts
+  const isOnBookingPage = pathname.includes('/reservar') || /\/giftcards$/.test(pathname)
+```
+so the site's bottom nav yields to the shop's action bar on the shop page only (the menu page `/menu/giftcards` and the thank-you page keep the nav).
+
+- [ ] **Step 7: Verify in the dev server**
+
+With `giftShop: true` set locally (revert afterwards), at 375px: the header reads "Paso 1 de 3 · Elige" with a one-third gold bar; step 2 shows "Paso 2 de 3 · Personaliza" and a sticky bar with "Volver" and "Continuar"; step 3 shows the recap line "Para María · por correo a … · se envía al pagar" above the buyer fields and a sticky "Pagar con tarjeta o Yappy"; the site's bottom nav is hidden on the shop page and visible on `/es/menu/giftcards`. Revert `src/lib/nav.ts`.
+
+- [ ] **Step 8: Build, commit**
+
+Run: `npm run build 2>&1 | tail -5`.
+```bash
+git branch --show-current
+git add src/components/giftshop/ShopStepHeader.tsx src/components/giftshop/ShopBottomBar.tsx src/lib/giftshop/recap.ts src/lib/giftshop/recap.test.ts src/lib/giftshop/thankYou.ts src/components/giftshop/GiftShopClient.tsx src/components/layout/MobileBottomNav.tsx src/messages/es.json src/messages/en.json
+git commit -m "feat(giftshop): same step header and action bar as the booking widget; recap before paying
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+```
+
+---
+
+### Task 11: Booking widget copy congruence
+
+**Files:**
+- Modify: `src/components/booking/steps/AuthStep.tsx:862-876`
+- Modify: `src/components/booking/steps/DateTimeStep.tsx:510`
+- Modify: `src/components/booking/shared/FloatingCart.tsx:126`
+- Modify: `src/components/booking/shared/StepProgress.tsx:73` and `:118`
+
+**Interfaces:** none (copy only).
+
+Why (screen review): the account step is "Paso 3 de 4" in the header but "Último paso" in the heading; the date strip says "10 slots" in a Spanish screen; the cart says "1 items".
+
+- [ ] **Step 1: Account step heading and benefits**
+
+In `AuthStep.tsx` replace
+```tsx
+            <h2 className="text-lg font-bold text-dark mb-0.5">Último paso</h2>
+            <p className="text-xs text-warm-gray">
+              Confirma tu número de teléfono para completar tu reserva
+            </p>
+```
+with
+```tsx
+            <h2 className="text-lg font-bold text-dark mb-0.5">Tu cuenta</h2>
+            <p className="text-xs text-warm-gray">
+              Un paso más y tu cita queda lista: confirma tu número de teléfono.
+            </p>
+```
+and replace the benefits box
+```tsx
+          <div className="mb-4 p-3 bg-beige-50 rounded-xl">
+            <p className="text-xs font-medium text-dark mb-1.5">Al iniciar sesión podrás:</p>
+            <ul className="text-xs text-warm-gray space-y-0.5">
+              <li>• Ver tu historial de citas y compras</li>
+              <li>• Gestionar tus próximas reservaciones</li>
+              <li>• Recibir ofertas exclusivas</li>
+              <li>• Agilizar futuras reservas</li>
+            </ul>
+          </div>
+```
+with
+```tsx
+          <p className="mb-4 text-xs text-warm-gray text-center">
+            Con tu cuenta ves tus citas, las cambias cuando quieras y recibes ofertas exclusivas.
+          </p>
+```
+
+- [ ] **Step 2: Date strip**
+
+In `DateTimeStep.tsx` replace `{dateItem.slotsCount} slots` with
+```tsx
+                          {dateItem.slotsCount} {dateItem.slotsCount === 1 ? 'horario' : 'horarios'}
+```
+
+- [ ] **Step 3: Cart wording**
+
+In `FloatingCart.tsx` replace `({itemCount} {itemCount === 1 ? 'item' : 'items'})` with
+```tsx
+                      ({itemCount} {itemCount === 1 ? 'tratamiento' : 'tratamientos'})
+```
+In `StepProgress.tsx` replace both occurrences of
+```tsx
+aria-label={`Carrito: ${itemCount} items`}
+```
+with
+```tsx
+aria-label={`Carrito: ${itemCount} ${itemCount === 1 ? 'tratamiento' : 'tratamientos'}`}
+```
+
+- [ ] **Step 4: Verify**
+
+```bash
+grep -n "Último paso\|} slots\|'items'\|items\`" src/components/booking/steps/AuthStep.tsx src/components/booking/steps/DateTimeStep.tsx src/components/booking/shared/FloatingCart.tsx src/components/booking/shared/StepProgress.tsx | grep -v ' [0-9]\{1,2\}\.tsx'; echo "(expect no lines above)"
+npm run build 2>&1 | tail -5
+```
+Open `http://localhost:3000/es/reservar` at 375px, pick a spa, a treatment, continue to the date step: the strip reads "10 horarios"; continue to the account step: heading "Tu cuenta", one-line note, no bullet list.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git branch --show-current
+git add src/components/booking/steps/AuthStep.tsx src/components/booking/steps/DateTimeStep.tsx src/components/booking/shared/FloatingCart.tsx src/components/booking/shared/StepProgress.tsx
+git commit -m "copy(booking): step heading matches the progress header; Spanish-only wording
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+```
+
+---
+
+### Task 12: Visible therapist choice on the date step (owner request, 2026-09-19)
+
+**Files:**
+- Modify: `src/components/booking/steps/DateTimeStep.tsx:4` (lucide import) and `:417-449` (the quiet therapist filter line)
+
+**Interfaces:** none. Uses the existing `bookableStaff`, `filterStaff`, `handleFilterChange(staffId: string)` and `staffName(st)` already defined in `DateTimeStep` (lines ~237-247). The inline `TherapistPicker` that appears after a slot is chosen (rendered at line ~624) stays as it is.
+
+Why: customers who book with "their" therapist could not see the option. It was a `text-xs` line, "¿Buscas a alguien en especial?", with a native select, placed above the date card. It becomes a card in the same style as "Selecciona Fecha" with the therapists as tappable chips, "Cualquiera" selected by default, so the majority still pass through with zero extra taps.
+
+- [ ] **Step 1: Import the icon**
+
+Change line 4 to:
+```ts
+import { Calendar, Loader2, Clock, ChevronLeft, ChevronRight, User, Users, Check } from 'lucide-react'
+```
+
+- [ ] **Step 2: Replace the quiet filter line with the therapist card**
+
+Replace the whole block that starts with the comment `{/* Optional therapist filter — one quiet line for the majority,` and ends with the `)}` closing `{bookableStaff.length > 0 && (` (currently lines 417–449) with:
+```tsx
+            {/* Therapist choice — visible, optional. "Cualquiera" is preselected so
+                the majority passes through with no extra tap; regulars tap a name
+                and the dates and slots below filter to that therapist. */}
+            {bookableStaff.length > 0 && (
+              <div className="bg-white border border-beige-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-dark flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gold" />
+                    Elige tu terapeuta
+                    <span className="text-xs font-normal text-warm-gray">(opcional)</span>
+                  </h3>
+                </div>
+                <div
+                  className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x"
+                  role="radiogroup"
+                  aria-label="Terapeuta"
+                >
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={!filterStaff}
+                    onClick={() => handleFilterChange('')}
+                    className={`shrink-0 snap-start px-4 py-2.5 min-h-[44px] rounded-full border text-sm font-medium transition-colors ${
+                      !filterStaff
+                        ? 'border-gold bg-gold text-dark'
+                        : 'border-beige-200 bg-white text-warm-gray hover:border-gold/60'
+                    }`}
+                  >
+                    Cualquiera
+                  </button>
+                  {bookableStaff.map((st) => {
+                    const selected = filterStaff?.Id === st.Id
+                    return (
+                      <button
+                        key={st.Id}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => handleFilterChange(String(st.Id))}
+                        className={`shrink-0 snap-start px-4 py-2.5 min-h-[44px] rounded-full border text-sm font-medium transition-colors ${
+                          selected
+                            ? 'border-gold bg-gold text-dark'
+                            : 'border-beige-200 bg-white text-warm-gray hover:border-gold/60'
+                        }`}
+                      >
+                        {staffName(st)}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="mt-2 text-xs text-warm-gray">
+                  {filterStaff
+                    ? `Mostrando horarios de ${staffName(filterStaff)}.`
+                    : 'Si no eliges, te asignamos a una terapeuta del equipo.'}
+                </p>
+              </div>
+            )}
+```
+The old `-mb-2` negative margin goes away with the old markup; the card sits inside the existing `space-y-6` container above the date card.
+
+- [ ] **Step 3: Build**
+
+Run: `npm run build 2>&1 | tail -5` → `✓ Compiled successfully`. Also `grep -n "Buscas a alguien" src/components/booking/steps/DateTimeStep.tsx` → no output.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git branch --show-current
+git add src/components/booking/steps/DateTimeStep.tsx
+git commit -m "feat(booking): therapist choice as a visible chip row on the date step
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+```
+The controller verifies in the browser (375px: card appears above the dates, chips scroll horizontally, tapping a name filters the date counts and slots, "Cualquiera" resets) and cherry-picks onto main after review.
