@@ -7,6 +7,7 @@ export async function GET() {
   const [settings, catalog] = await Promise.all([getShopSettings(), getActiveCatalog()])
   return NextResponse.json({
     shopEnabled: settings.shop_enabled && isTilopayConfigured(),
+    whatsappDeliveryEnabled: settings.whatsapp_delivery_enabled,
     occasion: settings.occasion_slug,
     items: catalog.map((i) => ({
       id: i.id,

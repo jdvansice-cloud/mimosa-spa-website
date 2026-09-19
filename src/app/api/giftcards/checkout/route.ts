@@ -4,6 +4,7 @@ import { getActiveCatalog, getShopSettings, giftshopAdminClient, itbmsCentsFor }
 import { createTilopayPayment, isTilopayConfigured } from '@/lib/payments/tilopay'
 import { checkRateLimit, getClientIdentifier, RATE_LIMIT_AUTH } from '@/lib/booking/rate-limit'
 import { SITE_URL } from '@/lib/nav'
+import { resolveDelivery } from '@/lib/giftshop/delivery'
 
 function orderNumber(): string {
   const d = new Date()
@@ -51,12 +52,12 @@ export async function POST(request: NextRequest) {
   if (!buyerName || !recipientName) {
     return NextResponse.json({ error: 'Nombre del comprador y destinatario son requeridos' }, { status: 400 })
   }
-  const recipientEmail = body.recipientEmail
-    ? String(body.recipientEmail).trim().toLowerCase().slice(0, 160)
-    : null
-  if (recipientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
-    return NextResponse.json({ error: 'Correo del destinatario inválido' }, { status: 400 })
-  }
+  const delivery = resolveDelivery({
+    deliveryMethod: body.deliveryMethod,
+    recipientEmail: body.recipientEmail,
+    recipientPhone: body.recipientPhone,
+  })
+  if (!delivery.ok) return NextResponse.json({ error: delivery.error }, { status: 400 })
 
   const supabase = giftshopAdminClient()
 
@@ -81,6 +82,7 @@ export async function POST(request: NextRequest) {
     const dt = new Date(`${body.scheduledDate}T14:00:00.000Z`)
     if (dt > new Date()) scheduled = dt.toISOString()
   }
+  if (delivery.method === 'self') scheduled = null
 
   const { data: order, error } = await supabase
     .from('gc_orders')
@@ -98,11 +100,11 @@ export async function POST(request: NextRequest) {
       buyer_phone: body.buyerPhone ? String(body.buyerPhone).slice(0, 24) : null,
       buyer_country: body.buyerCountry ? String(body.buyerCountry).slice(0, 2).toUpperCase() : 'PA',
       recipient_name: recipientName,
-      recipient_email: recipientEmail,
-      recipient_phone: body.recipientPhone ? String(body.recipientPhone).slice(0, 24) : null,
+      recipient_email: delivery.recipientEmail,
+      recipient_phone: delivery.recipientPhone,
       gift_message: body.message ? String(body.message).slice(0, 300) : null,
-      delivery_email: recipientEmail != null,
-      delivery_whatsapp: !!body.recipientPhone,
+      delivery_email: delivery.deliveryEmail,
+      delivery_whatsapp: delivery.deliveryWhatsapp,
       scheduled_send_at: scheduled,
       design_slug: typeof body.design === 'string' ? body.design.slice(0, 40) : 'general',
       locale,
