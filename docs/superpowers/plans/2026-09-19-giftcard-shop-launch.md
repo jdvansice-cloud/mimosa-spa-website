@@ -1627,7 +1627,7 @@ Run: `npx vitest run src/lib/giftshop/recap.test.ts` → FAIL, `Cannot find modu
 
 - [ ] **Step 3: Export the date formatter and implement `recapLine`**
 
-In `src/lib/giftshop/thankYou.ts` rename the private `dateLabel` to an exported `longDateLabel` (same body) and update its two call sites in `thankYouSentence`. Run `npx vitest run src/lib/giftshop/thankYou.test.ts` → 4 passed.
+In `src/lib/giftshop/thankYou.ts` rename the private `dateLabel` to an exported `longDateLabel` (same body) and update its two call sites in `thankYouSentence`. Also make the English sentence gender-neutral (review finding on Task 4): in `thankYouSentence` change `will receive her gift card` to `will receive the gift card`, and in `thankYou.test.ts` change both English expectations to `María will receive the gift card by email (maria@example.com) in the next few minutes.` and `María will receive the gift card by email (maria@example.com) on September 20.`. Run `npx vitest run src/lib/giftshop/thankYou.test.ts` → 4 passed.
 
 Create `src/lib/giftshop/recap.ts`:
 ```ts
@@ -1777,6 +1777,14 @@ In `GiftShopClient.tsx`:
 ```
 (`form` already has exactly the `RecapInput` fields plus extras; TypeScript accepts the wider object.)
 - Remove the now-unused `ChevronLeft` import if nothing else uses it.
+- Clear a field's error as soon as its value changes (screen review 2026-09-19: after correcting the email, the old error stayed until the next submit). Add one helper and use it in every `onChange` that has a matching `FieldErrors` key:
+```ts
+  const setField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
+    setForm({ ...form, [key]: value })
+    if (key in fieldErrors) setFieldErrors(({ [key as keyof FieldErrors]: _omit, ...rest }) => rest)
+  }
+```
+Then `onChange={(e) => setField('recipientName', e.target.value)}`, `setField('recipientEmail', …)`, `onChange={(recipientPhone) => setField('recipientPhone', recipientPhone)}`, `setField('buyerName', …)`, `setField('buyerEmail', …)`. Fields without an error key keep their existing `setForm` handlers.
 
 In `src/components/layout/MobileBottomNav.tsx` change line 22 from
 ```ts
