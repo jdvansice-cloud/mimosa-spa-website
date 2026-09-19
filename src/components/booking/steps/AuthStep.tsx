@@ -859,21 +859,15 @@ function AuthStepContent() {
                           flex items-center justify-center mx-auto mb-2 shadow-md">
               <User className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-lg font-bold text-dark mb-0.5">Último paso</h2>
+            <h2 className="text-lg font-bold text-dark mb-0.5">Tu cuenta</h2>
             <p className="text-xs text-warm-gray">
-              Confirma tu número de teléfono para completar tu reserva
+              Un paso más y tu cita queda lista: confirma tu número de teléfono.
             </p>
           </div>
 
-          <div className="mb-4 p-3 bg-beige-50 rounded-xl">
-            <p className="text-xs font-medium text-dark mb-1.5">Al iniciar sesión podrás:</p>
-            <ul className="text-xs text-warm-gray space-y-0.5">
-              <li>• Ver tu historial de citas y compras</li>
-              <li>• Gestionar tus próximas reservaciones</li>
-              <li>• Recibir ofertas exclusivas</li>
-              <li>• Agilizar futuras reservas</li>
-            </ul>
-          </div>
+          <p className="mb-4 text-xs text-warm-gray text-center">
+            Con tu cuenta ves tus citas, las cambias cuando quieras y recibes ofertas exclusivas.
+          </p>
 
           <div>
             <label className="block text-xs font-medium text-dark mb-1.5">
