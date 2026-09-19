@@ -47,7 +47,7 @@ Step names and numbering stay exactly as today ("Paso 1 de 4 · Servicios", …)
 ### 4.2 Step 2 — Fecha y Hora
 
 - Subtitle: "Selecciona cuándo desean su cita (60 min · para dos)".
-- The therapist dropdown is replaced by one static line: **"Dos terapeutas del equipo"**.
+- The therapist card added on 2026-09-19 ("Elige tu terapeuta" chip row) and the per-slot therapist picker are both hidden in couples mode; one static line takes their place: **"Dos terapeutas del equipo"**.
 - Dates and slots come from the availability call with `people=2`: a slot is offered only when two distinct qualified therapists are free for the whole duration at that time. Slot counts in the date strip reflect this.
 
 ### 4.3 Step 3 — Tu Cuenta
