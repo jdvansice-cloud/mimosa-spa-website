@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { giftshopAdminClient } from '@/lib/giftshop/data'
+import { giftshopAdminClient, getShopSettings } from '@/lib/giftshop/data'
 import { fulfillOrder, deliverOrder } from '@/lib/giftshop/fulfillment'
 
 // Reconciliation cron for the online gift-card shop:
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = giftshopAdminClient()
   const now = Date.now()
-  const summary = { refulfilled: 0, scheduledSent: 0, mindbodyRetried: 0, abandoned: 0, flagged: 0 }
+  const summary = { refulfilled: 0, scheduledSent: 0, whatsappSent: 0, mindbodyRetried: 0, abandoned: 0, flagged: 0 }
 
   // (a) paid > 5 min and not fulfilled → re-run pipeline
   const fiveMinAgo = new Date(now - 5 * 60 * 1000).toISOString()
@@ -46,6 +46,33 @@ export async function GET(request: NextRequest) {
       summary.scheduledSent++
     } catch (e) {
       console.error('cron delivery failed', o.id, e)
+    }
+  }
+
+  // (f) WhatsApp deliveries that were waiting for the template approval:
+  // exactly one automatic attempt per order once the setting is on. A failed
+  // attempt writes whatsapp_error and is left for manual follow-up in
+  // /admin/giftcards/orders (the buyer's receipt carries the forward link).
+  const settings = await getShopSettings()
+  if (settings.whatsapp_delivery_enabled) {
+    const nowIso = new Date(now).toISOString()
+    const { data: waPending } = await supabase
+      .from('gc_orders')
+      .select('id')
+      .eq('status', 'fulfilled')
+      .eq('delivery_whatsapp', true)
+      .not('recipient_phone', 'is', null)
+      .is('whatsapp_sent_at', null)
+      .is('whatsapp_error', null)
+      .or(`scheduled_send_at.is.null,scheduled_send_at.lte.${nowIso}`)
+      .limit(20)
+    for (const o of waPending || []) {
+      try {
+        await deliverOrder(o.id)
+        summary.whatsappSent++
+      } catch (e) {
+        console.error('cron whatsapp delivery failed', o.id, e)
+      }
     }
   }
 
