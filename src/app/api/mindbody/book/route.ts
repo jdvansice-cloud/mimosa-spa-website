@@ -19,6 +19,8 @@ import {
   createRateLimitHeaders,
   RATE_LIMIT_BOOKING
 } from '@/lib/booking/rate-limit'
+import { buildAppointmentNotes } from '@/lib/booking/notes'
+import { sanitizeGiftCode } from '@/lib/giftshop/giftCode'
 
 // Lazy-initialized Supabase client to avoid build-time errors
 let supabaseAdmin: SupabaseClient | null = null
@@ -65,6 +67,7 @@ export async function POST(request: NextRequest) {
       staffId,
       startDateTime, // ISO string
       notes,
+      giftCode,
       promotionName,
       promoServiceIds,
       globalDiscountPercent,
@@ -82,6 +85,8 @@ export async function POST(request: NextRequest) {
       // Appointment replacement: cancel this Mindbody appointment ID after success
       replaceAppointmentId,
     } = body
+
+    const giftCodeNote = sanitizeGiftCode(giftCode)
 
     // Validate required fields
     const validation = validateRequired(
@@ -283,16 +288,14 @@ export async function POST(request: NextRequest) {
     for (const service of services as BookingService[]) {
       // Build notes: always include "Reservado en línea" + optional promotion or global discount + optional custom notes
       // Promo-included services get the promotion name; all other discounted items get the global discount label.
-      const noteParts: string[] = ['Reservado en línea']
       const isPromoService = promoServiceIdSet.has(service.sessionTypeId)
-      if (isPromoService && promotionName) {
-        noteParts.push(`Promo: ${promotionName}`)
-      } else if (globalDiscountPercent && globalDiscountPercent > 0) {
-        noteParts.push(`Promo Online ${globalDiscountPercent}%`)
-      }
-      if (notes) {
-        noteParts.push(notes)
-      }
+      const appointmentNotes = buildAppointmentNotes({
+        isPromoService,
+        promotionName,
+        globalDiscountPercent,
+        customNotes: notes,
+        giftCode: giftCodeNote,
+      })
 
       appointments.push({
         ClientId: mindbodyClientId,  // use verified string Id, not raw numeric clientId
@@ -300,7 +303,7 @@ export async function POST(request: NextRequest) {
         StaffId: resolvedStaffId,
         SessionTypeId: service.sessionTypeId,
         StartDateTime: currentStartTime.toISOString().replace(/\.\d{3}Z$/, ''),
-        Notes: noteParts.join(' | '),
+        Notes: appointmentNotes,
         StaffRequested: !!staffRequested,
       })
 
