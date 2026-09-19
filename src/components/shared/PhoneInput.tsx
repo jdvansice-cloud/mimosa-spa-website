@@ -34,6 +34,10 @@ interface PhoneInputProps {
   /** Class for the country select */
   selectClassName?: string
   showIcon?: boolean
+  /** id for the local-number input, so a <label htmlFor> can target it */
+  id?: string
+  'aria-invalid'?: boolean
+  'aria-describedby'?: string
 }
 
 export function PhoneInput({
@@ -45,6 +49,9 @@ export function PhoneInput({
   inputClassName,
   selectClassName,
   showIcon = true,
+  id,
+  'aria-invalid': ariaInvalid,
+  'aria-describedby': ariaDescribedby,
 }: PhoneInputProps) {
   const initial = splitValue(value)
   const [cc, setCc] = useState(initial.cc)
@@ -99,6 +106,7 @@ export function PhoneInput({
         )}
         <input
           type="tel"
+          id={id}
           value={local}
           onChange={(e) => {
             setLocal(e.target.value)
@@ -107,6 +115,8 @@ export function PhoneInput({
           placeholder={placeholder}
           required={required}
           disabled={disabled}
+          aria-invalid={ariaInvalid}
+          aria-describedby={ariaDescribedby}
           className={inputClassName || defaultInputCls}
         />
       </div>
