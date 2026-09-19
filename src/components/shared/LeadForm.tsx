@@ -128,7 +128,7 @@ export function LeadForm({
           required
           showIcon={false}
           inputClassName={inputCls}
-          selectClassName={`${inputCls} w-20 px-2`}
+          selectClassName="w-24 shrink-0 border border-beige rounded-lg px-2 py-3 min-h-[44px] text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold"
         />
       </div>
       {corporate && (
