@@ -367,8 +367,11 @@ export function GiftShopClient({ locale }: { locale: string }) {
             </Field>
           )}
           {form.deliveryMethod === 'whatsapp' && (
-            <Field id="recipientPhone" label={t('labelRecipientPhone')} required error={fieldErrors.recipientPhone} labelFor={false}>
+            <Field id="recipientPhone" label={t('labelRecipientPhone')} required error={fieldErrors.recipientPhone}>
               <PhoneInput
+                id="recipientPhone"
+                aria-invalid={!!fieldErrors.recipientPhone}
+                aria-describedby={fieldErrors.recipientPhone ? 'recipientPhone-error' : undefined}
                 value={form.recipientPhone}
                 onChange={(recipientPhone) => setForm({ ...form, recipientPhone })}
                 placeholder="6612 3456"
@@ -434,8 +437,9 @@ export function GiftShopClient({ locale }: { locale: string }) {
               onChange={(e) => setForm({ ...form, buyerEmail: e.target.value })}
             />
           </Field>
-          <Field id="buyerPhone" label={`${t('labelBuyerPhone')} ${t('optional')}`} labelFor={false}>
+          <Field id="buyerPhone" label={`${t('labelBuyerPhone')} ${t('optional')}`}>
             <PhoneInput
+              id="buyerPhone"
               value={form.buyerPhone}
               onChange={(buyerPhone) => setForm({ ...form, buyerPhone })}
               placeholder="6612 3456"
