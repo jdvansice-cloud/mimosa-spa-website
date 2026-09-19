@@ -58,6 +58,9 @@ export async function POST(request: NextRequest) {
     recipientPhone: body.recipientPhone,
   })
   if (!delivery.ok) return NextResponse.json({ error: delivery.error }, { status: 400 })
+  if (delivery.method === 'whatsapp' && !settings.whatsapp_delivery_enabled) {
+    return NextResponse.json({ error: 'La entrega por WhatsApp no está disponible todavía.' }, { status: 400 })
+  }
 
   const supabase = giftshopAdminClient()
 
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
     const dt = new Date(`${body.scheduledDate}T14:00:00.000Z`)
     if (dt > new Date()) scheduled = dt.toISOString()
   }
-  if (delivery.method === 'self') scheduled = null
+  if (!delivery.allowSchedule) scheduled = null
 
   const { data: order, error } = await supabase
     .from('gc_orders')
