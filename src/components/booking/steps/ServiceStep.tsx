@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Sparkles, Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Clock, Check, Star, Info, X, Tag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useBookingStore, selectHasServices } from '@/lib/booking/store'
+import { useBookingStore } from '@/lib/booking/store'
 import type { MindbodyService, PromotionWithServices } from '@/types/booking'
 import type { Promotion } from '@/types'
 import { LocationPills } from '../shared/LocationPills'
@@ -396,7 +396,6 @@ function ServiceTile({
 export function ServiceStep() {
   const {
     selectedLocation,
-    services,
     setServices,
     selectedServices,
     addService,
@@ -411,10 +410,9 @@ export function ServiceStep() {
 
   const showGlobalDiscount = globalDiscountActive && globalDiscountPercent > 0
 
-  const hasServices = useBookingStore(selectHasServices)
   const [groupedServices, setGroupedServices] = useState<Record<string, MindbodyService[]>>({})
   const [topPickServices, setTopPickServices] = useState<MindbodyService[]>([])
-  const [treatmentSettings, setTreatmentSettings] = useState<Map<number, TreatmentSetting>>(new Map())
+  const [, setTreatmentSettings] = useState<Map<number, TreatmentSetting>>(new Map())
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [isRecommendationsExpanded, setIsRecommendationsExpanded] = useState(true)
   const [isPromotionsExpanded, setIsPromotionsExpanded] = useState(true)

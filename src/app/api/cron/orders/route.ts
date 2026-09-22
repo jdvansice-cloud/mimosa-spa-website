@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
     results.resumed++
     try {
       const outcome = await runPaidOrderPipeline(o.id, origin)
-      outcome.ok ? results.ok++ : results.failed++
+      if (outcome.ok) results.ok++
+      else results.failed++
     } catch (e) {
       results.failed++
       console.error('cron orders: pipeline error for', o.id, e)

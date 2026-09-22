@@ -89,7 +89,7 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages()
-  const settings = await getServerSettings()
+  await getServerSettings()
 
   return (
     <html lang={locale} className={`${cormorant.variable} ${lato.variable}`}>

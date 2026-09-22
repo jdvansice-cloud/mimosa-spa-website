@@ -12,8 +12,6 @@ import type {
   PromotionWithServices,
   BookingConfirmation,
   IdentifierType,
-  BOOKING_STEPS,
-  STEP_NUMBERS,
 } from '@/types/booking'
 import { ITBM_TAX_RATE } from './constants'
 

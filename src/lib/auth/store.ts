@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
+import { getClient } from '@/lib/supabase/client'
 
 interface AuthState {
   user: User | null
@@ -25,7 +26,6 @@ let supabaseInstance: SupabaseClient | null = null
 
 function getSupabase(): SupabaseClient {
   if (!supabaseInstance) {
-    const { getClient } = require('@/lib/supabase/client')
     supabaseInstance = getClient()
   }
   return supabaseInstance as SupabaseClient

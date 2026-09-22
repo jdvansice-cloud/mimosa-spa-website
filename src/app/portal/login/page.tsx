@@ -3,10 +3,12 @@
 import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Mail, MessageCircle, ArrowRight, Loader2, User, UserPlus, Phone, RefreshCw } from 'lucide-react'
 import { OtpInput } from '@/components/ui'
 import { OtpChannelChoice } from '@/components/auth'
 import { cn } from '@/lib/utils'
+import { getClient } from '@/lib/supabase/client'
 
 type LoginStep =
   | 'credential'
@@ -51,7 +53,6 @@ function PortalLoginContent() {
 
   const getSupabase = (): SupabaseClient => {
     if (!supabaseRef.current) {
-      const { getClient } = require('@/lib/supabase/client')
       supabaseRef.current = getClient()
     }
     return supabaseRef.current as SupabaseClient
@@ -892,9 +893,9 @@ function PortalLoginContent() {
           >
             ¿Cliente nuevo? Regístrate para reservar
           </button>
-          <a href="/" className="block text-warm-gray hover:text-dark text-sm transition-colors">
+          <Link href="/" className="block text-warm-gray hover:text-dark text-sm transition-colors">
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     </div>

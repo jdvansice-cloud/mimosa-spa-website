@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { ShoppingBag, X, Trash2, Clock, Tag, Star, ChevronDown, ChevronUp } from 'lucide-react'
+import { ShoppingBag, X, Trash2, Clock, Star, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBookingStore } from '@/lib/booking/store'
 import { calculateCartPricing } from '@/lib/booking/pricing'

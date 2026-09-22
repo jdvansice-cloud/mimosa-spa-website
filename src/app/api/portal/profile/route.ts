@@ -159,9 +159,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Determine if it's email or phone
-    const isEmail = identifier.includes('@')
-
     // Search for client
     const clients = await searchClients(identifier)
 

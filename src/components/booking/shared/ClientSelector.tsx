@@ -1,6 +1,6 @@
 'use client'
 
-import { User, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { MindbodyClient } from '@/types/booking'
 

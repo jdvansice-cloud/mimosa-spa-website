@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { Loader2, UserRound } from 'lucide-react'
 
 /**
@@ -61,6 +61,7 @@ export function ClientLookupInput({
   const boxRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
+  const listboxId = useId()
 
   useEffect(() => {
     const q = value.trim()
@@ -143,6 +144,7 @@ export function ClientLookupInput({
         autoComplete="off"
         role="combobox"
         aria-expanded={open}
+        aria-controls={listboxId}
         aria-autocomplete="list"
       />
       {loading && (
@@ -150,6 +152,7 @@ export function ClientLookupInput({
       )}
       {open && rect && (
         <ul
+          id={listboxId}
           ref={listRef}
           role="listbox"
           style={{ position: 'fixed', top: rect.top, left: rect.left, width: rect.width }}

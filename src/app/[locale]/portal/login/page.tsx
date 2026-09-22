@@ -7,6 +7,7 @@ import { Mail, MessageCircle, ArrowRight, Loader2, User, UserPlus, Phone, Refres
 import { OtpInput } from '@/components/ui'
 import { OtpChannelChoice } from '@/components/auth'
 import { cn } from '@/lib/utils'
+import { getClient } from '@/lib/supabase/client'
 
 type LoginStep =
   | 'credential'   // email or phone input
@@ -53,7 +54,6 @@ function PortalLoginContent() {
 
   const getSupabase = (): SupabaseClient => {
     if (!supabaseRef.current) {
-      const { getClient } = require('@/lib/supabase/client')
       supabaseRef.current = getClient()
     }
     return supabaseRef.current as SupabaseClient
