@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import {
   Calendar,
   Clock,
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react'
 import { usePortalStore, usePortalData } from '@/lib/portal/store'
 import { PANAMA_TIMEZONE } from '@/lib/booking/constants'
+import { getClient } from '@/lib/supabase/client'
 
 // Type for appointments
 interface Appointment {
@@ -179,7 +181,6 @@ function PortalContent() {
   // Lazy load Supabase client
   const getSupabase = (): SupabaseClient => {
     if (!supabaseRef.current) {
-      const { getClient } = require('@/lib/supabase/client')
       supabaseRef.current = getClient()
     }
     return supabaseRef.current as SupabaseClient
@@ -335,14 +336,14 @@ function PortalContent() {
             <p className="text-warm-gray mb-6">
               Tu sesión está activa, pero no encontramos una cuenta de cliente asociada.
             </p>
-            <a
+            <Link
               href="/es/reservar"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-dark
                        font-semibold rounded-xl hover:bg-gold/90 transition-colors"
             >
               <Calendar className="w-5 h-5" />
               Reservar tu primera cita
-            </a>
+            </Link>
             <button
               onClick={handleLogout}
               className="block w-full mt-4 text-warm-gray hover:text-dark transition-colors"
@@ -413,7 +414,7 @@ function PortalContent() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <a
+          <Link
             href="/es/reservar"
             className="p-4 bg-gradient-to-br from-gold to-gold/80 rounded-xl
                      text-dark hover:shadow-lg transition-all flex items-center gap-3"
@@ -425,7 +426,7 @@ function PortalContent() {
               <p className="font-semibold">Reservar Cita</p>
               <p className="text-sm text-dark/70">Agenda un nuevo tratamiento</p>
             </div>
-          </a>
+          </Link>
 
           <button
             onClick={() => setActiveTab('upcoming')}
@@ -728,14 +729,14 @@ function PortalContent() {
                     <div className="p-8 text-center">
                       <CalendarCheck className="w-12 h-12 text-beige-300 mx-auto mb-4" />
                       <p className="text-warm-gray mb-4">No tienes citas programadas</p>
-                      <a
+                      <Link
                         href="/es/reservar"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-dark
                                  font-medium rounded-lg hover:bg-gold/90 transition-colors"
                       >
                         <Calendar className="w-4 h-4" />
                         Reservar una cita
-                      </a>
+                      </Link>
                     </div>
                   ) : (
                     (() => {
@@ -976,9 +977,9 @@ function PortalContent() {
         <div className="max-w-6xl mx-auto px-4 text-center text-sm text-warm-gray">
           <p>Mimosa Spa Retreat - Tu bienestar, nuestra prioridad</p>
           <div className="mt-2 space-x-4">
-            <a href="/es" className="hover:text-dark transition-colors">Inicio</a>
-            <a href="/es/reservar" className="hover:text-dark transition-colors">Reservar</a>
-            <a href="/es/menu" className="hover:text-dark transition-colors">Servicios</a>
+            <Link href="/es" className="hover:text-dark transition-colors">Inicio</Link>
+            <Link href="/es/reservar" className="hover:text-dark transition-colors">Reservar</Link>
+            <Link href="/es/menu" className="hover:text-dark transition-colors">Servicios</Link>
           </div>
         </div>
       </footer>

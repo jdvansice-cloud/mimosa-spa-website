@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Image as ImageIcon, Upload,
   Trash2,
-  Images, Check, X, Loader2, AlertCircle , ChevronDown, ChevronUp} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
+  Images, X, Loader2, AlertCircle , ChevronDown, ChevronUp} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui'
 import Image from 'next/image'
 
 interface SiteImage {

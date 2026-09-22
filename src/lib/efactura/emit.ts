@@ -97,7 +97,7 @@ export async function emitInvoiceForOrder(
   const serviceTotalCents = lines.reduce((s, l) => s + l.inclusiveCents, 0)
   const invoicePayments: InvoicePaymentInput[] = []
   let remaining = serviceTotalCents
-  const ordered = [...payments].sort((a, b) => (a.kind === 'gift_card' ? -1 : 1))
+  const ordered = [...payments].sort((a) => (a.kind === 'gift_card' ? -1 : 1))
   for (const p of ordered) {
     if (remaining <= 0) break
     const applied = Math.min(p.amount_cents, remaining)

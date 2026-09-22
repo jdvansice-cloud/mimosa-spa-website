@@ -142,8 +142,8 @@ async function main() {
   function scrubAgain<T extends { customer: string[]; staff: string[] }>(items: T[]): T[] {
     return items.map(item => ({ ...item, customer: item.customer.map(hardScrub), staff: item.staff.map(hardScrub) }))
   }
-  let finalExemplars = scrubAgain(exemplars)
-  let finalCases = cases.map(c => ({ ...c, turns: scrubAgain(c.turns) }))
+  const finalExemplars = scrubAgain(exemplars)
+  const finalCases = cases.map(c => ({ ...c, turns: scrubAgain(c.turns) }))
   function findMatches(items: Array<{ customer: string[]; staff: string[] }>): string[] {
     const hits: string[] = []
     for (const item of items) for (const t of [...item.customer, ...item.staff]) {

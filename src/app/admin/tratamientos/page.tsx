@@ -5,7 +5,6 @@ import { Search, Eye, EyeOff, Calendar, Loader2, Save, RefreshCw, Star, ChevronD
 import { Button, Card } from '@/components/ui'
 import { AdminTable, CardField, type AdminColumn } from '@/components/admin/AdminTable'
 import { cn } from '@/lib/utils'
-import { PROGRAM_NAMES } from '@/lib/booking/constants'
 
 interface Treatment {
   id?: string

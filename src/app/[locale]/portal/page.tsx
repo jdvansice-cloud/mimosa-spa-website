@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { usePortalStore, usePortalData } from '@/lib/portal/store'
 import { PANAMA_TIMEZONE } from '@/lib/booking/constants'
+import { getClient } from '@/lib/supabase/client'
 
 // Type for appointments
 interface Appointment {
@@ -183,7 +184,6 @@ function PortalContent() {
   // Lazy load Supabase client
   const getSupabase = (): SupabaseClient => {
     if (!supabaseRef.current) {
-      const { getClient } = require('@/lib/supabase/client')
       supabaseRef.current = getClient()
     }
     return supabaseRef.current as SupabaseClient

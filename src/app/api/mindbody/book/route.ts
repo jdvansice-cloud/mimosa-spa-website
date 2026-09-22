@@ -7,9 +7,6 @@ import { bookingConfirmationEmail } from '@/lib/email/templates/booking'
 import {
   validateRequired,
   sanitizeError,
-  ERROR_MESSAGES,
-  formatDateForPanama,
-  formatTimeForPanama,
   isDateTimeInPastForPanama,
   PROGRAM_IDS
 } from '@/lib/booking/constants'

@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
 
     // Get available items from Mindbody
     // Note: /appointment/bookableitems REQUIRES sessionTypeIds parameter
-    let availableItems: Array<{
+    const availableItems: Array<{
       Id: number
       StartDateTime: string
       EndDateTime: string
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
     // Primary approach: Build availability from schedule items
     // This gives us full availability windows (staff working hours minus appointments/blocks)
     // which is more comprehensive than getBookableItems (which returns limited pre-computed slots)
-    let staffBlockedPeriods = new Map<number, { start: Date; end: Date }[]>()
+    const staffBlockedPeriods = new Map<number, { start: Date; end: Date }[]>()
 
     // Resource-aware (Phase 1A): per-resource busy periods extracted from
     // Appointments[].Resources[] returned by scheduleitems. Legacy appointments

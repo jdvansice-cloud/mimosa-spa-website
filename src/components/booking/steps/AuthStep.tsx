@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useRef, useEffect, Suspense } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Mail, MessageCircle, ArrowRight, Loader2, User, UserPlus, Phone, RefreshCw } from 'lucide-react'
 import { OtpInput } from '@/components/ui'
 import { OtpChannelChoice } from '@/components/auth'
 import { useBookingStore } from '@/lib/booking/store'
 import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
 import { PhoneInput } from '@/components/shared/PhoneInput'
-import type { MindbodyClient, PromotionWithServices } from '@/types/booking'
+import type { MindbodyClient } from '@/types/booking'
+import { getClient } from '@/lib/supabase/client'
 
 type AuthState =
   | 'credential'
@@ -39,9 +40,7 @@ interface SelectedClient {
 }
 
 function AuthStepContent() {
-  const params = useParams()
   const searchParams = useSearchParams()
-  const locale = params.locale as string || 'es'
 
   const {
     setClientInfo,
@@ -92,7 +91,6 @@ function AuthStepContent() {
 
   const getSupabase = (): SupabaseClient => {
     if (!supabaseRef.current) {
-      const { getClient } = require('@/lib/supabase/client')
       supabaseRef.current = getClient()
     }
     return supabaseRef.current as SupabaseClient

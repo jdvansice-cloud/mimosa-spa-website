@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     // Load Supabase eligibility map (PRD v1.4 D-10).
     // If the table doesn't exist yet or is empty, we still return useful audit
     // data — `eligibilityTable.populated` flags whether the gate is testable.
-    let eligibilityRows: Array<{
+    const eligibilityRows: Array<{
       session_type_id: number
       location_id: number
       resource_id: number

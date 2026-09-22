@@ -1,16 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useTranslations, useLocale } from 'next-intl'
-import { ArrowRight, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui'
+import { useTranslations } from 'next-intl'
+import { Loader2 } from 'lucide-react'
 import { PromotionCard } from '@/components/promotions/PromotionCard'
 import type { Promotion } from '@/types'
 
 export function PromotionsPreview() {
   const t = useTranslations('home.promotions')
-  const locale = useLocale()
   const [promotions, setPromotions] = useState<Promotion[]>([])
   const [isLoading, setIsLoading] = useState(true)
 

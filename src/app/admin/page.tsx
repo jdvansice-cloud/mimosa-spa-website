@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import {
-  AlertTriangle, ArrowRight, BarChart3, CalendarDays, Gift, Plus, Receipt,
-  ShoppingBag, Sparkles, Users,
+  ArrowRight, BarChart3, CalendarDays, Gift, Plus, Receipt,
+  ShoppingBag, Sparkles,
 } from 'lucide-react'
 import { getDashboardData } from '@/lib/admin/dashboard'
 

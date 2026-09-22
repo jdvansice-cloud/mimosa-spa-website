@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { usePortalStore } from '@/lib/portal/store'
 import { PhoneInput } from '@/components/shared/PhoneInput'
+import { getClient } from '@/lib/supabase/client'
 
 // Client profile data from API
 interface ClientProfile {
@@ -55,12 +56,11 @@ export default function ProfileEditPage() {
   const router = useRouter()
   type SupabaseClient = ReturnType<typeof import('@/lib/supabase/client').getClient>
   const supabaseRef = useRef<SupabaseClient | null>(null)
-  const { session, client, mindbodyClientId, logout } = usePortalStore()
+  const { session, mindbodyClientId } = usePortalStore()
 
   // Lazy load Supabase client
   const getSupabase = (): SupabaseClient => {
     if (!supabaseRef.current) {
-      const { getClient } = require('@/lib/supabase/client')
       supabaseRef.current = getClient()
     }
     return supabaseRef.current as SupabaseClient

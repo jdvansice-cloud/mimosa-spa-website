@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 function ResultContent() {
   const searchParams = useSearchParams()
@@ -86,12 +87,12 @@ function ResultContent() {
         
         {/* Actions */}
         <div className="space-y-3">
-          <a
+          <Link
             href="/"
             className="block w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors"
           >
             Ir al Inicio
-          </a>
+          </Link>
           
           <a
             href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '50760001234'}`}
@@ -103,12 +104,12 @@ function ResultContent() {
           </a>
           
           {isCancelled && (
-            <a
+            <Link
               href="/es/reservar"
               className="block w-full py-3 px-4 border border-amber-500 text-amber-600 hover:bg-amber-50 font-medium rounded-lg transition-colors"
             >
               Reservar Nueva Cita
-            </a>
+            </Link>
           )}
         </div>
         

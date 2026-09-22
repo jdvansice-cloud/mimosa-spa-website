@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { RefreshCw, ChevronDown, Info } from 'lucide-react'
 import { ExplainText, InfoTip, DictionaryLink } from './explain'
-import type { KpiPayload, KpiPeriod, KpiSeries } from '@/lib/kpis/queries'
+import type { KpiPayload, KpiPeriod } from '@/lib/kpis/queries'
 import {
   CardBox, DeltaChip, DualLine, GOLD, GREEN, Label, Legend, LoadingCard,
   deltaPct, money, moneyCompact, pct, pct1,
