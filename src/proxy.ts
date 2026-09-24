@@ -4,13 +4,13 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { routing } from './i18n/routing'
 import { updateSession } from './lib/supabase/middleware'
 
-// Create the intl middleware
+// next-intl's locale routing (still exported as createMiddleware; runs inside proxy)
 const intlMiddleware = createIntlMiddleware(routing)
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip middleware for API routes and static files
+  // Skip the proxy for API routes and static files
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
@@ -86,7 +86,7 @@ export async function middleware(request: NextRequest) {
 
     // mobile_manager: access limited to the Mobile Manager section, minus the
     // pages carrying owner-level financials (rent, planilla, accountant packet).
-    // The matching API routes enforce this too — middleware skips /api.
+    // The matching API routes enforce this too — the proxy skips /api.
     if (roleRow.role === 'mobile_manager') {
       const inKpis = pathname === '/admin/kpis' || pathname.startsWith('/admin/kpis/')
       const isOwnerOnly =
@@ -136,7 +136,7 @@ export async function middleware(request: NextRequest) {
   // First, refresh Supabase session (this is critical for keeping users logged in)
   const supabaseResponse = await updateSession(request)
 
-  // Then apply intl middleware
+  // Then apply the intl routing
   const intlResponse = intlMiddleware(request)
 
   // Merge the cookies from supabase response into intl response

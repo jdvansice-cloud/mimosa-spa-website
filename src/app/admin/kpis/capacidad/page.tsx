@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-// Protected by the /admin middleware (admin or mobile_manager role).
+// Protected by the /admin proxy (admin or mobile_manager role).
 export default function CapacidadPage() {
   return <CapacidadClient />
 }
