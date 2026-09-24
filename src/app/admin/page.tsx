@@ -75,7 +75,7 @@ const QUICK_LINKS = [
 ]
 
 export default async function AdminDashboard() {
-  // Only full admins reach this page — middleware.ts redirects mobile managers
+  // Only full admins reach this page — proxy.ts redirects mobile managers
   // to /admin/kpis and location-restricted staff to /admin/giftcards/issue.
   const { kpis, kpisError, attention } = await getDashboardData()
 

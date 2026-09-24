@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-// Protected by the /admin middleware (admin role required).
+// Protected by the /admin proxy (admin role required).
 export default function AgendaPage() {
   return <AgendaClient />
 }
