@@ -32,7 +32,8 @@ const sampleWithTreatments: LabelCard = {
   recipient_name: 'Lucía Vega',
   amount_cents: 16050,
   currency: 'USD',
-  gift_treatment_names: ['Masaje Relajante 60 min', 'Facial Hidratante'],
+  // Repetition = quantity; prints as "2× Masaje Relajante 60 min · Facial Hidratante".
+  gift_treatment_names: ['Masaje Relajante 60 min', 'Masaje Relajante 60 min', 'Facial Hidratante'],
   message: 'Con cariño, mamá.',
   print_amount: true,
   print_message: true,

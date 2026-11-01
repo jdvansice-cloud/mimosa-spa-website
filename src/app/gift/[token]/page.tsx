@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { giftshopAdminClient } from '@/lib/giftshop/data'
 import { GiftBarcode } from '@/components/giftshop/GiftBarcode'
+import { formatTreatmentNames } from '@/lib/giftcards/treatments'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,7 +89,7 @@ export default async function GiftViewPage({
                       <>
                         <p className="text-sm text-warm-gray mb-1">Incluye · Includes</p>
                         <p className="font-display text-xl text-dark mb-2">
-                          {card.gift_treatment_names.join(' · ')}
+                          {formatTreatmentNames(card.gift_treatment_names)}
                         </p>
                       </>
                     ) : null}
