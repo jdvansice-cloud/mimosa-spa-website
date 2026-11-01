@@ -1,5 +1,7 @@
 'use client'
 
+import { formatTreatmentNames } from '@/lib/giftcards/treatments'
+
 /**
  * The full record of one gift card, shared by the inline expansion in the
  * issued list and the standalone /admin/giftcards/issued/[id] page — one
@@ -136,7 +138,7 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
           <Field label="Vence">{when(card.expires_at)}</Field>
           <Field label="Promoción">{card.promotion_name}</Field>
           <Field label="Tratamientos" wide>
-            {card.gift_treatment_names?.length ? card.gift_treatment_names.join(' · ') : card.treatment_name}
+            {card.gift_treatment_names?.length ? formatTreatmentNames(card.gift_treatment_names) : card.treatment_name}
           </Field>
         </Section>
 

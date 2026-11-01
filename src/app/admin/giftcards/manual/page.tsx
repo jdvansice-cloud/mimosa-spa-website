@@ -106,7 +106,7 @@ export default function GiftCardManualPage() {
               <li>Entra a <Link href="/admin/giftcards/issue" className="text-gold-700 underline">Emitir Gift Card</Link>.</li>
               <li>
                 <strong>Monto.</strong> Elige <em>Monto directo</em> (escribes el valor) o <em>Por tratamientos</em> (sumas
-                tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada).
+                tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada). Los extras/adicionales también están en la lista, y para parejas o grupos usa el botón <strong>+</strong> para repetir un tratamiento: en la etiqueta sale como «2× Masaje Relajante».
               </li>
               <li>
                 <strong>Comprador.</strong> Escribe el nombre y elige el cliente de Mindbody en la lista si aparece — así

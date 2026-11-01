@@ -2,6 +2,7 @@
 
 import JsBarcode from 'jsbarcode'
 import { LabelCard, LABEL_WIDTH_IN, LABEL_HEIGHT_IN } from './types'
+import { formatTreatmentNames } from '@/lib/giftcards/treatments'
 
 // The label is rasterized at the printers' native 203 dpi so the printed
 // dots match the canvas pixels 1:1 — no browser/driver scaling in the path.
@@ -246,7 +247,9 @@ export async function renderLabelCanvas(
         ctx,
         [
           {
-            text: (card.gift_treatment_names ?? []).join('  ·  '),
+            // Repeated names collapse to "2× Masaje Relajante" — see
+            // lib/giftcards/treatments.ts for the storage convention.
+            text: formatTreatmentNames(card.gift_treatment_names, '  ·  '),
             font: `400 ${TREAT_SIZE}px ${LATO}`,
           },
         ],

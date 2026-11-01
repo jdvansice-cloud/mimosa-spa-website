@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Loader2, Plus, X, ChevronRight, ChevronDown, Gift, Save } from 'lucide-react'
+import { Loader2, Plus, Minus, X, ChevronRight, ChevronDown, Gift, Save } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { ClientLookupInput, type ClientSuggestion } from '@/components/admin/ClientLookupInput'
 import type { GiftCardDetailData } from './GiftCardDetail'
+import { collapseTreatmentNames, expandTreatmentLines, type TreatmentLine } from '@/lib/giftcards/treatments'
 
 /**
  * The gift card form, shared by "Emitir" (create) and "Editar" (edit — only
@@ -33,7 +34,7 @@ interface ActivePromo {
 const GROUP_LABEL: Record<TreatmentGroup, string> = {
   body: 'Masajes',
   facial: 'Faciales',
-  addon: 'Adicionales',
+  addon: 'Extras y adicionales',
 }
 
 interface TreatmentsResponse {
@@ -105,6 +106,35 @@ function initialItbms(card: GiftCardDetailData | undefined): string {
   return String(DEFAULT_ITBMS_PERCENT)
 }
 
+/** − n + control sized for the front-desk touchscreen. */
+function QtyStepper({ qty, label, onChange }: { qty: number; label: string; onChange: (q: number) => void }) {
+  return (
+    <div
+      className="inline-flex shrink-0 items-center rounded-lg border border-beige-300 bg-white"
+      role="group"
+      aria-label={`Cantidad de ${label}`}
+    >
+      <button
+        type="button"
+        onClick={() => onChange(qty - 1)}
+        className="h-9 w-9 flex items-center justify-center rounded-l-lg text-warm-gray-500 hover:text-dark hover:bg-beige-50"
+        aria-label="Menos"
+      >
+        <Minus className="h-4 w-4" />
+      </button>
+      <span className="w-8 text-center font-semibold text-dark tabular-nums" aria-live="polite">{qty}</span>
+      <button
+        type="button"
+        onClick={() => onChange(qty + 1)}
+        className="h-9 w-9 flex items-center justify-center rounded-r-lg text-warm-gray-500 hover:text-dark hover:bg-beige-50"
+        aria-label="Más"
+      >
+        <Plus className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
+
 export function GiftCardForm({
   mode,
   initial,
@@ -141,10 +171,13 @@ export function GiftCardForm({
   const [openAmount, setOpenAmount] = useState(
     initial ? (initial.amount_cents / 100).toFixed(2) : '',
   )
-  const [selectedTreatmentIds, setSelectedTreatmentIds] = useState<number[]>([])
+  // Selected catalog treatments with quantities — a couple's card carries
+  // the same massage twice, a group's three times. Insertion order is kept
+  // so the label lists them in the order staff added them.
+  const [selectedLines, setSelectedLines] = useState<Array<{ id: number; qty: number }>>([])
   // Treatment names on an edited card that no longer match the catalog
   // (renamed or retired). They still print; they just carry no price.
-  const [extraNames, setExtraNames] = useState<string[]>([])
+  const [extraLines, setExtraLines] = useState<TreatmentLine[]>([])
   // Names waiting to be resolved against the catalog once it loads.
   const [pendingNames, setPendingNames] = useState<string[] | null>(
     initial?.gift_treatment_names?.length ? initial.gift_treatment_names : null,
@@ -245,7 +278,9 @@ export function GiftCardForm({
     setServicesError(null)
     ;(async () => {
       try {
-        const res = await fetch('/api/admin/giftcards/treatments')
+        // Addons are hidden from the public menu but sold at the desk —
+        // ask for them explicitly.
+        const res = await fetch('/api/admin/giftcards/treatments?includeHiddenAddons=true')
         const data = await res.json() as TreatmentsResponse | { error?: string }
         if (!res.ok) {
           throw new Error('error' in data && data.error ? data.error : 'Error al cargar tratamientos')
@@ -273,30 +308,36 @@ export function GiftCardForm({
     const promo = initial?.promotion_id ? promos.find(p => p.id === initial.promotion_id) ?? null : null
     if (promo) {
       setSelectedPromo(promo)
-      names = names.filter(n => !promo.services.includes(n))
+      // The promo contributes exactly one of each of its services; any
+      // further repetition was added on top and must survive the round trip.
+      for (const svc of promo.services) {
+        const i = names.indexOf(svc)
+        if (i >= 0) names.splice(i, 1)
+      }
     }
-    const ids: number[] = []
-    const extras: string[] = []
-    for (const n of names) {
-      const s = services.find(x => x.service_name === n)
-      if (s) ids.push(s.mindbody_service_id)
-      else extras.push(n)
+    const lines: Array<{ id: number; qty: number }> = []
+    const extras: TreatmentLine[] = []
+    for (const line of collapseTreatmentNames(names)) {
+      const s = services.find(x => x.service_name === line.name)
+      if (s) lines.push({ id: s.mindbody_service_id, qty: line.qty })
+      else extras.push(line)
     }
-    setSelectedTreatmentIds(ids)
-    setExtraNames(extras)
+    setSelectedLines(lines)
+    setExtraLines(extras)
     setPendingNames(null)
   }, [pendingNames, services, promosLoaded, promos, initial])
 
   const selectedTreatments = useMemo(
-    () => selectedTreatmentIds
-      .map(id => services?.find(s => s.mindbody_service_id === id))
-      .filter((s): s is Treatment => !!s),
-    [selectedTreatmentIds, services],
+    () => selectedLines
+      .map(l => ({ qty: l.qty, treatment: services?.find(s => s.mindbody_service_id === l.id) }))
+      .filter((x): x is { qty: number; treatment: Treatment } => !!x.treatment),
+    [selectedLines, services],
   )
+  const selectedIds = useMemo(() => selectedLines.map(l => l.id), [selectedLines])
 
   const treatmentSubtotalCents = useMemo(
     () =>
-      selectedTreatments.reduce((acc, s) => acc + Math.round(s.price * 100), 0) +
+      selectedTreatments.reduce((acc, { treatment, qty }) => acc + Math.round(treatment.price * 100) * qty, 0) +
       (selectedPromo ? Math.round(selectedPromo.price * 100) : 0),
     [selectedTreatments, selectedPromo],
   )
@@ -323,21 +364,33 @@ export function GiftCardForm({
       .map(g => ({
         group: g,
         items: (groupedServices[g] ?? [])
-          .filter(s => !selectedTreatmentIds.includes(s.mindbody_service_id))
+          .filter(s => !selectedIds.includes(s.mindbody_service_id))
           .filter(s => !query || s.service_name.toLowerCase().includes(query)),
       }))
       .filter(g => g.items.length > 0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupedServices, selectedTreatmentIds, treatmentsSearch])
+  }, [groupedServices, selectedIds, treatmentsSearch])
 
   const addTreatment = (id: number) => {
-    setSelectedTreatmentIds(prev => prev.includes(id) ? prev : [...prev, id])
+    setSelectedLines(prev => prev.some(l => l.id === id)
+      ? prev.map(l => (l.id === id ? { ...l, qty: l.qty + 1 } : l))
+      : [...prev, { id, qty: 1 }])
   }
   const removeTreatment = (id: number) => {
-    setSelectedTreatmentIds(prev => prev.filter(x => x !== id))
+    setSelectedLines(prev => prev.filter(l => l.id !== id))
+  }
+  /** Quantity stepper; 0 removes the line, 20 is a sanity cap for groups. */
+  const setTreatmentQty = (id: number, qty: number) => {
+    if (qty <= 0) return removeTreatment(id)
+    setSelectedLines(prev => prev.map(l => (l.id === id ? { ...l, qty: Math.min(qty, 20) } : l)))
+  }
+  const setExtraQty = (name: string, qty: number) => {
+    setExtraLines(prev => qty <= 0
+      ? prev.filter(l => l.name !== name)
+      : prev.map(l => (l.name === name ? { ...l, qty: Math.min(qty, 20) } : l)))
   }
 
-  const hasTreatments = selectedTreatments.length > 0 || extraNames.length > 0
+  const hasTreatments = selectedTreatments.length > 0 || extraLines.length > 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -367,11 +420,14 @@ export function GiftCardForm({
       recipient_mindbody_client_id: recipientClientId,
       recipient_email: recipientEmail.trim() || null,
       amount_cents: computedAmountCents,
+      // Quantity is encoded as repetition (["Masaje", "Masaje"]) — the
+      // storage column stays a plain string[] and every reader collapses it
+      // back to "2× Masaje" via formatTreatmentNames().
       gift_treatment_names: includeTreatments
         ? [
             ...(selectedPromo?.services ?? []),
-            ...selectedTreatments.map(s => s.service_name),
-            ...extraNames,
+            ...expandTreatmentLines(selectedTreatments.map(({ treatment, qty }) => ({ name: treatment.service_name, qty }))),
+            ...expandTreatmentLines(extraLines),
           ]
         : null,
       base_amount_cents: includeTreatments ? treatmentSubtotalCents : null,
@@ -529,36 +585,38 @@ export function GiftCardForm({
                   </div>
                 ) : (
                   <ul className="divide-y divide-beige-200 border border-beige-200 rounded-lg overflow-hidden">
-                    {selectedTreatments.map(s => (
-                      <li key={s.mindbody_service_id} className="flex items-center justify-between px-3 py-2 text-sm">
-                        <div className="flex-1">
+                    {selectedTreatments.map(({ treatment: s, qty }) => (
+                      <li key={s.mindbody_service_id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                        <div className="flex-1 min-w-0">
                           <div className="text-dark">{s.service_name}</div>
-                          {s.category && (
-                            <div className="text-xs text-warm-gray-500">{s.category}</div>
-                          )}
+                          <div className="text-xs text-warm-gray-500">
+                            {s.category ? `${s.category} · ` : ''}${s.price.toFixed(2)} c/u
+                          </div>
                         </div>
-                        <div className="text-dark font-medium mr-3">${s.price.toFixed(2)}</div>
+                        <QtyStepper qty={qty} label={s.service_name} onChange={q => setTreatmentQty(s.mindbody_service_id, q)} />
+                        <div className="w-20 text-right text-dark font-medium tabular-nums">${(s.price * qty).toFixed(2)}</div>
                         <button
                           type="button"
                           onClick={() => removeTreatment(s.mindbody_service_id)}
                           className="p-1 text-warm-gray-500 hover:text-red-500"
-                          aria-label="Quitar"
+                          aria-label={`Quitar ${s.service_name}`}
                         >
                           <X className="h-4 w-4" />
                         </button>
                       </li>
                     ))}
-                    {extraNames.map(name => (
-                      <li key={name} className="flex items-center justify-between px-3 py-2 text-sm bg-amber-50">
-                        <div className="flex-1">
-                          <div className="text-dark">{name}</div>
+                    {extraLines.map(line => (
+                      <li key={line.name} className="flex items-center justify-between gap-3 px-3 py-2 text-sm bg-amber-50">
+                        <div className="flex-1 min-w-0">
+                          <div className="text-dark">{line.name}</div>
                           <div className="text-xs text-amber-700">No está en el catálogo actual — se imprime, pero no suma al monto.</div>
                         </div>
+                        <QtyStepper qty={line.qty} label={line.name} onChange={q => setExtraQty(line.name, q)} />
                         <button
                           type="button"
-                          onClick={() => setExtraNames(prev => prev.filter(n => n !== name))}
+                          onClick={() => setExtraQty(line.name, 0)}
                           className="p-1 text-warm-gray-500 hover:text-red-500"
-                          aria-label="Quitar"
+                          aria-label={`Quitar ${line.name}`}
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -570,8 +628,11 @@ export function GiftCardForm({
 
               {/* Picker */}
               <div>
-                <div className="text-xs uppercase tracking-widest text-warm-gray-500 mb-2">
-                  Agregar tratamiento
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-2">
+                  <div className="text-xs uppercase tracking-widest text-warm-gray-500">Agregar tratamiento</div>
+                  <div className="text-xs text-warm-gray-500">
+                    Parejas o grupos: usa <span className="font-semibold text-dark">+</span> para repetir un tratamiento — se imprime como «2× …».
+                  </div>
                 </div>
                 {servicesLoading ? (
                   <div className="input flex items-center gap-2 text-warm-gray-500">

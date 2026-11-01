@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui'
 import { AdminTable, CardField, StatusPill, type AdminColumn } from '@/components/admin/AdminTable'
 import { GiftCardDetail, type GiftCardDetailData } from '@/components/admin/giftcards/GiftCardDetail'
+import { formatTreatmentNames } from '@/lib/giftcards/treatments'
 
 interface IssuedRow {
   id: string
@@ -291,7 +292,7 @@ function IssuedList() {
       key: 'treatments',
       header: 'Tratamientos',
       cellClassName: 'text-warm-gray-500 text-xs',
-      render: r => r.gift_treatment_names?.length ? r.gift_treatment_names.join(' · ') : '—',
+      render: r => r.gift_treatment_names?.length ? formatTreatmentNames(r.gift_treatment_names) : '—',
     },
     {
       key: 'balance',
@@ -378,7 +379,7 @@ function IssuedList() {
           <CardField label="Compró">{row.buyer_name}</CardField>
           <CardField label="Emitida">{formatDate(row.issued_at)}</CardField>
           {row.gift_treatment_names?.length ? (
-            <CardField label="Incluye">{row.gift_treatment_names.join(' · ')}</CardField>
+            <CardField label="Incluye">{formatTreatmentNames(row.gift_treatment_names)}</CardField>
           ) : null}
         </dl>
         <div className="mt-4 flex items-center gap-2">

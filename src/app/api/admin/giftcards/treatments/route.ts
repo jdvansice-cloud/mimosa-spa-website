@@ -32,8 +32,12 @@ function groupOf(program_id: number | null): TreatmentGroup {
  * stays consistent and doesn't hit Mindbody on every load.
  *
  * Query params:
- *   - includeHidden=true  → return rows where is_visible=false too
- *                           (defaults to visible-only)
+ *   - includeHidden=true        → return rows where is_visible=false too
+ *                                 (defaults to visible-only)
+ *   - includeHiddenAddons=true  → visible rows PLUS every addon (programs
+ *                                 Adicionales / Adicionales en Cabina), which
+ *                                 are hidden from the public menu but sold at
+ *                                 the desk and on gift cards
  */
 export async function GET(request: NextRequest) {
   const ctx = await getGiftCardAdminContext()
@@ -41,6 +45,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const includeHidden = searchParams.get('includeHidden') === 'true'
+  const includeHiddenAddons = searchParams.get('includeHiddenAddons') === 'true'
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
   let query = supabase
@@ -48,7 +53,7 @@ export async function GET(request: NextRequest) {
     .select('mindbody_service_id, service_name, price, duration, program_id, category, is_visible')
     .order('service_name', { ascending: true })
 
-  if (!includeHidden) {
+  if (!includeHidden && !includeHiddenAddons) {
     query = query.eq('is_visible', true)
   }
 
@@ -57,7 +62,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const rows = (data ?? []) as TreatmentRow[]
+  let rows = (data ?? []) as TreatmentRow[]
+  if (!includeHidden && includeHiddenAddons) {
+    rows = rows.filter(r => r.is_visible || groupOf(r.program_id) === 'addon')
+  }
   const grouped: Record<TreatmentGroup, TreatmentRow[]> = {
     body: [],
     facial: [],
