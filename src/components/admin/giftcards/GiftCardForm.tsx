@@ -304,7 +304,7 @@ export function GiftCardForm({
   // entries (and the promo, if it still exists) once both have loaded.
   useEffect(() => {
     if (!pendingNames || services === null || !promosLoaded) return
-    let names = [...pendingNames]
+    const names = [...pendingNames]
     const promo = initial?.promotion_id ? promos.find(p => p.id === initial.promotion_id) ?? null : null
     if (promo) {
       setSelectedPromo(promo)
