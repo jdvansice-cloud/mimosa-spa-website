@@ -55,6 +55,13 @@ export type GiftCardLineResult = { ok: true; line: GiftCardLine } | { ok: false;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
+/** YYYY-MM-DD that is a real calendar day (rejects 2026-13-45 and 2026-02-31, which would roll over). */
+function isCalendarDate(d: string): boolean {
+  if (!DATE_RE.test(d)) return false
+  const t = new Date(`${d}T00:00:00Z`)
+  return !Number.isNaN(t.getTime()) && t.toISOString().slice(0, 10) === d
+}
+
 function trimmed(v: unknown): string {
   return typeof v === 'string' ? v.trim() : ''
 }
@@ -82,18 +89,20 @@ export function buildGiftCardLine(
     return { ok: false, error: 'La entrega por WhatsApp no está disponible todavía.' }
   }
 
-  const message = trimmed(input.message)
-  const messageOrNull = message && message.length <= 300 ? message : null
+  // Truncate (like legacy /api/checkout) rather than drop: the buyer has paid for this text.
+  const message = trimmed(input.message).slice(0, 300)
+  const messageOrNull = message || null
 
+  // Date rules apply only when the channel can schedule; otherwise it is dropped silently.
   let deliveryDate: string | null = null
-  if (input.deliveryDate !== undefined && input.deliveryDate !== null && input.deliveryDate !== '') {
-    if (typeof input.deliveryDate !== 'string' || !DATE_RE.test(input.deliveryDate)) {
+  if (delivery.allowSchedule && input.deliveryDate !== undefined && input.deliveryDate !== null && input.deliveryDate !== '') {
+    if (typeof input.deliveryDate !== 'string' || !isCalendarDate(input.deliveryDate)) {
       return { ok: false, error: 'Fecha de envío inválida' }
     }
     if (input.deliveryDate < opts.todayIso) {
       return { ok: false, error: 'La fecha de envío debe ser hoy o después' }
     }
-    deliveryDate = delivery.allowSchedule ? input.deliveryDate : null
+    deliveryDate = input.deliveryDate
   }
 
   const itbmsCents = itbmsCentsFor(item)
