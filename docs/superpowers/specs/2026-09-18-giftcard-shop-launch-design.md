@@ -161,3 +161,7 @@ Rollback at any point: set `FEATURES.giftShop = false` and `GIFT_CARDS_PATH = '/
 ## 10. Out of scope
 
 Shared bag and prepaid bookings, online invoicing of any order, gift cards as an online payment method, one-click refunds, the bonus redemption screen, corporate orders, showing the remaining balance on the card page.
+
+## Amendment 2026-11-02 — purchase path moves to the unified bag
+
+Owner decision: launch gift cards through the unified bag (`FEATURES.bag`) instead of the standalone pay step, **gift cards only at first**. Prepaid treatments ("Pagar ahora") stay behind a new server-side switch `checkout_settings.services_enabled` (default false) until the accountant ruling and efacturapty's bridge answer are in. Every customer rule in this spec (one delivery channel per order, WhatsApp hidden until enabled, redemption at the spa, receipt at sale, gift code chip) binds the bag path. The standalone checkout stays in the codebase as the rollback path. Plan: `docs/superpowers/plans/2026-11-02-unified-bag-giftcards-first.md`.
