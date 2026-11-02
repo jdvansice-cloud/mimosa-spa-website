@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware'
 import { track } from '@/lib/track'
+import type { DeliveryMethod } from '@/lib/giftshop/delivery'
 
 /**
  * Site-wide bag ("Bolsa"): one booking session (the widget's configured
@@ -41,6 +42,12 @@ export interface BagGiftCard {
   amountCents: number
   recipientName?: string
   recipientEmail?: string
+  /** Recipient WhatsApp number, used when deliveryMethod is 'whatsapp'. */
+  recipientPhone?: string
+  /** How the card reaches the recipient (v1 items are migrated to email/self). */
+  deliveryMethod: DeliveryMethod
+  /** Card design chosen on the personalize step. */
+  designSlug?: string
   message?: string
   deliveryDate?: string
 }
@@ -118,7 +125,18 @@ export const useBagStore = create<BagState>()(
     }),
     {
       name: 'mimosa-bag',
-      version: 1,
+      version: 2,
+      // v1 gift cards had no delivery choice: infer it from the recipient email.
+      migrate: (persisted: unknown, version: number) => {
+        const p = (persisted ?? {}) as { giftCards?: Array<Record<string, unknown>> }
+        if (version < 2 && Array.isArray(p.giftCards)) {
+          p.giftCards = p.giftCards.map((g) => ({
+            ...g,
+            deliveryMethod: g.deliveryMethod ?? (g.recipientEmail ? 'email' : 'self'),
+          }))
+        }
+        return p as never
+      },
       storage: createJSONStorage(() => expiringLocalStorage),
       partialize: (s) => ({
         session: s.session,

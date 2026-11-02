@@ -134,6 +134,8 @@ export function GiftShopClient({ locale }: { locale: string }) {
       amountCents: item.amount_cents + item.itbms_cents,
       recipientName: form.recipientName || undefined,
       recipientEmail: form.recipientEmail || undefined,
+      recipientPhone: form.recipientPhone || undefined,
+      deliveryMethod: form.deliveryMethod,
       message: form.message || undefined,
       deliveryDate: form.scheduledDate || undefined,
     })
