@@ -16,6 +16,9 @@ export async function GET() {
   ])
   return NextResponse.json({
     enabled: !!settings?.checkout_enabled,
+    // Prepaid treatments have their own switch; gift cards sell without it.
+    // select('*') tolerates a not-yet-migrated services_enabled column (undefined -> false).
+    servicesEnabled: settings?.services_enabled === true,
     allowPayAtSpa: settings?.allow_pay_at_spa ?? true,
     peakPrepayRequired: settings?.peak_prepay_required ?? false,
     peakDays: settings?.peak_days ?? [5, 6, 0],

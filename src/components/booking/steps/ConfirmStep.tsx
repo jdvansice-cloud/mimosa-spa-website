@@ -11,6 +11,7 @@ import { readStoredGiftCode, clearStoredGiftCode } from '@/lib/giftshop/giftCode
 
 interface CheckoutCfg {
   enabled: boolean
+  servicesEnabled: boolean
   allowPayAtSpa: boolean
   peakPrepayRequired: boolean
   peakDays: number[]
@@ -66,7 +67,7 @@ export function ConfirmStep() {
   // Promotions and appointment replacements keep the classic pay-at-spa flow
   // (promo bundle prices aren't representable as per-line Mindbody prices yet).
   const canPayOnline =
-    FEATURES.bag && !!checkoutCfg?.enabled && !activePromotion && !replaceAppointmentId
+    FEATURES.bag && !!checkoutCfg?.enabled && !!checkoutCfg?.servicesEnabled && !activePromotion && !replaceAppointmentId
 
   const isPeakSlot = useMemo(() => {
     if (!checkoutCfg?.peakPrepayRequired || !selectedDate) return false

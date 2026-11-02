@@ -52,10 +52,26 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = ordersAdminClient()
-  const { data: settings } = await supabase
-    .from('checkout_settings').select('*').eq('id', 1).single()
+  const settingsRes = await supabase
+    .from('checkout_settings').select('checkout_enabled, services_enabled').eq('id', 1).single()
+  let settings: { checkout_enabled?: boolean; services_enabled?: boolean } | null = settingsRes.data
+  if (settingsRes.error && /services_enabled/.test(settingsRes.error.message ?? '')) {
+    // Migration 20261102 not applied yet: sell gift cards only, services stay off.
+    const legacy = await supabase
+      .from('checkout_settings').select('checkout_enabled').eq('id', 1).single()
+    settings = legacy.data
+  }
   if (!settings?.checkout_enabled) {
     return NextResponse.json({ error: 'El pago en línea no está disponible todavía.' }, { status: 503 })
+  }
+  // Prepaid treatments have their own switch (the widget gate is a convenience;
+  // this is the guarantee). Gift-card-only bags are unaffected.
+  const servicesEnabled = settings?.services_enabled === true
+  const wantsServices = !!body.session
+    && Array.isArray((body.session as SessionInput).services)
+    && (body.session as SessionInput).services.length > 0
+  if (wantsServices && !servicesEnabled) {
+    return NextResponse.json({ error: 'El pago en línea de servicios no está disponible todavía.' }, { status: 503 })
   }
 
   const locale = body.locale === 'en' ? 'en' : 'es'
