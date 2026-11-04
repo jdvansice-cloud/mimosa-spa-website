@@ -141,6 +141,21 @@ export function buildGiftCardLine(
   }
 }
 
+/** Optional order_items columns for a gift-card line. Omitted when unset: the columns come from hand-run migrations. */
+export function giftCardItemExtras(l: {
+  gcDeliveryMethod?: string
+  gcRecipientPhone?: string
+  gcDesignSlug?: string
+  gcFaceValueCents?: number
+}): Record<string, unknown> {
+  const extras: Record<string, unknown> = {}
+  if (l.gcDeliveryMethod) extras.gc_delivery_method = l.gcDeliveryMethod
+  if (l.gcRecipientPhone) extras.gc_recipient_phone = l.gcRecipientPhone
+  if (l.gcDesignSlug) extras.gc_design_slug = l.gcDesignSlug
+  if (typeof l.gcFaceValueCents === 'number') extras.gc_face_value_cents = l.gcFaceValueCents
+  return extras
+}
+
 /** Row for gc_orders, built from an order_items row + its parent order (used by handoffGiftCardItems). */
 export function giftCardChildRow(args: {
   orderNumber: string

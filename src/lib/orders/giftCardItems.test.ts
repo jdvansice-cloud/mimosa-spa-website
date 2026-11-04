@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildGiftCardLine, giftCardChildRow } from './giftCardItems'
+import { buildGiftCardLine, giftCardChildRow, giftCardItemExtras } from './giftCardItems'
 
 const item = { id: 'i1', kind: 'monetary' as const, name_es: 'Gift Card $50', name_en: 'Gift Card $50', amount_cents: 5000, is_active: true, default_design_slug: 'general' }
 const exp = { ...item, id: 'i2', kind: 'experience' as const, amount_cents: 10000, treatment_names: ['Mimosa Relax'] }
@@ -130,5 +130,10 @@ describe('discounted gift cards', () => {
     expect(row).toMatchObject({ total_cents: 8000, base_amount_cents: 8000, face_value_cents: 10000 })
     const plain = giftCardChildRow({ ...base, item: { ...base.item, gc_face_value_cents: null } })
     expect(plain).not.toHaveProperty('face_value_cents')
+  })
+  it('item extras include only set columns', () => {
+    expect(giftCardItemExtras({})).toEqual({})
+    expect(giftCardItemExtras({ gcDeliveryMethod: 'email', gcDesignSlug: 'general' })).toEqual({ gc_delivery_method: 'email', gc_design_slug: 'general' })
+    expect(giftCardItemExtras({ gcRecipientPhone: '5072', gcFaceValueCents: 10000 })).toEqual({ gc_recipient_phone: '5072', gc_face_value_cents: 10000 })
   })
 })

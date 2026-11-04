@@ -8,6 +8,7 @@ import { computeOrderTotals } from '@/lib/orders/totals'
 import { validatePromoCode } from '@/lib/orders/promo'
 import type { OrderItemInput } from '@/lib/orders/types'
 import { signOrderNumber } from '@/lib/giftshop/sign'
+import { buildGiftCardLine, giftCardItemExtras, type BagGiftCardInput, type CatalogItemLite } from '@/lib/orders/giftCardItems'
 
 /**
  * POST /api/checkout — create a unified order (services + gift cards) and
@@ -27,13 +28,7 @@ interface SessionInput {
   startDateTime: string
 }
 
-interface GiftCardInput {
-  catalogItemId: string
-  recipientName?: string
-  recipientEmail?: string
-  message?: string
-  deliveryDate?: string
-}
+type GiftCardInput = BagGiftCardInput
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -84,7 +79,7 @@ export async function POST(request: NextRequest) {
   // order record and the Mindbody sale on the same branch.
   const { data: gcSettings } = await supabase
     .from('gc_shop_settings')
-    .select('default_mindbody_location_id')
+    .select('shop_enabled, whatsapp_delivery_enabled, default_mindbody_location_id')
     .eq('id', 1)
     .maybeSingle()
   const locationId = session
@@ -110,6 +105,23 @@ export async function POST(request: NextRequest) {
   const clientId = body.clientId ? Number(body.clientId) : null
   if (hasServices && (!clientId || !Number.isInteger(clientId) || clientId <= 0)) {
     return NextResponse.json({ error: 'Se requiere iniciar sesión para reservar servicios' }, { status: 401 })
+  }
+
+  // ---- Gift-card gates: shop switch and per-buyer abuse guard ----
+  if (giftCards.length > 0) {
+    if (gcSettings?.shop_enabled !== true) {
+      return NextResponse.json({ error: 'La tienda de gift cards no está disponible todavía.' }, { status: 503 })
+    }
+    const since = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+    const { count } = await supabase
+      .from('orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('buyer_email', buyerEmail)
+      .in('status', ['draft', 'totals_verified'])
+      .gte('created_at', since)
+    if ((count ?? 0) >= 5) {
+      return NextResponse.json({ error: 'Demasiados intentos. Espera unos minutos.' }, { status: 429 })
+    }
   }
 
   // ---- Server-side re-pricing ----
@@ -155,34 +167,44 @@ export async function POST(request: NextRequest) {
   }
 
   if (giftCards.length > 0) {
+    const todayIso = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Panama' })
     const ids = [...new Set(giftCards.map(g => g.catalogItemId))]
     const { data: rows } = await supabase
-      .from('gc_catalog_items').select('*').in('id', ids).eq('is_active', true)
+      .from('gc_catalog_items')
+      .select('id, kind, name_es, name_en, amount_cents, sale_amount_cents, treatment_names, default_design_slug, is_active')
+      .in('id', ids)
+    const catalogById = new Map((rows ?? []).map(r => [r.id as string, r as CatalogItemLite]))
     for (const g of giftCards) {
-      const row = rows?.find(r => r.id === g.catalogItemId)
-      if (!row) {
-        return NextResponse.json({ error: 'Gift card no disponible' }, { status: 409 })
+      const designSlug = typeof g.designSlug === 'string' && /^[a-z0-9-]{1,40}$/.test(g.designSlug)
+        ? g.designSlug : undefined
+      const built = buildGiftCardLine(
+        { ...g, designSlug },
+        catalogById.get(g.catalogItemId),
+        { whatsappEnabled: gcSettings?.whatsapp_delivery_enabled === true, todayIso }
+      )
+      if (!built.ok) {
+        return NextResponse.json(
+          { error: built.error },
+          { status: built.error === 'Gift card no disponible' ? 409 : 400 }
+        )
       }
-      const recipientEmail = g.recipientEmail?.trim().toLowerCase() || undefined
-      if (recipientEmail && !EMAIL_RE.test(recipientEmail)) {
-        return NextResponse.json({ error: 'Correo del destinatario inválido' }, { status: 400 })
-      }
-      const isExperience = row.kind === 'experience'
-      const itbms = isExperience ? Math.round(row.amount_cents * 0.07) : 0
+      const line = built.line
       items.push({
         itemType: 'gift_card',
         quantity: 1,
-        nameEs: row.name_es,
-        nameEn: row.name_en,
-        // monetary cards: no ITBMS at sale (liability, FEP '00');
-        // experiences: taxed like the underlying service.
-        unitPriceCents: row.amount_cents + itbms,
-        taxRateCode: isExperience ? '01' : '00',
-        gcCatalogItemId: row.id,
-        gcRecipientName: g.recipientName?.trim().slice(0, 120),
-        gcRecipientEmail: recipientEmail,
-        gcMessage: g.message?.trim().slice(0, 300),
-        gcDeliveryDate: /^\d{4}-\d{2}-\d{2}$/.test(g.deliveryDate ?? '') ? g.deliveryDate : undefined,
+        nameEs: line.nameEs,
+        nameEn: line.nameEn,
+        unitPriceCents: line.unitPriceCents, // tax-inclusive, on the sale price when set
+        taxRateCode: line.taxRateCode,
+        gcCatalogItemId: line.catalogItemId,
+        gcRecipientName: line.recipientName,
+        gcRecipientEmail: line.recipientEmail ?? undefined,
+        gcRecipientPhone: line.recipientPhone ?? undefined,
+        gcDeliveryMethod: line.deliveryMethod,
+        gcMessage: line.message ?? undefined,
+        gcDeliveryDate: line.deliveryDate ?? undefined,
+        gcDesignSlug: line.designSlug,
+        gcFaceValueCents: line.discountPercent !== null ? line.faceValueCents : undefined,
       })
     }
   }
@@ -290,6 +312,7 @@ export async function POST(request: NextRequest) {
     gc_recipient_email: l.gcRecipientEmail ?? null,
     gc_message: l.gcMessage ?? null,
     gc_delivery_date: l.gcDeliveryDate ?? null,
+    ...giftCardItemExtras(l),
     sort_order: i,
   }))
   const { error: itemsErr } = await supabase.from('order_items').insert(itemRows)
@@ -336,12 +359,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ paid: true, redirect: graciasUrl, orderNumber: order.order_number })
   }
 
-  // ---- Card portion: Tilopay AUTHORIZE ONLY (capture happens post-booking) ----
+  // ---- Card portion: services authorize only (capture after booking); gift-card-only captures now ----
   try {
     const url = await createTilopayPayment({
       orderNumber: order.order_number,
       amountCents: cardCents,
-      capture: 0,
+      capture: hasServices ? 0 : 1, // gift-card-only: nothing to book, capture now
       redirectUrl: `${SITE_URL}/api/checkout/callback`,
       buyerName,
       buyerEmail,

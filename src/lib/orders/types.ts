@@ -55,6 +55,11 @@ export interface OrderItemInput {
   gcRecipientEmail?: string
   gcMessage?: string
   gcDeliveryDate?: string
+  gcDeliveryMethod?: 'email' | 'whatsapp' | 'self'
+  gcRecipientPhone?: string
+  gcDesignSlug?: string
+  /** Catalogue face value; set only when the card is sold at a discount. */
+  gcFaceValueCents?: number
 }
 
 export interface ComputedOrderLine extends OrderItemInput {
