@@ -8,7 +8,7 @@ export const maxDuration = 300
  * GET /api/cron/orders — every 10 min. Finishes what the callback started
  * whenever a step died mid-flight, and expires abandoned drafts.
  *
- *  - authorized/booked/captured orders older than 3 min → re-run the pipeline
+ *  - authorized/booked/captured (and posted-but-unfulfilled posting_failed) orders older than 3 min → re-run the pipeline
  *    (every step is status-guarded + the poster verifies /sale/sales before
  *    retrying, so re-runs are safe). ≤5 posting attempts, then admin-only.
  *  - draft/totals_verified older than 24h → expired.
@@ -29,7 +29,10 @@ export async function GET(request: NextRequest) {
   const { data: stuck } = await supabase
     .from('orders')
     .select('id, status, posting_attempts, failure_code')
-    .in('status', ['authorized', 'booked', 'captured'])
+    // Plus gift-card-only orders whose hand-off threw after capture: they sit
+    // at 'posted' un-fulfilled with posting_failed (service orders at 'posted'
+    // are finished by the pipeline itself, so they never match this clause).
+    .or('status.in.(authorized,booked,captured),and(status.eq.posted,fulfilled_at.is.null,failure_code.eq.posting_failed)')
     .lt('updated_at', threeMinAgo)
     .order('created_at')
     .limit(20)

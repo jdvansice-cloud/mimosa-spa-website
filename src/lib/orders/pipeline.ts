@@ -9,6 +9,7 @@ import {
   captureTilopayPayment,
   voidTilopayPayment,
 } from '@/lib/payments/tilopay'
+import { giftCardChildRow } from './giftCardItems'
 import { fulfillOrder, resolvePaymentInfo, tenderNameFor } from '@/lib/giftshop/fulfillment'
 import { centsToDollars } from './totals'
 
@@ -82,6 +83,11 @@ export interface OrderItemRow {
   gc_recipient_email: string | null
   gc_message: string | null
   gc_delivery_date: string | null
+  // Added by hand-run migrations: may be absent until applied.
+  gc_recipient_phone?: string | null
+  gc_delivery_method?: string | null
+  gc_design_slug?: string | null
+  gc_face_value_cents?: number | null
   sort_order: number
 }
 
@@ -172,7 +178,11 @@ export async function runPaidOrderPipeline(
 
   // ---- STEP 2: capture the card hold ----
   const tp = tilopayPayment(loaded)
-  if (tp && tp.status === 'authorized') {
+  // Never capture a gift-card-only order: its charge was created with
+  // capture:1 and is already captured. Two independent guards (no services,
+  // or the payment row is already captured) so a replay can't double-capture.
+  const needsCapture = serviceItems(loaded).length > 0 && !!tp && tp.status === 'authorized'
+  if (tp && needsCapture) {
     const cap = await captureTilopayPayment(loaded.order.order_number, tp.amount_cents)
     if (!cap.ok) {
       await supabase.from('order_payments')
@@ -508,13 +518,17 @@ async function handoffGiftCardItems(
   if (gcs.length === 0) return { allFulfilled: true }
   const { order } = loaded
   const tp = tilopayPayment(loaded)
+  const hasServices = serviceItems(loaded).length > 0
   let allFulfilled = true
 
-  // Keep a whole order on one Mindbody branch: when the bag also holds a
-  // service, the card registers at the spa delivering it. A gift-card-only
-  // order carries no chosen location, so we leave this null and fulfillment
-  // falls back to the gift shop's configured branch.
-  const gcLocationId = serviceItems(loaded).length > 0 ? order.location_id : null
+  // Catalogue rows once (kind + treatment names for the child row).
+  const catalogIds = [...new Set(gcs.map(g => g.gc_catalog_item_id).filter((x): x is string => !!x))]
+  const catalog = new Map<string, { id: string; kind: 'monetary' | 'experience'; treatment_names: string[] | null }>()
+  if (catalogIds.length > 0) {
+    const { data: rows } = await supabase
+      .from('gc_catalog_items').select('id, kind, treatment_names').in('id', catalogIds)
+    for (const r of rows ?? []) catalog.set(r.id, r)
+  }
 
   for (let n = 0; n < gcs.length; n++) {
     const item = gcs[n]
@@ -524,32 +538,40 @@ async function handoffGiftCardItems(
     let childId = existing?.id as string | undefined
 
     if (!childId) {
+      const cat = item.gc_catalog_item_id ? catalog.get(item.gc_catalog_item_id) : undefined
+      if (!cat) console.error('handoff: catalog row missing', item.gc_catalog_item_id)
+      const row = giftCardChildRow({
+        orderNumber: order.order_number,
+        index: n,
+        order: {
+          buyer_name: order.buyer_name,
+          buyer_email: order.buyer_email ?? '',
+          buyer_phone: order.buyer_phone,
+          locale: order.locale,
+          location_id: order.location_id,
+          hasServices,
+        },
+        item: {
+          gc_catalog_item_id: item.gc_catalog_item_id ?? '',
+          name_es: item.name_es,
+          total_cents: item.total_cents,
+          tax_cents: item.tax_cents,
+          gc_recipient_name: item.gc_recipient_name,
+          gc_recipient_email: item.gc_recipient_email,
+          gc_recipient_phone: item.gc_recipient_phone ?? null,
+          gc_delivery_method: item.gc_delivery_method ?? null,
+          gc_message: item.gc_message,
+          gc_delivery_date: item.gc_delivery_date,
+          gc_design_slug: item.gc_design_slug ?? null,
+          gc_face_value_cents: item.gc_face_value_cents ?? null,
+        },
+        catalog: cat ? { kind: cat.kind, treatment_names: cat.treatment_names } : undefined,
+        payment: { tilopay_tpt: tp?.tilopay_tpt ?? null, tilopay_method: tp?.tilopay_method ?? null },
+        nowIso: order.captured_at ?? nowIso(),
+      })
       const { data: inserted, error } = await supabase
         .from('gc_orders')
-        .insert({
-          order_number: childNumber,
-          status: 'paid',
-          paid_at: order.captured_at ?? nowIso(),
-          catalog_item_id: item.gc_catalog_item_id,
-          item_kind: 'monetary',
-          item_name: item.name_es,
-          base_amount_cents: item.total_cents - item.tax_cents,
-          itbms_cents: item.tax_cents,
-          total_cents: item.total_cents,
-          buyer_name: order.buyer_name,
-          buyer_email: order.buyer_email,
-          buyer_phone: order.buyer_phone,
-          recipient_name: item.gc_recipient_name ?? order.buyer_name,
-          recipient_email: item.gc_recipient_email,
-          gift_message: item.gc_message,
-          delivery_email: !!item.gc_recipient_email,
-          delivery_whatsapp: false,
-          scheduled_send_at: item.gc_delivery_date ? `${item.gc_delivery_date}T14:00:00.000Z` : null,
-          locale: order.locale,
-          mindbody_location_id: gcLocationId,
-          tilopay_tpt: tp?.tilopay_tpt ?? null,
-          tilopay_method: tp?.tilopay_method ?? null,
-        })
+        .insert(row)
         .select('id')
         .single()
       if (error || !inserted) {

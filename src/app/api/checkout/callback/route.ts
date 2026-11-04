@@ -6,8 +6,9 @@ import { loadOrder, ordersAdminClient, runPaidOrderPipeline } from '@/lib/orders
 
 /**
  * GET /api/checkout/callback — Tilopay redirect for unified orders.
- * The Tilopay charge is an AUTHORIZATION ONLY (capture:0): this route claims
- * the order, books the appointment, captures on success or voids on slot
+ * The Tilopay charge is an AUTHORIZATION ONLY (capture:0) when the bag holds a
+ * service, and an immediate capture (capture:1) for gift-card-only bags: this
+ * route claims the order, books the appointment, captures on success or voids on slot
  * loss, then posts to Mindbody. Hash-verified and idempotent — refreshes and
  * duplicate hits are safe (status-guarded claim, pipeline steps re-entrant).
  */
@@ -87,10 +88,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(errorUrl('declined'), 303)
   }
 
-  // Idempotent claim: only one request flips totals_verified → authorized.
+  // Gift-card-only orders were charged with capture:1 (already captured);
+  // anything with a service is an authorization held until the slot is booked.
+  const { count: serviceCount } = await supabase
+    .from('order_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('order_id', order.id).eq('item_type', 'service')
+  const immediate = (serviceCount ?? 0) === 0
+  const now = new Date().toISOString()
+
+  // Idempotent claim: only one request flips totals_verified → authorized/captured.
   const { data: claimed } = await supabase
     .from('orders')
-    .update({ status: 'authorized', authorized_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .update(immediate
+      ? { status: 'captured', authorized_at: now, captured_at: now, updated_at: now }
+      : { status: 'authorized', authorized_at: now, updated_at: now })
     .eq('id', order.id)
     .eq('status', 'totals_verified')
     .select('id')
@@ -98,8 +110,9 @@ export async function GET(request: NextRequest) {
   if (claimed && claimed.length > 0) {
     await supabase.from('order_payments')
       .update({
-        status: 'authorized',
+        status: immediate ? 'captured' : 'authorized',
         tilopay_tpt: q.get('tpt'),
+        tilopay_auth: q.get('auth'),
         tilopay_method: [
           q.get('selected_method') ?? '',
           q.get('crd') ?? '',
