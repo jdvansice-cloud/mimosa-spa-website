@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
-import { Loader2, Gift, ShoppingBag } from 'lucide-react'
+import { Loader2, Gift } from 'lucide-react'
 import { track } from '@/lib/track'
 import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
 import { PhoneInput } from '@/components/shared/PhoneInput'
@@ -24,6 +24,7 @@ interface CatalogItem {
   image_url: string | null
   badge_es: string | null
   badge_en: string | null
+  default_design_slug?: string | null
 }
 
 interface CatalogResponse {
@@ -99,6 +100,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [justAdded, setJustAdded] = useState(false)
   const addGiftCardToBag = useBagStore((s) => s.addGiftCard)
   const openBag = useBagStore((s) => s.openBag)
 
@@ -117,6 +119,13 @@ export function GiftShopClient({ locale }: { locale: string }) {
       .catch(() => setCatalog({ shopEnabled: false, items: [] }))
   }, [locale])
 
+  // "Agregada a tu bolsa" lasts two seconds; the cleanup also covers unmount.
+  useEffect(() => {
+    if (!justAdded) return
+    const id = setTimeout(() => setJustAdded(false), 2000)
+    return () => clearTimeout(id)
+  }, [justAdded])
+
   const name = (i: CatalogItem) => (en ? i.name_en : i.name_es)
   const description = (i: CatalogItem) => (en ? i.description_en : i.description_es)
   const badge = (i: CatalogItem) => (en ? i.badge_en : i.badge_es)
@@ -126,23 +135,29 @@ export function GiftShopClient({ locale }: { locale: string }) {
 
   // With the unified bag on, "details" hands off to the bag instead of a
   // gift-card-only Tilopay redirect — so a card can ride along with a booking.
+  // The form keeps whatever was typed in the other delivery fields, so each
+  // contact is saved only for the delivery method that uses it.
   const addToBag = () => {
     if (!item) return
+    if (!validateDetails()) return
+    const method = form.deliveryMethod
     addGiftCardToBag({
       catalogItemId: item.id,
       name: name(item),
       amountCents: item.amount_cents + item.itbms_cents,
-      recipientName: form.recipientName || undefined,
-      recipientEmail: form.recipientEmail || undefined,
-      recipientPhone: form.recipientPhone || undefined,
-      deliveryMethod: form.deliveryMethod,
+      recipientName: form.recipientName.trim() || undefined,
+      recipientEmail: method === 'email' ? form.recipientEmail.trim() || undefined : undefined,
+      recipientPhone: method === 'whatsapp' ? form.recipientPhone || undefined : undefined,
+      deliveryMethod: method,
+      designSlug: item.default_design_slug ?? undefined,
       message: form.message || undefined,
-      deliveryDate: form.scheduledDate || undefined,
+      deliveryDate: method !== 'self' ? form.scheduledDate || undefined : undefined,
     })
-    track('giftshop_add_to_bag', { locale, meta: { item: item.id } })
+    track('giftshop_add_to_bag', { locale, meta: { item: item.name_es, delivery: method } })
     setItem(null)
     setForm({ ...form, recipientName: '', recipientEmail: '', recipientPhone: '', message: '', scheduledDate: '' })
     setStep('pick')
+    setJustAdded(true)
     openBag()
   }
 
@@ -228,11 +243,16 @@ export function GiftShopClient({ locale }: { locale: string }) {
 
   return (
     <div className="pb-28">
-      <ShopStepHeader step={step === 'pick' ? 1 : step === 'details' ? 2 : 3} />
+      <ShopStepHeader step={step === 'pick' ? 1 : step === 'details' ? 2 : 3} total={FEATURES.bag ? 2 : 3} />
 
       {/* Step 1: pick */}
       {step === 'pick' && (
         <div className="space-y-8">
+          {justAdded && (
+            <p role="status" className="text-sm font-medium text-dark bg-gold/15 rounded-lg px-4 py-3">
+              {t('addedToBag')}
+            </p>
+          )}
           {(['monetary', 'experience'] as const).map((kind) => {
             const items = catalog.items.filter((i) => i.kind === kind)
             if (items.length === 0) return null
@@ -246,6 +266,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
                     <button
                       key={i.id}
                       onClick={() => {
+                        setJustAdded(false)
                         setItem(i)
                         setStep('details')
                       }}
@@ -371,17 +392,6 @@ export function GiftShopClient({ locale }: { locale: string }) {
               <input id="scheduledDate" className={inputCls} type="date" min={todayIso} value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} />
             </Field>
           )}
-
-          {FEATURES.bag && (
-            <button
-              onClick={addToBag}
-              className="btn-primary w-full min-h-[44px] inline-flex items-center justify-center gap-2"
-              disabled={!form.recipientName}
-            >
-              <ShoppingBag className="h-4 w-4" />
-              {en ? 'Add to bag' : 'Agregar a la bolsa'}
-            </button>
-          )}
         </div>
       )}
 
@@ -450,12 +460,12 @@ export function GiftShopClient({ locale }: { locale: string }) {
         </div>
       )}
 
-      {step === 'details' && item && !FEATURES.bag && (
+      {step === 'details' && item && (
         <ShopBottomBar
           onBack={() => { setFieldErrors({}); setStep('pick') }}
           backLabel={t('back')}
-          onNext={goToPay}
-          nextLabel={t('continue')}
+          onNext={FEATURES.bag ? addToBag : goToPay}
+          nextLabel={FEATURES.bag ? t('addToBag') : t('continue')}
         />
       )}
       {step === 'pay' && item && (
