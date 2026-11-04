@@ -129,6 +129,6 @@ describe('discounted gift cards', () => {
     const row = giftCardChildRow({ ...base, item: { ...base.item, total_cents: 8000, gc_face_value_cents: 10000 } })
     expect(row).toMatchObject({ total_cents: 8000, base_amount_cents: 8000, face_value_cents: 10000 })
     const plain = giftCardChildRow({ ...base, item: { ...base.item, gc_face_value_cents: null } })
-    expect(plain).toMatchObject({ face_value_cents: null })
+    expect(plain).not.toHaveProperty('face_value_cents')
   })
 })

@@ -173,7 +173,7 @@ export function giftCardChildRow(args: {
 }): Record<string, unknown> {
   const { orderNumber, index, order, item, catalog, payment, nowIso } = args
   const method = item.gc_delivery_method ?? (item.gc_recipient_email ? 'email' : 'self')
-  return {
+  const row: Record<string, unknown> = {
     order_number: `${orderNumber}-G${index + 1}`,
     status: 'paid',
     paid_at: nowIso,
@@ -183,7 +183,6 @@ export function giftCardChildRow(args: {
     base_amount_cents: item.total_cents - item.tax_cents,
     itbms_cents: item.tax_cents,
     total_cents: item.total_cents,
-    face_value_cents: item.gc_face_value_cents ?? null,
     currency: 'USD',
     buyer_name: order.buyer_name,
     buyer_email: order.buyer_email,
@@ -202,4 +201,7 @@ export function giftCardChildRow(args: {
     tilopay_method: payment.tilopay_method,
     gift_treatment_names: catalog?.treatment_names ?? null,
   }
+  // Omit when unset: inserting a column that doesn't exist yet (migration pending) would be rejected.
+  if (typeof item.gc_face_value_cents === 'number') row.face_value_cents = item.gc_face_value_cents
+  return row
 }
