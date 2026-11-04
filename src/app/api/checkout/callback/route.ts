@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyTilopayHash } from '@/lib/payments/tilopay'
 import { SITE_URL } from '@/lib/nav'
 import { signOrderNumber as sig } from '@/lib/giftshop/sign'
+import { isImmediateCapture } from '@/lib/orders/giftCardItems'
 import { loadOrder, ordersAdminClient, runPaidOrderPipeline } from '@/lib/orders/pipeline'
 
 /**
@@ -90,11 +91,7 @@ export async function GET(request: NextRequest) {
 
   // Gift-card-only orders were charged with capture:1 (already captured);
   // anything with a service is an authorization held until the slot is booked.
-  const { count: serviceCount } = await supabase
-    .from('order_items')
-    .select('id', { count: 'exact', head: true })
-    .eq('order_id', order.id).eq('item_type', 'service')
-  const immediate = (serviceCount ?? 0) === 0
+  const immediate = isImmediateCapture(loaded.items)
   const now = new Date().toISOString()
 
   // Idempotent claim: only one request flips totals_verified → authorized/captured.

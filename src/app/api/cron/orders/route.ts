@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
   const { data: stuck } = await supabase
     .from('orders')
     .select('id, status, posting_attempts, failure_code')
-    // Plus gift-card-only orders whose hand-off threw after capture: they sit
-    // at 'posted' un-fulfilled with posting_failed (service orders at 'posted'
-    // are finished by the pipeline itself, so they never match this clause).
+    // Plus mixed orders already posted to Mindbody whose gift-card hand-off
+    // then failed (posted, un-fulfilled, posting_failed). Gift-card-only
+    // orders stay 'captured' on hand-off failure and use the first clause.
     .or('status.in.(authorized,booked,captured),and(status.eq.posted,fulfilled_at.is.null,failure_code.eq.posting_failed)')
     .lt('updated_at', threeMinAgo)
     .order('created_at')

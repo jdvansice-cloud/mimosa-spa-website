@@ -9,7 +9,7 @@ import {
   captureTilopayPayment,
   voidTilopayPayment,
 } from '@/lib/payments/tilopay'
-import { giftCardChildRow } from './giftCardItems'
+import { giftCardChildRow, isImmediateCapture } from './giftCardItems'
 import { fulfillOrder, resolvePaymentInfo, tenderNameFor } from '@/lib/giftshop/fulfillment'
 import { centsToDollars } from './totals'
 
@@ -181,7 +181,7 @@ export async function runPaidOrderPipeline(
   // Never capture a gift-card-only order: its charge was created with
   // capture:1 and is already captured. Two independent guards (no services,
   // or the payment row is already captured) so a replay can't double-capture.
-  const needsCapture = serviceItems(loaded).length > 0 && !!tp && tp.status === 'authorized'
+  const needsCapture = !isImmediateCapture(loaded.items) && !!tp && tp.status === 'authorized'
   if (tp && needsCapture) {
     const cap = await captureTilopayPayment(loaded.order.order_number, tp.amount_cents)
     if (!cap.ok) {
@@ -525,8 +525,14 @@ async function handoffGiftCardItems(
   const catalogIds = [...new Set(gcs.map(g => g.gc_catalog_item_id).filter((x): x is string => !!x))]
   const catalog = new Map<string, { id: string; kind: 'monetary' | 'experience'; treatment_names: string[] | null }>()
   if (catalogIds.length > 0) {
-    const { data: rows } = await supabase
+    const { data: rows, error: catErr } = await supabase
       .from('gc_catalog_items').select('id, kind, treatment_names').in('id', catalogIds)
+    if (catErr) {
+      // Transient error != missing row: minting now would send an experience
+      // card as monetary, irreversibly. Leave un-fulfilled; the cron retries.
+      await fail(supabase, orderId, 'posting_failed', `gift card catalogue lookup failed: ${catErr.message}`)
+      return { allFulfilled: false }
+    }
     for (const r of rows ?? []) catalog.set(r.id, r)
   }
 

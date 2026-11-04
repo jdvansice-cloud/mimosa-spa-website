@@ -156,6 +156,11 @@ export function giftCardItemExtras(l: {
   return extras
 }
 
+/** True when the order holds no service: its Tilopay charge is captured at once (capture:1). Unknown/loading state must be treated as NOT immediate by callers. */
+export function isImmediateCapture(items: Array<{ item_type: string }>): boolean {
+  return !items.some(i => i.item_type === 'service')
+}
+
 /** Row for gc_orders, built from an order_items row + its parent order (used by handoffGiftCardItems). */
 export function giftCardChildRow(args: {
   orderNumber: string

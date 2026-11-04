@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildGiftCardLine, giftCardChildRow, giftCardItemExtras } from './giftCardItems'
+import { buildGiftCardLine, giftCardChildRow, giftCardItemExtras, isImmediateCapture } from './giftCardItems'
 
 const item = { id: 'i1', kind: 'monetary' as const, name_es: 'Gift Card $50', name_en: 'Gift Card $50', amount_cents: 5000, is_active: true, default_design_slug: 'general' }
 const exp = { ...item, id: 'i2', kind: 'experience' as const, amount_cents: 10000, treatment_names: ['Mimosa Relax'] }
@@ -135,5 +135,15 @@ describe('discounted gift cards', () => {
     expect(giftCardItemExtras({})).toEqual({})
     expect(giftCardItemExtras({ gcDeliveryMethod: 'email', gcDesignSlug: 'general' })).toEqual({ gc_delivery_method: 'email', gc_design_slug: 'general' })
     expect(giftCardItemExtras({ gcRecipientPhone: '5072', gcFaceValueCents: 10000 })).toEqual({ gc_recipient_phone: '5072', gc_face_value_cents: 10000 })
+  })
+})
+
+describe('isImmediateCapture', () => {
+  it('is true for gift-card-only and empty item lists', () => {
+    expect(isImmediateCapture([{ item_type: 'gift_card' }, { item_type: 'gift_card' }])).toBe(true)
+    expect(isImmediateCapture([])).toBe(true)
+  })
+  it('is false when any service is present', () => {
+    expect(isImmediateCapture([{ item_type: 'gift_card' }, { item_type: 'service' }])).toBe(false)
   })
 })
