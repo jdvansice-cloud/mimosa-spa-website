@@ -30,6 +30,8 @@ export interface GcCatalogItem {
   description_es: string | null
   description_en: string | null
   amount_cents: number
+  /** Price charged when set; amount_cents stays the face value. */
+  sale_amount_cents: number | null
   treatment_names: string[]
   image_url: string | null
   default_design_slug: string
@@ -79,7 +81,8 @@ export const getActiveCatalog = unstable_cache(
         .select('*')
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
-      return (data as GcCatalogItem[]) ?? []
+      // select('*') tolerates the column not existing yet (migration pending): normalise to null.
+      return ((data ?? []) as GcCatalogItem[]).map((i) => ({ ...i, sale_amount_cents: i.sale_amount_cents ?? null }))
     } catch {
       return []
     }

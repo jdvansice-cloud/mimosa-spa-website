@@ -25,6 +25,8 @@ export interface CatalogItemLite {
   name_es: string
   name_en: string
   amount_cents: number
+  /** Seasonal price charged instead of amount_cents (face value). null/undefined = no sale. */
+  sale_amount_cents?: number | null
   treatment_names?: string[] | null
   default_design_slug?: string | null
   is_active: boolean
@@ -37,6 +39,10 @@ export interface GiftCardLine {
   nameEn: string
   /** tax-inclusive */
   unitPriceCents: number
+  /** What the card is worth (catalogue amount_cents); differs from the price on a sale. */
+  faceValueCents: number
+  /** Rounded % off face value, null when not on sale. */
+  discountPercent: number | null
   taxRateCode: '00' | '01'
   taxCents: number
   recipientName: string
@@ -105,7 +111,9 @@ export function buildGiftCardLine(
     deliveryDate = input.deliveryDate
   }
 
-  const itbmsCents = itbmsCentsFor(item)
+  const saleCents = item.sale_amount_cents ?? null
+  const priceCents = saleCents ?? item.amount_cents
+  const itbmsCents = itbmsCentsFor({ kind: item.kind, amount_cents: priceCents })
 
   return {
     ok: true,
@@ -114,7 +122,9 @@ export function buildGiftCardLine(
       kind: item.kind,
       nameEs: item.name_es,
       nameEn: item.name_en,
-      unitPriceCents: item.amount_cents + itbmsCents,
+      unitPriceCents: priceCents + itbmsCents,
+      faceValueCents: item.amount_cents,
+      discountPercent: saleCents ? Math.round(100 * (1 - saleCents / item.amount_cents)) : null,
       taxRateCode: item.kind === 'experience' ? '01' : '00',
       taxCents: itbmsCents,
       recipientName,
@@ -155,6 +165,7 @@ export function giftCardChildRow(args: {
     gc_message: string | null
     gc_delivery_date: string | null
     gc_design_slug: string | null
+    gc_face_value_cents?: number | null
   }
   catalog: { kind: 'monetary' | 'experience'; treatment_names?: string[] | null } | undefined
   payment: { tilopay_tpt: string | null; tilopay_method: string | null }
@@ -172,6 +183,7 @@ export function giftCardChildRow(args: {
     base_amount_cents: item.total_cents - item.tax_cents,
     itbms_cents: item.tax_cents,
     total_cents: item.total_cents,
+    face_value_cents: item.gc_face_value_cents ?? null,
     currency: 'USD',
     buyer_name: order.buyer_name,
     buyer_email: order.buyer_email,

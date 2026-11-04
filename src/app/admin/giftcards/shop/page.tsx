@@ -19,6 +19,7 @@ interface CatalogItem {
   kind: string
   name_es: string
   amount_cents: number
+  sale_amount_cents?: number | null
   mindbody_giftcard_id: number | null
   mindbody_layout_id: number | null
   sort_order: number
@@ -56,6 +57,8 @@ export default function AdminGcShopPage() {
       setIsLoading(false)
     }
   }, [])
+
+  const [saleErrors, setSaleErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     load()
@@ -104,6 +107,35 @@ export default function AdminGcShopPage() {
     />
   )
 
+  const saleInput = (i: CatalogItem) => (
+    <div>
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        className="w-28 border border-beige-400 rounded p-1.5 text-sm"
+        aria-label={`Precio de oferta (opcional) de ${i.name_es}`}
+        placeholder="Precio de oferta (opcional)"
+        defaultValue={i.sale_amount_cents != null ? (i.sale_amount_cents / 100).toString() : ''}
+        onBlur={e => {
+          const raw = e.target.value.trim()
+          const cents = raw === '' ? null : Math.round(Number(raw) * 100)
+          if (cents !== null && (!Number.isFinite(cents) || cents <= 0 || cents >= i.amount_cents)) {
+            setSaleErrors(prev => ({ ...prev, [i.id]: 'Debe ser menor que el valor' }))
+            return
+          }
+          setSaleErrors(prev => {
+            const { [i.id]: _drop, ...rest } = prev
+            return rest
+          })
+          if (cents === (i.sale_amount_cents ?? null)) return
+          patchItem(i.id, { sale_amount_cents: cents })
+        }}
+      />
+      {saleErrors[i.id] && <p className="text-xs text-red-600 mt-1" role="alert">{saleErrors[i.id]}</p>}
+    </div>
+  )
+
   const visibilityToggle = (i: CatalogItem) => (
     <button
       onClick={() => patchItem(i.id, { is_active: !i.is_active })}
@@ -129,6 +161,7 @@ export default function AdminGcShopPage() {
       cellClassName: 'tabular-nums',
       render: i => `$${(i.amount_cents / 100).toFixed(0)}`,
     },
+    { key: 'sale', header: 'Precio de oferta (opcional)', render: saleInput },
     { key: 'mbid', header: 'Mindbody GC ID', render: mbIdInput },
     { key: 'visible', header: 'Visible', render: visibilityToggle },
   ]
@@ -148,6 +181,7 @@ export default function AdminGcShopPage() {
         ${(i.amount_cents / 100).toFixed(0)}
       </p>
       <dl className="mt-3 space-y-1">
+        <CardField label="Precio de oferta (opcional)">{saleInput(i)}</CardField>
         <CardField label="Mindbody">{mbIdInput(i)}</CardField>
         <CardField label="Estado">{i.is_active ? 'Visible' : 'Oculto'}</CardField>
       </dl>

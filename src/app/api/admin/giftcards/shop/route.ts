@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest) {
     const i = body.item
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
     for (const f of [
-      'name_es', 'name_en', 'description_es', 'description_en', 'amount_cents',
+      'name_es', 'name_en', 'description_es', 'description_en', 'amount_cents', 'sale_amount_cents',
       'treatment_names', 'image_url', 'default_design_slug', 'mindbody_giftcard_id',
       'mindbody_layout_id', 'badge_es', 'badge_en', 'sort_order', 'is_active',
     ]) {

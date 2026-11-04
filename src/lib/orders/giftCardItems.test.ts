@@ -103,3 +103,32 @@ describe('giftCardChildRow', () => {
     expect(s).toMatchObject({ delivery_email: false, delivery_whatsapp: false, recipient_name: 'María' })
   })
 })
+
+describe('discounted gift cards', () => {
+  const sale = { ...item, id: 'i3', amount_cents: 10000, sale_amount_cents: 8000 }
+  const saleExp = { ...exp, id: 'i4', amount_cents: 10000, sale_amount_cents: 8000 }
+  const base = {
+    orderNumber: 'MO-001234', index: 0,
+    order: { buyer_name: 'Juan', buyer_email: 'juan@x.co', buyer_phone: '50761111111', locale: 'es', location_id: 2, hasServices: false },
+    item: { gc_catalog_item_id: 'i1', name_es: 'Gift Card $50', total_cents: 5000, tax_cents: 0, gc_recipient_name: 'María', gc_recipient_email: null, gc_recipient_phone: '50760000000', gc_delivery_method: 'whatsapp', gc_message: 'Hola', gc_delivery_date: '2026-12-01', gc_design_slug: 'navidad' },
+    catalog: { kind: 'monetary' as const }, payment: { tilopay_tpt: 'TPT1', tilopay_method: 'card|crd|visa' }, nowIso: '2026-11-02T15:00:00.000Z',
+  }
+  it('charges the sale price and keeps the face value', () => {
+    const r = buildGiftCardLine({ catalogItemId: 'i3', recipientName: 'A', deliveryMethod: 'self' }, sale, opts)
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 8000, taxCents: 0, faceValueCents: 10000, discountPercent: 20 })
+  })
+  it('taxes an experience on the sale price', () => {
+    const r = buildGiftCardLine({ catalogItemId: 'i4', recipientName: 'A', deliveryMethod: 'self' }, saleExp, opts)
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 8560, taxCents: 560, faceValueCents: 10000, taxRateCode: '01' })
+  })
+  it('no sale price → no discount, face value equals the price', () => {
+    const r = buildGiftCardLine({ catalogItemId: 'i1', recipientName: 'A', deliveryMethod: 'self' }, item, opts)
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 5000, faceValueCents: 5000, discountPercent: null })
+  })
+  it('child row carries the face value', () => {
+    const row = giftCardChildRow({ ...base, item: { ...base.item, total_cents: 8000, gc_face_value_cents: 10000 } })
+    expect(row).toMatchObject({ total_cents: 8000, base_amount_cents: 8000, face_value_cents: 10000 })
+    const plain = giftCardChildRow({ ...base, item: { ...base.item, gc_face_value_cents: null } })
+    expect(plain).toMatchObject({ face_value_cents: null })
+  })
+})

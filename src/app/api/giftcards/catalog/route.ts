@@ -9,7 +9,9 @@ export async function GET() {
     shopEnabled: settings.shop_enabled && isTilopayConfigured(),
     whatsappDeliveryEnabled: settings.whatsapp_delivery_enabled,
     occasion: settings.occasion_slug,
-    items: catalog.map((i) => ({
+    items: catalog.map((i) => {
+      const sale = i.sale_amount_cents ?? null
+      return {
       id: i.id,
       kind: i.kind,
       name_es: i.name_es,
@@ -17,11 +19,14 @@ export async function GET() {
       description_es: i.description_es,
       description_en: i.description_en,
       amount_cents: i.amount_cents,
-      itbms_cents: itbmsCentsFor(i),
+      sale_amount_cents: sale,
+      discount_percent: sale ? Math.round(100 * (1 - sale / i.amount_cents)) : null,
+      itbms_cents: itbmsCentsFor({ kind: i.kind, amount_cents: sale ?? i.amount_cents }),
       image_url: i.image_url,
       badge_es: i.badge_es,
       badge_en: i.badge_en,
       default_design_slug: i.default_design_slug,
-    })),
+      }
+    }),
   })
 }
