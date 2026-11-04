@@ -412,6 +412,95 @@ git commit -m "feat(checkout): gracias shows each gift card with its link; paid-
 
 ---
 
+---
+
+## Discounted gift cards (added 2026-11-04)
+
+**Requirement (owner):** sell a gift card below its face value for seasonal campaigns, e.g. a $100 card for $80 (20% off) on Mother's Day and Christmas. The card is worth $100 at the spa; the buyer pays $80.
+
+**Design:** a per-item **sale price** on the catalogue, the way the spa already runs these campaigns in-store (a seasonal product that the admin activates and deactivates). `gc_catalog_items.sale_amount_cents` (nullable, must be below `amount_cents`). `amount_cents` stays the face value (monetary) or the base price (experience). When a sale price is set: the buyer pays `sale_amount_cents` (+ ITBMS on the sale price for experiences), the card is issued for `amount_cents`, the receipt shows both, and the Mindbody registration is paid with the amount actually charged. The admin maps the discounted item to whichever Mindbody gift card product the spa uses for that promotion (the `Test:true` preflight in the E2E run confirms the product accepts the paid amount). Invoicing is unchanged (ruling R1: receipt at sale).
+
+**Execution order:** Task 11 runs right after Task 4 (before Task 5), so Tasks 5 and 6 consume the new line shape once; Task 12 runs after Task 6 and before Task 7.
+
+### Task 11: Sale price on the catalogue, in the builders, and in the admin
+
+**Files:**
+- Create: `supabase/migrations/20261104_gc_sale_price.sql`
+- Modify: `src/lib/giftshop/data.ts` (`GcCatalogItem` type, `itbmsCentsFor` caller sites unchanged), `src/app/api/giftcards/catalog/route.ts` (item mapping ~line 19), `src/app/api/admin/giftcards/shop/route.ts` (catalogue item upsert allow-list) and the admin shop page that edits catalogue items (find it: it calls that route), `src/lib/orders/giftCardItems.ts` + `giftCardItems.test.ts`
+
+**Interfaces:**
+- Produces: `GcCatalogItem.sale_amount_cents: number | null`; public catalogue items gain `sale_amount_cents: number | null`, `discount_percent: number | null` (rounded `100 × (1 − sale/amount)`), and `itbms_cents` is computed on the **sale** price when set; `CatalogItemLite.sale_amount_cents?: number | null`; `GiftCardLine` gains `faceValueCents: number` and `discountPercent: number | null`, and `unitPriceCents = (sale ?? amount) + itbms(sale ?? amount)`; `giftCardChildRow` reads `item.gc_face_value_cents` (nullable) and writes `face_value_cents` on the child row.
+
+- [ ] **Step 1: Migration**
+
+```sql
+-- supabase/migrations/20261104_gc_sale_price.sql
+-- Seasonal gift-card promotions: the buyer pays the sale price, the card is worth the face value.
+ALTER TABLE public.gc_catalog_items
+  ADD COLUMN IF NOT EXISTS sale_amount_cents INTEGER
+  CHECK (sale_amount_cents IS NULL OR (sale_amount_cents > 0 AND sale_amount_cents < amount_cents));
+COMMENT ON COLUMN public.gc_catalog_items.sale_amount_cents IS 'Price charged when set (pre-ITBMS for experiences); amount_cents stays the face value.';
+
+ALTER TABLE public.gc_orders      ADD COLUMN IF NOT EXISTS face_value_cents INTEGER;
+ALTER TABLE public.order_items    ADD COLUMN IF NOT EXISTS gc_face_value_cents INTEGER;
+COMMENT ON COLUMN public.gc_orders.face_value_cents IS 'Card value when it differs from total_cents (discounted sale). NULL = total_cents.';
+```
+
+- [ ] **Step 2: Failing tests** (append to `giftCardItems.test.ts`)
+
+```ts
+describe('discounted gift cards', () => {
+  const sale = { ...item, id: 'i3', amount_cents: 10000, sale_amount_cents: 8000 }
+  const saleExp = { ...exp, id: 'i4', amount_cents: 10000, sale_amount_cents: 8000 }
+  it('charges the sale price and keeps the face value', () => {
+    const r = buildGiftCardLine({ catalogItemId: 'i3', recipientName: 'A', deliveryMethod: 'self' }, sale, opts)
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 8000, taxCents: 0, faceValueCents: 10000, discountPercent: 20 })
+  })
+  it('taxes an experience on the sale price', () => {
+    const r = buildGiftCardLine({ catalogItemId: 'i4', recipientName: 'A', deliveryMethod: 'self' }, saleExp, opts)
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 8560, taxCents: 560, faceValueCents: 10000, taxRateCode: '01' })
+  })
+  it('no sale price → no discount, face value equals the price', () => {
+    const r = buildGiftCardLine({ catalogItemId: 'i1', recipientName: 'A', deliveryMethod: 'self' }, item, opts)
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 5000, faceValueCents: 5000, discountPercent: null })
+  })
+  it('child row carries the face value', () => {
+    const row = giftCardChildRow({ ...base, item: { ...base.item, total_cents: 8000, gc_face_value_cents: 10000 } })
+    expect(row).toMatchObject({ total_cents: 8000, base_amount_cents: 8000, face_value_cents: 10000 })
+    const plain = giftCardChildRow({ ...base, item: { ...base.item, gc_face_value_cents: null } })
+    expect(plain).toMatchObject({ face_value_cents: null })
+  })
+})
+```
+(`item`, `exp`, `opts`, `base` are the fixtures already in the file; add `gc_face_value_cents: null` to `base.item` and `sale_amount_cents: null` to `item`/`exp` if the types require it.)
+
+- [ ] **Step 3: Run red**, then implement: `CatalogItemLite.sale_amount_cents?: number | null`; in `buildGiftCardLine` compute `const priceCents = item.sale_amount_cents ?? item.amount_cents`, `const itbms = itbmsCentsFor({ kind: item.kind, amount_cents: priceCents })`, `unitPriceCents = priceCents + itbms`, `taxCents = itbms`, `faceValueCents = item.amount_cents`, `discountPercent = item.sale_amount_cents ? Math.round(100 * (1 - item.sale_amount_cents / item.amount_cents)) : null`. In `giftCardChildRow` add `face_value_cents: item.gc_face_value_cents ?? null`. Run green.
+- [ ] **Step 4: Catalogue plumbing.** `GcCatalogItem` type gains `sale_amount_cents: number | null`; `getActiveCatalog()` selects it; the public route returns `sale_amount_cents`, `discount_percent` and `itbms_cents: itbmsCentsFor({ kind, amount_cents: sale ?? amount })`. Admin: the catalogue item editor gets a field **"Precio de oferta (opcional)"** (dollars input, stored as cents, must be below the value; inline error "Debe ser menor que el valor"), and the admin route's allow-list accepts `sale_amount_cents` (null clears it). Tolerate the missing column on read (treat as null) until the migration is run.
+- [ ] **Step 5: Verify** `npx vitest run src/lib/orders/giftCardItems.test.ts` → PASS; full suite, `tsc`, lint; `curl -s localhost:3000/api/giftcards/catalog` shows `sale_amount_cents` and `discount_percent` per item (null when unset).
+- [ ] **Step 6: Commit**
+
+```bash
+git add supabase/migrations/20261104_gc_sale_price.sql src/lib/giftshop/data.ts src/app/api/giftcards/catalog/route.ts src/app/api/admin/giftcards/shop/route.ts <admin shop page> src/lib/orders/giftCardItems.ts src/lib/orders/giftCardItems.test.ts
+git commit -m "feat(giftshop): seasonal sale price on catalogue items (buyer pays less, card keeps its value)"
+```
+
+### Task 12: Discount through the shop, the bag, the standalone route, fulfilment and the receipt
+
+**Files:**
+- Modify: `src/components/giftshop/GiftShopClient.tsx` (tile price ~281, details header ~299, pay totals ~444, `addToBag` amount ~147), `src/lib/bag/store.ts` (`BagGiftCard.faceValueCents?`, `discountPercent?`), `src/components/bag/BagDrawer.tsx` (gift card row ~178), `src/app/api/giftcards/checkout/route.ts` (standalone totals + `face_value_cents`), `src/lib/giftshop/fulfillment.ts` (card value 156-158, receipt 377), `src/lib/email/templates/giftcard.ts` (`BuyerEmailData` + a paid line), `src/app/[locale]/giftcards/gracias/page.tsx` if it prints the amount
+
+**Interfaces:**
+- Consumes: catalogue `sale_amount_cents` / `discount_percent` (Task 11); `order_items.gc_face_value_cents` written by Task 5's route from `line.faceValueCents`; `gc_orders.face_value_cents` written by Task 6's hand-off.
+- Produces: shop tile shows `$100` struck through, `$80` in gold, a `−20%` chip (plus the admin badge if set); bag item `amountCents` = price paid (tax-inclusive) with `faceValueCents` and `discountPercent` for display; drawer row "Gift Card $100 · −20%" with `$80`; standalone route charges `sale ?? amount` (+ITBMS on it) and stores `face_value_cents`; fulfilment issues the card for `face_value_cents ?? total_cents` (monetary) and keeps the experience base/tax logic on the paid amounts; Mindbody `PaymentInfo` stays the paid total; buyer receipt shows "Valor $100" and "Pagaste $80 (20% de descuento)"; recipient email shows the face value only.
+
+- [ ] **Step 1: Shop + bag.** Tile: when `i.sale_amount_cents` is set, render `<span className="line-through text-warm-gray">{money(i.amount_cents)}</span> <span className="text-gold-600 font-bold text-lg">{money(i.sale_amount_cents)}</span> <span className="ml-1 rounded-full bg-rose-100 text-rose-800 text-[11px] font-semibold px-2 py-0.5">−{i.discount_percent}%</span>`; details header and pay totals use the sale price; `addToBag` passes `amountCents: (sale ?? amount) + itbms_cents`, `faceValueCents: amount_cents`, `discountPercent`. Drawer row: name + (`faceValueCents` differs → `· −{discountPercent}%`) and the paid amount. Bag store: two optional fields, no migration bump needed (optional).
+- [ ] **Step 2: Standalone route** (`/api/giftcards/checkout`): `const price = item.sale_amount_cents ?? item.amount_cents`; `itbms = itbmsCentsFor({ kind, amount_cents: price })`; `total = price + itbms`; insert `face_value_cents: item.sale_amount_cents ? item.amount_cents : null`, `base_amount_cents: price`.
+- [ ] **Step 3: Fulfilment.** `gift_cards.amount_cents = order.face_value_cents ?? order.total_cents` for monetary; for experience keep `base_amount_cents`/`tax_cents` from the order (paid) and set `amount_cents = order.face_value_cents ?? order.total_cents`. Receipt: `amountLabel` = face value; new `paidLabel` = `$${total/100}` and `discountLabel` = `20% de descuento` passed to `buyerReceiptEmail` as `paidLine?: string | null` rendered as a table row `Pagaste | $80 (20% de descuento)` under "Valor"; recipient email unchanged. Tolerate `face_value_cents` missing (null → today's behaviour).
+- [ ] **Step 4: Verify** at 375px with local flag flips: a sale item shows the struck-through value and chip; the drawer shows the paid amount; `curl` the standalone route body for a sale item → `total_cents` = sale (+ITBMS for experiences). Unit: extend `src/lib/giftshop/thankYou.test.ts` only if it prints amounts (it does not). Reset flags.
+- [ ] **Step 5: Commit** `feat(giftshop): discounted cards show value, price and discount; card issued at face value; receipt shows what was paid`.
+
+**Ops note for Task 10:** create the seasonal item in the admin (name "Gift Card $100 · Día de las Madres", valor $100, precio de oferta $80, Mindbody product = the promo product used in-store), activate it for the campaign window, deactivate after. Discount is per item, not shop-wide, so regular denominations can stay on sale or not independently.
+
 ## Later (not in this plan)
 
 - Prepaid treatments: `services_enabled=true` + `FEATURES.prepay=true` after the accountant and efacturapty answers, with the "Pagar ahora" UX pass and a live booking+invoice+credit-note test.
