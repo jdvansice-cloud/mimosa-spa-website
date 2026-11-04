@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     locale,
     path: '/giftcards',
     title: t('title'),
-    description: t('subtitle'),
+    description: t(FEATURES.bag ? 'subtitleBag' : 'subtitle'),
   })
 }
 
@@ -26,7 +26,7 @@ export default async function GiftShopPage({ params }: { params: Promise<{ local
       <MarketingHero
         imageKey="giftcards_banner"
         title={t('title')}
-        subtitle={t('subtitle')}
+        subtitle={t(FEATURES.bag ? 'subtitleBag' : 'subtitle')}
         size="compact"
       />
       <section className="section">
