@@ -76,8 +76,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Demasiados intentos. Intenta más tarde.' }, { status: 429 })
   }
 
-  const itbms = itbmsCentsFor(item)
-  const total = item.amount_cents + itbms
+  // The buyer pays the sale price when the item has one; the card keeps its face value.
+  const price = item.sale_amount_cents ?? item.amount_cents
+  const itbms = itbmsCentsFor({ kind: item.kind, amount_cents: price })
+  const total = price + itbms
   const locale = body.locale === 'en' ? 'en' : 'es'
   let scheduled: string | null = null
   if (typeof body.scheduledDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.scheduledDate)) {
@@ -95,7 +97,8 @@ export async function POST(request: NextRequest) {
       catalog_item_id: item.id,
       item_kind: item.kind,
       item_name: locale === 'en' ? item.name_en : item.name_es,
-      base_amount_cents: item.amount_cents,
+      base_amount_cents: price,
+      ...(item.sale_amount_cents ? { face_value_cents: item.amount_cents } : {}),
       itbms_cents: itbms,
       total_cents: total,
       buyer_name: buyerName,

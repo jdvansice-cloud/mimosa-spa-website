@@ -40,6 +40,9 @@ export interface BagGiftCard {
   name: string
   /** Face value in cents (monetary cards — untaxed). */
   amountCents: number
+  /** Discounted cards: the card's face value (amountCents is what is paid). */
+  faceValueCents?: number
+  discountPercent?: number
   recipientName?: string
   recipientEmail?: string
   /** Recipient WhatsApp number, used when deliveryMethod is 'whatsapp'. */

@@ -153,7 +153,8 @@ export async function fulfillOrder(orderId: string): Promise<void> {
         buyer_phone: order.buyer_phone,
         recipient_name: order.recipient_name,
         recipient_email: order.recipient_email,
-        amount_cents: order.total_cents,
+        // Issued at face value; a discounted order was charged less (total_cents).
+        amount_cents: order.face_value_cents ?? order.total_cents,
         base_amount_cents: isExperience ? order.base_amount_cents : null,
         tax_cents: isExperience ? order.itbms_cents : null,
         gift_treatment_names: isExperience && order.item_name ? [order.item_name] : null,
@@ -374,7 +375,15 @@ export async function deliverOrder(orderId: string): Promise<void> {
   if (!card?.view_token) return
 
   const giftUrl = `${SITE_URL}/gift/${card.view_token}`
-  const amountLabel = `$${(order.total_cents / 100).toFixed(0)}`
+  const cardValueCents: number = order.face_value_cents ?? order.total_cents
+  const amountLabel = `$${(cardValueCents / 100).toFixed(0)}`
+  // Only a discounted order shows what was paid.
+  let paidLine: string | null = null
+  if (order.face_value_cents && order.face_value_cents !== order.total_cents) {
+    const pct = Math.round(100 * (1 - order.total_cents / order.face_value_cents))
+    const paid = `$${(order.total_cents / 100).toFixed(order.total_cents % 100 === 0 ? 0 : 2)}`
+    paidLine = order.locale === 'en' ? `${paid} (${pct}% off)` : `${paid} (${pct}% de descuento)`
+  }
   const itemName = order.item_name || 'Gift Card'
   const buyerName = order.buyer_name || 'Mimosa'
 
@@ -420,6 +429,7 @@ export async function deliverOrder(orderId: string): Promise<void> {
       buyerName,
       recipientName: order.recipient_name,
       amountLabel,
+      paidLine,
       itemName,
       orderNumber: order.order_number,
       giftUrl,

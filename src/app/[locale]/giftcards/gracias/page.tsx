@@ -25,6 +25,7 @@ export default async function GraciasPage({
     status: string
     item_name: string | null
     total_cents: number
+    face_value_cents: number | null
     recipient_name: string
     recipient_email: string | null
     recipient_phone: string | null
@@ -40,7 +41,7 @@ export default async function GraciasPage({
     const supabase = giftshopAdminClient()
     const { data } = await supabase
       .from('gc_orders')
-      .select('order_number, status, item_name, total_cents, recipient_name, recipient_email, recipient_phone, delivery_email, delivery_whatsapp, buyer_email, scheduled_send_at, gift_card_id')
+      .select('order_number, status, item_name, total_cents, face_value_cents, recipient_name, recipient_email, recipient_phone, delivery_email, delivery_whatsapp, buyer_email, scheduled_send_at, gift_card_id')
       .eq('order_number', o)
       .single()
     order = data
@@ -76,7 +77,18 @@ export default async function GraciasPage({
               </div>
               <div className="flex justify-between">
                 <span className="text-warm-gray">{order.item_name}</span>
-                <span className="font-bold">${(order.total_cents / 100).toFixed(2)}</span>
+                <span className="font-bold">
+                  {order.face_value_cents && order.face_value_cents !== order.total_cents ? (
+                    <>
+                      ${(order.face_value_cents / 100).toFixed(2)}{' '}
+                      <span className="font-normal text-warm-gray">
+                        ({en ? 'you paid' : 'pagaste'} ${(order.total_cents / 100).toFixed(2)})
+                      </span>
+                    </>
+                  ) : (
+                    <>${(order.total_cents / 100).toFixed(2)}</>
+                  )}
+                </span>
               </div>
               {order.scheduled_send_at && (
                 <div className="flex justify-between">

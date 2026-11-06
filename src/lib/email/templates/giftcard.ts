@@ -74,6 +74,8 @@ interface BuyerEmailData {
   buyerName: string
   recipientName: string
   amountLabel: string
+  /** Discounted orders only, e.g. "$80 (20% de descuento)". */
+  paidLine?: string | null
   itemName: string
   orderNumber: string
   giftUrl: string
@@ -102,6 +104,11 @@ export function buyerReceiptEmail(d: BuyerEmailData): { subject: string; html: s
       <table style="width:100%;font-size:14px;border-collapse:collapse;margin-bottom:18px">
         <tr><td style="padding:6px 0;color:#8B8680">${en ? 'Item' : 'Artículo'}</td><td style="text-align:right">${esc(d.itemName)}</td></tr>
         <tr><td style="padding:6px 0;color:#8B8680">${en ? 'Value' : 'Valor'}</td><td style="text-align:right;font-weight:bold">${esc(d.amountLabel)}</td></tr>
+        ${
+          d.paidLine
+            ? `<tr><td style="padding:6px 0;color:#8B8680">${en ? 'You paid' : 'Pagaste'}</td><td style="text-align:right">${esc(d.paidLine)}</td></tr>`
+            : ''
+        }
         <tr><td style="padding:6px 0;color:#8B8680">${en ? 'Order' : 'Pedido'}</td><td style="text-align:right">${esc(d.orderNumber)}</td></tr>
         ${
           d.scheduledLabel

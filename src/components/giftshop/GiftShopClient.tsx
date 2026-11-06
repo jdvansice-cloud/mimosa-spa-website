@@ -21,6 +21,8 @@ interface CatalogItem {
   description_en: string | null
   amount_cents: number
   itbms_cents: number
+  sale_amount_cents?: number | null
+  discount_percent?: number | null
   image_url: string | null
   badge_es: string | null
   badge_en: string | null
@@ -144,7 +146,10 @@ export function GiftShopClient({ locale }: { locale: string }) {
     addGiftCardToBag({
       catalogItemId: item.id,
       name: name(item),
-      amountCents: item.amount_cents + item.itbms_cents,
+      amountCents: (item.sale_amount_cents ?? item.amount_cents) + item.itbms_cents,
+      ...(item.sale_amount_cents
+        ? { faceValueCents: item.amount_cents, discountPercent: item.discount_percent ?? undefined }
+        : {}),
       recipientName: form.recipientName.trim() || undefined,
       recipientEmail: method === 'email' ? form.recipientEmail.trim() || undefined : undefined,
       recipientPhone: method === 'whatsapp' ? form.recipientPhone || undefined : undefined,
@@ -278,7 +283,19 @@ export function GiftShopClient({ locale }: { locale: string }) {
                         </span>
                       )}
                       <p className="font-semibold text-dark text-sm mt-1">{name(i)}</p>
-                      <p className="text-gold-600 font-bold text-lg">{money(i.amount_cents)}</p>
+                      {i.sale_amount_cents ? (
+                        <p className="flex flex-wrap items-baseline gap-x-1.5">
+                          <span className="line-through text-warm-gray">{money(i.amount_cents)}</span>
+                          <span className="text-gold-600 font-bold text-lg">{money(i.sale_amount_cents)}</span>
+                          {i.discount_percent ? (
+                            <span className="ml-1 rounded-full bg-rose-100 text-rose-800 text-[11px] font-semibold px-2 py-0.5">
+                              −{i.discount_percent}%
+                            </span>
+                          ) : null}
+                        </p>
+                      ) : (
+                        <p className="text-gold-600 font-bold text-lg">{money(i.amount_cents)}</p>
+                      )}
                       {description(i) && (
                         <p className="text-xs text-warm-gray mt-1 line-clamp-2">{description(i)}</p>
                       )}
@@ -296,7 +313,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
         <div className="bg-white rounded-2xl shadow-card p-6 space-y-5">
           <p className="font-display font-semibold text-dark">
             {name(item)}
-            {item.kind === 'experience' && <span className="text-gold-600"> · {money(item.amount_cents)}</span>}
+            {item.kind === 'experience' && <span className="text-gold-600"> · {money(item.sale_amount_cents ?? item.amount_cents)}</span>}
           </p>
           <input type="text" name="website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="hidden" tabIndex={-1} autoComplete="off" aria-hidden />
 
@@ -441,8 +458,14 @@ export function GiftShopClient({ locale }: { locale: string }) {
           <div className="bg-beige/60 rounded-xl p-4 text-sm space-y-1">
             <div className="flex justify-between">
               <span className="text-warm-gray">{name(item)}</span>
-              <span>{money(item.amount_cents)}</span>
+              <span>{money(item.sale_amount_cents ?? item.amount_cents)}</span>
             </div>
+            {item.sale_amount_cents ? (
+              <div className="flex justify-between text-warm-gray">
+                <span>{t('value')}</span>
+                <span>{money(item.amount_cents)}</span>
+              </div>
+            ) : null}
             {item.itbms_cents > 0 && (
               <div className="flex justify-between text-warm-gray">
                 <span>ITBMS (7%)</span>
@@ -451,7 +474,7 @@ export function GiftShopClient({ locale }: { locale: string }) {
             )}
             <div className="flex justify-between font-bold text-dark border-t border-beige pt-1">
               <span>Total</span>
-              <span>{money(item.amount_cents + item.itbms_cents)}</span>
+              <span>{money((item.sale_amount_cents ?? item.amount_cents) + item.itbms_cents)}</span>
             </div>
           </div>
 

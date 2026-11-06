@@ -166,7 +166,12 @@ export function BagDrawer({ locale }: { locale: string }) {
                   <div className="flex items-center gap-3">
                     <Gift className="h-5 w-5 text-gold" />
                     <div>
-                      <p className="text-sm font-medium text-dark">{g.name}</p>
+                      <p className="text-sm font-medium text-dark">
+                        {g.name}
+                        {g.faceValueCents && g.faceValueCents !== g.amountCents && g.discountPercent ? (
+                          <span className="text-rose-700"> · −{g.discountPercent}%</span>
+                        ) : null}
+                      </p>
                       {g.recipientName && (
                         <p className="text-xs text-gray-500">
                           {en ? 'For' : 'Para'} {g.recipientName}
