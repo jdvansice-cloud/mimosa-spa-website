@@ -74,11 +74,12 @@ export default async function CheckoutGraciasPage({
       items = rows ?? []
       // Children are `<order>-G<n>`; escape LIKE wildcards in the number.
       const prefix = `${o}-G`.replace(/[\\%_]/g, c => `\\${c}`)
-      const { data: kids } = await supabase
+      const { data: kids, error: kidsError } = await supabase
         .from('gc_orders')
         .select('id, order_number, status, recipient_name, recipient_email, recipient_phone, delivery_email, delivery_whatsapp, scheduled_send_at, buyer_email, gift_card_id, item_name')
         .like('order_number', `${prefix}%`)
         .order('order_number')
+      if (kidsError) console.error('gracias: children query failed', kidsError)
       children = (kids ?? []) as GcChild[]
       const cardIds = children.map(c => c.gift_card_id).filter((x): x is string => !!x)
       if (cardIds.length > 0) {
@@ -99,7 +100,7 @@ export default async function CheckoutGraciasPage({
 
   // A real order that is not paid yet (authorized, cancelled, expired…):
   // never claim payment and never empty the bag.
-  if (order && !isPaidStatus(order.status)) {
+  if (!order || !isPaidStatus(order.status)) {
     return (
       <div className="min-h-[70vh] bg-cream flex items-center justify-center px-4 py-16">
         <div className="bg-white rounded-3xl shadow-card p-8 md:p-10 max-w-md w-full text-center">
@@ -114,20 +115,22 @@ export default async function CheckoutGraciasPage({
               ? 'This can take a minute. Do not pay again — we will email you as soon as it is confirmed.'
               : 'Puede tardar un minuto. No pagues de nuevo — te escribimos por correo apenas se confirme.'}
           </p>
-          <div className="bg-beige/60 rounded-xl p-4 text-sm text-left mb-6">
-            <div className="flex justify-between">
-              <span className="text-warm-gray">{en ? 'Order' : 'Pedido'}</span>
-              <span className="font-mono">{order.order_number}</span>
+          {order && (
+            <div className="bg-beige/60 rounded-xl p-4 text-sm text-left mb-6">
+              <div className="flex justify-between">
+                <span className="text-warm-gray">{en ? 'Order' : 'Pedido'}</span>
+                <span className="font-mono">{order.order_number}</span>
+              </div>
             </div>
-          </div>
+          )}
           <div className="flex flex-col items-center gap-3">
             <WhatsAppBookingLink
               cta="checkout_confirming"
               variant="link"
               message={
                 en
-                  ? `Hi, I paid online and my order ${order.order_number} is still confirming.`
-                  : `Hola, pagué en línea y mi pedido ${order.order_number} sigue en confirmación.`
+                  ? `Hi, I paid online and my order${order ? ` ${order.order_number}` : ''} is still confirming.`
+                  : `Hola, pagué en línea y mi pedido${order ? ` ${order.order_number}` : ''} sigue en confirmación.`
               }
             />
             <Link href={`/${locale}`} className="text-sm text-gold-600 hover:text-gold-700 font-medium inline-flex items-center min-h-[44px]">
@@ -237,6 +240,13 @@ export default async function CheckoutGraciasPage({
                     </div>
                   )
                 })}
+                {children.length === 0 && (
+                  <p className="text-sm text-dark">
+                    {en
+                      ? 'Your gift cards are on their way; we send them in a few minutes.'
+                      : 'Tus gift cards están en camino; te las enviamos en unos minutos.'}
+                  </p>
+                )}
                 <p className="text-xs text-warm-gray">
                   {en
                     ? 'A receipt for the gift card goes to your email; the invoice is issued when it is redeemed.'
