@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const threeMinAgo = new Date(Date.now() - 3 * 60 * 1000).toISOString()
   const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-  const results = { resumed: 0, ok: 0, failed: 0, expired: 0, needsAdmin: 0 }
+  const results = { resumed: 0, ok: 0, failed: 0, expired: 0, needsAdmin: 0, expiredWithPayment: 0 }
 
   // Resume stuck in-flight orders.
   const { data: stuck } = await supabase
@@ -52,6 +52,25 @@ export async function GET(request: NextRequest) {
   }
 
   // Expire abandoned checkouts (never paid).
+  const { data: toExpire } = await supabase
+    .from('orders')
+    .select('id, order_number')
+    .in('status', ['draft', 'totals_verified'])
+    .lt('created_at', dayAgo)
+  if (toExpire && toExpire.length > 0) {
+    const { data: paidRows } = await supabase
+      .from('order_payments')
+      .select('order_id')
+      .eq('kind', 'tilopay')
+      .in('order_id', toExpire.map(o => o.id))
+    const withPayment = new Set((paidRows ?? []).map(r => r.order_id as string))
+    for (const o of toExpire) {
+      if (withPayment.has(o.id as string)) {
+        console.error('ALARM: expiring order with a Tilopay payment row — reconcile in the Tilopay portal', o.order_number)
+        results.expiredWithPayment++
+      }
+    }
+  }
   const { data: expired } = await supabase
     .from('orders')
     .update({ status: 'expired', updated_at: new Date().toISOString() })

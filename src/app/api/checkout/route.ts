@@ -72,6 +72,9 @@ export async function POST(request: NextRequest) {
   const locale = body.locale === 'en' ? 'en' : 'es'
   const session = (body.session ?? null) as SessionInput | null
   const giftCards = Array.isArray(body.giftCards) ? (body.giftCards as GiftCardInput[]) : []
+  if (giftCards.length > 10) {
+    return NextResponse.json({ error: 'Máximo 10 gift cards por pedido' }, { status: 400 })
+  }
 
   // A bag with a service belongs to the spa delivering it. A gift-card-only
   // order has no physical location, so it takes the gift shop's configured
@@ -204,7 +207,7 @@ export async function POST(request: NextRequest) {
         gcMessage: line.message ?? undefined,
         gcDeliveryDate: line.deliveryDate ?? undefined,
         gcDesignSlug: line.designSlug,
-        gcFaceValueCents: line.discountPercent !== null ? line.faceValueCents : undefined,
+        gcFaceValueCents: line.faceValueCents,
       })
     }
   }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Calendar, Gift, Loader2, ShoppingBag, Tag, X } from 'lucide-react'
 import { bagDisplayTotals, useBagStore } from '@/lib/bag/store'
+import { bagGiftCardsToCheckout } from '@/lib/bag/checkoutPayload'
 import { track } from '@/lib/track'
 import { GIFT_CARDS_PATH } from '@/lib/nav'
 import { PhoneInput } from '@/components/shared/PhoneInput'
@@ -32,7 +33,7 @@ interface AppliedGc {
  */
 export function CheckoutClient({ locale }: { locale: string }) {
   const en = locale === 'en'
-  const { session, giftCards, clearBag } = useBagStore()
+  const { session, giftCards, clearBag, clearSession } = useBagStore()
   const [mounted, setMounted] = useState(false)
   const [config, setConfig] = useState<CheckoutConfig | null>(null)
   const [clientId, setClientId] = useState<number | null>(null)
@@ -100,6 +101,7 @@ export function CheckoutClient({ locale }: { locale: string }) {
   }, [])
 
   const hasServices = !!session && session.services.length > 0
+  const staleSession = !!session && !!config && !config.servicesEnabled
 
   // Auto-apply the gift card the recipient arrived with (/reservar?gc=SERIAL)
   const [gcAutoTried, setGcAutoTried] = useState(false)
@@ -310,13 +312,7 @@ export function CheckoutClient({ locale }: { locale: string }) {
                 startDateTime: session.startDateTime,
               }
             : null,
-          giftCards: giftCards.map(g => ({
-            catalogItemId: g.catalogItemId,
-            recipientName: g.recipientName,
-            recipientEmail: g.recipientEmail,
-            message: g.message,
-            deliveryDate: g.deliveryDate,
-          })),
+          giftCards: bagGiftCardsToCheckout(giftCards),
           redemptions: appliedGcs.map(g => ({ barcode: g.barcode })),
           promoCode: promo?.code,
           website: '',
@@ -414,6 +410,22 @@ export function CheckoutClient({ locale }: { locale: string }) {
       {/* Left: identity + payment options */}
       <div className="space-y-6">
         <section className="rounded-2xl bg-white p-6 shadow-card">
+          {staleSession && (
+            <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-dark" role="alert">
+              <p>
+                {en
+                  ? 'Services are not available for online payment yet. Remove the booking from your bag to continue.'
+                  : 'Los servicios no están disponibles para pago en línea todavía. Quita la reserva de tu bolsa para continuar.'}
+              </p>
+              <button
+                type="button"
+                onClick={clearSession}
+                className="mt-3 min-h-[44px] rounded-lg border border-dark px-4 text-sm font-semibold"
+              >
+                {en ? 'Remove booking' : 'Quitar reserva'}
+              </button>
+            </div>
+          )}
           <h2 className="mb-4 text-lg font-display font-semibold text-dark">
             {en ? 'Your details' : 'Tus datos'}
           </h2>
@@ -619,7 +631,7 @@ export function CheckoutClient({ locale }: { locale: string }) {
 
         <button
           onClick={submit}
-          disabled={submitting || (hasServices && !clientChecked)}
+          disabled={submitting || staleSession || (hasServices && !clientChecked)}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-gold px-6 py-3 text-base font-semibold text-dark shadow-sm transition-colors hover:bg-gold-600 disabled:opacity-60"
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
