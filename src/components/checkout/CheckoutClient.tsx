@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Calendar, Gift, Loader2, ShoppingBag, Tag, X } from 'lucide-react'
 import { bagDisplayTotals, useBagStore } from '@/lib/bag/store'
 import { track } from '@/lib/track'
+import { GIFT_CARDS_PATH } from '@/lib/nav'
+import { PhoneInput } from '@/components/shared/PhoneInput'
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`
 
@@ -12,6 +14,7 @@ interface CheckoutConfig {
   enabled: boolean
   onlineDiscountActive: boolean
   onlineDiscountPercent: number
+  servicesEnabled?: boolean
 }
 
 interface AppliedGc {
@@ -93,7 +96,7 @@ export function CheckoutClient({ locale }: { locale: string }) {
     fetch('/api/checkout/config')
       .then(r => r.json())
       .then(setConfig)
-      .catch(() => setConfig({ enabled: false, onlineDiscountActive: false, onlineDiscountPercent: 0 }))
+      .catch(() => setConfig({ enabled: false, onlineDiscountActive: false, onlineDiscountPercent: 0, servicesEnabled: false }))
   }, [])
 
   const hasServices = !!session && session.services.length > 0
@@ -360,7 +363,13 @@ export function CheckoutClient({ locale }: { locale: string }) {
       <EmptyState
         icon={<ShoppingBag className="h-10 w-10 text-gray-300" />}
         title={en ? 'Online payment is not available yet' : 'El pago en línea no está disponible todavía'}
-        cta={<Link href={`/${locale}/reservar`} className="btn-primary">{en ? 'Book now' : 'Reservar'}</Link>}
+        cta={
+          config.servicesEnabled ? (
+            <Link href={`/${locale}/reservar`} className="btn-primary">{en ? 'Book now' : 'Reservar'}</Link>
+          ) : (
+            <Link href={`/${locale}${GIFT_CARDS_PATH}`} className="btn-primary">{en ? 'Buy a gift card' : 'Comprar una gift card'}</Link>
+          )
+        }
       />
     )
   }
@@ -371,7 +380,16 @@ export function CheckoutClient({ locale }: { locale: string }) {
       <EmptyState
         icon={<ShoppingBag className="h-10 w-10 text-gray-300" />}
         title={en ? 'Your bag is empty' : 'Tu bolsa está vacía'}
-        cta={<Link href={`/${locale}/reservar`} className="btn-primary">{en ? 'Book a service' : 'Reservar un servicio'}</Link>}
+        cta={
+          <div className="flex flex-col items-center gap-3">
+            <Link href={`/${locale}${GIFT_CARDS_PATH}`} className="btn-primary">{en ? 'Buy a gift card' : 'Comprar una gift card'}</Link>
+            {config.servicesEnabled && (
+              <Link href={`/${locale}/reservar`} className="inline-flex min-h-[44px] items-center text-sm font-medium text-gold-700 hover:underline">
+                {en ? 'Book a service' : 'Reservar un servicio'}
+              </Link>
+            )}
+          </div>
+        }
       />
     )
   }
@@ -408,21 +426,26 @@ export function CheckoutClient({ locale }: { locale: string }) {
               autoComplete="name"
             />
             <input
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-dark focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+              className="min-h-[44px] w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-dark focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
               placeholder={en ? 'Email' : 'Correo electrónico'}
+              aria-label={en ? 'Email' : 'Correo electrónico'}
+              aria-describedby={giftCards.length > 0 ? 'buyer-email-hint' : undefined}
               type="email"
               value={buyerEmail}
               onChange={e => setBuyerEmail(e.target.value)}
               autoComplete="email"
             />
-            <input
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-dark focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
-              placeholder={en ? 'WhatsApp (optional)' : 'WhatsApp (opcional)'}
-              type="tel"
-              value={buyerPhone}
-              onChange={e => setBuyerPhone(e.target.value)}
-              autoComplete="tel"
-            />
+            {giftCards.length > 0 && (
+              <p id="buyer-email-hint" className="-mt-1 text-xs text-warm-gray">
+                {en ? 'Your receipt and the gift cards go here' : 'Aquí llegan tu comprobante y las gift cards'}
+              </p>
+            )}
+            <div>
+              <label htmlFor="buyer-phone" className="mb-1 block text-xs font-medium text-dark">
+                {en ? 'WhatsApp (optional)' : 'WhatsApp (opcional)'}
+              </label>
+              <PhoneInput id="buyer-phone" value={buyerPhone} onChange={setBuyerPhone} />
+            </div>
             <label className="flex items-start gap-2 text-xs text-warm-gray">
               <input
                 type="checkbox"
@@ -535,7 +558,9 @@ export function CheckoutClient({ locale }: { locale: string }) {
       {/* Right: order summary + pay */}
       <aside className="h-fit rounded-2xl bg-white p-6 shadow-card lg:sticky lg:top-24">
         <h2 className="mb-4 text-lg font-display font-semibold text-dark">
-          {en ? 'Summary' : 'Resumen'}
+          {!hasServices && giftCards.length > 0
+            ? en ? 'Your gift cards' : 'Tus gift cards'
+            : en ? 'Summary' : 'Resumen'}
         </h2>
         <dl className="space-y-2 text-sm">
           {session?.services.map((s, i) => (
@@ -603,10 +628,15 @@ export function CheckoutClient({ locale }: { locale: string }) {
             : en ? 'Complete order' : 'Completar pedido'}
         </button>
         <p className="mt-3 text-center text-[11px] text-warm-gray">
-          {cardDueCents > 0 &&
-            (en
-              ? 'Secure payment via Tilopay — Visa, Mastercard, AMEX, Yappy or Apple Pay. Your card is only charged once the booking is confirmed.'
-              : 'Pago seguro con Tilopay — Visa, Mastercard, AMEX, Yappy o Apple Pay. Tu tarjeta solo se cobra cuando la reserva queda confirmada.')}
+          {cardDueCents > 0 && (
+            <>
+              {en ? 'Secure payment with Tilopay.' : 'Pago seguro con Tilopay.'}
+              {hasServices &&
+                (en
+                  ? ' Your card is only charged once the booking is confirmed.'
+                  : ' Tu tarjeta solo se cobra cuando la reserva queda confirmada.')}
+            </>
+          )}
         </p>
       </aside>
     </div>

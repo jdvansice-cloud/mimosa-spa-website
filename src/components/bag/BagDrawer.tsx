@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -28,6 +28,30 @@ export function BagDrawer({ locale }: { locale: string }) {
   const count = selectBagCount({ session, giftCards })
   const totals = bagDisplayTotals({ session, giftCards })
   const en = locale === 'en'
+
+  // Prepaid services stay behind a switch; the config endpoint is the source.
+  const [servicesEnabled, setServicesEnabled] = useState(false)
+  useEffect(() => {
+    let alive = true
+    fetch('/api/checkout/config')
+      .then(r => r.json())
+      .then(c => alive && setServicesEnabled(c?.servicesEnabled === true))
+      .catch(() => alive && setServicesEnabled(false))
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const deliveryLine = (g: (typeof giftCards)[number]): string => {
+    if (g.deliveryMethod === 'email' && g.recipientEmail) {
+      return en ? `by email to ${g.recipientEmail}` : `por correo a ${g.recipientEmail}`
+    }
+    if (g.deliveryMethod === 'whatsapp' && g.recipientPhone) {
+      const p = `+${g.recipientPhone.replace(/\D/g, '')}`
+      return en ? `by WhatsApp to ${p}` : `por WhatsApp al ${p}`
+    }
+    return en ? 'delivered to you' : 'te la entregamos a ti'
+  }
 
   // ESC to close + body scroll lock while open
   useEffect(() => {
@@ -92,21 +116,23 @@ export function BagDrawer({ locale }: { locale: string }) {
                   <p className="mb-6">{en ? 'Your bag is empty.' : 'Tu bolsa está vacía.'}</p>
                   <div className="flex flex-col items-center gap-3">
                     <Link
-                      href={`/${locale}/reservar`}
-                      onClick={closeBag}
-                      className="inline-flex items-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-semibold text-dark hover:bg-gold-600"
-                    >
-                      <Calendar className="h-4 w-4" />
-                      {en ? 'Book a service' : 'Reservar un servicio'}
-                    </Link>
-                    <Link
                       href={`/${locale}${GIFT_CARDS_PATH}`}
                       onClick={closeBag}
-                      className="inline-flex items-center gap-2 text-sm font-medium text-gold-700 hover:underline"
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-semibold text-dark hover:bg-gold-600"
                     >
                       <Gift className="h-4 w-4" />
                       {en ? 'Buy a gift card' : 'Comprar una gift card'}
                     </Link>
+                    {servicesEnabled && (
+                      <Link
+                        href={`/${locale}/reservar`}
+                        onClick={closeBag}
+                        className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-gold-700 hover:underline"
+                      >
+                        <Calendar className="h-4 w-4" />
+                        {en ? 'Book a service' : 'Reservar un servicio'}
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}
@@ -172,11 +198,10 @@ export function BagDrawer({ locale }: { locale: string }) {
                           <span className="text-rose-700"> · −{g.discountPercent}%</span>
                         ) : null}
                       </p>
-                      {g.recipientName && (
-                        <p className="text-xs text-gray-500">
-                          {en ? 'For' : 'Para'} {g.recipientName}
-                        </p>
-                      )}
+                      <p className="text-xs text-gray-500">
+                        {g.recipientName ? `${en ? 'For' : 'Para'} ${g.recipientName} · ` : ''}
+                        {deliveryLine(g)}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -194,7 +219,7 @@ export function BagDrawer({ locale }: { locale: string }) {
 
               {count > 0 && (
                 <div className="flex flex-wrap gap-3 pt-1">
-                  {!session && (
+                  {servicesEnabled && !session && (
                     <Link
                       href={`/${locale}/reservar`}
                       onClick={closeBag}
