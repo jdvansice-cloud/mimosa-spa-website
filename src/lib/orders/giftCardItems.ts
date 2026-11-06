@@ -124,7 +124,7 @@ export function buildGiftCardLine(
       nameEs: item.name_es,
       nameEn: item.name_en,
       unitPriceCents: priceCents + itbmsCents,
-      faceValueCents: item.amount_cents,
+      faceValueCents: item.kind === 'experience' ? priceCents + itbmsCents : item.amount_cents,
       discountPercent: saleCents && Math.round(100 * (1 - saleCents / item.amount_cents)) >= 1
         ? Math.round(100 * (1 - saleCents / item.amount_cents))
         : null,

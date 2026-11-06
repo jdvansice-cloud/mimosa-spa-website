@@ -119,7 +119,11 @@ describe('discounted gift cards', () => {
   })
   it('ignores the sale price for experiences', () => {
     const r = buildGiftCardLine({ catalogItemId: 'i4', recipientName: 'A', deliveryMethod: 'self' }, saleExp, opts)
-    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 10700, taxCents: 700, faceValueCents: 10000, taxRateCode: '01', discountPercent: null })
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 10700, taxCents: 700, faceValueCents: 10700, taxRateCode: '01', discountPercent: null })
+  })
+  it('full-price experience keeps its tax-inclusive face value', () => {
+    const r = buildGiftCardLine({ catalogItemId: 'i2', recipientName: 'A', deliveryMethod: 'self' }, exp, opts)
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 10700, faceValueCents: 10700 })
   })
   it('no sale price → no discount, face value equals the price', () => {
     const r = buildGiftCardLine({ catalogItemId: 'i1', recipientName: 'A', deliveryMethod: 'self' }, item, opts)

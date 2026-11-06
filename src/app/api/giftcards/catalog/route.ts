@@ -10,7 +10,7 @@ export async function GET() {
     whatsappDeliveryEnabled: settings.whatsapp_delivery_enabled,
     occasion: settings.occasion_slug,
     items: catalog.map((i) => {
-      const sale = i.sale_amount_cents ?? null
+      const sale = i.kind === 'experience' ? null : (i.sale_amount_cents ?? null)
       return {
       id: i.id,
       kind: i.kind,

@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   }
 
   // The buyer pays the sale price when the item has one; the card keeps its face value.
-  const price = item.sale_amount_cents ?? item.amount_cents
+  const price = item.kind === 'experience' ? item.amount_cents : (item.sale_amount_cents ?? item.amount_cents)
   const itbms = itbmsCentsFor({ kind: item.kind, amount_cents: price })
   const total = price + itbms
   const locale = body.locale === 'en' ? 'en' : 'es'
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       item_kind: item.kind,
       item_name: locale === 'en' ? item.name_en : item.name_es,
       base_amount_cents: price,
-      ...(item.sale_amount_cents ? { face_value_cents: item.amount_cents } : {}),
+      ...(item.kind !== 'experience' && item.sale_amount_cents ? { face_value_cents: item.amount_cents } : {}),
       itbms_cents: itbms,
       total_cents: total,
       buyer_name: buyerName,
