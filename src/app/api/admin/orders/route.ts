@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const orders = (data ?? []) as Array<Record<string, unknown> & { id: string }>
+  const orders = (data ?? []) as Array<Record<string, unknown> & { id: string; order_number: string }>
   const ids = orders.map(o => o.id)
   if (ids.length === 0) return NextResponse.json({ data: [] })
 
-  const [itemsRes, paymentsRes] = await Promise.all([
+  const [itemsRes, paymentsRes, childrenRes] = await Promise.all([
     supabase
       .from('order_items')
       .select('order_id, item_type, name_es, total_cents, appointment_start, gc_serial, mindbody_appointment_ids')
@@ -40,7 +40,14 @@ export async function GET(request: NextRequest) {
       .from('order_payments')
       .select('order_id, kind, amount_cents, status, tilopay_tpt, mindbody_tender, gc_barcode')
       .in('order_id', ids),
+    // Online gift cards become gc_orders children named <order_number>-G<n>.
+    supabase
+      .from('gc_orders')
+      .select('id, order_number, status')
+      .or(orders.map(o => `order_number.like.${o.order_number}-G%`).join(',')),
   ])
+  if (childrenRes.error) console.error('[admin/orders] gc_orders children query failed', childrenRes.error)
+  const children = (childrenRes.error ? [] : childrenRes.data ?? []) as Array<{ id: string; order_number: string; status: string }>
   const items = itemsRes.data ?? []
   const payments = paymentsRes.data ?? []
 
@@ -49,6 +56,9 @@ export async function GET(request: NextRequest) {
       ...o,
       items: items.filter(i => i.order_id === o.id),
       payments: payments.filter(p => p.order_id === o.id),
+      gift_card_children: children
+        .filter(c => c.order_number.startsWith(`${o.order_number}-G`))
+        .sort((a, b) => a.order_number.localeCompare(b.order_number)),
     })),
   })
 }

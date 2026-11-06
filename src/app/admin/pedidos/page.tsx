@@ -21,6 +21,9 @@ interface OrderPayment {
   mindbody_tender: string | null
   gc_barcode: string | null
 }
+function siteLabel(id: number | null) {
+  return id === 1 ? 'CDE' : id === 2 ? 'SFC' : 'Online'
+}
 interface OrderRow {
   id: string
   order_number: string
@@ -46,6 +49,7 @@ interface OrderRow {
   notes: string | null
   created_at: string
   items: OrderItem[]
+  gift_card_children?: Array<{ id: string; order_number: string; status: string }>
   payments: OrderPayment[]
 }
 
@@ -144,17 +148,23 @@ export default function AdminPedidosPage() {
         {o.order_number}
       </button>
       <p className="text-[11px] text-warm-gray-500">{dt(o.created_at)}</p>
-      <p className="text-[11px] text-warm-gray-500">{o.location_id === 1 ? 'CDE' : 'SFC'}</p>
+      <p className="text-[11px] text-warm-gray-500">{siteLabel(o.location_id)}</p>
     </>
   )
 
-  const itemsCell = (o: OrderRow) => (
+  const itemsCell = (o: OrderRow, tall = false) => (
     <>
       {o.items.map((it, i) => (
         <p key={i} className="text-xs text-dark">
           {it.item_type === 'gift_card' ? '🎁 ' : ''}{it.name_es}
           {it.appointment_start && <span className="text-warm-gray-500"> · {dt(it.appointment_start)}</span>}
         </p>
+      ))}
+      {(o.gift_card_children ?? []).map(c => (
+        <a key={c.id} href={`/admin/giftcards/orders/${c.id}`}
+          className={`${tall ? 'flex min-h-[44px] items-center' : 'block'} text-[11px] text-gold-700 underline`}>
+          {c.order_number} · {c.status}
+        </a>
       ))}
       {o.promo_code && <p className="text-[11px] text-green-700">Código {o.promo_code}</p>}
     </>
@@ -255,7 +265,7 @@ export default function AdminPedidosPage() {
         </>
       ),
     },
-    { key: 'items', header: 'Artículos', render: itemsCell },
+    { key: 'items', header: 'Artículos', render: o => itemsCell(o) },
     {
       key: 'total',
       header: 'Total',
@@ -301,10 +311,10 @@ export default function AdminPedidosPage() {
             <span className="ml-2 text-sm font-body font-normal text-green-700">−{money(o.discount_cents)}</span>
           )}
         </p>
-        <div className="mt-2">{itemsCell(o)}</div>
+        <div className="mt-2">{itemsCell(o, true)}</div>
         <dl className="mt-3 space-y-1">
           <CardField label="Cliente">{o.buyer_name ?? o.buyer_email}</CardField>
-          <CardField label="Sucursal">{o.location_id === 1 ? 'CDE' : 'SFC'}</CardField>
+          <CardField label="Sucursal">{siteLabel(o.location_id)}</CardField>
           <CardField label="Creada">{dt(o.created_at)}</CardField>
           <CardField label="Mindbody">{mindbodyCell(o)}</CardField>
         </dl>

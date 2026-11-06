@@ -98,7 +98,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Sistema',
     items: [
       { href: '/admin/wati-agent', label: 'Camila (WhatsApp)', icon: MessageCircle },
-      ...(FEATURES.bag
+      ...(FEATURES.prepay
         ? [
             { href: '/admin/facturas', label: 'Facturación electrónica', icon: Receipt },
             { href: '/admin/impresion', label: 'Impresión de facturas', icon: Printer },
