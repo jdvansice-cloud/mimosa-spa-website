@@ -53,6 +53,10 @@ export async function PUT(request: NextRequest) {
     ]) {
       if (f in i) patch[f] = i[f]
     }
+    if ('sale_amount_cents' in i) {
+      const { data: cur } = await supabase.from('gc_catalog_items').select('kind').eq('id', i.id).maybeSingle()
+      if ((i.kind ?? cur?.kind) === 'experience') patch.sale_amount_cents = null
+    }
     const { error } = await supabase.from('gc_catalog_items').update(patch).eq('id', i.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   }

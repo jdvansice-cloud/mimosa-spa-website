@@ -117,9 +117,9 @@ describe('discounted gift cards', () => {
     const r = buildGiftCardLine({ catalogItemId: 'i3', recipientName: 'A', deliveryMethod: 'self' }, sale, opts)
     expect(r.ok && r.line).toMatchObject({ unitPriceCents: 8000, taxCents: 0, faceValueCents: 10000, discountPercent: 20 })
   })
-  it('taxes an experience on the sale price', () => {
+  it('ignores the sale price for experiences', () => {
     const r = buildGiftCardLine({ catalogItemId: 'i4', recipientName: 'A', deliveryMethod: 'self' }, saleExp, opts)
-    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 8560, taxCents: 560, faceValueCents: 10000, taxRateCode: '01' })
+    expect(r.ok && r.line).toMatchObject({ unitPriceCents: 10700, taxCents: 700, faceValueCents: 10000, taxRateCode: '01', discountPercent: null })
   })
   it('no sale price → no discount, face value equals the price', () => {
     const r = buildGiftCardLine({ catalogItemId: 'i1', recipientName: 'A', deliveryMethod: 'self' }, item, opts)
@@ -128,13 +128,16 @@ describe('discounted gift cards', () => {
   it('child row carries the face value', () => {
     const row = giftCardChildRow({ ...base, item: { ...base.item, total_cents: 8000, gc_face_value_cents: 10000 } })
     expect(row).toMatchObject({ total_cents: 8000, base_amount_cents: 8000, face_value_cents: 10000 })
-    const plain = giftCardChildRow({ ...base, item: { ...base.item, gc_face_value_cents: null } })
-    expect(plain).not.toHaveProperty('face_value_cents')
+    const plain = giftCardChildRow({ ...base, item: { ...base.item, gc_face_value_cents: 5000 } })
+    expect(plain).toMatchObject({ face_value_cents: 5000, total_cents: 5000 })
+    const legacy = giftCardChildRow({ ...base, item: { ...base.item, gc_face_value_cents: null } })
+    expect(legacy).not.toHaveProperty('face_value_cents')
   })
   it('item extras include only set columns', () => {
     expect(giftCardItemExtras({})).toEqual({})
     expect(giftCardItemExtras({ gcDeliveryMethod: 'email', gcDesignSlug: 'general' })).toEqual({ gc_delivery_method: 'email', gc_design_slug: 'general' })
     expect(giftCardItemExtras({ gcRecipientPhone: '5072', gcFaceValueCents: 10000 })).toEqual({ gc_recipient_phone: '5072', gc_face_value_cents: 10000 })
+    expect(giftCardItemExtras({ gcFaceValueCents: 5000 })).toEqual({ gc_face_value_cents: 5000 })
   })
 })
 

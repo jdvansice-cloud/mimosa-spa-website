@@ -20,7 +20,7 @@ export async function GET() {
       description_en: i.description_en,
       amount_cents: i.amount_cents,
       sale_amount_cents: sale,
-      discount_percent: sale ? Math.round(100 * (1 - sale / i.amount_cents)) : null,
+      discount_percent: sale && Math.round(100 * (1 - sale / i.amount_cents)) >= 1 ? Math.round(100 * (1 - sale / i.amount_cents)) : null,
       itbms_cents: itbmsCentsFor({ kind: i.kind, amount_cents: sale ?? i.amount_cents }),
       image_url: i.image_url,
       badge_es: i.badge_es,

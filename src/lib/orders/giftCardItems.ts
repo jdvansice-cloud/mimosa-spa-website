@@ -111,7 +111,8 @@ export function buildGiftCardLine(
     deliveryDate = input.deliveryDate
   }
 
-  const saleCents = item.sale_amount_cents ?? null
+  // A sale price applies to monetary cards only (experiences are always full price).
+  const saleCents = item.kind === 'experience' ? null : (item.sale_amount_cents ?? null)
   const priceCents = saleCents ?? item.amount_cents
   const itbmsCents = itbmsCentsFor({ kind: item.kind, amount_cents: priceCents })
 
@@ -124,7 +125,9 @@ export function buildGiftCardLine(
       nameEn: item.name_en,
       unitPriceCents: priceCents + itbmsCents,
       faceValueCents: item.amount_cents,
-      discountPercent: saleCents ? Math.round(100 * (1 - saleCents / item.amount_cents)) : null,
+      discountPercent: saleCents && Math.round(100 * (1 - saleCents / item.amount_cents)) >= 1
+        ? Math.round(100 * (1 - saleCents / item.amount_cents))
+        : null,
       taxRateCode: item.kind === 'experience' ? '01' : '00',
       taxCents: itbmsCents,
       recipientName,

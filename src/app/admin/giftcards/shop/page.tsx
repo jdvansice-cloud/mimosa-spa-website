@@ -113,7 +113,9 @@ export default function AdminGcShopPage() {
         type="number"
         min="0"
         step="0.01"
-        className="w-28 border border-beige-400 rounded p-1.5 text-sm"
+        className="w-28 border border-beige-400 rounded p-1.5 text-sm disabled:opacity-50"
+        disabled={i.kind === 'experience'}
+        title={i.kind === 'experience' ? 'Solo para gift cards de valor' : undefined}
         aria-label={`Precio de oferta (opcional) de ${i.name_es}`}
         placeholder="Precio de oferta (opcional)"
         defaultValue={i.sale_amount_cents != null ? (i.sale_amount_cents / 100).toString() : ''}
@@ -132,6 +134,7 @@ export default function AdminGcShopPage() {
           patchItem(i.id, { sale_amount_cents: cents })
         }}
       />
+      {i.kind === 'experience' && <p className="text-xs text-gray-500 mt-1">Solo para gift cards de valor</p>}
       {saleErrors[i.id] && <p className="text-xs text-red-600 mt-1" role="alert">{saleErrors[i.id]}</p>}
     </div>
   )
