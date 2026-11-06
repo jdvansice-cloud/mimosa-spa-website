@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status')
+  const qRaw = searchParams.get('q')
+  const q = qRaw && /^[A-Za-z0-9-]{1,40}$/.test(qRaw) ? qRaw : null
   const limit = Math.min(Number(searchParams.get('limit') || 100), 500)
 
   const supabase = giftshopAdminClient()
@@ -20,6 +22,7 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(limit)
   if (status) query = query.eq('status', status)
+  if (q) query = query.ilike('order_number', `%${q}%`)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

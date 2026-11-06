@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       payments: payments.filter(p => p.order_id === o.id),
       gift_card_children: children
         .filter(c => c.order_number.startsWith(`${o.order_number}-G`))
-        .sort((a, b) => a.order_number.localeCompare(b.order_number)),
+        .sort((a, b) => a.order_number.localeCompare(b.order_number, 'en', { numeric: true })),
     })),
   })
 }

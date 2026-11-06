@@ -49,11 +49,17 @@ export default function AdminGcOrdersPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [q, setQ] = useState('')
 
   const load = useCallback(async () => {
     setIsLoading(true)
     try {
-      const res = await fetch('/api/admin/giftcards/orders')
+      // Read after mount (window) so no Suspense boundary is needed.
+      const qParam = new URLSearchParams(window.location.search).get('q') ?? ''
+      setQ(qParam)
+      const res = await fetch(
+        `/api/admin/giftcards/orders${qParam ? `?q=${encodeURIComponent(qParam)}` : ''}`
+      )
       if (res.ok) {
         const { data } = await res.json()
         setOrders(data || [])
@@ -209,6 +215,15 @@ export default function AdminGcOrdersPage() {
     >
       <div className="space-y-4">
         {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+        {q && (
+          <div className="flex flex-wrap items-center gap-3 text-sm text-warm-gray-500">
+            <span className="rounded-full bg-beige/60 px-3 py-1 font-mono text-xs text-dark">Filtrando: {q}</span>
+            <button type="button" onClick={() => window.location.assign('/admin/giftcards/orders')}
+              className="inline-flex min-h-[44px] items-center text-gold-700 underline">
+              Quitar filtro
+            </button>
+          </div>
+        )}
         <AdminTable
           rows={orders}
           columns={columns}

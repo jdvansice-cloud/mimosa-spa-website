@@ -161,7 +161,7 @@ export default function AdminPedidosPage() {
         </p>
       ))}
       {(o.gift_card_children ?? []).map(c => (
-        <a key={c.id} href={`/admin/giftcards/orders/${c.id}`}
+        <a key={c.id} href={`/admin/giftcards/orders?q=${encodeURIComponent(c.order_number)}`}
           className={`${tall ? 'flex min-h-[44px] items-center' : 'block'} text-[11px] text-gold-700 underline`}>
           {c.order_number} · {c.status}
         </a>
