@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { thankYouSentence, isSelfDelivery, discountLine, type ThankYouOrder } from './thankYou'
+import { thankYouSentence, isSelfDelivery, discountLine, isPaidStatus, giftForwardUrl, type ThankYouOrder } from './thankYou'
 
 describe('discountLine', () => {
   const o = { faceValueCents: 10000, baseAmountCents: 8000, totalCents: 8000, itbmsCents: 0, locale: 'es' }
@@ -51,5 +51,21 @@ describe('thankYouSentence', () => {
     expect(thankYouSentence(base, 'en')).toBe("Here is María's gift card. Share it whenever you like.")
     expect(isSelfDelivery(base)).toBe(true)
     expect(isSelfDelivery({ ...base, delivery_email: true })).toBe(false)
+  })
+})
+
+describe('isPaidStatus', () => {
+  it('true only for paid statuses', () => {
+    for (const s of ['captured', 'posted', 'invoiced', 'fulfilled', 'booked']) expect(isPaidStatus(s)).toBe(true)
+    for (const s of ['authorized', 'totals_verified', 'cancelled', 'expired', '', null, undefined]) expect(isPaidStatus(s)).toBe(false)
+  })
+})
+
+describe('giftForwardUrl', () => {
+  it('encodes the localized text with the link', () => {
+    const u = giftForwardUrl('https://x.test/gift/abc', 'es')
+    expect(u.startsWith('https://wa.me/?text=')).toBe(true)
+    expect(decodeURIComponent(u.split('text=')[1])).toBe('Un regalo de Mimosa Spa para ti 🎁 https://x.test/gift/abc')
+    expect(decodeURIComponent(giftForwardUrl('u', 'en').split('text=')[1])).toBe('A Mimosa Spa gift for you 🎁 u')
   })
 })

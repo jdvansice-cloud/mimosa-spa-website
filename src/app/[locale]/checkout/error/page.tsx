@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { XCircle, Clock } from 'lucide-react'
+import { BackToGiftCardsLink } from '@/components/checkout/BackToGiftCardsLink'
 import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
 
 export const metadata = { robots: { index: false, follow: false } }
@@ -66,6 +67,7 @@ export default async function CheckoutErrorPage({
               {en ? 'Try again' : 'Intentar de nuevo'}
             </Link>
           ) : null}
+          {reason !== 'slot' && !isPending && <BackToGiftCardsLink locale={locale} />}
           <WhatsAppBookingLink
             cta="checkout_error"
             variant="link"

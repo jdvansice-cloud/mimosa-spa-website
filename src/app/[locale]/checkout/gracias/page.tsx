@@ -1,8 +1,11 @@
 import Link from 'next/link'
-import { Check, Calendar, Gift } from 'lucide-react'
+import { Check, Calendar, Gift, Clock } from 'lucide-react'
 import { signOrderNumber } from '@/lib/giftshop/sign'
 import { ordersAdminClient } from '@/lib/orders/pipeline'
 import { ClearBagOnMount } from '@/components/checkout/ClearBagOnMount'
+import { WhatsAppBookingLink } from '@/components/shared/WhatsAppBookingLink'
+import { SITE_URL } from '@/lib/nav'
+import { thankYouSentence, isSelfDelivery, isPaidStatus, giftForwardUrl } from '@/lib/giftshop/thankYou'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { robots: { index: false, follow: false } }
@@ -38,6 +41,22 @@ export default async function CheckoutGraciasPage({
     gc_recipient_name: string | null
   }> = []
 
+  type GcChild = {
+    id: string
+    order_number: string
+    recipient_name: string
+    recipient_email: string | null
+    recipient_phone: string | null
+    delivery_email: boolean
+    delivery_whatsapp: boolean
+    scheduled_send_at: string | null
+    buyer_email: string | null
+    gift_card_id: string | null
+    item_name: string | null
+  }
+  let children: GcChild[] = []
+  const tokens = new Map<string, string>()
+
   if (o && k && k === signOrderNumber(o)) {
     const supabase = ordersAdminClient()
     const { data } = await supabase
@@ -53,6 +72,22 @@ export default async function CheckoutGraciasPage({
         .eq('order_id', data.id)
         .order('sort_order')
       items = rows ?? []
+      // Children are `<order>-G<n>`; escape LIKE wildcards in the number.
+      const prefix = `${o}-G`.replace(/[\\%_]/g, c => `\\${c}`)
+      const { data: kids } = await supabase
+        .from('gc_orders')
+        .select('id, order_number, status, recipient_name, recipient_email, recipient_phone, delivery_email, delivery_whatsapp, scheduled_send_at, buyer_email, gift_card_id, item_name')
+        .like('order_number', `${prefix}%`)
+        .order('order_number')
+      children = (kids ?? []) as GcChild[]
+      const cardIds = children.map(c => c.gift_card_id).filter((x): x is string => !!x)
+      if (cardIds.length > 0) {
+        const { data: cards } = await supabase
+          .from('gift_cards')
+          .select('id, view_token, serial')
+          .in('id', cardIds)
+        for (const c of cards ?? []) if (c.view_token) tokens.set(c.id, c.view_token)
+      }
     }
   }
 
@@ -60,6 +95,49 @@ export default async function CheckoutGraciasPage({
   const services = items.filter(i => i.item_type === 'service')
   const giftCards = items.filter(i => i.item_type === 'gift_card')
   const slot = services[0]?.appointment_start
+  const loc = en ? 'en' : 'es'
+
+  // A real order that is not paid yet (authorized, cancelled, expired…):
+  // never claim payment and never empty the bag.
+  if (order && !isPaidStatus(order.status)) {
+    return (
+      <div className="min-h-[70vh] bg-cream flex items-center justify-center px-4 py-16">
+        <div className="bg-white rounded-3xl shadow-card p-8 md:p-10 max-w-md w-full text-center">
+          <div className="w-14 h-14 bg-gold/15 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Clock className="h-7 w-7 text-gold-600" />
+          </div>
+          <h1 className="text-2xl font-display font-semibold text-dark mb-2">
+            {en ? 'We are confirming your payment…' : 'Estamos confirmando tu pago…'}
+          </h1>
+          <p className="text-sm text-warm-gray mb-5">
+            {en
+              ? 'This can take a minute. Do not pay again — we will email you as soon as it is confirmed.'
+              : 'Puede tardar un minuto. No pagues de nuevo — te escribimos por correo apenas se confirme.'}
+          </p>
+          <div className="bg-beige/60 rounded-xl p-4 text-sm text-left mb-6">
+            <div className="flex justify-between">
+              <span className="text-warm-gray">{en ? 'Order' : 'Pedido'}</span>
+              <span className="font-mono">{order.order_number}</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-3">
+            <WhatsAppBookingLink
+              cta="checkout_confirming"
+              variant="link"
+              message={
+                en
+                  ? `Hi, I paid online and my order ${order.order_number} is still confirming.`
+                  : `Hola, pagué en línea y mi pedido ${order.order_number} sigue en confirmación.`
+              }
+            />
+            <Link href={`/${locale}`} className="text-sm text-gold-600 hover:text-gold-700 font-medium inline-flex items-center min-h-[44px]">
+              {en ? 'Back to home' : 'Volver al inicio'}
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-[70vh] bg-cream flex items-center justify-center px-4 py-16">
@@ -125,11 +203,46 @@ export default async function CheckoutGraciasPage({
               </div>
             </div>
             {giftCards.length > 0 && (
-              <p className="text-xs text-warm-gray mb-4">
-                {en
-                  ? 'Gift cards are delivered by email (a sales receipt is issued for gift cards — the invoice comes with the service).'
-                  : 'Las gift cards se entregan por correo (por la gift card se emite un recibo — la factura se genera con el servicio).'}
-              </p>
+              <div className="space-y-3 mb-4 text-left">
+                {children.map(child => {
+                  const token = child.gift_card_id ? tokens.get(child.gift_card_id) : undefined
+                  const giftUrl = token ? `${SITE_URL}/gift/${token}` : null
+                  return (
+                    <div key={child.id} className="border border-gold/30 rounded-xl p-4">
+                      <p className="text-sm text-dark mb-3 break-words">{thankYouSentence(child, loc)}</p>
+                      {token && giftUrl ? (
+                        <div className="flex flex-col gap-1">
+                          <Link
+                            href={`/gift/${token}`}
+                            className="text-sm text-gold-600 hover:text-gold-700 font-medium inline-flex items-center min-h-[44px]"
+                          >
+                            {en ? 'View gift card' : 'Ver gift card'}
+                          </Link>
+                          {isSelfDelivery(child) && (
+                            <a
+                              href={giftForwardUrl(giftUrl, loc)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-gold-600 hover:text-gold-700 font-medium inline-flex items-center min-h-[44px]"
+                            >
+                              {en ? 'Send by WhatsApp' : 'Enviar por WhatsApp'}
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-warm-gray">
+                          {en ? 'On its way in a few minutes.' : 'Te la enviamos en unos minutos.'}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
+                <p className="text-xs text-warm-gray">
+                  {en
+                    ? 'A receipt for the gift card goes to your email; the invoice is issued when it is redeemed.'
+                    : 'Por la gift card recibes un recibo por correo; la factura se emite al canjearla.'}
+                </p>
+              </div>
             )}
           </>
         ) : (

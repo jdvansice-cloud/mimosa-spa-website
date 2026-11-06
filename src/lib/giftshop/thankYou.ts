@@ -7,6 +7,21 @@ export interface ThankYouOrder {
   delivery_email: boolean
   delivery_whatsapp: boolean
   scheduled_send_at: string | null
+  buyer_email?: string | null
+}
+
+// Order statuses that mean the money is in; anything else is "confirming".
+const PAID_STATUSES = ['captured', 'posted', 'invoiced', 'fulfilled', 'booked']
+export function isPaidStatus(status: string | null | undefined): boolean {
+  return !!status && PAID_STATUSES.includes(status)
+}
+
+// wa.me link the buyer uses to forward a self-delivered card.
+export function giftForwardUrl(giftUrl: string, locale: 'es' | 'en'): string {
+  const text = locale === 'en'
+    ? `A Mimosa Spa gift for you 🎁 ${giftUrl}`
+    : `Un regalo de Mimosa Spa para ti 🎁 ${giftUrl}`
+  return `https://wa.me/?text=${encodeURIComponent(text)}`
 }
 
 /**
