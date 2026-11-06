@@ -106,7 +106,7 @@ export function buyerReceiptEmail(d: BuyerEmailData): { subject: string; html: s
         <tr><td style="padding:6px 0;color:#8B8680">${en ? 'Value' : 'Valor'}</td><td style="text-align:right;font-weight:bold">${esc(d.amountLabel)}</td></tr>
         ${
           d.paidLine
-            ? `<tr><td style="padding:6px 0;color:#8B8680">${en ? 'You paid' : 'Pagaste'}</td><td style="text-align:right">${esc(d.paidLine)}</td></tr>`
+            ? `<tr><td colspan="2" style="padding:6px 0;text-align:right;color:#5c6157">${esc(d.paidLine)}</td></tr>`
             : ''
         }
         <tr><td style="padding:6px 0;color:#8B8680">${en ? 'Order' : 'Pedido'}</td><td style="text-align:right">${esc(d.orderNumber)}</td></tr>

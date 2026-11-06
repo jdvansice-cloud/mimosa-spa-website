@@ -168,7 +168,7 @@ export function BagDrawer({ locale }: { locale: string }) {
                     <div>
                       <p className="text-sm font-medium text-dark">
                         {g.name}
-                        {g.faceValueCents && g.faceValueCents !== g.amountCents && g.discountPercent ? (
+                        {g.discountPercent ? (
                           <span className="text-rose-700"> · −{g.discountPercent}%</span>
                         ) : null}
                       </p>

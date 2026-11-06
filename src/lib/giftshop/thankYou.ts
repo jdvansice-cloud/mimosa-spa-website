@@ -9,6 +9,27 @@ export interface ThankYouOrder {
   scheduled_send_at: string | null
 }
 
+/**
+ * "You paid" line for a discounted card, or null when the order is not
+ * discounted. The percent comes from the pre-tax price (baseAmountCents is
+ * the sale price); the amount shown is what was charged, with a tax note
+ * when ITBMS is part of it.
+ */
+export function discountLine(o: {
+  faceValueCents: number | null | undefined
+  baseAmountCents: number
+  totalCents: number
+  itbmsCents: number
+  locale: string | null | undefined
+}): string | null {
+  if (!o.faceValueCents || o.faceValueCents <= o.baseAmountCents) return null
+  const en = o.locale === 'en'
+  const pct = Math.round(100 * (1 - o.baseAmountCents / o.faceValueCents))
+  const paid = `$${(o.totalCents / 100).toFixed(o.totalCents % 100 === 0 ? 0 : 2)}`
+  const tax = o.itbmsCents > 0 ? ', incl. ITBMS' : ''
+  return en ? `You paid ${paid} (${pct}% off${tax})` : `Pagaste ${paid} (${pct}% de descuento${tax})`
+}
+
 export function isSelfDelivery(o: ThankYouOrder): boolean {
   return !o.delivery_email && !o.delivery_whatsapp
 }

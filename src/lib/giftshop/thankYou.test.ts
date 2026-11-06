@@ -1,5 +1,23 @@
 import { describe, it, expect } from 'vitest'
-import { thankYouSentence, isSelfDelivery, type ThankYouOrder } from './thankYou'
+import { thankYouSentence, isSelfDelivery, discountLine, type ThankYouOrder } from './thankYou'
+
+describe('discountLine', () => {
+  const o = { faceValueCents: 10000, baseAmountCents: 8000, totalCents: 8000, itbmsCents: 0, locale: 'es' }
+  it('monetary, es', () => {
+    expect(discountLine(o)).toBe('Pagaste $80 (20% de descuento)')
+  })
+  it('experience with ITBMS, en: percent from the pre-tax price', () => {
+    expect(discountLine({ ...o, totalCents: 8560, itbmsCents: 560, locale: 'en' })).toBe(
+      'You paid $85.60 (20% off, incl. ITBMS)'
+    )
+  })
+  it('null without a face value', () => {
+    expect(discountLine({ ...o, faceValueCents: null })).toBeNull()
+  })
+  it('null when face equals base', () => {
+    expect(discountLine({ ...o, faceValueCents: 8000 })).toBeNull()
+  })
+})
 
 const base: ThankYouOrder = {
   recipient_name: 'María',

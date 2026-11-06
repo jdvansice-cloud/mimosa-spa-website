@@ -10,6 +10,7 @@ import {
 } from '@/lib/booking/mindbody'
 import { sendTemplateMessage, isWatiConfigured } from '@/lib/booking/wati'
 import { SITE_URL } from '@/lib/nav'
+import { discountLine } from './thankYou'
 
 // Idempotent fulfillment pipeline for a PAID gc_orders row. Each step
 // checkpoints on columns so a crash mid-way is completed by the cron with no
@@ -378,12 +379,13 @@ export async function deliverOrder(orderId: string): Promise<void> {
   const cardValueCents: number = order.face_value_cents ?? order.total_cents
   const amountLabel = `$${(cardValueCents / 100).toFixed(0)}`
   // Only a discounted order shows what was paid.
-  let paidLine: string | null = null
-  if (order.face_value_cents && order.face_value_cents !== order.total_cents) {
-    const pct = Math.round(100 * (1 - order.total_cents / order.face_value_cents))
-    const paid = `$${(order.total_cents / 100).toFixed(order.total_cents % 100 === 0 ? 0 : 2)}`
-    paidLine = order.locale === 'en' ? `${paid} (${pct}% off)` : `${paid} (${pct}% de descuento)`
-  }
+  const paidLine = discountLine({
+    faceValueCents: order.face_value_cents,
+    baseAmountCents: order.base_amount_cents,
+    totalCents: order.total_cents,
+    itbmsCents: order.itbms_cents ?? 0,
+    locale: order.locale,
+  })
   const itemName = order.item_name || 'Gift Card'
   const buyerName = order.buyer_name || 'Mimosa'
 

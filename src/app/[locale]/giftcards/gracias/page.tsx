@@ -3,7 +3,7 @@ import { Check } from 'lucide-react'
 import { giftshopAdminClient } from '@/lib/giftshop/data'
 import { signOrderNumber } from '@/lib/giftshop/sign'
 import { SITE_URL } from '@/lib/nav'
-import { thankYouSentence, isSelfDelivery } from '@/lib/giftshop/thankYou'
+import { thankYouSentence, isSelfDelivery, discountLine } from '@/lib/giftshop/thankYou'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { robots: { index: false, follow: false } }
@@ -26,6 +26,8 @@ export default async function GraciasPage({
     item_name: string | null
     total_cents: number
     face_value_cents: number | null
+    base_amount_cents: number
+    itbms_cents: number
     recipient_name: string
     recipient_email: string | null
     recipient_phone: string | null
@@ -41,7 +43,7 @@ export default async function GraciasPage({
     const supabase = giftshopAdminClient()
     const { data } = await supabase
       .from('gc_orders')
-      .select('order_number, status, item_name, total_cents, face_value_cents, recipient_name, recipient_email, recipient_phone, delivery_email, delivery_whatsapp, buyer_email, scheduled_send_at, gift_card_id')
+      .select('order_number, status, item_name, total_cents, face_value_cents, base_amount_cents, itbms_cents, recipient_name, recipient_email, recipient_phone, delivery_email, delivery_whatsapp, buyer_email, scheduled_send_at, gift_card_id')
       .eq('order_number', o)
       .single()
     order = data
@@ -78,18 +80,26 @@ export default async function GraciasPage({
               <div className="flex justify-between">
                 <span className="text-warm-gray">{order.item_name}</span>
                 <span className="font-bold">
-                  {order.face_value_cents && order.face_value_cents !== order.total_cents ? (
-                    <>
-                      ${(order.face_value_cents / 100).toFixed(2)}{' '}
-                      <span className="font-normal text-warm-gray">
-                        ({en ? 'you paid' : 'pagaste'} ${(order.total_cents / 100).toFixed(2)})
-                      </span>
-                    </>
-                  ) : (
-                    <>${(order.total_cents / 100).toFixed(2)}</>
-                  )}
+                  ${((order.face_value_cents ?? order.total_cents) / 100).toFixed(2)}
                 </span>
               </div>
+              {discountLine({
+                faceValueCents: order.face_value_cents,
+                baseAmountCents: order.base_amount_cents,
+                totalCents: order.total_cents,
+                itbmsCents: order.itbms_cents,
+                locale,
+              }) && (
+                <p className="text-right text-xs text-warm-gray">
+                  {discountLine({
+                    faceValueCents: order.face_value_cents,
+                    baseAmountCents: order.base_amount_cents,
+                    totalCents: order.total_cents,
+                    itbmsCents: order.itbms_cents,
+                    locale,
+                  })}
+                </p>
+              )}
               {order.scheduled_send_at && (
                 <div className="flex justify-between">
                   <span className="text-warm-gray">{en ? 'Delivery' : 'Entrega'}</span>
