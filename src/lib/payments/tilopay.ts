@@ -77,9 +77,16 @@ export async function createTilopayPayment(input: TilopayPaymentInput): Promise<
       billToTelephone: input.buyerPhone || '00000000',
       billToCountry: input.buyerCountry || 'PA',
       billToAddress: 'Panamá',
+      billToAddress2: '',
       billToCity: 'Panamá',
       billToState: 'PA',
       billToZipPostCode: '0000',
+      // Required by the API contract (tilopay.com/developers, verified 2026-11-07):
+      // no card saving, the platform label Tilopay expects for direct API use,
+      // and the current token format.
+      subscription: '0',
+      platform: 'api',
+      token_version: 'v2',
       hashVersion: 'V2',
       ...(input.returnData ? { returnData: input.returnData } : {}),
     }),
