@@ -58,10 +58,12 @@ export async function GET(request: NextRequest) {
     .in('status', ['draft', 'totals_verified'])
     .lt('created_at', dayAgo)
   if (toExpire && toExpire.length > 0) {
+    // Only rows that reached Tilopay: a processPayment failure marks its row 'failed'.
     const { data: paidRows } = await supabase
       .from('order_payments')
       .select('order_id')
       .eq('kind', 'tilopay')
+      .neq('status', 'failed')
       .in('order_id', toExpire.map(o => o.id))
     const withPayment = new Set((paidRows ?? []).map(r => r.order_id as string))
     for (const o of toExpire) {

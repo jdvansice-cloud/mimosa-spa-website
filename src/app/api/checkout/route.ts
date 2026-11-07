@@ -377,9 +377,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url, orderNumber: order.order_number })
   } catch (e) {
     console.error('Tilopay authorization creation failed:', e)
-    await supabase.from('orders')
-      .update({ failure_code: 'auth_declined', failure_detail: 'processPayment failed' })
-      .eq('id', order.id)
+    // The buyer never reached Tilopay: mark the card row failed so the expiry
+    // cron does not raise a reconciliation alarm for a charge that never happened.
+    await Promise.all([
+      supabase.from('orders')
+        .update({ failure_code: 'auth_declined', failure_detail: 'processPayment failed' })
+        .eq('id', order.id),
+      supabase.from('order_payments')
+        .update({ status: 'failed', updated_at: new Date().toISOString() })
+        .eq('order_id', order.id).eq('kind', 'tilopay').eq('status', 'pending'),
+    ])
     return NextResponse.json({ error: 'No pudimos iniciar el pago. Intenta de nuevo.' }, { status: 502 })
   }
 }
