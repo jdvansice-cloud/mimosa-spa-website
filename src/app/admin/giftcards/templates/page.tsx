@@ -47,8 +47,8 @@ const samplePrivilege: LabelCard = {
   buyer_name: 'Roberto Díaz',
   // Bearer card: no recipient, no dedication.
   recipient_name: 'Al portador',
-  // The card's VALUE (its denomination); the sale price lives in Mindbody.
-  amount_cents: 100000,
+  // The card's consumption VALUE (a "Privilege $1,000"); the sale price lives in Mindbody.
+  amount_cents: 135000,
   currency: 'USD',
   gift_treatment_names: null,
   message: null,

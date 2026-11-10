@@ -1,7 +1,7 @@
 'use client'
 
 import { formatTreatmentNames } from '@/lib/giftcards/treatments'
-import { isPrivilege } from '@/lib/giftcards/privilege'
+import { isPrivilege, privilegeCardName } from '@/lib/giftcards/privilege'
 
 /**
  * The full record of one gift card, shared by the inline expansion in the
@@ -101,10 +101,13 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
       {/* The three facts staff actually come for, big and first. */}
       <div className="flex flex-wrap items-end gap-x-10 gap-y-3 bg-white border border-beige-300 rounded-lg p-4">
         <div>
-          <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">{isPrivilege(card) ? 'Valor' : 'Monto'}</div>
+          <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">{isPrivilege(card) ? 'Valor de consumo' : 'Monto'}</div>
           <div className="text-3xl font-bold text-dark tabular-nums">{money(card.amount_cents)}</div>
           {isPrivilege(card) && (
-            <div className="text-xs text-warm-gray-500 mt-0.5">Precio de venta: el definido en Mindbody</div>
+            <div className="text-xs text-warm-gray-500 mt-0.5">
+              {/* Named after what the buyer pays, so staff can match it in Mindbody. */}
+              {privilegeCardName(card.amount_cents) ?? 'Tarjeta Privilege'} · precio de venta: el definido en Mindbody
+            </div>
           )}
           {card.base_amount_cents != null && (
             <div className="text-xs text-warm-gray-500 mt-0.5">

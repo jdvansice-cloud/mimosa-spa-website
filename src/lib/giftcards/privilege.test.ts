@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
-  PRIVILEGE_DENOMINATIONS_CENTS,
+  PRIVILEGE_CARDS, PRIVILEGE_DENOMINATIONS_CENTS,
   formatPrivilegeValue, hasPrivilegeSeries, isPrivilege, isPrivilegeDenomination,
-  maxSerialNumber, previewPrivilegeSerial, privilegeValueError,
+  maxSerialNumber, previewPrivilegeSerial, privilegeCardName, privilegeValueError,
 } from './privilege'
 
 describe('privilege series', () => {
@@ -37,14 +37,28 @@ describe('privilege value', () => {
     expect(isPrivilege(undefined)).toBe(false)
   })
 
-  it('only exists in $500 and $1,000', () => {
-    expect([...PRIVILEGE_DENOMINATIONS_CENTS]).toEqual([50000, 100000])
-    expect(isPrivilegeDenomination(50000)).toBe(true)
-    expect(isPrivilegeDenomination(100000)).toBe(true)
-    expect(isPrivilegeDenomination(75000)).toBe(false)
-    // $2,500 was offered briefly and then dropped by the owner.
+  it('has two cards: Privilege $500 worth $625 and Privilege $1,000 worth $1,350', () => {
+    expect(PRIVILEGE_CARDS).toEqual([
+      { name: 'Privilege $500', valueCents: 62500 },
+      { name: 'Privilege $1,000', valueCents: 135000 },
+    ])
+    expect([...PRIVILEGE_DENOMINATIONS_CENTS]).toEqual([62500, 135000])
+    expect(isPrivilegeDenomination(62500)).toBe(true)
+    expect(isPrivilegeDenomination(135000)).toBe(true)
+    expect(formatPrivilegeValue(62500)).toBe('$625')
+    expect(formatPrivilegeValue(135000)).toBe('$1,350')
+  })
+
+  it('names a card by what the buyer pays, from its consumption value', () => {
+    expect(privilegeCardName(62500)).toBe('Privilege $500')
+    expect(privilegeCardName(135000)).toBe('Privilege $1,000')
+    expect(privilegeCardName(100000)).toBeNull()
+  })
+
+  it('no longer accepts the face amounts or the dropped $2,500 card as values', () => {
+    expect(isPrivilegeDenomination(50000)).toBe(false)
+    expect(isPrivilegeDenomination(100000)).toBe(false)
     expect(isPrivilegeDenomination(250000)).toBe(false)
-    expect(formatPrivilegeValue(100000)).toBe('$1,000')
   })
 
   it('accepts a denomination with no sale price: Mindbody holds the price', () => {
@@ -54,8 +68,9 @@ describe('privilege value', () => {
   })
 
   it('rejects any other value', () => {
-    const message = 'Valor no permitido: las tarjetas Privilege son de $500 o $1,000'
+    const message = 'Valor no permitido: las tarjetas Privilege son de $625 o $1,350'
     expect(privilegeValueError(75000)).toBe(message)
+    expect(privilegeValueError(100000)).toBe(message)
     expect(privilegeValueError(250000)).toBe(message)
     expect(privilegeValueError(0)).toBe(message)
     expect(privilegeValueError(100001)).toBe(message)

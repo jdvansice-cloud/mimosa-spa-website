@@ -10,7 +10,7 @@ import { collapseTreatmentNames, expandTreatmentLines, type TreatmentLine } from
 import {
   PRIVILEGE_BEARER, PRIVILEGE_FORMAT, isPrivilege, hasPrivilegeSeries, previewPrivilegeSerial,
   privilegeValueError, type PrivilegeSeries,
-  PRIVILEGE_DENOMINATIONS_CENTS, formatPrivilegeValue,
+  PRIVILEGE_CARDS, formatPrivilegeValue,
 } from '@/lib/giftcards/privilege'
 
 /**
@@ -181,7 +181,7 @@ export function GiftCardForm({
   const [openAmount, setOpenAmount] = useState(
     initial ? (initial.amount_cents / 100).toFixed(2) : '',
   )
-  // Privilege: only the denomination is recorded. The sale price is not —
+  // Privilege: only the card's consumption value is recorded. The sale price is not —
   // Mindbody already carries it on the card staff pick when selling.
   const [privilegeValue, setPrivilegeValue] = useState(
     isPrivilege(initial) && initial ? (initial.amount_cents / 100).toFixed(2) : '',
@@ -372,7 +372,7 @@ export function GiftCardForm({
   // recipient and the dedication while this mode is selected.
   const privilegeMode = amountMode === 'privilege'
   const privilegeValueCents = toCents(privilegeValue)
-  /** Privilege cards only exist in fixed denominations — no typed value. */
+  /** Privilege cards only exist as the PRIVILEGE_CARDS — no typed value. */
   const selectDenomination = (cents: number) => setPrivilegeValue((cents / 100).toFixed(2))
 
   /**
@@ -454,7 +454,7 @@ export function GiftCardForm({
     if (!buyerName.trim()) return setError('Nombre del comprador requerido')
     if (!privilegeMode && !recipientName.trim()) return setError('Nombre del destinatario requerido')
     if (amountMode === 'privilege') {
-      if (!privilegeValueCents) return setError('Elige la denominación de la tarjeta')
+      if (!privilegeValueCents) return setError('Elige la tarjeta Privilege')
       const problem = privilegeValueError(privilegeValueCents)
       if (problem) return setError(problem)
     } else if (computedAmountCents <= 0) {
@@ -655,30 +655,33 @@ export function GiftCardForm({
             <div className="space-y-4">
               <div>
                 <div className="label" id="privilege-denomination-label">
-                  Denominación <span className="text-red-500">*</span>
+                  Tarjeta <span className="text-red-500">*</span>
                 </div>
                 <div className="flex flex-wrap gap-3" role="radiogroup" aria-labelledby="privilege-denomination-label">
-                  {PRIVILEGE_DENOMINATIONS_CENTS.map(cents => {
-                    const selected = privilegeValueCents === cents
+                  {PRIVILEGE_CARDS.map(({ name, valueCents }) => {
+                    const selected = privilegeValueCents === valueCents
                     return (
                       <button
-                        key={cents}
+                        key={valueCents}
                         type="button"
                         role="radio"
                         aria-checked={selected}
-                        onClick={() => selectDenomination(cents)}
-                        className={`min-w-[8rem] rounded-lg border-2 px-5 py-3 text-xl font-semibold tabular-nums ${
-                          selected ? 'border-gold bg-gold/5 text-dark' : 'border-beige-300 bg-white text-dark hover:bg-beige-50'
+                        onClick={() => selectDenomination(valueCents)}
+                        className={`min-w-[11rem] rounded-lg border-2 px-5 py-3 text-left ${
+                          selected ? 'border-gold bg-gold/5' : 'border-beige-300 bg-white hover:bg-beige-50'
                         }`}
                       >
-                        {formatPrivilegeValue(cents)}
+                        <span className="block text-sm font-medium text-warm-gray-500">{name}</span>
+                        <span className="block text-2xl font-semibold tabular-nums text-dark">{formatPrivilegeValue(valueCents)}</span>
+                        <span className="block text-xs text-warm-gray-500">valor de consumo</span>
                       </button>
                     )
                   })}
                 </div>
                 <p className="mt-2 text-xs text-warm-gray-500">
-                  Valor de la tarjeta: el saldo que usa quien la presente. Solo se imprime en la etiqueta si marcas «Imprimir el monto».
-                  El precio de venta no se registra aquí: ya viene definido en Mindbody al elegir la tarjeta para venderla.
+                  El valor de consumo es el saldo que usa quien presente la tarjeta, y es el monto con el que se emite.
+                  Solo se imprime en la etiqueta si marcas «Imprimir el monto».
+                  El precio que paga el comprador no se registra aquí: ya viene definido en Mindbody al elegir la tarjeta para venderla.
                 </p>
               </div>
 

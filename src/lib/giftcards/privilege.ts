@@ -21,18 +21,40 @@ export const PRIVILEGE_FORMAT = 'privilege'
 export const PRIVILEGE_BEARER = 'Al portador'
 
 /**
- * The only values a Privilege card can have, in cents: $500 and $1,000
- * (owner rule, 2026-11-10; a $2,500 card existed for a few hours that day and
- * was dropped before any was issued). Enforced in the form AND in the
- * issue/edit APIs through privilegeValueError().
+ * The two Privilege cards (owner, 2026-11-10). A card is NAMED after what the
+ * buyer pays and CARRIES a higher consumption value:
+ *
+ *   Privilege $500   → $625 to spend   (25% benefit)
+ *   Privilege $1,000 → $1,350 to spend (35% benefit)
+ *
+ * gift_cards.amount_cents stores the consumption value. The name is only a
+ * label so staff can match the card to the one they sell in Mindbody; the
+ * price paid is charged there and not recorded here.
+ *
+ * History, same day: values were first the face amounts ($500 / $1,000) and a
+ * $2,500 card existed for a few hours and was dropped before any was issued.
  */
-export const PRIVILEGE_DENOMINATIONS_CENTS = [50000, 100000] as const
+export const PRIVILEGE_CARDS: ReadonlyArray<{ name: string; valueCents: number }> = [
+  { name: 'Privilege $500', valueCents: 62500 },
+  { name: 'Privilege $1,000', valueCents: 135000 },
+]
+
+/**
+ * The only values a Privilege card can have, in cents. Enforced in the form
+ * AND in the issue/edit APIs through privilegeValueError().
+ */
+export const PRIVILEGE_DENOMINATIONS_CENTS: readonly number[] = PRIVILEGE_CARDS.map(c => c.valueCents)
 
 export function isPrivilegeDenomination(valueCents: number): boolean {
-  return (PRIVILEGE_DENOMINATIONS_CENTS as readonly number[]).includes(valueCents)
+  return PRIVILEGE_DENOMINATIONS_CENTS.includes(valueCents)
 }
 
-/** "$1,000" — denominations are whole dollars. */
+/** "Privilege $500" for a card worth $625; null for a value that is not a current card. */
+export function privilegeCardName(valueCents: number): string | null {
+  return PRIVILEGE_CARDS.find(c => c.valueCents === valueCents)?.name ?? null
+}
+
+/** "$1,350" — values are whole dollars. */
 export function formatPrivilegeValue(valueCents: number): string {
   return `$${(valueCents / 100).toLocaleString('en-US')}`
 }
@@ -63,7 +85,7 @@ export function previewPrivilegeSerial(cfg: PrivilegeSeries | null | undefined):
 
 /**
  * Validate a Privilege card's value. Returns a Spanish message for the
- * staff, or null when the value is one of the denominations.
+ * staff, or null when the value is the consumption value of one of the cards.
  */
 export function privilegeValueError(valueCents: number): string | null {
   if (!isPrivilegeDenomination(valueCents)) {
