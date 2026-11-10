@@ -122,7 +122,7 @@
     <li><strong>Monto.</strong> Elige <em>Monto directo</em> (escribes el valor) o <em>Por tratamientos</em> (sumas tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada). Los extras/adicionales también están en la lista, y para parejas o grupos usa el botón <strong>+</strong> para repetir un tratamiento: en la etiqueta sale como «2× Masaje Relajante». La tercera opción, <em>Privilege</em>, tiene su propia sección (5).</li>
     <li><strong>Comprador.</strong> Escribe el nombre y elige el cliente de Mindbody en la lista si aparece — así queda enlazado y se rellenan correo y teléfono. Usa el mismo cliente al vender en Mindbody.</li>
     <li><strong>Destinatario.</strong> Quien recibe el regalo. El nombre no se imprime en la etiqueta.</li>
-    <li><strong>Detalles de impresión.</strong> Mensaje/dedicatoria (sí se imprime), nota interna (nunca se imprime) y qué mostrar en la etiqueta: monto, mensaje, tratamientos.</li>
+    <li><strong>Detalles de impresión.</strong> Mensaje/dedicatoria, nota interna (nunca se imprime) y las casillas de qué mostrar en la etiqueta: monto, mensaje, tratamientos. En <em>Monto directo</em> vienen marcados el monto y el mensaje. En <em>Por tratamientos</em> solo vienen marcados los tratamientos: <strong>el monto y el mensaje vienen desmarcados</strong>; márcalos si quieres que salgan en la etiqueta.</li>
     <li>Presiona <strong>Emitir e imprimir</strong>. El sitio asigna el serial (por ejemplo <code>MG000123</code>) y te lleva a la pantalla de impresión.</li>
   </ol>
   <figure><img src="../public/manual/giftcards/01-emitir.png" alt="Formulario Emitir Gift Card"><figcaption>Pantalla Emitir Gift Card: monto, comprador, destinatario y detalles de impresión.</figcaption></figure>
@@ -138,7 +138,7 @@
     <li>Pega la etiqueta <strong>centrada</strong> en la tarjeta física de Mimosa.</li>
   </ol>
   <figure><img src="../public/manual/giftcards/02-imprimir.png" alt="Pantalla de impresión"><figcaption>Pantalla de impresión: estado en Mindbody, botones Manual · Editar · Prueba · Imprimir Etiqueta, y la vista previa.</figcaption></figure>
-  <figure class="narrow"><img src="../public/manual/giftcards/03-etiqueta.png" alt="Etiqueta"><figcaption>La etiqueta (3 × 2 pulgadas): monto, tratamientos incluidos, mensaje y el código de barras con el serial.</figcaption></figure>
+  <figure class="narrow"><img src="../public/manual/giftcards/03-etiqueta.png" alt="Etiqueta"><figcaption>La etiqueta (3 × 2 pulgadas) con todas las casillas marcadas: monto, tratamientos incluidos, mensaje y el código de barras con el serial. Cada dato sale solo si su casilla está marcada.</figcaption></figure>
   <div class="tip"><b>Prueba</b> imprime un patrón de calibración (marco, flecha ARRIBA, parches de oscuridad y un código de barras). Úsalo al cambiar de rollo: el marco debe coincidir con el borde de la etiqueta. Si no coincide, con la impresora encendida y el cable USB desconectado, mantén presionado el botón de avance 3–6 segundos para que recalibre, y vuelve a probar.</div>
   <div class="tip warn">Si la etiqueta no se imprime, lo más común es que QZ Tray no esté abierto. Ábrelo desde Aplicaciones y vuelve a intentar. Si aparece una ventana de QZ pidiendo permiso (“Allow”), avisa a administración: falta instalar el certificado en esa computadora.</div>
 </section>
@@ -167,12 +167,12 @@
     <li>En <strong>Emitir Gift Card</strong>, en «1. Monto», elige <strong>Privilege</strong>.</li>
     <li>Elige la <strong>denominación</strong> — <strong>$500</strong>, <strong>$1,000</strong> o <strong>$2,500</strong>: es el saldo disponible para quien presente la tarjeta, y no se puede escribir otro valor. Aquí <strong>no se escribe ningún precio</strong>: el precio de venta ya viene definido en Mindbody. El sistema muestra el próximo serial de la serie.</li>
     <li>Completa los datos del <strong>comprador</strong> y presiona <strong>Emitir e imprimir</strong>. Al ser al portador, la tarjeta Privilege <strong>no lleva destinatario ni dedicatoria</strong>: esas secciones no aparecen.</li>
-    <li>La etiqueta imprime el <strong>valor</strong> y la marca <strong>PRIVILEGE</strong>.</li>
+    <li>La etiqueta imprime la marca <strong>PRIVILEGE</strong> y el código de barras. <strong>El valor no se imprime</strong>: «Imprimir el monto» viene desmarcado en Privilege. Márcalo solo si quieres que el valor salga en la etiqueta.</li>
     <li>En Mindbody, elige para vender la <strong>tarjeta Privilege de la misma denominación</strong>: <strong>el precio ya viene definido ahí</strong>, no hay que calcularlo. Escanea el serial de la etiqueta como número de la tarjeta.</li>
     <li>Presiona <strong>Sincronizar</strong>: pasa a <span class="pill green">Vendida</span> con el saldo completo de su denominación.</li>
   </ol>
   <figure><img src="../public/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege"><figcaption>Privilege: se elige la denominación ($500, $1,000 o $2,500) y se muestra el próximo serial. Solo pide el comprador: no hay destinatario, dedicatoria ni precio.</figcaption></figure>
-  <figure class="narrow"><img src="../public/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta Privilege"><figcaption>Etiqueta Privilege: valor, marca PRIVILEGE y código de barras con el serial de la serie Privilege.</figcaption></figure>
+  <figure class="narrow"><img src="../public/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta Privilege"><figcaption>Etiqueta Privilege: marca PRIVILEGE y código de barras con el serial de la serie Privilege. El valor solo aparece si marcas «Imprimir el monto».</figcaption></figure>
   <div class="tip">En la lista de Emitidas las tarjetas Privilege llevan la marca <b>Privilege</b> junto al serial y figuran como <b>Al portador</b>; el detalle muestra su valor. Se editan igual que las demás mientras estén Emitidas; el tipo de tarjeta no cambia.</div>
   <div class="tip warn">¿La opción Privilege aparece deshabilitada? Esa sede no tiene serie Privilege configurada. Administración la define en Gift Cards → Ubicaciones y Seriales → <b>Serie Privilege</b> (prefijo y próximo número por sede).</div>
 </section>

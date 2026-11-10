@@ -115,8 +115,10 @@ export default function GiftCardManualPage() {
               </li>
               <li><strong>Destinatario.</strong> Quien recibe el regalo. El nombre no se imprime en la etiqueta.</li>
               <li>
-                <strong>Detalles de impresión.</strong> Mensaje/dedicatoria (sí se imprime), nota interna (nunca se imprime)
-                y qué mostrar en la etiqueta: monto, mensaje, tratamientos.
+                <strong>Detalles de impresión.</strong> Mensaje/dedicatoria, nota interna (nunca se imprime)
+                y las casillas de qué mostrar en la etiqueta: monto, mensaje, tratamientos. En <em>Monto directo</em> vienen
+                marcados el monto y el mensaje. En <em>Por tratamientos</em> solo vienen marcados los tratamientos:
+                <strong> el monto y el mensaje vienen desmarcados</strong>; márcalos si quieres que salgan en la etiqueta.
               </li>
               <li>Presiona <strong>Emitir e imprimir</strong>. El sitio asigna el serial (por ejemplo <span className="font-mono">MG000123</span>) y te lleva a la pantalla de impresión.</li>
             </Steps>
@@ -131,7 +133,7 @@ export default function GiftCardManualPage() {
               <li>Pega la etiqueta <strong>centrada</strong> en la tarjeta física de Mimosa.</li>
             </Steps>
             <Shot src="/manual/giftcards/02-imprimir.png" alt="Pantalla de impresión de la etiqueta" caption="Pantalla de impresión: estado en Mindbody, botones Editar · Prueba · Imprimir Etiqueta, y la vista previa." />
-            <Shot src="/manual/giftcards/03-etiqueta.png" alt="Etiqueta de Gift Card" caption="La etiqueta (3 × 2 pulgadas): monto, tratamientos incluidos, mensaje y el código de barras con el serial." />
+            <Shot src="/manual/giftcards/03-etiqueta.png" alt="Etiqueta de Gift Card" caption="La etiqueta (3 × 2 pulgadas) con todas las casillas marcadas: monto, tratamientos incluidos, mensaje y el código de barras con el serial. Cada dato sale solo si su casilla está marcada." />
             <Tip>
               <strong>Prueba</strong> imprime un patrón de calibración (marco, flecha ARRIBA, parches de oscuridad y un código de barras).
               Úsalo al cambiar de rollo: el marco debe coincidir con el borde de la etiqueta. Si no coincide, con la impresora
@@ -193,7 +195,8 @@ export default function GiftCardManualPage() {
                 la tarjeta Privilege <strong>no lleva destinatario ni dedicatoria</strong>: esas secciones no aparecen.
               </li>
               <li>
-                La etiqueta imprime el <strong>valor</strong> y la marca <strong>PRIVILEGE</strong>.
+                La etiqueta imprime la marca <strong>PRIVILEGE</strong> y el código de barras. <strong>El valor no se imprime</strong>:
+                «Imprimir el monto» viene desmarcado en Privilege. Márcalo solo si quieres que el valor salga en la etiqueta.
               </li>
               <li>
                 En Mindbody, elige para vender la <strong>tarjeta Privilege de la misma denominación</strong>: <strong>el precio ya viene definido ahí</strong>,
@@ -202,7 +205,7 @@ export default function GiftCardManualPage() {
               <li>Presiona <strong>Sincronizar</strong>: pasa a <StatusPill tone="green">Vendida</StatusPill> con el saldo completo de su denominación.</li>
             </Steps>
             <Shot src="/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege" caption="Privilege: se elige la denominación ($500, $1,000 o $2,500) y se muestra el próximo serial. Solo pide el comprador: no hay destinatario, dedicatoria ni precio." />
-            <Shot src="/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta de una tarjeta Privilege" caption="Etiqueta Privilege: valor, marca PRIVILEGE y código de barras con el serial de la serie Privilege." />
+            <Shot src="/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta de una tarjeta Privilege" caption="Etiqueta Privilege: marca PRIVILEGE y código de barras con el serial de la serie Privilege. El valor solo aparece si marcas «Imprimir el monto»." />
             <Tip>
               En la lista de Emitidas las tarjetas Privilege llevan la marca <strong>Privilege</strong> junto al serial y figuran como
               <strong>Al portador</strong>; el detalle muestra su valor. Se editan igual que las demás mientras estén Emitidas; el tipo de tarjeta no cambia.

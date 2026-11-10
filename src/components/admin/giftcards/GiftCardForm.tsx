@@ -234,6 +234,9 @@ export function GiftCardForm({
   const [recipientEmail, setRecipientEmail] = useState(initial?.recipient_email ?? '')
   const [message, setMessage] = useState(initial?.message ?? '')
   const [staffNote, setStaffNote] = useState(initial?.notes ?? '')
+  // A new card opens in "Monto directo", which prints amount and dedication.
+  // The other kinds start with both off (see selectAmountMode). An edit
+  // always opens with what the card has stored.
   const [printAmount, setPrintAmount] = useState(initial?.print_amount ?? true)
   const [printMessage, setPrintMessage] = useState(initial?.print_message ?? true)
   const [printTreatments, setPrintTreatments] = useState(initial?.print_treatments ?? true)
@@ -372,6 +375,21 @@ export function GiftCardForm({
   /** Privilege cards only exist in fixed denominations — no typed value. */
   const selectDenomination = (cents: number) => setPrivilegeValue((cents / 100).toFixed(2))
 
+  /**
+   * Picking the kind of card also resets the print checkboxes to that kind's
+   * defaults. Only "Monto directo" prints the amount and the dedication out
+   * of the box; "Por tratamientos" prints just the treatments and Privilege
+   * just its mark, unless staff tick more. Editing never resets them — the
+   * card's stored choices stand.
+   */
+  const selectAmountMode = (mode: AmountMode) => {
+    if (!isEdit && mode !== amountMode) {
+      setPrintAmount(mode === 'amount')
+      setPrintMessage(mode === 'amount')
+    }
+    setAmountMode(mode)
+  }
+
   const computedAmountCents = useMemo(() => {
     if (amountMode === 'treatments') return treatmentTotalCents
     if (amountMode === 'privilege') return privilegeValueCents
@@ -385,6 +403,9 @@ export function GiftCardForm({
   useEffect(() => {
     if (!isEdit && amountMode === 'privilege' && configId && !scopeLoading && !privilegeAvailable) {
       setAmountMode('amount')
+      // Back to the "Monto directo" print defaults.
+      setPrintAmount(true)
+      setPrintMessage(true)
     }
   }, [isEdit, amountMode, configId, scopeLoading, privilegeAvailable])
 
@@ -566,7 +587,7 @@ export function GiftCardForm({
                 type="radio"
                 name="amountMode"
                 checked={amountMode === 'amount'}
-                onChange={() => setAmountMode('amount')}
+                onChange={() => selectAmountMode('amount')}
                 className="mt-1"
               />
               <div>
@@ -579,7 +600,7 @@ export function GiftCardForm({
                 type="radio"
                 name="amountMode"
                 checked={amountMode === 'treatments'}
-                onChange={() => setAmountMode('treatments')}
+                onChange={() => selectAmountMode('treatments')}
                 className="mt-1"
               />
               <div>
@@ -599,7 +620,7 @@ export function GiftCardForm({
                   type="radio"
                   name="amountMode"
                   checked={amountMode === 'privilege'}
-                  onChange={() => setAmountMode('privilege')}
+                  onChange={() => selectAmountMode('privilege')}
                   disabled={!privilegeAvailable}
                   className="mt-1"
                 />
@@ -646,7 +667,7 @@ export function GiftCardForm({
                   })}
                 </div>
                 <p className="mt-2 text-xs text-warm-gray-500">
-                  Valor de la tarjeta: el saldo que usa quien la presente. Es lo que se imprime en la etiqueta.
+                  Valor de la tarjeta: el saldo que usa quien la presente. Solo se imprime en la etiqueta si marcas «Imprimir el monto».
                   El precio de venta no se registra aquí: ya viene definido en Mindbody al elegir la tarjeta para venderla.
                 </p>
               </div>
@@ -960,6 +981,11 @@ export function GiftCardForm({
             <div>
               <label className="label">Mensaje / Dedicatoria</label>
               <textarea rows={3} className="input" value={message} onChange={e => setMessage(e.target.value)} />
+              {message.trim() && !printMessage && (
+                <p className="mt-1 text-xs text-amber-700">
+                  Este mensaje no saldrá en la etiqueta: «Imprimir el mensaje» está desmarcado.
+                </p>
+              )}
             </div>
           )}
           <div>
