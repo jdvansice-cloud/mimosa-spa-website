@@ -395,7 +395,7 @@ export default function GiftCardConfigPage() {
           <h2 id="privilege-series-heading" className="text-2xl font-display font-semibold text-dark">Serie Privilege</h2>
         </div>
         <p className="text-warm-gray-500 mb-4 max-w-3xl">
-          Las tarjetas Privilege (monto alto a precio preferencial) llevan su propia numeración por ubicación,
+          Las tarjetas Privilege (tarjetas de beneficios al portador, de monto alto a precio preferencial) llevan su propia numeración por ubicación,
           separada de las Gift Cards regulares. Define el prefijo y, si hace falta, el próximo número. Deja el
           prefijo vacío para no ofrecer Privilege en esa ubicación.
         </p>

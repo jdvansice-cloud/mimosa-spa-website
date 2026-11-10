@@ -45,7 +45,8 @@ const samplePrivilege: LabelCard = {
   serial: 'PCE000001',
   format: 'privilege',
   buyer_name: 'Roberto Díaz',
-  recipient_name: 'Roberto Díaz',
+  // Bearer card: no recipient, no dedication.
+  recipient_name: 'Al portador',
   // The label shows the card's VALUE; the discounted price is never printed.
   amount_cents: 100000,
   currency: 'USD',
@@ -111,7 +112,7 @@ export default function AdminGiftCardTemplatesPage() {
         />
         <Preview
           title="Privilege"
-          subtitle="Tarjeta Privilege: imprime su valor y la marca PRIVILEGE; serie propia por ubicación."
+          subtitle="Tarjeta Privilege (al portador): imprime su valor y la marca PRIVILEGE; serie propia por ubicación."
           card={samplePrivilege}
         />
       </div>

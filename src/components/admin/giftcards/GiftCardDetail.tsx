@@ -127,9 +127,11 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
           </div>
         </div>
         <div>
-          <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">Para</div>
+          <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">{isPrivilege(card) ? 'Uso' : 'Para'}</div>
           <div className="text-xl font-semibold text-dark">{card.recipient_name}</div>
-          <div className="text-xs text-warm-gray-500 mt-0.5">de {card.buyer_name}</div>
+          <div className="text-xs text-warm-gray-500 mt-0.5">
+            {isPrivilege(card) ? `comprada por ${card.buyer_name}` : `de ${card.buyer_name}`}
+          </div>
         </div>
       </div>
 
@@ -168,6 +170,13 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
           <Field label="Cliente Mindbody">{card.buyer_mindbody_client_id && `#${card.buyer_mindbody_client_id}`}</Field>
         </Section>
 
+        {/* A Privilege card is a bearer card: no recipient, no dedication. */}
+        {isPrivilege(card) ? (
+        <Section title="Uso de la tarjeta">
+          <Field label="Portador" wide>Al portador: los beneficios y el saldo son de quien presente la tarjeta.</Field>
+          <Field label="En la etiqueta">{printFlags || 'nada opcional'}</Field>
+        </Section>
+        ) : (
         <Section title="Destinatario">
           <Field label="Nombre">{card.recipient_name}</Field>
           <Field label="Correo">{card.recipient_email}</Field>
@@ -175,6 +184,7 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
           <Field label="Mensaje" wide>{card.message && <span className="italic">“{card.message}”</span>}</Field>
           <Field label="En la etiqueta">{printFlags || 'nada opcional'}</Field>
         </Section>
+        )}
 
         <Section title="Registro">
           <Field label="Emitida">{when(card.issued_at)}</Field>

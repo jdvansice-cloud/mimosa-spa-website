@@ -8,7 +8,7 @@ import { ClientLookupInput, type ClientSuggestion } from '@/components/admin/Cli
 import type { GiftCardDetailData } from './GiftCardDetail'
 import { collapseTreatmentNames, expandTreatmentLines, type TreatmentLine } from '@/lib/giftcards/treatments'
 import {
-  PRIVILEGE_FORMAT, isPrivilege, hasPrivilegeSeries, previewPrivilegeSerial,
+  PRIVILEGE_BEARER, PRIVILEGE_FORMAT, isPrivilege, hasPrivilegeSeries, previewPrivilegeSerial,
   privilegeAmountError, privilegeDiscountPercent, type PrivilegeSeries,
 } from '@/lib/giftcards/privilege'
 
@@ -371,6 +371,9 @@ export function GiftCardForm({
 
   const treatmentTotalCents = treatmentSubtotalCents + treatmentItbmsCents
 
+  // Privilege is a bearer card with benefits, not a gift: the form drops the
+  // recipient and the dedication while this mode is selected.
+  const privilegeMode = amountMode === 'privilege'
   const privilegeValueCents = toCents(privilegeValue)
   const privilegePriceCents = toCents(privilegePrice)
   const privilegeDiscount = privilegeDiscountPercent(privilegeValueCents, privilegePriceCents)
@@ -434,7 +437,7 @@ export function GiftCardForm({
 
     if (!configId) return setError('Selecciona una ubicación')
     if (!buyerName.trim()) return setError('Nombre del comprador requerido')
-    if (!recipientName.trim()) return setError('Nombre del destinatario requerido')
+    if (!privilegeMode && !recipientName.trim()) return setError('Nombre del destinatario requerido')
     if (amountMode === 'privilege') {
       const problem = privilegeAmountError(privilegeValueCents, privilegePriceCents)
       if (problem) return setError(problem)
@@ -455,9 +458,9 @@ export function GiftCardForm({
       buyer_mindbody_client_id: buyerClientId,
       buyer_email: buyerEmail.trim() || null,
       buyer_phone: buyerPhone.trim() || null,
-      recipient_name: recipientName.trim(),
-      recipient_mindbody_client_id: recipientClientId,
-      recipient_email: recipientEmail.trim() || null,
+      recipient_name: privilegeMode ? PRIVILEGE_BEARER : recipientName.trim(),
+      recipient_mindbody_client_id: privilegeMode ? null : recipientClientId,
+      recipient_email: privilegeMode ? null : recipientEmail.trim() || null,
       amount_cents: computedAmountCents,
       // Quantity is encoded as repetition (["Masaje", "Masaje"]) — the
       // storage column stays a plain string[] and every reader collapses it
@@ -471,9 +474,9 @@ export function GiftCardForm({
         : null,
       base_amount_cents: includeTreatments ? treatmentSubtotalCents : null,
       tax_cents: includeTreatments ? treatmentItbmsCents : null,
-      message: message.trim() || null,
+      message: privilegeMode ? null : message.trim() || null,
       print_amount: printAmount,
-      print_message: printMessage,
+      print_message: privilegeMode ? false : printMessage,
       print_recipient: false,
       print_treatments: includeTreatments && printTreatments,
       notes: staffNote.trim() || null,
@@ -612,7 +615,7 @@ export function GiftCardForm({
                   </div>
                   <div className="text-sm text-warm-gray-500">
                     {privilegeAvailable
-                      ? 'Monto alto con precio preferencial — serie propia.'
+                      ? 'Tarjeta de beneficios al portador, no un regalo — serie propia.'
                       : configId
                         ? 'Esta ubicación aún no tiene serie Privilege configurada.'
                         : 'Selecciona una ubicación primero.'}
@@ -639,7 +642,7 @@ export function GiftCardForm({
                     onChange={e => setPrivilegeValue(e.target.value)}
                     required
                   />
-                  <p className="mt-1 text-xs text-warm-gray-500">Saldo que recibe el cliente. Es lo que se imprime y lo que se carga en Mindbody.</p>
+                  <p className="mt-1 text-xs text-warm-gray-500">Saldo de la tarjeta: lo usa quien la presente. Es lo que se imprime y lo que se carga en Mindbody.</p>
                 </div>
                 <div>
                   <label className="label" htmlFor="privilege-price">Precio de venta (USD) <span className="text-red-500">*</span></label>
@@ -908,6 +911,12 @@ export function GiftCardForm({
       <Card variant="default" padding="md">
         <CardHeader><CardTitle>2. Comprador</CardTitle></CardHeader>
         <CardContent className="space-y-4">
+          {privilegeMode && (
+            <p className="text-sm text-warm-gray-500">
+              Quien compra la tarjeta. La tarjeta Privilege es <span className="font-medium text-dark">al portador</span>:
+              no lleva destinatario ni dedicatoria, y sus beneficios son de quien la presente.
+            </p>
+          )}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="label" htmlFor="buyer-name">Nombre <span className="text-red-500">*</span></label>
@@ -939,7 +948,8 @@ export function GiftCardForm({
         </CardContent>
       </Card>
 
-      {/* Recipient */}
+      {/* Recipient — gift cards only; a Privilege card belongs to its holder */}
+      {!privilegeMode && (
       <Card variant="default" padding="md">
         <CardHeader><CardTitle>3. Destinatario</CardTitle></CardHeader>
         <CardContent className="space-y-4">
@@ -968,15 +978,18 @@ export function GiftCardForm({
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Print details */}
       <Card variant="default" padding="md">
-        <CardHeader><CardTitle>4. Detalles de impresión</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{privilegeMode ? '3' : '4'}. Detalles de impresión</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <label className="label">Mensaje / Dedicatoria</label>
-            <textarea rows={3} className="input" value={message} onChange={e => setMessage(e.target.value)} />
-          </div>
+          {!privilegeMode && (
+            <div>
+              <label className="label">Mensaje / Dedicatoria</label>
+              <textarea rows={3} className="input" value={message} onChange={e => setMessage(e.target.value)} />
+            </div>
+          )}
           <div>
             <label className="label">Nota interna</label>
             <textarea
@@ -993,11 +1006,13 @@ export function GiftCardForm({
                 checked={printAmount} onChange={e => setPrintAmount(e.target.checked)} />
               <span className="text-dark">Imprimir el monto</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="w-4 h-4 text-gold focus:ring-gold rounded"
-                checked={printMessage} onChange={e => setPrintMessage(e.target.checked)} />
-              <span className="text-dark">Imprimir el mensaje</span>
-            </label>
+            {!privilegeMode && (
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 text-gold focus:ring-gold rounded"
+                  checked={printMessage} onChange={e => setPrintMessage(e.target.checked)} />
+                <span className="text-dark">Imprimir el mensaje</span>
+              </label>
+            )}
             {amountMode === 'treatments' && (hasTreatments || selectedPromo) && (
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" className="w-4 h-4 text-gold focus:ring-gold rounded"

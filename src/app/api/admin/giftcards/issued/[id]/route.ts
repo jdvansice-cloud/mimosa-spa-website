@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
-import { PRIVILEGE_FORMAT, privilegeAmountError } from '@/lib/giftcards/privilege'
+import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeAmountError } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -126,16 +126,17 @@ export async function PATCH(
   if (!body.buyer_name?.trim()) {
     return NextResponse.json({ error: 'buyer_name required' }, { status: 400 })
   }
-  if (!body.recipient_name?.trim()) {
+  // The card's kind is fixed at issuance — its serial belongs to that series
+  // — so an edit keeps a Privilege card Privilege and a regular card regular.
+  // Privilege is a bearer card: no recipient, no dedication.
+  const privilege = card.format === PRIVILEGE_FORMAT
+  if (!privilege && !body.recipient_name?.trim()) {
     return NextResponse.json({ error: 'recipient_name required' }, { status: 400 })
   }
   if (!Number.isInteger(body.amount_cents) || body.amount_cents <= 0) {
     return NextResponse.json({ error: 'amount_cents must be a positive integer' }, { status: 400 })
   }
 
-  // The card's kind is fixed at issuance — its serial belongs to that series
-  // — so an edit keeps a Privilege card Privilege and a regular card regular.
-  const privilege = card.format === PRIVILEGE_FORMAT
   if (privilege) {
     const problem = privilegeAmountError(body.amount_cents, body.sale_amount_cents as number)
     if (problem) return NextResponse.json({ error: problem }, { status: 400 })
@@ -151,17 +152,17 @@ export async function PATCH(
     buyer_mindbody_client_id: body.buyer_mindbody_client_id ?? null,
     buyer_email: body.buyer_email?.trim() || null,
     buyer_phone: body.buyer_phone?.trim() || null,
-    recipient_name: body.recipient_name.trim(),
-    recipient_mindbody_client_id: body.recipient_mindbody_client_id ?? null,
-    recipient_email: body.recipient_email?.trim() || null,
+    recipient_name: privilege ? PRIVILEGE_BEARER : body.recipient_name.trim(),
+    recipient_mindbody_client_id: privilege ? null : body.recipient_mindbody_client_id ?? null,
+    recipient_email: privilege ? null : body.recipient_email?.trim() || null,
     amount_cents: body.amount_cents,
     base_amount_cents: privilege ? null : body.base_amount_cents ?? null,
     tax_cents: privilege ? null : body.tax_cents ?? null,
     gift_treatment_names: treatmentNames,
-    message: body.message?.trim() || null,
+    message: privilege ? null : body.message?.trim() || null,
     print_amount: !!body.print_amount,
-    print_message: !!body.print_message,
-    print_recipient: !!body.print_recipient,
+    print_message: privilege ? false : !!body.print_message,
+    print_recipient: privilege ? false : !!body.print_recipient,
     print_treatments: privilege ? false : !!body.print_treatments,
     notes: body.notes?.trim() || null,
     promotion_id: privilege ? null : body.promotion_id || null,

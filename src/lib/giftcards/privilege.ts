@@ -1,15 +1,21 @@
 /**
- * Privilege cards — high-value gift cards sold at a discount (worth $1,000,
- * sold for $800) and numbered on their own per-location serial series.
+ * Privilege cards — NOT gifts. A Privilege card is a bearer card with
+ * benefits for whoever holds it: high value sold at a preferential price
+ * (worth $1,000, sold for $800), numbered on its own per-location series.
+ * It has a buyer but no recipient and no dedication.
  *
  * Storage (see supabase/migrations/20261110_gc_privilege.sql):
  *   gift_cards.format            = 'privilege'
  *   gift_cards.amount_cents      = the card's VALUE (Mindbody balance, label)
  *   gift_cards.sale_amount_cents = what the buyer paid
+ *   gift_cards.recipient_name    = PRIVILEGE_BEARER (the column is NOT NULL)
  *   gift_card_serial_config.privilege_* = the location's second series
  */
 
 export const PRIVILEGE_FORMAT = 'privilege'
+
+/** Stored as the recipient of every Privilege card: any holder may use it. */
+export const PRIVILEGE_BEARER = 'Al portador'
 
 export function isPrivilege(card: { format?: string | null } | null | undefined): boolean {
   return card?.format === PRIVILEGE_FORMAT
