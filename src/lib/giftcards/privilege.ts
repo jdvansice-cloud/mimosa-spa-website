@@ -17,6 +17,28 @@ export const PRIVILEGE_FORMAT = 'privilege'
 /** Stored as the recipient of every Privilege card: any holder may use it. */
 export const PRIVILEGE_BEARER = 'Al portador'
 
+/**
+ * The only values a Privilege card can have, in cents: $500, $1,000, $2,500
+ * (owner rule, 2026-11-10). Enforced in the form AND in the issue/edit APIs
+ * through privilegeAmountError().
+ */
+export const PRIVILEGE_DENOMINATIONS_CENTS = [50000, 100000, 250000] as const
+
+/**
+ * Sale prices already agreed per denomination. Only $1,000 -> $800 is known;
+ * the form pre-fills these and staff type the price for the others.
+ */
+export const PRIVILEGE_KNOWN_PRICES_CENTS: Readonly<Record<number, number>> = { 100000: 80000 }
+
+export function isPrivilegeDenomination(valueCents: number): boolean {
+  return (PRIVILEGE_DENOMINATIONS_CENTS as readonly number[]).includes(valueCents)
+}
+
+/** "$1,000" — denominations are whole dollars. */
+export function formatPrivilegeValue(valueCents: number): string {
+  return `$${(valueCents / 100).toLocaleString('en-US')}`
+}
+
 export function isPrivilege(card: { format?: string | null } | null | undefined): boolean {
   return card?.format === PRIVILEGE_FORMAT
 }
@@ -52,7 +74,10 @@ export function privilegeDiscountPercent(valueCents: number, saleCents: number):
  * null when the pair is acceptable.
  */
 export function privilegeAmountError(valueCents: number, saleCents: number): string | null {
-  if (!Number.isInteger(valueCents) || valueCents <= 0) return 'Valor de la tarjeta inválido'
+  if (!isPrivilegeDenomination(valueCents)) {
+    const options = PRIVILEGE_DENOMINATIONS_CENTS.map(formatPrivilegeValue)
+    return `Valor no permitido: las tarjetas Privilege son de ${options.slice(0, -1).join(', ')} o ${options[options.length - 1]}`
+  }
   if (!Number.isInteger(saleCents) || saleCents <= 0) return 'Precio de venta inválido'
   if (saleCents >= valueCents) return 'El precio de venta debe ser menor que el valor de la tarjeta'
   return null

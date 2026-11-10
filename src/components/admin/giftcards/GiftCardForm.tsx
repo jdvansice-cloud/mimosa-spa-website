@@ -10,6 +10,7 @@ import { collapseTreatmentNames, expandTreatmentLines, type TreatmentLine } from
 import {
   PRIVILEGE_BEARER, PRIVILEGE_FORMAT, isPrivilege, hasPrivilegeSeries, previewPrivilegeSerial,
   privilegeAmountError, privilegeDiscountPercent, type PrivilegeSeries,
+  PRIVILEGE_DENOMINATIONS_CENTS, PRIVILEGE_KNOWN_PRICES_CENTS, formatPrivilegeValue,
 } from '@/lib/giftcards/privilege'
 
 /**
@@ -64,9 +65,6 @@ interface MeResponse {
 }
 
 type AmountMode = 'amount' | 'treatments' | 'privilege'
-
-/** One-click fill for the standard Privilege offer; any other pair can be typed. */
-const PRIVILEGE_PRESET = { value: '1000.00', price: '800.00', label: '$1,000 por $800' }
 
 const DEFAULT_ITBMS_PERCENT = 7
 
@@ -377,6 +375,16 @@ export function GiftCardForm({
   const privilegeValueCents = toCents(privilegeValue)
   const privilegePriceCents = toCents(privilegePrice)
   const privilegeDiscount = privilegeDiscountPercent(privilegeValueCents, privilegePriceCents)
+  /**
+   * Privilege cards only exist in fixed denominations. Picking one fills the
+   * agreed price when there is one; otherwise it clears the price, so a
+   * figure typed for another denomination never rides along by accident.
+   */
+  const selectDenomination = (cents: number) => {
+    setPrivilegeValue((cents / 100).toFixed(2))
+    const known = PRIVILEGE_KNOWN_PRICES_CENTS[cents]
+    setPrivilegePrice(known ? (known / 100).toFixed(2) : '')
+  }
 
   const computedAmountCents = useMemo(() => {
     if (amountMode === 'treatments') return treatmentTotalCents
@@ -439,6 +447,7 @@ export function GiftCardForm({
     if (!buyerName.trim()) return setError('Nombre del comprador requerido')
     if (!privilegeMode && !recipientName.trim()) return setError('Nombre del destinatario requerido')
     if (amountMode === 'privilege') {
+      if (!privilegeValueCents) return setError('Elige la denominación de la tarjeta')
       const problem = privilegeAmountError(privilegeValueCents, privilegePriceCents)
       if (problem) return setError(problem)
     } else if (computedAmountCents <= 0) {
@@ -628,47 +637,50 @@ export function GiftCardForm({
 
           {amountMode === 'privilege' ? (
             <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2 max-w-xl">
-                <div>
-                  <label className="label" htmlFor="privilege-value">Valor de la tarjeta (USD) <span className="text-red-500">*</span></label>
-                  <input
-                    id="privilege-value"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="input"
-                    placeholder="1000.00"
-                    value={privilegeValue}
-                    onChange={e => setPrivilegeValue(e.target.value)}
-                    required
-                  />
-                  <p className="mt-1 text-xs text-warm-gray-500">Saldo de la tarjeta: lo usa quien la presente. Es lo que se imprime y lo que se carga en Mindbody.</p>
+              <div>
+                <div className="label" id="privilege-denomination-label">
+                  Denominación <span className="text-red-500">*</span>
                 </div>
-                <div>
-                  <label className="label" htmlFor="privilege-price">Precio de venta (USD) <span className="text-red-500">*</span></label>
-                  <input
-                    id="privilege-price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="input"
-                    placeholder="800.00"
-                    value={privilegePrice}
-                    onChange={e => setPrivilegePrice(e.target.value)}
-                    required
-                  />
-                  <p className="mt-1 text-xs text-warm-gray-500">Lo que paga el cliente. Nunca se imprime en la etiqueta.</p>
+                <div className="flex flex-wrap gap-3" role="radiogroup" aria-labelledby="privilege-denomination-label">
+                  {PRIVILEGE_DENOMINATIONS_CENTS.map(cents => {
+                    const selected = privilegeValueCents === cents
+                    return (
+                      <button
+                        key={cents}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => selectDenomination(cents)}
+                        className={`min-w-[8rem] rounded-lg border-2 px-5 py-3 text-xl font-semibold tabular-nums ${
+                          selected ? 'border-gold bg-gold/5 text-dark' : 'border-beige-300 bg-white text-dark hover:bg-beige-50'
+                        }`}
+                      >
+                        {formatPrivilegeValue(cents)}
+                      </button>
+                    )
+                  })}
                 </div>
+                <p className="mt-2 text-xs text-warm-gray-500">
+                  Valor de la tarjeta: el saldo que usa quien la presente. Es lo que se imprime y lo que se carga en Mindbody.
+                </p>
+              </div>
+
+              <div className="max-w-xs">
+                <label className="label" htmlFor="privilege-price">Precio de venta (USD) <span className="text-red-500">*</span></label>
+                <input
+                  id="privilege-price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className="input"
+                  value={privilegePrice}
+                  onChange={e => setPrivilegePrice(e.target.value)}
+                  required
+                />
+                <p className="mt-1 text-xs text-warm-gray-500">Lo que paga el comprador. Nunca se imprime en la etiqueta.</p>
               </div>
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <button
-                  type="button"
-                  onClick={() => { setPrivilegeValue(PRIVILEGE_PRESET.value); setPrivilegePrice(PRIVILEGE_PRESET.price) }}
-                  className="rounded-full border border-beige-400 bg-white px-3 py-1.5 text-sm font-medium text-dark hover:bg-beige"
-                >
-                  {PRIVILEGE_PRESET.label}
-                </button>
                 {privilegeDiscount != null ? (
                   <span className="text-sm text-dark">
                     Descuento <span className="font-semibold">{privilegeDiscount}%</span>

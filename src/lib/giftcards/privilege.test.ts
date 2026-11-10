@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
-  hasPrivilegeSeries, isPrivilege, maxSerialNumber, previewPrivilegeSerial,
-  privilegeAmountError, privilegeDiscountPercent,
+  PRIVILEGE_DENOMINATIONS_CENTS, PRIVILEGE_KNOWN_PRICES_CENTS,
+  formatPrivilegeValue, hasPrivilegeSeries, isPrivilege, isPrivilegeDenomination,
+  maxSerialNumber, previewPrivilegeSerial, privilegeAmountError, privilegeDiscountPercent,
 } from './privilege'
 
 describe('privilege series', () => {
@@ -41,6 +42,30 @@ describe('privilege amounts', () => {
     expect(privilegeDiscountPercent(50000, 42500)).toBe(15)
     expect(privilegeDiscountPercent(100000, 100000)).toBeNull()
     expect(privilegeDiscountPercent(100000, 0)).toBeNull()
+  })
+
+  it('only exists in $500, $1,000 and $2,500', () => {
+    expect([...PRIVILEGE_DENOMINATIONS_CENTS]).toEqual([50000, 100000, 250000])
+    expect(isPrivilegeDenomination(50000)).toBe(true)
+    expect(isPrivilegeDenomination(250000)).toBe(true)
+    expect(isPrivilegeDenomination(75000)).toBe(false)
+    expect(formatPrivilegeValue(250000)).toBe('$2,500')
+    // A valid price never rescues a value outside the denominations.
+    expect(privilegeAmountError(75000, 60000)).toBe(
+      'Valor no permitido: las tarjetas Privilege son de $500, $1,000 o $2,500',
+    )
+    expect(privilegeAmountError(50000, 40000)).toBeNull()
+    expect(privilegeAmountError(250000, 200000)).toBeNull()
+  })
+
+  it('knows the agreed price only where one was given', () => {
+    expect(PRIVILEGE_KNOWN_PRICES_CENTS[100000]).toBe(80000)
+    expect(PRIVILEGE_KNOWN_PRICES_CENTS[50000]).toBeUndefined()
+    expect(PRIVILEGE_KNOWN_PRICES_CENTS[250000]).toBeUndefined()
+    // Every known price must itself be a valid pair.
+    for (const [value, price] of Object.entries(PRIVILEGE_KNOWN_PRICES_CENTS)) {
+      expect(privilegeAmountError(Number(value), price)).toBeNull()
+    }
   })
 
   it('requires a price below the value', () => {
