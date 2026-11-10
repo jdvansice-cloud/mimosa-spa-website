@@ -21,11 +21,12 @@ export const PRIVILEGE_FORMAT = 'privilege'
 export const PRIVILEGE_BEARER = 'Al portador'
 
 /**
- * The only values a Privilege card can have, in cents: $500, $1,000, $2,500
- * (owner rule, 2026-11-10). Enforced in the form AND in the issue/edit APIs
- * through privilegeValueError().
+ * The only values a Privilege card can have, in cents: $500 and $1,000
+ * (owner rule, 2026-11-10; a $2,500 card existed for a few hours that day and
+ * was dropped before any was issued). Enforced in the form AND in the
+ * issue/edit APIs through privilegeValueError().
  */
-export const PRIVILEGE_DENOMINATIONS_CENTS = [50000, 100000, 250000] as const
+export const PRIVILEGE_DENOMINATIONS_CENTS = [50000, 100000] as const
 
 export function isPrivilegeDenomination(valueCents: number): boolean {
   return (PRIVILEGE_DENOMINATIONS_CENTS as readonly number[]).includes(valueCents)

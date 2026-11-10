@@ -181,7 +181,7 @@ export default function GiftCardManualPage() {
           <Section id="privilege" icon={Crown} title="Tarjetas Privilege">
             <p>
               Una tarjeta Privilege <strong>no es un regalo</strong>: es una <strong>tarjeta de beneficios al portador</strong>. Sus
-              beneficios y su saldo son de quien la presente. Existe solo en <strong>tres denominaciones: $500, $1,000 y $2,500</strong>.
+              beneficios y su saldo son de quien la presente. Existe solo en <strong>dos denominaciones: $500 y $1,000</strong>.
               Su precio de venta lo define Mindbody, no este sistema. Lleva su
               <strong> propia numeración por sede</strong>
               (por ejemplo <span className="font-mono">PCE000001</span> en Costa del Este y <span className="font-mono">PSF000001</span> en
@@ -190,7 +190,7 @@ export default function GiftCardManualPage() {
             <Steps>
               <li>En <Link href="/admin/giftcards/issue" className="text-gold-700 underline">Emitir Gift Card</Link>, en «1. Monto», elige <strong>Privilege</strong>.</li>
               <li>
-                Elige la <strong>denominación</strong> — <strong>$500</strong>, <strong>$1,000</strong> o <strong>$2,500</strong>: es el saldo disponible
+                Elige la <strong>denominación</strong> — <strong>$500</strong> o <strong>$1,000</strong>: es el saldo disponible
                 para quien presente la tarjeta, y no se puede escribir otro valor. Aquí <strong>no se escribe ningún precio</strong>: el precio de venta
                 ya viene definido en Mindbody. El sistema muestra el próximo serial de la serie.
               </li>
@@ -208,7 +208,7 @@ export default function GiftCardManualPage() {
               </li>
               <li>Presiona <strong>Sincronizar</strong>: pasa a <StatusPill tone="green">Vendida</StatusPill> con el saldo completo de su denominación.</li>
             </Steps>
-            <Shot src="/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege" caption="Privilege: se elige la denominación ($500, $1,000 o $2,500) y se muestra el próximo serial. Solo pide el comprador: no hay destinatario, dedicatoria ni precio." />
+            <Shot src="/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege" caption="Privilege: se elige la denominación ($500 o $1,000) y se muestra el próximo serial. Solo pide el comprador: no hay destinatario, dedicatoria ni precio." />
             <Shot src="/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta de una tarjeta Privilege" caption="Etiqueta Privilege: marca PRIVILEGE y código de barras con el serial de la serie Privilege. El valor solo aparece si marcas «Imprimir el monto»." />
             <Tip>
               En la lista de Emitidas las tarjetas Privilege llevan la marca <strong>Privilege</strong> junto al serial y figuran como
