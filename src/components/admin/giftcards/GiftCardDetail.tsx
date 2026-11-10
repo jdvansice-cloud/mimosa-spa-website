@@ -1,6 +1,7 @@
 'use client'
 
 import { formatTreatmentNames } from '@/lib/giftcards/treatments'
+import { isPrivilege, privilegeDiscountPercent } from '@/lib/giftcards/privilege'
 
 /**
  * The full record of one gift card, shared by the inline expansion in the
@@ -22,6 +23,8 @@ export interface GiftCardDetailData {
   recipient_email: string | null
   recipient_mindbody_client_id: number | null
   amount_cents: number
+  /** Privilege: the discounted price paid. Absent/NULL = sold at amount_cents. */
+  sale_amount_cents?: number | null
   base_amount_cents: number | null
   tax_cents: number | null
   treatment_name: string | null
@@ -100,8 +103,15 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
       {/* The three facts staff actually come for, big and first. */}
       <div className="flex flex-wrap items-end gap-x-10 gap-y-3 bg-white border border-beige-300 rounded-lg p-4">
         <div>
-          <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">Monto</div>
+          <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">{isPrivilege(card) ? 'Valor' : 'Monto'}</div>
           <div className="text-3xl font-bold text-dark tabular-nums">{money(card.amount_cents)}</div>
+          {card.sale_amount_cents != null && (
+            <div className="text-xs text-warm-gray-500 mt-0.5">
+              Precio de venta {money(card.sale_amount_cents)}
+              {privilegeDiscountPercent(card.amount_cents, card.sale_amount_cents) != null &&
+                ` · ${privilegeDiscountPercent(card.amount_cents, card.sale_amount_cents)}% desc.`}
+            </div>
+          )}
           {card.base_amount_cents != null && (
             <div className="text-xs text-warm-gray-500 mt-0.5">
               {money(card.base_amount_cents)} + {money(card.tax_cents ?? 0)} ITBMS
@@ -132,7 +142,7 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Section title="Tarjeta">
-          <Field label="Formato">{card.format === 'certificado' ? 'Certificado' : 'Gift card'}</Field>
+          <Field label="Formato">{isPrivilege(card) ? 'Privilege' : card.format === 'certificado' ? 'Certificado' : 'Gift card'}</Field>
           <Field label="Canal">{card.channel}</Field>
           <Field label="Sede">{card.location_label}</Field>
           <Field label="Vence">{when(card.expires_at)}</Field>

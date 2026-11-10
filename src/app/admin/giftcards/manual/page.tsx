@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, Gift, Printer, ShoppingCart, RefreshCw, Pencil, Search, AlertTriangle } from 'lucide-react'
+import { BookOpen, Gift, Printer, ShoppingCart, RefreshCw, Pencil, Search, AlertTriangle, Crown } from 'lucide-react'
 import { AdminPage } from '@/components/admin/AdminPage'
 import { StatusPill } from '@/components/admin/AdminTable'
 
@@ -14,6 +14,7 @@ const SECTIONS = [
   { id: 'emitir', label: '1. Emitir' },
   { id: 'imprimir', label: '2. Imprimir la etiqueta' },
   { id: 'mindbody', label: '3. Vender en Mindbody' },
+  { id: 'privilege', label: 'Tarjetas Privilege' },
   { id: 'estados', label: 'Estados' },
   { id: 'editar', label: 'Editar una Gift Card' },
   { id: 'consultar', label: 'Consultar y sincronizar' },
@@ -106,7 +107,7 @@ export default function GiftCardManualPage() {
               <li>Entra a <Link href="/admin/giftcards/issue" className="text-gold-700 underline">Emitir Gift Card</Link>.</li>
               <li>
                 <strong>Monto.</strong> Elige <em>Monto directo</em> (escribes el valor) o <em>Por tratamientos</em> (sumas
-                tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada). Los extras/adicionales también están en la lista, y para parejas o grupos usa el botón <strong>+</strong> para repetir un tratamiento: en la etiqueta sale como «2× Masaje Relajante».
+                tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada). Los extras/adicionales también están en la lista, y para parejas o grupos usa el botón <strong>+</strong> para repetir un tratamiento: en la etiqueta sale como «2× Masaje Relajante». La tercera opción, <em>Privilege</em>, tiene su propia sección más abajo.
               </li>
               <li>
                 <strong>Comprador.</strong> Escribe el nombre y elige el cliente de Mindbody en la lista si aparece — así
@@ -169,6 +170,41 @@ export default function GiftCardManualPage() {
               Para canjear: en Mindbody, al cobrar un servicio, elige <em>Gift Card</em> como forma de pago y escanea la misma etiqueta. El saldo baja
               en Mindbody y, tras sincronizar, también aquí.
             </p>
+          </Section>
+
+          <Section id="privilege" icon={Crown} title="Tarjetas Privilege">
+            <p>
+              Una tarjeta Privilege es una Gift Card de <strong>monto alto que se vende a precio preferencial</strong> — por ejemplo,
+              vale <strong>$1,000</strong> y el cliente paga <strong>$800</strong>. Lleva su <strong>propia numeración por sede</strong>
+              (por ejemplo <span className="font-mono">PCE000001</span> en Costa del Este y <span className="font-mono">PSF000001</span> en
+              San Francisco), separada de las Gift Cards regulares.
+            </p>
+            <Steps>
+              <li>En <Link href="/admin/giftcards/issue" className="text-gold-700 underline">Emitir Gift Card</Link>, en «1. Monto», elige <strong>Privilege</strong>.</li>
+              <li>
+                Escribe el <strong>Valor de la tarjeta</strong> (el saldo que recibe el cliente) y el <strong>Precio de venta</strong> (lo que paga).
+                El botón <strong>$1,000 por $800</strong> llena la oferta estándar. El sistema muestra el descuento y el próximo serial de la serie.
+              </li>
+              <li>Completa comprador y destinatario y presiona <strong>Emitir e imprimir</strong>.</li>
+              <li>
+                La etiqueta imprime el <strong>valor</strong> y la marca <strong>PRIVILEGE</strong>. El precio de venta nunca se imprime.
+              </li>
+              <li>
+                En Mindbody, vende la gift card con <strong>valor igual al valor de la tarjeta</strong> ($1,000) y <strong>cobra el precio de venta</strong> ($800),
+                escaneando el serial de la etiqueta como número de la gift card.
+              </li>
+              <li>Presiona <strong>Sincronizar</strong>: pasa a <StatusPill tone="green">Vendida</StatusPill> con el saldo completo ($1,000).</li>
+            </Steps>
+            <Shot src="/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege" caption="Privilege: valor de la tarjeta, precio de venta, descuento calculado y próximo serial de la serie de la sede." />
+            <Shot src="/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta de una tarjeta Privilege" caption="Etiqueta Privilege: valor, marca PRIVILEGE y código de barras con el serial de la serie Privilege." />
+            <Tip>
+              En la lista de Emitidas las tarjetas Privilege llevan la marca <strong>Privilege</strong> junto al serial, y el detalle muestra el
+              valor, el precio de venta y el descuento. Se editan igual que las demás mientras estén Emitidas; el tipo de tarjeta no cambia.
+            </Tip>
+            <Tip warn>
+              ¿La opción Privilege aparece deshabilitada? Esa sede no tiene serie Privilege configurada. Administración la define en
+              Gift Cards → Ubicaciones y Seriales → <strong>Serie Privilege</strong> (prefijo y próximo número por sede).
+            </Tip>
           </Section>
 
           <Section id="estados" icon={RefreshCw} title="Estados de una Gift Card">
@@ -281,6 +317,10 @@ export default function GiftCardManualPage() {
                   <tr>
                     <td className="px-4 py-3">Se dañó la etiqueta</td>
                     <td className="px-4 py-3">Reimprime desde la tarjeta (mismo serial). No emitas una nueva: eso crea otro serial.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3">La opción Privilege está deshabilitada</td>
+                    <td className="px-4 py-3">La sede no tiene serie Privilege. Avisa a administración (Ubicaciones y Seriales → Serie Privilege).</td>
                   </tr>
                 </tbody>
               </table>

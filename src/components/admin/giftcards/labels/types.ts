@@ -52,6 +52,8 @@ export const PRINTER_PROFILES: LabelPrinterProfile[] = [D520_PROFILE, TSP143_PRO
 
 export interface LabelCard {
   serial: string
+  /** 'privilege' prints a small PRIVILEGE mark; anything else prints as before. */
+  format?: string | null
   buyer_name: string
   recipient_name: string
   amount_cents: number

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
+import { maxSerialNumber } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -11,7 +12,13 @@ interface UpdatePayload {
   prefix?: string
   serial_length?: number
   is_active?: boolean
+  /** Privilege series. '' or null switches Privilege off for the location. */
+  privilege_prefix?: string | null
+  privilege_serial_length?: number
+  privilege_next_sequence_value?: number
 }
+
+const PREFIX_RE = /^[A-Z0-9]{1,8}$/
 
 export async function PATCH(
   request: NextRequest,
@@ -71,13 +78,90 @@ export async function PATCH(
     update.is_active = !!body.is_active
   }
 
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  // --- Privilege series (super admin only: it numbers high-value cards) ---
+  const touchesPrivilege =
+    body.privilege_prefix !== undefined ||
+    body.privilege_serial_length !== undefined ||
+    body.privilege_next_sequence_value !== undefined
+  if (touchesPrivilege && ctx.locationConfigId) {
+    return NextResponse.json({ error: 'Forbidden — solo administración gestiona la serie Privilege' }, { status: 403 })
+  }
+
+  // Both series share one namespace: gift_cards.serial is unique, so a
+  // regular prefix equal to another row's Privilege prefix (or vice versa)
+  // would eventually mint the same serial twice.
+  if (body.prefix !== undefined || body.privilege_prefix) {
+    const { data: all, error: allError } = await supabase
+      .from('gift_card_serial_config')
+      .select('*')
+    if (allError) return NextResponse.json({ error: allError.message }, { status: 500 })
+    const rows = (all ?? []) as Array<{ id: string; prefix: string; privilege_prefix?: string | null; location_name: string }>
+    const current = rows.find(r => r.id === id)
+    const nextPrefix = body.prefix ?? current?.prefix
+    const nextPrivilege = body.privilege_prefix !== undefined
+      ? (body.privilege_prefix || null)
+      : (current?.privilege_prefix ?? null)
+    if (nextPrivilege && nextPrivilege === nextPrefix) {
+      return NextResponse.json({ error: 'El prefijo Privilege debe ser distinto del prefijo regular' }, { status: 400 })
+    }
+    for (const r of rows) {
+      if (r.id === id) continue
+      const taken = [r.prefix, r.privilege_prefix].filter(Boolean)
+      if (body.prefix !== undefined && taken.includes(body.prefix)) {
+        return NextResponse.json({ error: `El prefijo ${body.prefix} ya lo usa ${r.location_name}` }, { status: 409 })
+      }
+      if (nextPrivilege && body.privilege_prefix !== undefined && taken.includes(nextPrivilege)) {
+        return NextResponse.json({ error: `El prefijo ${nextPrivilege} ya lo usa ${r.location_name}` }, { status: 409 })
+      }
+    }
+  }
+
+  if (body.privilege_prefix !== undefined) {
+    const p = body.privilege_prefix || null
+    if (p !== null && !PREFIX_RE.test(p)) {
+      return NextResponse.json({ error: 'privilege_prefix must be 1–8 uppercase letters/digits' }, { status: 400 })
+    }
+    update.privilege_prefix = p
+  }
+  if (body.privilege_serial_length !== undefined) {
+    if (!Number.isInteger(body.privilege_serial_length) || body.privilege_serial_length < 4 || body.privilege_serial_length > 12) {
+      return NextResponse.json({ error: 'privilege_serial_length must be 4–12' }, { status: 400 })
+    }
+    update.privilege_serial_length = body.privilege_serial_length
+  }
+  if (body.privilege_next_sequence_value !== undefined) {
+    const next = body.privilege_next_sequence_value
+    if (!Number.isInteger(next) || next < 1) {
+      return NextResponse.json({ error: 'El próximo número debe ser un entero mayor que 0' }, { status: 400 })
+    }
+    // Never rewind onto numbers already printed on a card.
+    const { data: cfgRow } = await supabase
+      .from('gift_card_serial_config').select('*').eq('id', id).maybeSingle()
+    const prefix = (update.privilege_prefix as string | null | undefined) ??
+      (cfgRow as { privilege_prefix?: string | null } | null)?.privilege_prefix ?? null
+    if (prefix) {
+      const { data: issued, error: issuedError } = await supabase
+        .from('gift_cards').select('serial').like('serial', `${prefix}%`)
+      if (issuedError) return NextResponse.json({ error: issuedError.message }, { status: 500 })
+      const used = maxSerialNumber((issued ?? []).map(r => r.serial as string), prefix)
+      if (next <= used) {
+        return NextResponse.json(
+          { error: `Ya existe una tarjeta ${prefix} con el número ${used}; el próximo debe ser ${used + 1} o mayor.` },
+          { status: 409 },
+        )
+      }
+    }
+    update.privilege_next_sequence_value = next
+  }
+
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: 'nothing to update' }, { status: 400 })
   }
 
   update.updated_at = new Date().toISOString()
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey)
   const { data, error } = await supabase
     .from('gift_card_serial_config')
     .update(update)

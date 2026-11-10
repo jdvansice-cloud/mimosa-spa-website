@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Hash, Plus, Loader2, Trash2 } from 'lucide-react'
+import { ArrowLeft, Hash, Plus, Loader2, Trash2, Crown } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
 import { AdminTable, CardField, type AdminColumn } from '@/components/admin/AdminTable'
+import { previewPrivilegeSerial, type PrivilegeSeries } from '@/lib/giftcards/privilege'
 
-interface LocationConfig {
+interface LocationConfig extends PrivilegeSeries {
   id: string
   mindbody_location_id: number
   location_name: string
@@ -184,6 +185,74 @@ export default function GiftCardConfigPage() {
     </button>
   )
 
+  // --- Privilege series: a second prefix + counter on the same location ---
+  // The columns arrive with migration 20261110_gc_privilege.sql; until it is
+  // applied the API returns rows without them and this section says so.
+  const privilegeReady = rows.length > 0 && rows.every(r => r.privilege_serial_length != null)
+
+  const privilegePrefixInput = (row: LocationConfig) => (
+    <input
+      type="text"
+      className="input font-mono uppercase w-28"
+      maxLength={8}
+      placeholder="—"
+      aria-label={`Prefijo Privilege de ${row.location_name}`}
+      value={row.privilege_prefix ?? ''}
+      onChange={e => updateLocal(row.id, {
+        privilege_prefix: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''),
+      })}
+      onBlur={() => saveRow(row, { privilege_prefix: row.privilege_prefix || null })}
+    />
+  )
+
+  const privilegeLengthInput = (row: LocationConfig) => (
+    <input
+      type="number"
+      min={4}
+      max={12}
+      className="input w-20"
+      aria-label={`Longitud del serial Privilege de ${row.location_name}`}
+      value={row.privilege_serial_length ?? 6}
+      onChange={e => updateLocal(row.id, { privilege_serial_length: Number(e.target.value) })}
+      onBlur={() => saveRow(row, { privilege_serial_length: row.privilege_serial_length ?? 6 })}
+    />
+  )
+
+  const privilegeNextInput = (row: LocationConfig) => (
+    <input
+      type="number"
+      min={1}
+      className="input w-28 tabular-nums"
+      aria-label={`Próximo número Privilege de ${row.location_name}`}
+      value={row.privilege_next_sequence_value ?? 1}
+      onChange={e => updateLocal(row.id, { privilege_next_sequence_value: Number(e.target.value) })}
+      onBlur={() => saveRow(row, { privilege_next_sequence_value: row.privilege_next_sequence_value ?? 1 })}
+    />
+  )
+
+  const privilegePreview = (row: LocationConfig) =>
+    previewPrivilegeSerial(row) ?? <span className="font-body text-warm-gray-500">Sin serie — no se ofrece aquí</span>
+
+  const privilegeColumns: Array<AdminColumn<LocationConfig>> = [
+    { key: 'name', header: 'Ubicación', render: row => row.location_name },
+    { key: 'pprefix', header: 'Prefijo Privilege', render: privilegePrefixInput },
+    { key: 'plength', header: 'Longitud', render: privilegeLengthInput },
+    { key: 'pnext', header: 'Próximo número', render: privilegeNextInput },
+    { key: 'ppreview', header: 'Próximo serial', cellClassName: 'font-mono', render: privilegePreview },
+  ]
+
+  const privilegeMobileCard = (row: LocationConfig) => (
+    <>
+      <div className="font-semibold text-dark">{row.location_name}</div>
+      <p className="font-mono text-sm text-warm-gray-500">Próximo: {privilegePreview(row)}</p>
+      <dl className="mt-3 space-y-2">
+        <CardField label="Prefijo">{privilegePrefixInput(row)}</CardField>
+        <CardField label="Longitud">{privilegeLengthInput(row)}</CardField>
+        <CardField label="Próximo número">{privilegeNextInput(row)}</CardField>
+      </dl>
+    </>
+  )
+
   const columns: Array<AdminColumn<LocationConfig>> = [
     { key: 'name', header: 'Ubicación', render: nameInput },
     { key: 'mbid', header: 'Mindbody ID', cellClassName: 'font-mono', render: row => row.mindbody_location_id },
@@ -316,6 +385,37 @@ export default function GiftCardConfigPage() {
         error={error}
         empty={'No hay ubicaciones todavía. Crea la primera con el botón "Nueva ubicación".'}
       />
+
+      {/* Privilege series */}
+      <section className="mt-10" aria-labelledby="privilege-series-heading">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-gold/10 rounded-lg">
+            <Crown className="h-5 w-5 text-gold-700" />
+          </div>
+          <h2 id="privilege-series-heading" className="text-2xl font-display font-semibold text-dark">Serie Privilege</h2>
+        </div>
+        <p className="text-warm-gray-500 mb-4 max-w-3xl">
+          Las tarjetas Privilege (monto alto a precio preferencial) llevan su propia numeración por ubicación,
+          separada de las Gift Cards regulares. Define el prefijo y, si hace falta, el próximo número. Deja el
+          prefijo vacío para no ofrecer Privilege en esa ubicación.
+        </p>
+        {loading ? null : !privilegeReady ? (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-dark max-w-3xl">
+            Falta aplicar la migración <code className="font-mono text-xs">20261110_gc_privilege.sql</code> en
+            Supabase (SQL editor). Al aplicarla aparecen aquí las series de cada ubicación.
+          </div>
+        ) : (
+          <AdminTable
+            rows={rows}
+            columns={privilegeColumns}
+            rowKey={row => `priv-${row.id}`}
+            mobileCard={privilegeMobileCard}
+            loading={false}
+            error={null}
+            empty="No hay ubicaciones todavía."
+          />
+        )}
+      </section>
 
     </div>
   )

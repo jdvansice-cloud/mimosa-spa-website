@@ -11,10 +11,12 @@ import { Button } from '@/components/ui'
 import { AdminTable, CardField, StatusPill, type AdminColumn } from '@/components/admin/AdminTable'
 import { GiftCardDetail, type GiftCardDetailData } from '@/components/admin/giftcards/GiftCardDetail'
 import { formatTreatmentNames } from '@/lib/giftcards/treatments'
+import { isPrivilege } from '@/lib/giftcards/privilege'
 
 interface IssuedRow {
   id: string
   serial: string
+  format?: string | null
   buyer_name: string
   recipient_name: string
   amount_cents: number
@@ -72,6 +74,15 @@ function statusLabel(row: IssuedRow): { label: string; tone: 'green' | 'amber' |
 
 /** Only an Emitida card can still change — after the sale the record is frozen. */
 const isEditable = (row: IssuedRow) => !row.sold_at && !row.redeemed_at
+
+/** Marks a Privilege card wherever its serial is shown. */
+function PrivilegeTag() {
+  return (
+    <span className="ml-2 align-middle rounded bg-gold/15 px-1.5 py-0.5 font-body text-[10px] font-bold uppercase tracking-wide text-gold-700">
+      Privilege
+    </span>
+  )
+}
 
 /** Pill filter — shared vocabulary with the KPIs section. */
 function Pill({
@@ -282,6 +293,7 @@ function IssuedList() {
             ? <ChevronDown className="h-4 w-4 text-gold-600" />
             : <ChevronRight className="h-4 w-4 text-warm-gray-400" />}
           {r.serial}
+          {isPrivilege(r) && <PrivilegeTag />}
         </button>
       ),
     },
@@ -363,6 +375,7 @@ function IssuedList() {
             className="font-mono text-lg font-semibold text-dark break-all underline decoration-beige-400 underline-offset-2 text-left"
           >
             {row.serial}
+            {isPrivilege(row) && <PrivilegeTag />}
           </button>
           <StatusPill tone={st.tone}>{st.label}</StatusPill>
         </div>

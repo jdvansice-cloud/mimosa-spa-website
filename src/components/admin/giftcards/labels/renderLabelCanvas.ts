@@ -267,12 +267,18 @@ export async function renderLabelCanvas(
         )
       : []
 
+  // A Privilege card carries no treatments; its only mark is a small
+  // PRIVILEGE eyebrow in the same style as INCLUYE, above the message.
+  const privilegeMark = card.format === 'privilege' && !treatLines.length
+  const privilegeH = privilegeMark ? EYEBROW_SIZE + (msgLines.length ? pt(4) : 0) : 0
+
   // Bigger body sizes can overflow the band when both blocks max out their
   // line clamps — drop trailing lines (with ellipsis) before crowding the
   // barcode.
   const bandH = barsTop - pt(2) - bandTop
   const eyebrowH = () => (treatLines.length ? EYEBROW_SIZE + pt(2.5) : 0)
   const contentH = () =>
+    privilegeH +
     eyebrowH() +
     treatLines.length * TREAT_LINE +
     (treatLines.length && msgLines.length ? pt(5) : 0) +
@@ -293,7 +299,17 @@ export async function renderLabelCanvas(
   const treatH = treatLines.length * TREAT_LINE
   const msgH = msgLines.length * MSG_LINE
   const gap = treatLines.length && msgLines.length ? pt(5) : 0
-  let y = bandTop + Math.max(0, (bandH - (eyebrowH() + treatH + gap + msgH)) / 2)
+  let y = bandTop + Math.max(0, (bandH - (privilegeH + eyebrowH() + treatH + gap + msgH)) / 2)
+
+  if (privilegeMark) {
+    ctx.font = `700 ${EYEBROW_SIZE}px ${LATO}`
+    if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = `${pt(1.3)}px`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+    ctx.fillText('PRIVILEGE', centerX, y)
+    if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = '0px'
+    y += privilegeH
+  }
 
   if (treatLines.length) {
     ctx.font = `700 ${EYEBROW_SIZE}px ${LATO}`

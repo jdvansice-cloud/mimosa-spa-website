@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     supabase
       .from('gift_cards')
       .select(
-        'id, serial, buyer_name, recipient_name, amount_cents, gift_treatment_names, gift_card_serial_config_id, issued_at, redeemed_at, sold_at, mindbody_remaining_balance_cents, mindbody_synced_at',
+        'id, serial, format, buyer_name, recipient_name, amount_cents, gift_treatment_names, gift_card_serial_config_id, issued_at, redeemed_at, sold_at, mindbody_remaining_balance_cents, mindbody_synced_at',
       ),
   )
     .order('issued_at', { ascending: false })

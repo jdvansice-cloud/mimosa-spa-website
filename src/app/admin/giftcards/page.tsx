@@ -43,7 +43,7 @@ const tiles = [
     href: '/admin/giftcards/config',
     icon: Hash,
     title: 'Configuración de Serial',
-    description: 'Prefijo y longitud del número correlativo de las Gift Cards.',
+    description: 'Prefijo y numeración por ubicación, incluida la serie de tarjetas Privilege.',
   },
   {
     href: '/admin/giftcards/settings',

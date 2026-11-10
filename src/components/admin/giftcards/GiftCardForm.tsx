@@ -2,11 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Loader2, Plus, Minus, X, ChevronRight, ChevronDown, Gift, Save } from 'lucide-react'
+import { Loader2, Plus, Minus, X, ChevronRight, ChevronDown, Gift, Save, Crown } from 'lucide-react'
 import { Button, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { ClientLookupInput, type ClientSuggestion } from '@/components/admin/ClientLookupInput'
 import type { GiftCardDetailData } from './GiftCardDetail'
 import { collapseTreatmentNames, expandTreatmentLines, type TreatmentLine } from '@/lib/giftcards/treatments'
+import {
+  PRIVILEGE_FORMAT, isPrivilege, hasPrivilegeSeries, previewPrivilegeSerial,
+  privilegeAmountError, privilegeDiscountPercent, type PrivilegeSeries,
+} from '@/lib/giftcards/privilege'
 
 /**
  * The gift card form, shared by "Emitir" (create) and "Editar" (edit — only
@@ -43,7 +47,7 @@ interface TreatmentsResponse {
   count: number
 }
 
-interface LocationConfig {
+interface LocationConfig extends PrivilegeSeries {
   id: string
   mindbody_location_id: number
   location_name: string
@@ -59,7 +63,10 @@ interface MeResponse {
   isSuperAdmin: boolean
 }
 
-type AmountMode = 'amount' | 'treatments'
+type AmountMode = 'amount' | 'treatments' | 'privilege'
+
+/** One-click fill for the standard Privilege offer; any other pair can be typed. */
+const PRIVILEGE_PRESET = { value: '1000.00', price: '800.00', label: '$1,000 por $800' }
 
 const DEFAULT_ITBMS_PERCENT = 7
 
@@ -84,6 +91,10 @@ export interface GiftCardFormPayload {
   notes: string | null
   promotion_id: string | null
   promotion_name: string | null
+  /** 'privilege' mints from the location's Privilege series. */
+  format: 'gift_card' | 'privilege'
+  /** Privilege only: the discounted price; amount_cents is the card's value. */
+  sale_amount_cents: number | null
 }
 
 function formatMoney(cents: number | null | undefined): string {
@@ -165,11 +176,21 @@ export function GiftCardForm({
   const [servicesLoading, setServicesLoading] = useState(false)
   const [servicesError, setServicesError] = useState<string | null>(null)
 
+  // A card's kind is fixed once issued (its serial belongs to that series),
+  // so an edit opens in the card's own mode and can't cross over.
+  const editingPrivilege = isEdit && isPrivilege(initial)
   const [amountMode, setAmountMode] = useState<AmountMode>(
-    initial?.gift_treatment_names?.length ? 'treatments' : 'amount',
+    isPrivilege(initial) ? 'privilege' : initial?.gift_treatment_names?.length ? 'treatments' : 'amount',
   )
   const [openAmount, setOpenAmount] = useState(
     initial ? (initial.amount_cents / 100).toFixed(2) : '',
+  )
+  // Privilege: what the card is worth vs. what the buyer pays for it.
+  const [privilegeValue, setPrivilegeValue] = useState(
+    isPrivilege(initial) && initial ? (initial.amount_cents / 100).toFixed(2) : '',
+  )
+  const [privilegePrice, setPrivilegePrice] = useState(
+    isPrivilege(initial) && initial?.sale_amount_cents ? (initial.sale_amount_cents / 100).toFixed(2) : '',
   )
   // Selected catalog treatments with quantities — a couple's card carries
   // the same massage twice, a group's three times. Insertion order is kept
@@ -350,10 +371,25 @@ export function GiftCardForm({
 
   const treatmentTotalCents = treatmentSubtotalCents + treatmentItbmsCents
 
+  const privilegeValueCents = toCents(privilegeValue)
+  const privilegePriceCents = toCents(privilegePrice)
+  const privilegeDiscount = privilegeDiscountPercent(privilegeValueCents, privilegePriceCents)
+
   const computedAmountCents = useMemo(() => {
     if (amountMode === 'treatments') return treatmentTotalCents
+    if (amountMode === 'privilege') return privilegeValueCents
     return toCents(openAmount)
-  }, [amountMode, treatmentTotalCents, openAmount])
+  }, [amountMode, treatmentTotalCents, openAmount, privilegeValueCents])
+
+  // Privilege needs the location's own series. If staff switch to a location
+  // without one, fall back rather than leave an option they can't submit.
+  const selectedConfig = locations.find(l => l.id === configId)
+  const privilegeAvailable = isEdit ? editingPrivilege : hasPrivilegeSeries(selectedConfig)
+  useEffect(() => {
+    if (!isEdit && amountMode === 'privilege' && configId && !scopeLoading && !privilegeAvailable) {
+      setAmountMode('amount')
+    }
+  }, [isEdit, amountMode, configId, scopeLoading, privilegeAvailable])
 
   // Three fixed buckets in display order (Body / Facial / Addon).
   // Filter out already-selected rows and apply the search query.
@@ -399,7 +435,10 @@ export function GiftCardForm({
     if (!configId) return setError('Selecciona una ubicación')
     if (!buyerName.trim()) return setError('Nombre del comprador requerido')
     if (!recipientName.trim()) return setError('Nombre del destinatario requerido')
-    if (computedAmountCents <= 0) {
+    if (amountMode === 'privilege') {
+      const problem = privilegeAmountError(privilegeValueCents, privilegePriceCents)
+      if (problem) return setError(problem)
+    } else if (computedAmountCents <= 0) {
       return setError(amountMode === 'treatments'
         ? 'Selecciona al menos un tratamiento'
         : 'Monto inválido')
@@ -438,8 +477,11 @@ export function GiftCardForm({
       print_recipient: false,
       print_treatments: includeTreatments && printTreatments,
       notes: staffNote.trim() || null,
-      promotion_id: selectedPromo?.id ?? null,
-      promotion_name: selectedPromo?.title_es ?? null,
+      // A promo only belongs to a treatments card; switching modes drops it.
+      promotion_id: includeTreatments ? selectedPromo?.id ?? null : null,
+      promotion_name: includeTreatments ? selectedPromo?.title_es ?? null : null,
+      format: amountMode === 'privilege' ? PRIVILEGE_FORMAT : 'gift_card',
+      sale_amount_cents: amountMode === 'privilege' ? privilegePriceCents : null,
     }
 
     setSubmitting(true)
@@ -464,7 +506,6 @@ export function GiftCardForm({
   }
 
   const isLocationLocked = !!me?.locationConfigId
-  const selectedLocation = locations.find(l => l.id === configId)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -495,13 +536,13 @@ export function GiftCardForm({
                 ))}
               </select>
             )}
-            {selectedLocation && (
+            {selectedConfig && (
               <div className="text-xs text-warm-gray-500 mt-2">
-                Prefijo: <span className="font-mono text-dark">{selectedLocation.prefix}</span>
+                Prefijo: <span className="font-mono text-dark">{selectedConfig.prefix}</span>
                 {' · '}Próximo serial:{' '}
                 <span className="font-mono text-dark">
-                  {selectedLocation.prefix}
-                  {String(selectedLocation.next_sequence_value).padStart(selectedLocation.serial_length, '0')}
+                  {selectedConfig.prefix}
+                  {String(selectedConfig.next_sequence_value).padStart(selectedConfig.serial_length, '0')}
                 </span>
               </div>
             )}
@@ -513,7 +554,16 @@ export function GiftCardForm({
       <Card variant="default" padding="md">
         <CardHeader><CardTitle>1. Monto</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-2">
+          {editingPrivilege ? (
+            <div className="flex items-center gap-3 rounded-lg border-2 border-gold bg-gold/5 p-4">
+              <Crown className="h-5 w-5 text-gold-700 shrink-0" />
+              <div>
+                <div className="font-medium text-dark">Tarjeta Privilege</div>
+                <div className="text-sm text-warm-gray-500">El tipo de tarjeta no cambia al editar: su serial pertenece a la serie Privilege.</div>
+              </div>
+            </div>
+          ) : (
+          <div className={`grid gap-3 ${isEdit ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
             <label className={`flex gap-3 p-4 rounded-lg border-2 cursor-pointer ${amountMode === 'amount' ? 'border-gold bg-gold/5' : 'border-beige-300'}`}>
               <input
                 type="radio"
@@ -540,9 +590,100 @@ export function GiftCardForm({
                 <div className="text-sm text-warm-gray-500">Suma tratamientos + ITBMS — referencia para el cliente.</div>
               </div>
             </label>
+            {!isEdit && (
+              <label
+                className={`flex gap-3 p-4 rounded-lg border-2 ${
+                  !privilegeAvailable
+                    ? 'border-beige-200 bg-beige-50 cursor-not-allowed'
+                    : amountMode === 'privilege' ? 'border-gold bg-gold/5 cursor-pointer' : 'border-beige-300 cursor-pointer'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="amountMode"
+                  checked={amountMode === 'privilege'}
+                  onChange={() => setAmountMode('privilege')}
+                  disabled={!privilegeAvailable}
+                  className="mt-1"
+                />
+                <div>
+                  <div className={`font-medium flex items-center gap-1.5 ${privilegeAvailable ? 'text-dark' : 'text-warm-gray-500'}`}>
+                    <Crown className="h-4 w-4 text-gold-700" /> Privilege
+                  </div>
+                  <div className="text-sm text-warm-gray-500">
+                    {privilegeAvailable
+                      ? 'Monto alto con precio preferencial — serie propia.'
+                      : configId
+                        ? 'Esta ubicación aún no tiene serie Privilege configurada.'
+                        : 'Selecciona una ubicación primero.'}
+                  </div>
+                </div>
+              </label>
+            )}
           </div>
+          )}
 
-          {amountMode === 'amount' ? (
+          {amountMode === 'privilege' ? (
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2 max-w-xl">
+                <div>
+                  <label className="label" htmlFor="privilege-value">Valor de la tarjeta (USD) <span className="text-red-500">*</span></label>
+                  <input
+                    id="privilege-value"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="input"
+                    placeholder="1000.00"
+                    value={privilegeValue}
+                    onChange={e => setPrivilegeValue(e.target.value)}
+                    required
+                  />
+                  <p className="mt-1 text-xs text-warm-gray-500">Saldo que recibe el cliente. Es lo que se imprime y lo que se carga en Mindbody.</p>
+                </div>
+                <div>
+                  <label className="label" htmlFor="privilege-price">Precio de venta (USD) <span className="text-red-500">*</span></label>
+                  <input
+                    id="privilege-price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="input"
+                    placeholder="800.00"
+                    value={privilegePrice}
+                    onChange={e => setPrivilegePrice(e.target.value)}
+                    required
+                  />
+                  <p className="mt-1 text-xs text-warm-gray-500">Lo que paga el cliente. Nunca se imprime en la etiqueta.</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <button
+                  type="button"
+                  onClick={() => { setPrivilegeValue(PRIVILEGE_PRESET.value); setPrivilegePrice(PRIVILEGE_PRESET.price) }}
+                  className="rounded-full border border-beige-400 bg-white px-3 py-1.5 text-sm font-medium text-dark hover:bg-beige"
+                >
+                  {PRIVILEGE_PRESET.label}
+                </button>
+                {privilegeDiscount != null ? (
+                  <span className="text-sm text-dark">
+                    Descuento <span className="font-semibold">{privilegeDiscount}%</span>
+                    <span className="text-warm-gray-500"> · el cliente ahorra {formatMoney(privilegeValueCents - privilegePriceCents)}</span>
+                  </span>
+                ) : privilegeValueCents > 0 && privilegePriceCents > 0 ? (
+                  <span className="text-sm text-red-600">El precio de venta debe ser menor que el valor.</span>
+                ) : null}
+              </div>
+
+              {!isEdit && previewPrivilegeSerial(selectedConfig) && (
+                <p className="text-xs text-warm-gray-500">
+                  Serie Privilege de esta ubicación · próximo serial{' '}
+                  <span className="font-mono text-dark">{previewPrivilegeSerial(selectedConfig)}</span>
+                </p>
+              )}
+            </div>
+          ) : amountMode === 'amount' ? (
             <div className="max-w-xs">
               <label className="label">Monto (USD) <span className="text-red-500">*</span></label>
               <input
@@ -871,7 +1012,12 @@ export function GiftCardForm({
       <div className="flex items-center justify-between gap-4">
         <div className="text-sm text-warm-gray-500">
           {computedAmountCents > 0
-            ? <>{isEdit ? 'Queda por' : 'Se emitirá por'} <span className="text-dark font-medium">{formatMoney(computedAmountCents)}</span></>
+            ? <>
+                {isEdit ? 'Queda por' : 'Se emitirá por'} <span className="text-dark font-medium">{formatMoney(computedAmountCents)}</span>
+                {amountMode === 'privilege' && privilegePriceCents > 0 && (
+                  <> · precio de venta <span className="text-dark font-medium">{formatMoney(privilegePriceCents)}</span></>
+                )}
+              </>
             : '—'}
         </div>
         <div className="flex items-center gap-4">

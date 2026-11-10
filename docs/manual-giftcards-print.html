@@ -82,7 +82,7 @@
   <p class="sub">Todo el ciclo de una Gift Card en el sitio de administración y en Mindbody — para recepción, administración y socios.</p>
   <div class="meta">
     <div><b>Mimosa Spa Retreat</b>Costa del Este · San Francisco</div>
-    <div><b>Versión</b>Septiembre 2026</div>
+    <div><b>Versión</b>Noviembre 2026</div>
     <div><b>En línea</b>www.mimosaretreat.com/admin/giftcards/manual</div>
   </div>
 </section>
@@ -94,10 +94,11 @@
     <div><span>2</span>Emitir una Gift Card</div>
     <div><span>3</span>Imprimir la etiqueta</div>
     <div><span>4</span>Vender la Gift Card en Mindbody</div>
-    <div><span>5</span>Estados de una Gift Card</div>
-    <div><span>6</span>Editar una Gift Card</div>
-    <div><span>7</span>Consultar y sincronizar</div>
-    <div><span>8</span>Problemas frecuentes</div>
+    <div><span>5</span>Tarjetas Privilege</div>
+    <div><span>6</span>Estados de una Gift Card</div>
+    <div><span>7</span>Editar una Gift Card</div>
+    <div><span>8</span>Consultar y sincronizar</div>
+    <div><span>9</span>Problemas frecuentes</div>
   </div>
 </section>
 
@@ -118,7 +119,7 @@
   <h2>Emitir una Gift Card</h2>
   <ol class="steps">
     <li>Entra a <strong>Emitir Gift Card</strong> en el panel de administración.</li>
-    <li><strong>Monto.</strong> Elige <em>Monto directo</em> (escribes el valor) o <em>Por tratamientos</em> (sumas tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada). Los extras/adicionales también están en la lista, y para parejas o grupos usa el botón <strong>+</strong> para repetir un tratamiento: en la etiqueta sale como «2× Masaje Relajante».</li>
+    <li><strong>Monto.</strong> Elige <em>Monto directo</em> (escribes el valor) o <em>Por tratamientos</em> (sumas tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada). Los extras/adicionales también están en la lista, y para parejas o grupos usa el botón <strong>+</strong> para repetir un tratamiento: en la etiqueta sale como «2× Masaje Relajante». La tercera opción, <em>Privilege</em>, tiene su propia sección (5).</li>
     <li><strong>Comprador.</strong> Escribe el nombre y elige el cliente de Mindbody en la lista si aparece — así queda enlazado y se rellenan correo y teléfono. Usa el mismo cliente al vender en Mindbody.</li>
     <li><strong>Destinatario.</strong> Quien recibe el regalo. El nombre no se imprime en la etiqueta.</li>
     <li><strong>Detalles de impresión.</strong> Mensaje/dedicatoria (sí se imprime), nota interna (nunca se imprime) y qué mostrar en la etiqueta: monto, mensaje, tratamientos.</li>
@@ -158,8 +159,26 @@
   <p style="color:var(--muted); font-size:9.6pt">Para canjear: en Mindbody, al cobrar un servicio, elige <em>Gift Card</em> como forma de pago y escanea la misma etiqueta. El saldo baja en Mindbody y, tras sincronizar, también en el sitio.</p>
 </section>
 
-<section class="section">
+<section class="section new-page">
   <div class="kicker">5</div>
+  <h2>Tarjetas Privilege</h2>
+  <p>Una tarjeta Privilege es una Gift Card de <strong>monto alto que se vende a precio preferencial</strong> — por ejemplo, vale <strong>$1,000</strong> y el cliente paga <strong>$800</strong>. Lleva su <strong>propia numeración por sede</strong> (por ejemplo <code>PCE000001</code> en Costa del Este y <code>PSF000001</code> en San Francisco), separada de las Gift Cards regulares.</p>
+  <ol class="steps">
+    <li>En <strong>Emitir Gift Card</strong>, en «1. Monto», elige <strong>Privilege</strong>.</li>
+    <li>Escribe el <strong>Valor de la tarjeta</strong> (el saldo que recibe el cliente) y el <strong>Precio de venta</strong> (lo que paga). El botón <strong>$1,000 por $800</strong> llena la oferta estándar. El sistema muestra el descuento y el próximo serial de la serie.</li>
+    <li>Completa comprador y destinatario y presiona <strong>Emitir e imprimir</strong>.</li>
+    <li>La etiqueta imprime el <strong>valor</strong> y la marca <strong>PRIVILEGE</strong>. El precio de venta nunca se imprime.</li>
+    <li>En Mindbody, vende la gift card con <strong>valor igual al valor de la tarjeta</strong> ($1,000) y <strong>cobra el precio de venta</strong> ($800), escaneando el serial de la etiqueta como número de la gift card.</li>
+    <li>Presiona <strong>Sincronizar</strong>: pasa a <span class="pill green">Vendida</span> con el saldo completo ($1,000).</li>
+  </ol>
+  <figure><img src="../public/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege"><figcaption>Privilege: valor de la tarjeta, precio de venta, descuento calculado y próximo serial de la serie de la sede.</figcaption></figure>
+  <figure class="narrow"><img src="../public/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta Privilege"><figcaption>Etiqueta Privilege: valor, marca PRIVILEGE y código de barras con el serial de la serie Privilege.</figcaption></figure>
+  <div class="tip">En la lista de Emitidas las tarjetas Privilege llevan la marca <b>Privilege</b> junto al serial, y el detalle muestra el valor, el precio de venta y el descuento. Se editan igual que las demás mientras estén Emitidas; el tipo de tarjeta no cambia.</div>
+  <div class="tip warn">¿La opción Privilege aparece deshabilitada? Esa sede no tiene serie Privilege configurada. Administración la define en Gift Cards → Ubicaciones y Seriales → <b>Serie Privilege</b> (prefijo y próximo número por sede).</div>
+</section>
+
+<section class="section new-page">
+  <div class="kicker">6</div>
   <h2>Estados de una Gift Card</h2>
   <p>El estado sale de comparar nuestro registro con Mindbody. Cambia solo, por sincronización — nadie lo edita a mano.</p>
   <table>
@@ -175,7 +194,7 @@
 </section>
 
 <section class="section">
-  <div class="kicker">6</div>
+  <div class="kicker">7</div>
   <h2>Editar una Gift Card</h2>
   <p>Mientras la tarjeta esté <span class="pill amber">Emitida</span> puedes corregir cualquier dato: monto, tratamientos, comprador, destinatario, mensaje y qué se imprime. El <strong>serial nunca cambia</strong>.</p>
   <ol class="steps">
@@ -188,7 +207,7 @@
 </section>
 
 <section class="section">
-  <div class="kicker">7</div>
+  <div class="kicker">8</div>
   <h2>Consultar y sincronizar</h2>
   <ol class="steps">
     <li>En <strong>Emitidas</strong> escribe el serial, un nombre, correo o teléfono en el buscador.</li>
@@ -201,7 +220,7 @@
 </section>
 
 <section class="section new-page">
-  <div class="kicker">8</div>
+  <div class="kicker">9</div>
   <h2>Problemas frecuentes</h2>
   <table>
     <thead><tr><th style="width:38%">Qué pasa</th><th>Qué hacer</th></tr></thead>
@@ -213,9 +232,10 @@
       <tr><td>Sincronicé y sigue en Emitida</td><td>La venta en Mindbody no lleva este serial. Anula esa venta y vuelve a venderla escaneando la etiqueta.</td></tr>
       <tr><td>Me equivoqué en el monto o el nombre</td><td>Si está Emitida: Editar y reimprimir. Si ya está Vendida: corregir en Mindbody y Sincronizar.</td></tr>
       <tr><td>Se dañó la etiqueta</td><td>Reimprime desde la tarjeta (mismo serial). No emitas una nueva: eso crea otro serial.</td></tr>
+      <tr><td>La opción Privilege está deshabilitada</td><td>La sede no tiene serie Privilege. Avisa a administración (Ubicaciones y Seriales → Serie Privilege).</td></tr>
     </tbody>
   </table>
-  <p class="footer-note">Este manual también está disponible dentro del panel de administración (botón <strong>Manual</strong> en Emitir, Emitidas y la pantalla de impresión), siempre con la versión más reciente. Mimosa Spa Retreat · Septiembre 2026.</p>
+  <p class="footer-note">Este manual también está disponible dentro del panel de administración (botón <strong>Manual</strong> en Emitir, Emitidas y la pantalla de impresión), siempre con la versión más reciente. Mimosa Spa Retreat · Noviembre 2026.</p>
 </section>
 
 </body>

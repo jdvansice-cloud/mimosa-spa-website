@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
+import { PRIVILEGE_FORMAT, privilegeAmountError } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -26,6 +27,10 @@ interface IssuePayload {
   notes?: string | null
   promotion_id?: string | null
   promotion_name?: string | null
+  /** 'privilege' issues from the location's Privilege series. Default: regular. */
+  format?: 'gift_card' | 'privilege'
+  /** Privilege only: what the buyer pays (amount_cents is the card's value). */
+  sale_amount_cents?: number | null
 }
 
 export async function POST(request: NextRequest) {
@@ -52,6 +57,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'amount_cents must be a positive integer' }, { status: 400 })
   }
 
+  const privilege = body.format === PRIVILEGE_FORMAT
+  if (privilege) {
+    const problem = privilegeAmountError(body.amount_cents, body.sale_amount_cents as number)
+    if (problem) return NextResponse.json({ error: problem }, { status: 400 })
+  }
+
   // Location-restricted admins can only issue for their own location.
   if (ctx.locationConfigId && ctx.locationConfigId !== body.gift_card_serial_config_id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -73,17 +84,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'location config is inactive' }, { status: 400 })
   }
 
-  // Mint the serial from the location's counter.
+  // Mint the serial from the location's counter — Privilege cards from the
+  // location's separate Privilege series, so the two never share numbers.
   const { data: serial, error: serialError } = await supabase.rpc(
-    'next_giftcard_serial',
+    privilege ? 'next_giftcard_privilege_serial' : 'next_giftcard_serial',
     { p_config_id: body.gift_card_serial_config_id }
   )
 
   if (serialError || !serial) {
-    console.error('next_giftcard_serial RPC error:', serialError)
+    console.error('gift card serial RPC error:', serialError)
     return NextResponse.json(
-      { error: serialError?.message || 'Failed to generate serial' },
-      { status: 500 }
+      {
+        error: privilege
+          ? 'Esta ubicación no tiene una serie Privilege configurada. Configúrala en Gift Cards → Ubicaciones y Seriales.'
+          : serialError?.message || 'Failed to generate serial',
+      },
+      { status: privilege ? 409 : 500 }
     )
   }
 
@@ -92,9 +108,9 @@ export async function POST(request: NextRequest) {
       ? body.gift_treatment_names.map(s => s.trim()).filter(Boolean)
       : null
 
-  const insert = {
+  const insert: Record<string, unknown> = {
     serial,
-    format: 'gift_card',
+    format: privilege ? PRIVILEGE_FORMAT : 'gift_card',
     gift_card_serial_config_id: config.id,
     mindbody_location_id: config.mindbody_location_id,
     buyer_name: body.buyer_name.trim(),
@@ -107,21 +123,25 @@ export async function POST(request: NextRequest) {
     recipient_mindbody_client_id: body.recipient_mindbody_client_id ?? null,
     recipient_email: body.recipient_email?.trim() || null,
     amount_cents: body.amount_cents,
-    base_amount_cents: body.base_amount_cents ?? null,
-    tax_cents: body.tax_cents ?? null,
-    gift_treatment_names: treatmentNames,
+    // A Privilege card is pure stored value: no treatments, tax split or promo.
+    base_amount_cents: privilege ? null : body.base_amount_cents ?? null,
+    tax_cents: privilege ? null : body.tax_cents ?? null,
+    gift_treatment_names: privilege ? null : treatmentNames,
     message: body.message?.trim() || null,
     print_amount: body.print_amount,
     print_message: body.print_message,
     print_recipient: body.print_recipient,
-    print_treatments: body.print_treatments,
+    print_treatments: privilege ? false : body.print_treatments,
     notes: body.notes?.trim() || null,
     // Snapshot alongside the reference: the card must still name the promo
     // after the promotion itself is edited or deleted.
-    promotion_id: body.promotion_id || null,
-    promotion_name: body.promotion_name?.trim() || null,
+    promotion_id: privilege ? null : body.promotion_id || null,
+    promotion_name: privilege ? null : body.promotion_name?.trim() || null,
     issued_by: ctx.userId,
   }
+  // Only sent for Privilege so regular issuance never depends on the column
+  // (it arrives with migration 20261110_gc_privilege.sql).
+  if (privilege) insert.sale_amount_cents = body.sale_amount_cents
 
   const { data, error } = await supabase
     .from('gift_cards')

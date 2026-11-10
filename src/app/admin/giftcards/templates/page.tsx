@@ -41,6 +41,22 @@ const sampleWithTreatments: LabelCard = {
   print_treatments: true,
 }
 
+const samplePrivilege: LabelCard = {
+  serial: 'PCE000001',
+  format: 'privilege',
+  buyer_name: 'Roberto Díaz',
+  recipient_name: 'Roberto Díaz',
+  // The label shows the card's VALUE; the discounted price is never printed.
+  amount_cents: 100000,
+  currency: 'USD',
+  gift_treatment_names: null,
+  message: null,
+  print_amount: true,
+  print_message: false,
+  print_recipient: false,
+  print_treatments: false,
+}
+
 function Preview({ title, subtitle, card }: { title: string; subtitle: string; card: LabelCard }) {
   return (
     <Card variant="default" padding="md">
@@ -92,6 +108,11 @@ export default function AdminGiftCardTemplatesPage() {
           title="Con tratamientos"
           subtitle="Gift Card cuyo monto se calculó sumando tratamientos."
           card={sampleWithTreatments}
+        />
+        <Preview
+          title="Privilege"
+          subtitle="Tarjeta Privilege: imprime su valor y la marca PRIVILEGE; serie propia por ubicación."
+          card={samplePrivilege}
         />
       </div>
 

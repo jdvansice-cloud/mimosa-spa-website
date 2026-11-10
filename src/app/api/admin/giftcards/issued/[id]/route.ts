@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
+import { PRIVILEGE_FORMAT, privilegeAmountError } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -75,6 +76,8 @@ interface EditPayload {
   notes?: string | null
   promotion_id?: string | null
   promotion_name?: string | null
+  /** Privilege cards only: the discounted price (amount_cents is the value). */
+  sale_amount_cents?: number | null
 }
 
 /**
@@ -94,7 +97,7 @@ export async function PATCH(
 
   const { data: card, error: loadError } = await supabase
     .from('gift_cards')
-    .select('id, gift_card_serial_config_id, sold_at, redeemed_at, voided_at')
+    .select('id, format, gift_card_serial_config_id, sold_at, redeemed_at, voided_at')
     .eq('id', id)
     .single()
   if (loadError || !card) {
@@ -130,12 +133,20 @@ export async function PATCH(
     return NextResponse.json({ error: 'amount_cents must be a positive integer' }, { status: 400 })
   }
 
+  // The card's kind is fixed at issuance — its serial belongs to that series
+  // — so an edit keeps a Privilege card Privilege and a regular card regular.
+  const privilege = card.format === PRIVILEGE_FORMAT
+  if (privilege) {
+    const problem = privilegeAmountError(body.amount_cents, body.sale_amount_cents as number)
+    if (problem) return NextResponse.json({ error: problem }, { status: 400 })
+  }
+
   const treatmentNames =
-    Array.isArray(body.gift_treatment_names) && body.gift_treatment_names.length > 0
+    !privilege && Array.isArray(body.gift_treatment_names) && body.gift_treatment_names.length > 0
       ? body.gift_treatment_names.map(s => s.trim()).filter(Boolean)
       : null
 
-  const update = {
+  const update: Record<string, unknown> = {
     buyer_name: body.buyer_name.trim(),
     buyer_mindbody_client_id: body.buyer_mindbody_client_id ?? null,
     buyer_email: body.buyer_email?.trim() || null,
@@ -144,18 +155,19 @@ export async function PATCH(
     recipient_mindbody_client_id: body.recipient_mindbody_client_id ?? null,
     recipient_email: body.recipient_email?.trim() || null,
     amount_cents: body.amount_cents,
-    base_amount_cents: body.base_amount_cents ?? null,
-    tax_cents: body.tax_cents ?? null,
+    base_amount_cents: privilege ? null : body.base_amount_cents ?? null,
+    tax_cents: privilege ? null : body.tax_cents ?? null,
     gift_treatment_names: treatmentNames,
     message: body.message?.trim() || null,
     print_amount: !!body.print_amount,
     print_message: !!body.print_message,
     print_recipient: !!body.print_recipient,
-    print_treatments: !!body.print_treatments,
+    print_treatments: privilege ? false : !!body.print_treatments,
     notes: body.notes?.trim() || null,
-    promotion_id: body.promotion_id || null,
-    promotion_name: body.promotion_name?.trim() || null,
+    promotion_id: privilege ? null : body.promotion_id || null,
+    promotion_name: privilege ? null : body.promotion_name?.trim() || null,
   }
+  if (privilege) update.sale_amount_cents = body.sale_amount_cents
 
   const { data, error } = await supabase
     .from('gift_cards')
