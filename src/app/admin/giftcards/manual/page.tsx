@@ -104,7 +104,11 @@ export default function GiftCardManualPage() {
 
           <Section id="emitir" icon={Gift} title="1. Emitir una Gift Card">
             <Steps>
-              <li>Entra a <Link href="/admin/giftcards/issue" className="text-gold-700 underline">Emitir Gift Card</Link>.</li>
+              <li>
+                Entra a <Link href="/admin/giftcards/issue" className="text-gold-700 underline">Emitir Gift Card</Link>. Si tu usuario
+                maneja varias sedes, elige primero la <strong>Ubicación</strong>: hasta entonces las tres opciones de «Monto» están
+                deshabilitadas, porque el serial sale de la serie de esa sede.
+              </li>
               <li>
                 <strong>Monto.</strong> Elige <em>Monto directo</em> (escribes el valor) o <em>Por tratamientos</em> (sumas
                 tratamientos del menú + ITBMS; los tratamientos se imprimen en la etiqueta si dejas la casilla marcada). Los extras/adicionales también están en la lista, y para parejas o grupos usa el botón <strong>+</strong> para repetir un tratamiento: en la etiqueta sale como «2× Masaje Relajante». La tercera opción, <em>Privilege</em>, tiene su propia sección más abajo.

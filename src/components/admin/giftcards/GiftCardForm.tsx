@@ -525,6 +525,18 @@ export function GiftCardForm({
 
   const isLocationLocked = !!me?.locationConfigId
 
+  // A card's serial comes from its location's series, so nothing can be
+  // chosen until the location is set (only super admins ever see this:
+  // location-restricted staff arrive with theirs already locked in).
+  const needsLocation = !isEdit && !configId
+  const kindCardClass = (mode: AmountMode, enabled: boolean) =>
+    `flex gap-3 p-4 rounded-lg border-2 ${
+      !enabled
+        ? 'border-beige-200 bg-beige-50 cursor-not-allowed'
+        : amountMode === mode ? 'border-gold bg-gold/5 cursor-pointer' : 'border-beige-300 cursor-pointer'
+    }`
+  const kindTitleClass = (enabled: boolean) => (enabled ? 'text-dark' : 'text-warm-gray-500')
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Location picker — super admin, create mode only */}
@@ -582,58 +594,52 @@ export function GiftCardForm({
             </div>
           ) : (
           <div className={`grid gap-3 ${isEdit ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
-            <label className={`flex gap-3 p-4 rounded-lg border-2 cursor-pointer ${amountMode === 'amount' ? 'border-gold bg-gold/5' : 'border-beige-300'}`}>
+            <label className={kindCardClass('amount', !needsLocation)}>
               <input
                 type="radio"
                 name="amountMode"
-                checked={amountMode === 'amount'}
+                checked={!needsLocation && amountMode === 'amount'}
                 onChange={() => selectAmountMode('amount')}
+                disabled={needsLocation}
                 className="mt-1"
               />
               <div>
-                <div className="font-medium text-dark">Monto directo</div>
+                <div className={`font-medium ${kindTitleClass(!needsLocation)}`}>Monto directo</div>
                 <div className="text-sm text-warm-gray-500">Ingresa el valor de la tarjeta.</div>
               </div>
             </label>
-            <label className={`flex gap-3 p-4 rounded-lg border-2 cursor-pointer ${amountMode === 'treatments' ? 'border-gold bg-gold/5' : 'border-beige-300'}`}>
+            <label className={kindCardClass('treatments', !needsLocation)}>
               <input
                 type="radio"
                 name="amountMode"
-                checked={amountMode === 'treatments'}
+                checked={!needsLocation && amountMode === 'treatments'}
                 onChange={() => selectAmountMode('treatments')}
+                disabled={needsLocation}
                 className="mt-1"
               />
               <div>
-                <div className="font-medium text-dark">Por tratamientos</div>
+                <div className={`font-medium ${kindTitleClass(!needsLocation)}`}>Por tratamientos</div>
                 <div className="text-sm text-warm-gray-500">Suma tratamientos + ITBMS — referencia para el cliente.</div>
               </div>
             </label>
             {!isEdit && (
-              <label
-                className={`flex gap-3 p-4 rounded-lg border-2 ${
-                  !privilegeAvailable
-                    ? 'border-beige-200 bg-beige-50 cursor-not-allowed'
-                    : amountMode === 'privilege' ? 'border-gold bg-gold/5 cursor-pointer' : 'border-beige-300 cursor-pointer'
-                }`}
-              >
+              <label className={kindCardClass('privilege', privilegeAvailable)}>
                 <input
                   type="radio"
                   name="amountMode"
-                  checked={amountMode === 'privilege'}
+                  checked={!needsLocation && amountMode === 'privilege'}
                   onChange={() => selectAmountMode('privilege')}
                   disabled={!privilegeAvailable}
                   className="mt-1"
                 />
                 <div>
-                  <div className={`font-medium flex items-center gap-1.5 ${privilegeAvailable ? 'text-dark' : 'text-warm-gray-500'}`}>
+                  <div className={`font-medium flex items-center gap-1.5 ${kindTitleClass(privilegeAvailable)}`}>
                     <Crown className="h-4 w-4 text-gold-700" /> Privilege
                   </div>
                   <div className="text-sm text-warm-gray-500">
-                    {privilegeAvailable
+                    {privilegeAvailable || needsLocation
                       ? 'Tarjeta de beneficios al portador, no un regalo — serie propia.'
-                      : configId
-                        ? 'Esta ubicación aún no tiene serie Privilege configurada.'
-                        : 'Selecciona una ubicación primero.'}
+                      : 'Esta ubicación aún no tiene serie Privilege configurada.'}
                   </div>
                 </div>
               </label>
@@ -641,7 +647,11 @@ export function GiftCardForm({
           </div>
           )}
 
-          {amountMode === 'privilege' ? (
+          {needsLocation ? (
+            <p className="text-sm text-warm-gray-500" role="status">
+              Selecciona primero la <span className="font-medium text-dark">ubicación</span>: el serial de la tarjeta sale de la serie de esa sede.
+            </p>
+          ) : amountMode === 'privilege' ? (
             <div className="space-y-4">
               <div>
                 <div className="label" id="privilege-denomination-label">
