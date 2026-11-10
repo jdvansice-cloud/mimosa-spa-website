@@ -1,7 +1,7 @@
 'use client'
 
 import { formatTreatmentNames } from '@/lib/giftcards/treatments'
-import { isPrivilege, privilegeDiscountPercent } from '@/lib/giftcards/privilege'
+import { isPrivilege } from '@/lib/giftcards/privilege'
 
 /**
  * The full record of one gift card, shared by the inline expansion in the
@@ -23,8 +23,6 @@ export interface GiftCardDetailData {
   recipient_email: string | null
   recipient_mindbody_client_id: number | null
   amount_cents: number
-  /** Privilege: the discounted price paid. Absent/NULL = sold at amount_cents. */
-  sale_amount_cents?: number | null
   base_amount_cents: number | null
   tax_cents: number | null
   treatment_name: string | null
@@ -105,12 +103,8 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
         <div>
           <div className="text-[11px] uppercase tracking-wide text-warm-gray-500">{isPrivilege(card) ? 'Valor' : 'Monto'}</div>
           <div className="text-3xl font-bold text-dark tabular-nums">{money(card.amount_cents)}</div>
-          {card.sale_amount_cents != null && (
-            <div className="text-xs text-warm-gray-500 mt-0.5">
-              Precio de venta {money(card.sale_amount_cents)}
-              {privilegeDiscountPercent(card.amount_cents, card.sale_amount_cents) != null &&
-                ` · ${privilegeDiscountPercent(card.amount_cents, card.sale_amount_cents)}% desc.`}
-            </div>
+          {isPrivilege(card) && (
+            <div className="text-xs text-warm-gray-500 mt-0.5">Precio de venta: el definido en Mindbody</div>
           )}
           {card.base_amount_cents != null && (
             <div className="text-xs text-warm-gray-500 mt-0.5">

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
-import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeAmountError } from '@/lib/giftcards/privilege'
+import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeValueError } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -29,8 +29,6 @@ interface IssuePayload {
   promotion_name?: string | null
   /** 'privilege' issues from the location's Privilege series. Default: regular. */
   format?: 'gift_card' | 'privilege'
-  /** Privilege only: what the buyer pays (amount_cents is the card's value). */
-  sale_amount_cents?: number | null
 }
 
 export async function POST(request: NextRequest) {
@@ -59,8 +57,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'amount_cents must be a positive integer' }, { status: 400 })
   }
 
+  // Privilege cards exist only in fixed denominations. The sale price is not
+  // recorded: Mindbody carries it on the card staff pick when selling.
   if (privilege) {
-    const problem = privilegeAmountError(body.amount_cents, body.sale_amount_cents as number)
+    const problem = privilegeValueError(body.amount_cents)
     if (problem) return NextResponse.json({ error: problem }, { status: 400 })
   }
 
@@ -141,9 +141,6 @@ export async function POST(request: NextRequest) {
     promotion_name: privilege ? null : body.promotion_name?.trim() || null,
     issued_by: ctx.userId,
   }
-  // Only sent for Privilege so regular issuance never depends on the column
-  // (it arrives with migration 20261110_gc_privilege.sql).
-  if (privilege) insert.sale_amount_cents = body.sale_amount_cents
 
   const { data, error } = await supabase
     .from('gift_cards')

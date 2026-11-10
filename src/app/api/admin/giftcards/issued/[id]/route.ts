@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
-import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeAmountError } from '@/lib/giftcards/privilege'
+import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeValueError } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -76,8 +76,6 @@ interface EditPayload {
   notes?: string | null
   promotion_id?: string | null
   promotion_name?: string | null
-  /** Privilege cards only: the discounted price (amount_cents is the value). */
-  sale_amount_cents?: number | null
 }
 
 /**
@@ -137,8 +135,9 @@ export async function PATCH(
     return NextResponse.json({ error: 'amount_cents must be a positive integer' }, { status: 400 })
   }
 
+  // Fixed denominations only; the sale price lives in Mindbody, not here.
   if (privilege) {
-    const problem = privilegeAmountError(body.amount_cents, body.sale_amount_cents as number)
+    const problem = privilegeValueError(body.amount_cents)
     if (problem) return NextResponse.json({ error: problem }, { status: 400 })
   }
 
@@ -168,7 +167,6 @@ export async function PATCH(
     promotion_id: privilege ? null : body.promotion_id || null,
     promotion_name: privilege ? null : body.promotion_name?.trim() || null,
   }
-  if (privilege) update.sale_amount_cents = body.sale_amount_cents
 
   const { data, error } = await supabase
     .from('gift_cards')

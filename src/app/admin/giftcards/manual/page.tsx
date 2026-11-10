@@ -175,8 +175,8 @@ export default function GiftCardManualPage() {
           <Section id="privilege" icon={Crown} title="Tarjetas Privilege">
             <p>
               Una tarjeta Privilege <strong>no es un regalo</strong>: es una <strong>tarjeta de beneficios al portador</strong>. Sus
-              beneficios y su saldo son de quien la presente. Existe solo en <strong>tres denominaciones: $500, $1,000 y $2,500</strong>,
-              y se vende a precio preferencial — por ejemplo, la de <strong>$1,000</strong> se paga <strong>$800</strong>. Lleva su
+              beneficios y su saldo son de quien la presente. Existe solo en <strong>tres denominaciones: $500, $1,000 y $2,500</strong>.
+              Su precio de venta lo define Mindbody, no este sistema. Lleva su
               <strong> propia numeración por sede</strong>
               (por ejemplo <span className="font-mono">PCE000001</span> en Costa del Este y <span className="font-mono">PSF000001</span> en
               San Francisco), separada de las Gift Cards regulares.
@@ -185,27 +185,27 @@ export default function GiftCardManualPage() {
               <li>En <Link href="/admin/giftcards/issue" className="text-gold-700 underline">Emitir Gift Card</Link>, en «1. Monto», elige <strong>Privilege</strong>.</li>
               <li>
                 Elige la <strong>denominación</strong> — <strong>$500</strong>, <strong>$1,000</strong> o <strong>$2,500</strong>: es el saldo disponible
-                para quien presente la tarjeta, y no se puede escribir otro valor. Luego confirma el <strong>Precio de venta</strong> (lo que paga el comprador):
-                para $1,000 se llena solo con $800; para las demás, escríbelo. El sistema muestra el descuento y el próximo serial de la serie.
+                para quien presente la tarjeta, y no se puede escribir otro valor. Aquí <strong>no se escribe ningún precio</strong>: el precio de venta
+                ya viene definido en Mindbody. El sistema muestra el próximo serial de la serie.
               </li>
               <li>
                 Completa los datos del <strong>comprador</strong> y presiona <strong>Emitir e imprimir</strong>. Al ser al portador,
                 la tarjeta Privilege <strong>no lleva destinatario ni dedicatoria</strong>: esas secciones no aparecen.
               </li>
               <li>
-                La etiqueta imprime el <strong>valor</strong> y la marca <strong>PRIVILEGE</strong>. El precio de venta nunca se imprime.
+                La etiqueta imprime el <strong>valor</strong> y la marca <strong>PRIVILEGE</strong>.
               </li>
               <li>
-                En Mindbody la tarjeta se registra como una gift card prepagada: usa como <strong>valor el valor de la tarjeta</strong> ($1,000),
-                <strong>cobra el precio de venta</strong> ($800) y escanea el serial de la etiqueta como número de la gift card.
+                En Mindbody, elige para vender la <strong>tarjeta Privilege de la misma denominación</strong>: <strong>el precio ya viene definido ahí</strong>,
+                no hay que calcularlo. Escanea el serial de la etiqueta como número de la tarjeta.
               </li>
-              <li>Presiona <strong>Sincronizar</strong>: pasa a <StatusPill tone="green">Vendida</StatusPill> con el saldo completo ($1,000).</li>
+              <li>Presiona <strong>Sincronizar</strong>: pasa a <StatusPill tone="green">Vendida</StatusPill> con el saldo completo de su denominación.</li>
             </Steps>
-            <Shot src="/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege" caption="Privilege: denominación ($500, $1,000 o $2,500), precio de venta, descuento calculado y próximo serial. Solo pide el comprador: no hay destinatario ni dedicatoria." />
+            <Shot src="/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege" caption="Privilege: se elige la denominación ($500, $1,000 o $2,500) y se muestra el próximo serial. Solo pide el comprador: no hay destinatario, dedicatoria ni precio." />
             <Shot src="/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta de una tarjeta Privilege" caption="Etiqueta Privilege: valor, marca PRIVILEGE y código de barras con el serial de la serie Privilege." />
             <Tip>
               En la lista de Emitidas las tarjetas Privilege llevan la marca <strong>Privilege</strong> junto al serial y figuran como
-              <strong>Al portador</strong>; el detalle muestra el valor, el precio de venta y el descuento. Se editan igual que las demás mientras estén Emitidas; el tipo de tarjeta no cambia.
+              <strong>Al portador</strong>; el detalle muestra su valor. Se editan igual que las demás mientras estén Emitidas; el tipo de tarjeta no cambia.
             </Tip>
             <Tip warn>
               ¿La opción Privilege aparece deshabilitada? Esa sede no tiene serie Privilege configurada. Administración la define en

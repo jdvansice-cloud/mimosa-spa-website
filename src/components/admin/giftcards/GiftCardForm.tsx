@@ -9,8 +9,8 @@ import type { GiftCardDetailData } from './GiftCardDetail'
 import { collapseTreatmentNames, expandTreatmentLines, type TreatmentLine } from '@/lib/giftcards/treatments'
 import {
   PRIVILEGE_BEARER, PRIVILEGE_FORMAT, isPrivilege, hasPrivilegeSeries, previewPrivilegeSerial,
-  privilegeAmountError, privilegeDiscountPercent, type PrivilegeSeries,
-  PRIVILEGE_DENOMINATIONS_CENTS, PRIVILEGE_KNOWN_PRICES_CENTS, formatPrivilegeValue,
+  privilegeValueError, type PrivilegeSeries,
+  PRIVILEGE_DENOMINATIONS_CENTS, formatPrivilegeValue,
 } from '@/lib/giftcards/privilege'
 
 /**
@@ -91,8 +91,6 @@ export interface GiftCardFormPayload {
   promotion_name: string | null
   /** 'privilege' mints from the location's Privilege series. */
   format: 'gift_card' | 'privilege'
-  /** Privilege only: the discounted price; amount_cents is the card's value. */
-  sale_amount_cents: number | null
 }
 
 function formatMoney(cents: number | null | undefined): string {
@@ -183,12 +181,10 @@ export function GiftCardForm({
   const [openAmount, setOpenAmount] = useState(
     initial ? (initial.amount_cents / 100).toFixed(2) : '',
   )
-  // Privilege: what the card is worth vs. what the buyer pays for it.
+  // Privilege: only the denomination is recorded. The sale price is not —
+  // Mindbody already carries it on the card staff pick when selling.
   const [privilegeValue, setPrivilegeValue] = useState(
     isPrivilege(initial) && initial ? (initial.amount_cents / 100).toFixed(2) : '',
-  )
-  const [privilegePrice, setPrivilegePrice] = useState(
-    isPrivilege(initial) && initial?.sale_amount_cents ? (initial.sale_amount_cents / 100).toFixed(2) : '',
   )
   // Selected catalog treatments with quantities — a couple's card carries
   // the same massage twice, a group's three times. Insertion order is kept
@@ -373,18 +369,8 @@ export function GiftCardForm({
   // recipient and the dedication while this mode is selected.
   const privilegeMode = amountMode === 'privilege'
   const privilegeValueCents = toCents(privilegeValue)
-  const privilegePriceCents = toCents(privilegePrice)
-  const privilegeDiscount = privilegeDiscountPercent(privilegeValueCents, privilegePriceCents)
-  /**
-   * Privilege cards only exist in fixed denominations. Picking one fills the
-   * agreed price when there is one; otherwise it clears the price, so a
-   * figure typed for another denomination never rides along by accident.
-   */
-  const selectDenomination = (cents: number) => {
-    setPrivilegeValue((cents / 100).toFixed(2))
-    const known = PRIVILEGE_KNOWN_PRICES_CENTS[cents]
-    setPrivilegePrice(known ? (known / 100).toFixed(2) : '')
-  }
+  /** Privilege cards only exist in fixed denominations — no typed value. */
+  const selectDenomination = (cents: number) => setPrivilegeValue((cents / 100).toFixed(2))
 
   const computedAmountCents = useMemo(() => {
     if (amountMode === 'treatments') return treatmentTotalCents
@@ -448,7 +434,7 @@ export function GiftCardForm({
     if (!privilegeMode && !recipientName.trim()) return setError('Nombre del destinatario requerido')
     if (amountMode === 'privilege') {
       if (!privilegeValueCents) return setError('Elige la denominación de la tarjeta')
-      const problem = privilegeAmountError(privilegeValueCents, privilegePriceCents)
+      const problem = privilegeValueError(privilegeValueCents)
       if (problem) return setError(problem)
     } else if (computedAmountCents <= 0) {
       return setError(amountMode === 'treatments'
@@ -493,7 +479,6 @@ export function GiftCardForm({
       promotion_id: includeTreatments ? selectedPromo?.id ?? null : null,
       promotion_name: includeTreatments ? selectedPromo?.title_es ?? null : null,
       format: amountMode === 'privilege' ? PRIVILEGE_FORMAT : 'gift_card',
-      sale_amount_cents: amountMode === 'privilege' ? privilegePriceCents : null,
     }
 
     setSubmitting(true)
@@ -661,34 +646,9 @@ export function GiftCardForm({
                   })}
                 </div>
                 <p className="mt-2 text-xs text-warm-gray-500">
-                  Valor de la tarjeta: el saldo que usa quien la presente. Es lo que se imprime y lo que se carga en Mindbody.
+                  Valor de la tarjeta: el saldo que usa quien la presente. Es lo que se imprime en la etiqueta.
+                  El precio de venta no se registra aquí: ya viene definido en Mindbody al elegir la tarjeta para venderla.
                 </p>
-              </div>
-
-              <div className="max-w-xs">
-                <label className="label" htmlFor="privilege-price">Precio de venta (USD) <span className="text-red-500">*</span></label>
-                <input
-                  id="privilege-price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  className="input"
-                  value={privilegePrice}
-                  onChange={e => setPrivilegePrice(e.target.value)}
-                  required
-                />
-                <p className="mt-1 text-xs text-warm-gray-500">Lo que paga el comprador. Nunca se imprime en la etiqueta.</p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                {privilegeDiscount != null ? (
-                  <span className="text-sm text-dark">
-                    Descuento <span className="font-semibold">{privilegeDiscount}%</span>
-                    <span className="text-warm-gray-500"> · el cliente ahorra {formatMoney(privilegeValueCents - privilegePriceCents)}</span>
-                  </span>
-                ) : privilegeValueCents > 0 && privilegePriceCents > 0 ? (
-                  <span className="text-sm text-red-600">El precio de venta debe ser menor que el valor.</span>
-                ) : null}
               </div>
 
               {!isEdit && previewPrivilegeSerial(selectedConfig) && (
@@ -1041,9 +1001,6 @@ export function GiftCardForm({
           {computedAmountCents > 0
             ? <>
                 {isEdit ? 'Queda por' : 'Se emitirá por'} <span className="text-dark font-medium">{formatMoney(computedAmountCents)}</span>
-                {amountMode === 'privilege' && privilegePriceCents > 0 && (
-                  <> · precio de venta <span className="text-dark font-medium">{formatMoney(privilegePriceCents)}</span></>
-                )}
               </>
             : '—'}
         </div>
