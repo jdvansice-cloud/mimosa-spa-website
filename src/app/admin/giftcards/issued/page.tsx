@@ -44,6 +44,15 @@ const STATUS_FILTERS: Array<{ key: Status; label: string }> = [
   { key: 'usada', label: 'Usadas' },
 ]
 
+/** Privilege cards run on their own serial series — let staff pull them apart. */
+type Kind = '' | 'gift' | 'privilege'
+
+const KIND_FILTERS: Array<{ key: Kind; label: string }> = [
+  { key: '', label: 'Todos los tipos' },
+  { key: 'gift', label: 'Gift Cards' },
+  { key: 'privilege', label: 'Privilege' },
+]
+
 const PAGE_SIZE = 25
 
 /** "Mimosa Spa | Costa del Este" → "Costa del Este" so the pill fits one line. */
@@ -113,9 +122,10 @@ export default function AdminGiftCardsIssuedPage() {
 }
 
 function IssuedList() {
-  // The dashboard links here pre-filtered, e.g. ?status=emitida.
+  // The dashboard links here pre-filtered, e.g. ?status=emitida or ?kind=privilege.
   const searchParams = useSearchParams()
   const initialStatus = searchParams.get('status')
+  const initialKind = searchParams.get('kind')
 
   const [rows, setRows] = useState<IssuedRow[]>([])
   const [total, setTotal] = useState(0)
@@ -134,6 +144,9 @@ function IssuedList() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [status, setStatus] = useState<Status>(
     STATUS_FILTERS.some(f => f.key && f.key === initialStatus) ? initialStatus as Status : '',
+  )
+  const [kind, setKind] = useState<Kind>(
+    KIND_FILTERS.some(f => f.key && f.key === initialKind) ? initialKind as Kind : '',
   )
   const [configId, setConfigId] = useState('')
   const [page, setPage] = useState(1)
@@ -180,6 +193,7 @@ function IssuedList() {
       const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) })
       if (debouncedSearch) params.set('q', debouncedSearch)
       if (status) params.set('status', status)
+      if (kind) params.set('kind', kind)
       if (configId) params.set('configId', configId)
 
       const res = await fetch(`/api/admin/giftcards/issued?${params}`)
@@ -197,7 +211,7 @@ function IssuedList() {
     } finally {
       if (seq === requestSeq.current) setLoading(false)
     }
-  }, [page, debouncedSearch, status, configId])
+  }, [page, debouncedSearch, status, kind, configId])
 
   useEffect(() => { load() }, [load])
 
@@ -251,8 +265,8 @@ function IssuedList() {
     return <GiftCardDetail card={d} />
   }
 
-  const hasFilters = !!debouncedSearch || !!status || !!configId
-  const clearFilters = () => { setSearch(''); setStatus(''); setConfigId(''); setPage(1) }
+  const hasFilters = !!debouncedSearch || !!status || !!kind || !!configId
+  const clearFilters = () => { setSearch(''); setStatus(''); setKind(''); setConfigId(''); setPage(1) }
 
   const firstOnPage = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
   const lastOnPage = Math.min(page * PAGE_SIZE, total)
@@ -484,6 +498,14 @@ function IssuedList() {
         <div className="flex flex-wrap gap-2" role="group" aria-label="Estado">
           {STATUS_FILTERS.map(f => (
             <Pill key={f.key} active={status === f.key} onClick={() => { setStatus(f.key); setPage(1) }}>
+              {f.label}
+            </Pill>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Tipo de tarjeta">
+          {KIND_FILTERS.map(f => (
+            <Pill key={f.key} active={kind === f.key} onClick={() => { setKind(f.key); setPage(1) }}>
               {f.label}
             </Pill>
           ))}

@@ -212,7 +212,8 @@ export default function GiftCardManualPage() {
             <Shot src="/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta de una tarjeta Privilege" caption="Etiqueta Privilege: marca PRIVILEGE y código de barras con el serial de la serie Privilege. El valor solo aparece si marcas «Imprimir el monto»." />
             <Tip>
               En la lista de Emitidas las tarjetas Privilege llevan la marca <strong>Privilege</strong> junto al serial y figuran como
-              <strong>Al portador</strong>; el detalle muestra su valor. Se editan igual que las demás mientras estén Emitidas; el tipo de tarjeta no cambia.
+              <strong>Al portador</strong>; el detalle muestra su valor. Para ver solo estas tarjetas usa el filtro <strong>Privilege</strong> de esa lista.
+              Se editan igual que las demás mientras estén Emitidas; el tipo de tarjeta no cambia.
             </Tip>
             <Tip warn>
               ¿La opción Privilege aparece deshabilitada? Esa sede no tiene serie Privilege configurada. Administración la define en
@@ -285,11 +286,14 @@ export default function GiftCardManualPage() {
           <Section id="consultar" icon={Search} title="Consultar y sincronizar">
             <Steps>
               <li>En <Link href="/admin/giftcards/issued" className="text-gold-700 underline">Emitidas</Link> escribe el serial, un nombre, correo o teléfono en el buscador.</li>
-              <li>Filtra por estado con los botones Todas · Emitidas · Vendidas · Usadas.</li>
+              <li>
+                Filtra por estado con los botones Todas · Emitidas · Vendidas · Usadas, y por tipo con
+                Todos los tipos · Gift Cards · <strong>Privilege</strong>. Los filtros se combinan: por ejemplo, Vendidas + Privilege.
+              </li>
               <li>Toca el serial para abrir el detalle completo (monto, saldo, comprador, destinatario, venta en Mindbody, quién la emitió).</li>
               <li>El botón <RefreshCw className="inline h-4 w-4 align-text-bottom" /> <strong>Sincronizar</strong> consulta Mindbody en ese momento y actualiza estado y saldo.</li>
             </Steps>
-            <Shot src="/manual/giftcards/04-emitidas.png" alt="Lista de Gift Cards emitidas" caption="Emitidas: buscador, filtros por estado, saldo en Mindbody y acciones (sincronizar · editar · imprimir)." />
+            <Shot src="/manual/giftcards/04-emitidas.png" alt="Lista de Gift Cards emitidas" caption="Emitidas: buscador, filtros por estado y por tipo, saldo en Mindbody y acciones (sincronizar · editar · imprimir)." />
             <Shot src="/manual/giftcards/05-detalle.png" alt="Detalle de una Gift Card vendida" caption="Detalle de una tarjeta ya vendida: saldo en Mindbody, venta y forma de pago." />
           </Section>
 

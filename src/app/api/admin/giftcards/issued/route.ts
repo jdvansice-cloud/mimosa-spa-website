@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
+import { PRIVILEGE_FORMAT } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -16,6 +17,10 @@ const MAX_PAGE_SIZE = 100
  */
 type Status = 'emitida' | 'vendida' | 'usada'
 const STATUSES: Status[] = ['emitida', 'vendida', 'usada']
+
+/** Kind of card: Privilege (bearer cards, own serial series) or every other gift card. */
+type Kind = 'privilege' | 'gift'
+const KINDS: Kind[] = ['privilege', 'gift']
 
 /** PostgREST `or` values are comma-separated, so a comma would split the filter. */
 function escapeForOr(value: string): string {
@@ -33,11 +38,13 @@ export async function GET(request: NextRequest) {
   const q = (searchParams.get('q') || '').trim()
   const statusParam = searchParams.get('status')
   const status = STATUSES.includes(statusParam as Status) ? (statusParam as Status) : null
+  const kindParam = searchParams.get('kind')
+  const kind = KINDS.includes(kindParam as Kind) ? (kindParam as Kind) : null
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const applyFilters = <T extends { eq: any; or: any; is: any; not: any }>(query: T): T => {
+  const applyFilters = <T extends { eq: any; neq: any; or: any; is: any; not: any }>(query: T): T => {
     let q2 = query
     // Location-restricted admins only see their own location's cards.
     if (ctx.locationConfigId) {
@@ -67,6 +74,13 @@ export async function GET(request: NextRequest) {
       q2 = q2.not('sold_at', 'is', null).is('redeemed_at', null)
     } else if (status === 'usada') {
       q2 = q2.not('redeemed_at', 'is', null)
+    }
+
+    // gift_cards.format is NOT NULL, so "not Privilege" needs no null branch.
+    if (kind === 'privilege') {
+      q2 = q2.eq('format', PRIVILEGE_FORMAT)
+    } else if (kind === 'gift') {
+      q2 = q2.neq('format', PRIVILEGE_FORMAT)
     }
     return q2
   }
