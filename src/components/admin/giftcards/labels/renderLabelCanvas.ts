@@ -3,6 +3,7 @@
 import JsBarcode from 'jsbarcode'
 import { LabelCard, LABEL_WIDTH_IN, LABEL_HEIGHT_IN } from './types'
 import { formatTreatmentNames } from '@/lib/giftcards/treatments'
+import { formatPrivilegeDate, privilegeExpiresAt } from '@/lib/giftcards/privilege'
 
 // The label is rasterized at the printers' native 203 dpi so the printed
 // dots match the canvas pixels 1:1 — no browser/driver scaling in the path.
@@ -267,10 +268,21 @@ export async function renderLabelCanvas(
         )
       : []
 
-  // A Privilege card carries no treatments; its only mark is a small
-  // PRIVILEGE eyebrow in the same style as INCLUYE, above the message.
+  // A Privilege card carries no treatments; its mark is a small PRIVILEGE
+  // eyebrow in the same style as INCLUYE, with the purchase date and the
+  // expiry right under it (the card is valid 12 or 18 months from purchase).
   const privilegeMark = card.format === 'privilege' && !treatLines.length
-  const privilegeH = privilegeMark ? EYEBROW_SIZE + (msgLines.length ? pt(4) : 0) : 0
+  const dateLines: Seg[][] = []
+  if (privilegeMark && card.issued_at) {
+    const bold = `700 ${TREAT_SIZE}px ${LATO}`
+    const regular = `400 ${TREAT_SIZE}px ${LATO}`
+    const purchase = formatPrivilegeDate(card.issued_at)
+    const expires = card.expires_at ?? privilegeExpiresAt(card.issued_at, card.amount_cents)
+    if (purchase) dateLines.push([{ text: 'Compra:', font: bold }, { text: purchase, font: regular }])
+    if (expires) dateLines.push([{ text: 'Vence:', font: bold }, { text: formatPrivilegeDate(expires), font: regular }])
+  }
+  const datesH = dateLines.length ? pt(2.5) + dateLines.length * TREAT_LINE : 0
+  const privilegeH = privilegeMark ? EYEBROW_SIZE + datesH + (msgLines.length ? pt(4) : 0) : 0
 
   // Bigger body sizes can overflow the band when both blocks max out their
   // line clamps — drop trailing lines (with ellipsis) before crowding the
@@ -308,6 +320,11 @@ export async function renderLabelCanvas(
     ctx.textBaseline = 'top'
     ctx.fillText('PRIVILEGE', centerX, y)
     if ('letterSpacing' in ctx) (ctx as { letterSpacing: string }).letterSpacing = '0px'
+    let dateY = y + EYEBROW_SIZE + pt(2.5)
+    for (const line of dateLines) {
+      drawCenteredLine(ctx, line, centerX, dateY + (TREAT_LINE - TREAT_SIZE) / 2)
+      dateY += TREAT_LINE
+    }
     y += privilegeH
   }
 

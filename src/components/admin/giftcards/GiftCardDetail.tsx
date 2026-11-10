@@ -1,7 +1,9 @@
 'use client'
 
 import { formatTreatmentNames } from '@/lib/giftcards/treatments'
-import { isPrivilege, privilegeCardName } from '@/lib/giftcards/privilege'
+import {
+  formatPrivilegeDate, isPrivilege, privilegeCardName, privilegeExpiresAt, privilegeValidityMonths,
+} from '@/lib/giftcards/privilege'
 
 /**
  * The full record of one gift card, shared by the inline expansion in the
@@ -96,6 +98,12 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
     card.print_treatments && 'tratamientos',
   ].filter(Boolean).join(' · ')
 
+  // A Privilege card always has an expiry: stored, or worked out from its
+  // validity for a card issued before the date was recorded.
+  const privilegeExpiry = isPrivilege(card)
+    ? card.expires_at ?? privilegeExpiresAt(card.issued_at, card.amount_cents)
+    : null
+
   return (
     <div className="space-y-4">
       {/* The three facts staff actually come for, big and first. */}
@@ -144,7 +152,11 @@ export function GiftCardDetail({ card }: { card: GiftCardDetailData }) {
           <Field label="Formato">{isPrivilege(card) ? 'Privilege' : card.format === 'certificado' ? 'Certificado' : 'Gift card'}</Field>
           <Field label="Canal">{card.channel}</Field>
           <Field label="Sede">{card.location_label}</Field>
-          <Field label="Vence">{when(card.expires_at)}</Field>
+          <Field label="Vence">
+            {privilegeExpiry
+              ? `${formatPrivilegeDate(privilegeExpiry)} · ${privilegeValidityMonths(card.amount_cents)} meses desde la compra (${formatPrivilegeDate(card.issued_at)})`
+              : when(card.expires_at)}
+          </Field>
           <Field label="Promoción">{card.promotion_name}</Field>
           <Field label="Tratamientos" wide>
             {card.gift_treatment_names?.length ? formatTreatmentNames(card.gift_treatment_names) : card.treatment_name}

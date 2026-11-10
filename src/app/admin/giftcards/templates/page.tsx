@@ -54,6 +54,8 @@ const samplePrivilege: LabelCard = {
   message: null,
   // Privilege labels leave the value off unless staff tick "Imprimir el monto".
   print_amount: false,
+  // Purchase date; the expiry (18 months for this card) is worked out from it.
+  issued_at: '2026-11-10T15:30:00Z',
   print_message: false,
   print_recipient: false,
   print_treatments: false,
@@ -113,7 +115,7 @@ export default function AdminGiftCardTemplatesPage() {
         />
         <Preview
           title="Privilege"
-          subtitle="Tarjeta Privilege (al portador): imprime la marca PRIVILEGE y el serial de su serie propia. El valor solo se imprime si se marca «Imprimir el monto»."
+          subtitle="Tarjeta Privilege (al portador): imprime la marca PRIVILEGE, la fecha de compra, la fecha de vencimiento y el serial de su serie propia. El valor solo se imprime si se marca «Imprimir el monto»."
           card={samplePrivilege}
         />
       </div>

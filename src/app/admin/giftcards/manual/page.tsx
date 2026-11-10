@@ -182,8 +182,10 @@ export default function GiftCardManualPage() {
             <p>
               Una tarjeta Privilege <strong>no es un regalo</strong>: es una <strong>tarjeta de beneficios al portador</strong>. Sus
               beneficios y su saldo son de quien la presente. Hay <strong>dos tarjetas</strong>: <strong>Privilege $500</strong>, con
-              <strong> $625</strong> de valor de consumo, y <strong>Privilege $1,000</strong>, con <strong>$1,350</strong>. El nombre es lo que
-              paga el comprador y lo cobra Mindbody; este sistema registra el valor de consumo. Lleva su
+              <strong> $625</strong> de valor de consumo y <strong>12 meses</strong> de vigencia, y <strong>Privilege $1,000</strong>, con
+              <strong> $1,350</strong> y <strong>18 meses</strong>. El nombre es lo que
+              paga el comprador y lo cobra Mindbody; este sistema registra el valor de consumo. La vigencia se cuenta desde la
+              fecha de compra, que es el día en que se emite la tarjeta. Lleva su
               <strong> propia numeración por sede</strong>
               (por ejemplo <span className="font-mono">PCE000001</span> en Costa del Este y <span className="font-mono">PSF000001</span> en
               San Francisco), separada de las Gift Cards regulares.
@@ -201,7 +203,8 @@ export default function GiftCardManualPage() {
                 la tarjeta Privilege <strong>no lleva destinatario ni dedicatoria</strong>: esas secciones no aparecen.
               </li>
               <li>
-                La etiqueta imprime la marca <strong>PRIVILEGE</strong> y el código de barras. <strong>El valor no se imprime</strong>:
+                La etiqueta imprime la marca <strong>PRIVILEGE</strong>, la <strong>fecha de compra</strong>, la <strong>fecha de
+                vencimiento</strong> (12 o 18 meses después, según la tarjeta) y el código de barras. <strong>El valor no se imprime</strong>:
                 «Imprimir el monto» viene desmarcado en Privilege. Márcalo solo si quieres que el valor salga en la etiqueta.
               </li>
               <li>
@@ -211,7 +214,7 @@ export default function GiftCardManualPage() {
               <li>Presiona <strong>Sincronizar</strong>: pasa a <StatusPill tone="green">Vendida</StatusPill> con su saldo completo.</li>
             </Steps>
             <Shot src="/manual/giftcards/07-privilege.png" alt="Emitir una tarjeta Privilege" caption="Privilege: se elige la tarjeta (Privilege $500 = $625 de consumo · Privilege $1,000 = $1,350) y se muestra el próximo serial. Solo pide el comprador: no hay destinatario, dedicatoria ni precio." />
-            <Shot src="/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta de una tarjeta Privilege" caption="Etiqueta Privilege: marca PRIVILEGE y código de barras con el serial de la serie Privilege. El valor solo aparece si marcas «Imprimir el monto»." />
+            <Shot src="/manual/giftcards/08-etiqueta-privilege.png" alt="Etiqueta de una tarjeta Privilege" caption="Etiqueta Privilege: marca PRIVILEGE, fecha de compra, fecha de vencimiento y código de barras con el serial de la serie Privilege. El valor solo aparece si marcas «Imprimir el monto»." />
             <Tip>
               En la lista de Emitidas las tarjetas Privilege llevan la marca <strong>Privilege</strong> junto al serial y figuran como
               <strong>Al portador</strong>; el monto que se ve es su valor de consumo ($625 o $1,350) y el detalle dice qué tarjeta es. Para ver solo estas tarjetas usa el filtro <strong>Privilege</strong> de esa lista.

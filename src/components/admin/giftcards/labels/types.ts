@@ -65,6 +65,13 @@ export interface LabelCard {
   print_message: boolean
   print_recipient: boolean
   print_treatments: boolean
+  /**
+   * Privilege only: the purchase date (issue date) and the expiry printed
+   * under the PRIVILEGE mark. Without issued_at no dates are printed; without
+   * expires_at the expiry is worked out from the card's validity.
+   */
+  issued_at?: string | null
+  expires_at?: string | null
 }
 
 export function formatLabelMoney(cents: number, currency = 'USD') {

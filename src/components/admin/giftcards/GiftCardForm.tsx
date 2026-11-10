@@ -658,7 +658,7 @@ export function GiftCardForm({
                   Tarjeta <span className="text-red-500">*</span>
                 </div>
                 <div className="flex flex-wrap gap-3" role="radiogroup" aria-labelledby="privilege-denomination-label">
-                  {PRIVILEGE_CARDS.map(({ name, valueCents }) => {
+                  {PRIVILEGE_CARDS.map(({ name, valueCents, validityMonths }) => {
                     const selected = privilegeValueCents === valueCents
                     return (
                       <button
@@ -673,7 +673,7 @@ export function GiftCardForm({
                       >
                         <span className="block text-sm font-medium text-warm-gray-500">{name}</span>
                         <span className="block text-2xl font-semibold tabular-nums text-dark">{formatPrivilegeValue(valueCents)}</span>
-                        <span className="block text-xs text-warm-gray-500">valor de consumo</span>
+                        <span className="block text-xs text-warm-gray-500">valor de consumo · vence en {validityMonths} meses</span>
                       </button>
                     )
                   })}
@@ -681,6 +681,7 @@ export function GiftCardForm({
                 <p className="mt-2 text-xs text-warm-gray-500">
                   El valor de consumo es el saldo que usa quien presente la tarjeta, y es el monto con el que se emite.
                   Solo se imprime en la etiqueta si marcas «Imprimir el monto».
+                  La etiqueta siempre lleva la fecha de compra ({isEdit ? 'el día en que se emitió' : 'hoy'}) y la fecha de vencimiento.
                   El precio que paga el comprador no se registra aquí: ya viene definido en Mindbody al elegir la tarjeta para venderla.
                 </p>
               </div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
-import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeValueError } from '@/lib/giftcards/privilege'
+import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeExpiresAt, privilegeValueError } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -140,6 +140,15 @@ export async function POST(request: NextRequest) {
     promotion_id: privilege ? null : body.promotion_id || null,
     promotion_name: privilege ? null : body.promotion_name?.trim() || null,
     issued_by: ctx.userId,
+  }
+
+  // A Privilege card is valid 12 or 18 months from its purchase date, which
+  // is the day it is issued. Set issued_at here (not by column default) so
+  // the expiry is counted from exactly the date the label prints.
+  if (privilege) {
+    const issuedAt = new Date()
+    insert.issued_at = issuedAt.toISOString()
+    insert.expires_at = privilegeExpiresAt(issuedAt, body.amount_cents)
   }
 
   const { data, error } = await supabase

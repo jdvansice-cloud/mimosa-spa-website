@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getGiftCardAdminContext } from '@/lib/giftcards/auth'
-import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeValueError } from '@/lib/giftcards/privilege'
+import { PRIVILEGE_BEARER, PRIVILEGE_FORMAT, privilegeExpiresAt, privilegeValueError } from '@/lib/giftcards/privilege'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -95,7 +95,7 @@ export async function PATCH(
 
   const { data: card, error: loadError } = await supabase
     .from('gift_cards')
-    .select('id, format, gift_card_serial_config_id, sold_at, redeemed_at, voided_at')
+    .select('id, format, gift_card_serial_config_id, issued_at, sold_at, redeemed_at, voided_at')
     .eq('id', id)
     .single()
   if (loadError || !card) {
@@ -166,6 +166,12 @@ export async function PATCH(
     notes: body.notes?.trim() || null,
     promotion_id: privilege ? null : body.promotion_id || null,
     promotion_name: privilege ? null : body.promotion_name?.trim() || null,
+  }
+
+  // Switching between Privilege $500 and $1,000 changes the validity, so the
+  // expiry follows the card: always counted from the original issue date.
+  if (privilege) {
+    update.expires_at = privilegeExpiresAt(card.issued_at, body.amount_cents)
   }
 
   const { data, error } = await supabase
